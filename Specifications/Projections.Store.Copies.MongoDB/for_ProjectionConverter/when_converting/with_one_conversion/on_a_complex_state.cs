@@ -89,7 +89,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
                         {
                             new PropertyConversion(
                                 "released",
-                                ConversionBSONType.Date,
+                                ConversionBSONType.DateAsDate,
                                 false,
                                 "",
                                 Array.Empty<PropertyConversion>()),
@@ -104,28 +104,28 @@ public class on_a_complex_state : given.a_converter_and_inputs
         converted_five = new BsonArray();
 
         value_converter
-            .Setup(_ => _.Convert(new BsonString("1905-09-26T00:00:00.000Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("1905-09-26T00:00:00.000Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_one);
         value_converter
-            .Setup(_ => _.Convert(new BsonString("1905-11-21T00:00:00.000Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("1905-11-21T00:00:00.000Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_two);
         value_converter
-            .Setup(_ => _.Convert(new BsonString("1963-01-01T00:00:00.000Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("1963-01-01T00:00:00.000Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_three);
         value_converter
-            .Setup(_ => _.Convert(new BsonString("1988-01-01T00:00:00.000Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("1988-01-01T00:00:00.000Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_four);
         value_converter
-            .Setup(_ => _.Convert(new BsonString("2013-01-01T00:00:00.000Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("2013-01-01T00:00:00.000Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_five);
     };
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_convert_the_first_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-09-26T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_second_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-11-21T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_third_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1963-01-01T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_fourth_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1988-01-01T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_fifth_value = () => value_converter.Verify(_ => _.Convert(new BsonString("2013-01-01T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
+    It should_convert_the_first_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-09-26T00:00:00.000Z"), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_second_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-11-21T00:00:00.000Z"), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_third_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1963-01-01T00:00:00.000Z"), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_fourth_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1988-01-01T00:00:00.000Z"), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_fifth_value = () => value_converter.Verify(_ => _.Convert(new BsonString("2013-01-01T00:00:00.000Z"), ConversionBSONType.DateAsDate), Times.Once);
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
     It should_have_the_first_converted_value = () => result["people"][0]["works"][0]["released"].ShouldBeTheSameAs(converted_one);
     It should_have_the_second_converted_value = () => result["people"][0]["works"][1]["released"].ShouldBeTheSameAs(converted_two);

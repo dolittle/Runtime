@@ -25,7 +25,7 @@ public class a_property_that_does_not_exist : given.a_converter_and_inputs
         {
             new PropertyConversion(
                 "some_other_property",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),

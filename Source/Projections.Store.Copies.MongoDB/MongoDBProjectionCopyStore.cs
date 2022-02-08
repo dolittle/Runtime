@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using MongoDB.Bson;
@@ -18,6 +19,8 @@ namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB;
 [SingletonPerTenant]
 public class MongoDBProjectionCopyStore : IProjectionCopyStore
 {
+    const string ProjectionDocumentKeyProperty = "_dolittle_projection_key";
+    
     readonly IProjectionCopiesStorage _storage;
     readonly IProjectionConverter _converter;
 
@@ -105,8 +108,8 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
         => projection.Copies.MongoDB.Collection;
     
     static FilterDefinition<BsonDocument> GetFilterFor(ProjectionKey key)
-        => Builders<BsonDocument>.Filter.Eq("_id", key.Value);
+        => Builders<BsonDocument>.Filter.Eq(ProjectionDocumentKeyProperty, key.Value);
 
     static void AddKeyTo(BsonDocument document, ProjectionKey key)
-        => document.Set("_id", key.Value);
+        => document.Set(ProjectionDocumentKeyProperty, key.Value);
 }

@@ -29,7 +29,7 @@ public class converting_some_int : given.a_converter_and_inputs
         {
             new PropertyConversion(
                 "some_int",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),
@@ -37,12 +37,12 @@ public class converting_some_int : given.a_converter_and_inputs
 
         converted_value = new BsonArray();
         value_converter
-            .Setup(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonInt32(42), ConversionBSONType.DateAsDate))
             .Returns(converted_value);
     };
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date), Times.Once);
+    It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.DateAsDate), Times.Once);
     It should_have_the_correct_string = () => result["some_string"].ShouldEqual(new BsonString("hello world"));
     It should_have_the_converted_value = () => result["some_int"].ShouldBeTheSameAs(converted_value);
     It should_have_the_correct_bool = () => result["some_bool"].ShouldEqual(new BsonBoolean(true));

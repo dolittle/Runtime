@@ -29,7 +29,7 @@ public class converting_some_date : given.a_converter_and_inputs
         {
             new PropertyConversion(
                 "some_date",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),
@@ -37,12 +37,12 @@ public class converting_some_date : given.a_converter_and_inputs
         
         converted_value = new BsonArray();
         value_converter
-            .Setup(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_value);
     };
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.Date), Times.Once);
+    It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.DateAsDate), Times.Once);
     It should_have_the_correct_string = () => result["some_string"].ShouldEqual(new BsonString("hello world"));
     It should_have_the_correct_int = () => result["some_int"].ShouldEqual(new BsonInt32(42));
     It should_have_the_correct_bool = () => result["some_bool"].ShouldEqual(new BsonBoolean(true));

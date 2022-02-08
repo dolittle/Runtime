@@ -33,8 +33,8 @@ public class by_removing_a_conversion : given.all_dependencies
             {
                 Conversions = new []
                 {
-                    new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
-                    new PropertyConversion("field two", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
+                    new PropertyConversion("field one", ConversionBSONType.DateAsDate, false, "", Array.Empty<PropertyConversion>()),
+                    new PropertyConversion("field two", ConversionBSONType.GuidAsStandardBinary, false, "", Array.Empty<PropertyConversion>()),
                 },
             })
             .build();
@@ -49,7 +49,7 @@ public class by_removing_a_conversion : given.all_dependencies
                     {
                         Conversions = new []
                         {
-                            new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field one", ConversionBSONType.DateAsDate, false, "", Array.Empty<PropertyConversion>()),
                         },
                     }
                 }

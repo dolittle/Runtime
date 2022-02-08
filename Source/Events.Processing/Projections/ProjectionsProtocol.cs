@@ -108,8 +108,17 @@ public class ProjectionsProtocol : IProjectionsProtocol
                 conversion.ConvertTo switch
                 {
                     ProjectionCopyToMongoDB.Types.BSONType.None => ConversionBSONType.None,
-                    ProjectionCopyToMongoDB.Types.BSONType.Date => ConversionBSONType.Date,
-                    ProjectionCopyToMongoDB.Types.BSONType.Guid => ConversionBSONType.Guid,
+                    
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsDate => ConversionBSONType.DateAsDate,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsArray => ConversionBSONType.DateAsArray,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsDocument => ConversionBSONType.DateAsDocument,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsString => ConversionBSONType.DateAsString,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsInt64 => ConversionBSONType.DateAsInt64,
+                    
+                    ProjectionCopyToMongoDB.Types.BSONType.GuidasStandardBinary => ConversionBSONType.GuidAsStandardBinary,
+                    ProjectionCopyToMongoDB.Types.BSONType.GuidasCsharpLegacyBinary => ConversionBSONType.GuidAsCsharpLegacyBinary,
+                    ProjectionCopyToMongoDB.Types.BSONType.GuidasString => ConversionBSONType.GuidAsString,
+                    
                     _ => throw new InvalidMongoDBFieldConversion(conversion.PropertyName, conversion.ConvertTo),
                 },
                 conversion.RenameTo != default,

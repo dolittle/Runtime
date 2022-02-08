@@ -33,8 +33,8 @@ public class rename_to_for_one_property : given.all_dependencies
             {
                 Conversions = new []
                 {
-                    new PropertyConversion("field one", ConversionBSONType.Date, true, "field three", Array.Empty<PropertyConversion>()),
-                    new PropertyConversion("field two", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
+                    new PropertyConversion("field one", ConversionBSONType.DateAsDate, true, "field three", Array.Empty<PropertyConversion>()),
+                    new PropertyConversion("field two", ConversionBSONType.GuidAsStandardBinary, false, "", Array.Empty<PropertyConversion>()),
                 },
             })
             .build();
@@ -49,8 +49,8 @@ public class rename_to_for_one_property : given.all_dependencies
                     {
                         Conversions = new []
                         {
-                            new PropertyConversion("field one", ConversionBSONType.Date, true, "field four", Array.Empty<PropertyConversion>()),
-                            new PropertyConversion("field two", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field one", ConversionBSONType.DateAsDate, true, "field four", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field two", ConversionBSONType.GuidAsStandardBinary, false, "", Array.Empty<PropertyConversion>()),
                         },
                     }
                 }

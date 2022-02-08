@@ -76,7 +76,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
                 {
                     new PropertyConversion(
                         "name",
-                        ConversionBSONType.Date,
+                        ConversionBSONType.DateAsDate,
                         false,
                         "",
                         Array.Empty<PropertyConversion>()),
@@ -97,7 +97,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
                         {
                             new PropertyConversion(
                                 "released",
-                                ConversionBSONType.Date,
+                                ConversionBSONType.DateAsDate,
                                 false,
                                 "",
                                 Array.Empty<PropertyConversion>()),
@@ -106,12 +106,12 @@ public class on_a_complex_state : given.a_converter_and_inputs
         };
 
         value_converter
-            .Setup(_ => _.Convert(Moq.It.IsAny<BsonString>(), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(Moq.It.IsAny<BsonString>(), ConversionBSONType.DateAsDate))
             .Returns(new BsonArray());
     };
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_call_the_converter_eight_times = () => value_converter.Verify(_ => _.Convert(Moq.It.IsAny<BsonString>(), ConversionBSONType.Date), Times.Exactly(8));
+    It should_call_the_converter_eight_times = () => value_converter.Verify(_ => _.Convert(Moq.It.IsAny<BsonString>(), ConversionBSONType.DateAsDate), Times.Exactly(8));
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
     It should_return_the_correct_document = () => result.ShouldEqual(
         new BsonDocument("people", new BsonArray(new []
