@@ -26,8 +26,8 @@ public class and_replacing_is_not_acknowledged : given.a_projection_copy_store_a
     It should_get_the_correct_collection = () => database.Verify(_ => _.GetCollection<BsonDocument>(collection_name, Moq.It.IsAny<MongoCollectionSettings>()));
     It should_convert_the_projection = () => converter.Verify(_ => _.Convert(projection_state, Moq.It.IsAny<PropertyConversion[]>()));
     It should_replace_the_document_with_the_correct_filter_and_document_and_options = () => collection.Verify(_ => _.ReplaceOneAsync(
-        IsFilter(document => document["_id"].AsString == projection_key.Value),
-        Moq.It.Is<BsonDocument>(document => document == converted_bson_document && document["_id"].AsString == projection_key.Value),
+        IsFilter(document => document["_dolittle_projection_key"].AsString == projection_key.Value),
+        Moq.It.Is<BsonDocument>(document => document == converted_bson_document && document["_dolittle_projection_key"].AsString == projection_key.Value),
         Moq.It.Is<ReplaceOptions>(options => options.IsUpsert == true),
         cancellation_token), Times.Once);
     It should_return_false = () => result.ShouldBeFalse();
