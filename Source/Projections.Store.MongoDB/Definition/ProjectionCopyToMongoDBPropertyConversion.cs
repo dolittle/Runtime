@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 
@@ -19,6 +21,7 @@ public class ProjectionCopyToMongoDBPropertyConversion
     /// <summary>
     /// Gets or sets the conversion to apply to the property.
     /// </summary>
+    [BsonRepresentation(BsonType.String)]
     public ConversionBSONType ConversionType { get; set; }
     
     /// <summary>
