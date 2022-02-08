@@ -16,12 +16,42 @@ public enum ConversionBSONType : ushort
     None = 0,
     
     /// <summary>
-    /// Convert to a BSON Date.
+    /// Convert a Date to a BSON Date.
     /// </summary>
-    Date,
+    DateAsDate,
     
     /// <summary>
-    /// Convert to a BSON Binary Guid.
+    /// Convert a Date to a BSON Array with .NET ticks and offset in minutes as elements.
     /// </summary>
-    Guid 
+    DateAsArray,
+    
+    /// <summary>
+    /// Convert a Date to a BSON Document with "DateTime": BSON Date, "Ticks": .NET ticks and "Offset": offset in minutes as properties.
+    /// </summary>
+    DateAsDocument,
+    
+    /// <summary>
+    /// Convert a Date to a BSON String using the Newtonsoft serializer to string.
+    /// </summary>
+    DateAsString,
+    
+    /// <summary>
+    /// Convert a Date to a BSON Int64 with value from .NET ticks.
+    /// </summary>
+    DateAsInt64,
+    
+    /// <summary>
+    /// Convert a Guid to a BSON Binary Guid with standard representation.
+    /// </summary>
+    GuidAsStandardBinary,
+    
+    /// <summary>
+    /// Convert a Guid to a BSON Binary Guid with C# legacy representation.
+    /// </summary>
+    GuidAsCsharpLegacyBinary,
+    
+    /// <summary>
+    /// Convert a Guid to a BSON String.
+    /// </summary>
+    GuidAsString,
 }
