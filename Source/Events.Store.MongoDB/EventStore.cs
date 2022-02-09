@@ -194,12 +194,18 @@ public class EventStore : IEventStore
         where TEvent : CommittedEvent
     {
         var committedEvents = await DoInSession<TCommittedEvents, TEvent>(doTask, cancellationToken).ConfigureAwait(false);
-        if (committedEvents.HasEvents) _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, committedEvents.Max(_ => _.EventLogSequenceNumber.Value));
+        if (committedEvents.HasEvents)
+        {
+            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, committedEvents.Max(_ => _.EventLogSequenceNumber.Value));
+        }
         return committedEvents;
     }
 
     void ThrowIfNoEventsToCommit(UncommittedEvents events)
     {
-        if (!events.HasEvents) throw new NoEventsToCommit();
+        if (!events.HasEvents)
+        {
+            throw new NoEventsToCommit();
+        }
     }
 }

@@ -199,7 +199,10 @@ public class EventHandler : IDisposable
     /// <param name="disposing">Whether to dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         if (disposing)
         {
             FilterStreamProcessor?.Dispose();
@@ -229,7 +232,10 @@ public class EventHandler : IDisposable
 
     async Task<bool> RejectIfNonWriteableStream()
     {
-        if (!TargetStream.IsNonWriteable) return false;
+        if (!TargetStream.IsNonWriteable)
+        {
+            return false;
+        }
         _logger.EventHandlerIsInvalid(EventProcessor);
         await Fail(
             EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,

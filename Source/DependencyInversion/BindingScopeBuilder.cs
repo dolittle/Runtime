@@ -37,10 +37,14 @@ public class BindingScopeBuilder : IBindingScopeBuilder
     public Binding Build()
     {
         if (!(_binding.Scope is Scopes.Singleton) && _binding.Strategy.GetTargetType().HasAttribute<SingletonAttribute>())
+        {
             Singleton();
+        }
 
         if (!(_binding.Scope is Scopes.SingletonPerTenant) && _binding.Strategy.GetTargetType().HasAttribute<SingletonPerTenantAttribute>())
+        {
             SingletonPerTenant();
+        }
 
         return _binding;
     }

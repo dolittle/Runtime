@@ -89,6 +89,8 @@ public class FilterDefinitionDiscriminatorConvention : IDiscriminatorConvention
     void ThrowIfNominalTypeIsIncorrect(Type nominalType)
     {
         if (!typeof(AbstractFilterDefinition).IsAssignableFrom(nominalType))
+        {
             throw new UnsupportedTypeForFilterDefinitionDiscriminatorConvention(nominalType);
+        }
     }
 }

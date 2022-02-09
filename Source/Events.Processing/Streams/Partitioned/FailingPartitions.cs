@@ -85,11 +85,23 @@ public class FailingPartitions : IFailingPartitions
                     var tryGetEvent = await _eventsFetcherPolicy.Execute(
                         cancellationToken => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken),
                         cancellationToken).ConfigureAwait(false);
-                    if (!tryGetEvent.Success) break;
+                    if (!tryGetEvent.Success)
+                    {
+                        break;
+                    }
                     var streamEvent = tryGetEvent.Result;
-                    if (streamEvent.Partition != partition) throw new StreamEventInWrongPartition(streamEvent, partition);
-                    if (!ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position)) break;
-                    if (!ShouldRetryProcessing(failingPartitionState)) break;
+                    if (streamEvent.Partition != partition)
+                    {
+                        throw new StreamEventInWrongPartition(streamEvent, partition);
+                    }
+                    if (!ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position))
+                    {
+                        break;
+                    }
+                    if (!ShouldRetryProcessing(failingPartitionState))
+                    {
+                        break;
+                    }
 
                     var processingResult = await RetryProcessingEvent(
                         failingPartitionState,
@@ -135,7 +147,10 @@ public class FailingPartitions : IFailingPartitions
                     }
                 }
 
-                if (ShouldRetryProcessing(failingPartitionState)) streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken).ConfigureAwait(false);
+                if (ShouldRetryProcessing(failingPartitionState))
+                {
+                    streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 

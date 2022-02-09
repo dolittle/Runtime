@@ -22,12 +22,18 @@ public abstract class CommittedEventSequence<TEvent> : EventSequence<TEvent>
         for (var i = 0; i < events.Count; i++)
         {
             var @event = events[i];
-            if (i > 0) ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
+            if (i > 0)
+            {
+                ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
+            }
         }
     }
 
     void ThrowIfEventLogSequenceIsOutOfOrder(TEvent @event, TEvent previousEvent)
     {
-        if (@event.EventLogSequenceNumber <= previousEvent.EventLogSequenceNumber) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber);
+        if (@event.EventLogSequenceNumber <= previousEvent.EventLogSequenceNumber)
+        {
+            throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber);
+        }
     }
 }

@@ -31,7 +31,10 @@ public class ProjectionKeys : IProjectionKeys
     {
         key = null;
         var eventSelector = projectionDefinition.Events.FirstOrDefault(_ => _.EventType == @event.Type.Id);
-        if (eventSelector == null) return false;
+        if (eventSelector == null)
+        {
+            return false;
+        }
         return TryGetKey(eventSelector, @event, partition, out key);
     }
 
@@ -65,7 +68,10 @@ public class ProjectionKeys : IProjectionKeys
     bool PropertyIsKey(ProjectEventKeySelectorType type, string eventContent, KeySelectorExpression keySelectorExpression, out ProjectionKey key)
     {
         key = null;
-        if (type != ProjectEventKeySelectorType.Property) return false;
+        if (type != ProjectEventKeySelectorType.Property)
+        {
+            return false;
+        }
         return _keyPropertyExtractor.TryExtract(eventContent, keySelectorExpression, out key);
     }
 }

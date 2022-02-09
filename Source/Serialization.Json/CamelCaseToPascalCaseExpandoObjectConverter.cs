@@ -65,7 +65,9 @@ public class CamelCaseToPascalCaseExpandoObjectConverter : JsonConverter
         while (reader.TokenType == JsonToken.Comment)
         {
             if (!reader.Read())
+            {
                 throw new Exception("Unexpected end.");
+            }
         }
 
         switch (reader.TokenType)
@@ -76,7 +78,9 @@ public class CamelCaseToPascalCaseExpandoObjectConverter : JsonConverter
                 return ReadList(reader);
             default:
                 if (IsPrimitiveToken(reader.TokenType))
+                {
                     return reader.Value;
+                }
 
                 throw new Exception(string.Format(CultureInfo.InvariantCulture, "Unexpected token when converting ExpandoObject: {0}", reader.TokenType));
         }
@@ -117,7 +121,9 @@ public class CamelCaseToPascalCaseExpandoObjectConverter : JsonConverter
                     var propertyName = reader.Value.ToString().ToPascalCase();
 
                     if (!reader.Read())
+                    {
                         throw new Exception("Unexpected end.");
+                    }
 
                     var v = ReadValue(reader);
 

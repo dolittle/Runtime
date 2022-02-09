@@ -61,7 +61,10 @@ public class ResourceConfiguration : IResourceConfiguration
         var results = resourceTypesRepresentationsWithService.Where(_ =>
         {
             var resourceType = _.Type;
-            if (!_resources.ContainsKey(resourceType)) return false;
+            if (!_resources.ContainsKey(resourceType))
+            {
+                return false;
+            }
             var resourceTypeImplementation = _.ImplementationName;
             return resourceTypeImplementation == _resources[resourceType];
         }).ToArray();
@@ -117,7 +120,10 @@ public class ResourceConfiguration : IResourceConfiguration
         resourcesGroupedByResourceType.ForEach(group =>
         {
             var numResources = group.Count();
-            if (group.GroupBy(_ => _.ImplementationName).Count() != numResources) throw new FoundDuplicateResourceDefinition(group.Key);
+            if (group.GroupBy(_ => _.ImplementationName).Count() != numResources)
+            {
+                throw new FoundDuplicateResourceDefinition(@group.Key);
+            }
         });
     }
 }

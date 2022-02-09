@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given;
 
@@ -21,5 +23,10 @@ public class projection_definition_builder
         return this;
     }
 
-    public ProjectionDefinition Build() => new(Guid.NewGuid(), Guid.NewGuid(), selectors, "");
+    public ProjectionDefinition Build() => new(
+        Guid.Parse("4af56faf-6dca-4348-8790-c53972485d47"), 
+        Guid.Parse("daa3841d-fbb4-455e-be49-9638194bbad8"),
+        selectors, 
+        "", 
+        new ProjectionCopySpecification(CopyToMongoDBSpecification.Default));
 }

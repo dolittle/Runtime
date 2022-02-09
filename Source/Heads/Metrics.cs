@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
 using IMetricFactory = Dolittle.Runtime.Metrics.IMetricFactory;
@@ -12,6 +13,7 @@ namespace Dolittle.Runtime.Heads;
 /// <summary>
 /// Represents metrics for heads.
 /// </summary>
+[Singleton]
 public class Metrics : ICanProvideMetrics
 {
     Gauge _connectedHeads;

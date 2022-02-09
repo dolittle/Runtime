@@ -48,6 +48,9 @@ public abstract class EventSequence<TEvent> : IReadOnlyList<TEvent>
 
     void ThrowIfEventIsNull(TEvent @event)
     {
-        if (@event == null) throw new EventCanNotBeNull();
+        if (@event == null)
+        {
+            throw new EventCanNotBeNull();
+        }
     }
 }

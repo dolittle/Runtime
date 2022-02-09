@@ -1,12 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -30,7 +33,8 @@ public class ProjectionsProtocol : IProjectionsProtocol
                     Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
                     _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
                 }),
-                arguments.InitialState
+                arguments.InitialState,
+                ConvertCopySpecification(arguments.Copies)
             ));
 
     /// <inheritdoc/>
@@ -85,4 +89,40 @@ public class ProjectionsProtocol : IProjectionsProtocol
         }
         return ConnectArgumentsValidationResult.Ok;
     }
+
+    static ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)
+    {
+        var mongoDB = CopyToMongoDBSpecification.Default;
+        if (copies?.MongoDB is { } copyToMongoDb)
+        {
+            mongoDB = new CopyToMongoDBSpecification(true, copyToMongoDb.Collection, ConvertPropertyConversions(copyToMongoDb.Conversions));
+        }
+
+        return new ProjectionCopySpecification(mongoDB);
+    }
+
+    static PropertyConversion[] ConvertPropertyConversions(IEnumerable<ProjectionCopyToMongoDB.Types.PropertyConversion> conversions)
+        => conversions.Select(conversion =>
+            new PropertyConversion(
+                conversion.PropertyName,
+                conversion.ConvertTo switch
+                {
+                    ProjectionCopyToMongoDB.Types.BSONType.None => ConversionBSONType.None,
+                    
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsDate => ConversionBSONType.DateAsDate,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsArray => ConversionBSONType.DateAsArray,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsDocument => ConversionBSONType.DateAsDocument,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsString => ConversionBSONType.DateAsString,
+                    ProjectionCopyToMongoDB.Types.BSONType.DateAsInt64 => ConversionBSONType.DateAsInt64,
+                    
+                    ProjectionCopyToMongoDB.Types.BSONType.GuidasStandardBinary => ConversionBSONType.GuidAsStandardBinary,
+                    ProjectionCopyToMongoDB.Types.BSONType.GuidasCsharpLegacyBinary => ConversionBSONType.GuidAsCsharpLegacyBinary,
+                    ProjectionCopyToMongoDB.Types.BSONType.GuidasString => ConversionBSONType.GuidAsString,
+                    
+                    _ => throw new InvalidMongoDBFieldConversion(conversion.PropertyName, conversion.ConvertTo),
+                },
+                conversion.RenameTo != default,
+                conversion.RenameTo ?? "",
+                ConvertPropertyConversions(conversion.Children))
+            ).ToArray();
 }

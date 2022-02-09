@@ -166,10 +166,16 @@ public class Serializer : ISerializer
         else if (type == typeof(DateTimeOffset) || type == typeof(DateTime))
         {
             value = DateTimeOffset.FromUnixTimeMilliseconds(inputStream.ReadInt64());
-            if (type == typeof(DateTime)) value = ((DateTimeOffset)value).UtcDateTime;
+            if (type == typeof(DateTime))
+            {
+                value = ((DateTimeOffset)value).UtcDateTime;
+            }
         }
 
-        if (converter != null) value = converter.ConvertFrom(targetType, value);
+        if (converter != null)
+        {
+            value = converter.ConvertFrom(targetType, value);
+        }
         return value;
     }
 

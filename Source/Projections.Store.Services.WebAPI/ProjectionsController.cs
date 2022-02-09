@@ -29,7 +29,10 @@ public class EventStoreController : ControllerBase
             request.Key,
             request.Context.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (getOneResult.Success) return Ok(GetOneResponse.From(getOneResult.Result));
+        if (getOneResult.Success)
+        {
+            return Ok(GetOneResponse.From(getOneResult.Result));
+        }
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return new JsonResult(GetOneResponse.From(getOneResult.Exception.ToFailure()));
     }

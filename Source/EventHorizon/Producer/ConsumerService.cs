@@ -112,7 +112,10 @@ public class ConsumerService : ConsumerBase, IDisposable
             _protocol,
             token).ConfigureAwait(false);
 
-        if (!tryConnect.Success) return;
+        if (!tryConnect.Success)
+        {
+            return;
+        }
         var (dispatcher, arguments) = tryConnect.Result;
         _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
@@ -161,7 +164,10 @@ public class ConsumerService : ConsumerBase, IDisposable
             };
 
             var anyTask = await Task.WhenAny(tasks).ConfigureAwait(false);
-            if (!jointCts.IsCancellationRequested) jointCts.Cancel();
+            if (!jointCts.IsCancellationRequested)
+            {
+                jointCts.Cancel();
+            }
             if (TryGetException(tasks, out var ex))
             {
                 Log.ErrorOccurredInEventHorizon(
@@ -199,7 +205,10 @@ public class ConsumerService : ConsumerBase, IDisposable
         }
         catch (Exception ex)
         {
-            if (!jointCts.IsCancellationRequested) jointCts.Cancel();
+            if (!jointCts.IsCancellationRequested)
+            {
+                jointCts.Cancel();
+            }
             if (!context.CancellationToken.IsCancellationRequested)
             {
                 Log.ErrorOccurredInEventHorizon(
@@ -232,7 +241,10 @@ public class ConsumerService : ConsumerBase, IDisposable
     /// <param name="disposeManagedResources">Whether to dispose managed resources.</param>
     protected virtual void Dispose(bool disposeManagedResources)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
 
         _disposed = true;
     }

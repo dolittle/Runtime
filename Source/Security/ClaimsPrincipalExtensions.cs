@@ -19,7 +19,9 @@ public static class ClaimsPrincipalExtensions
     public static Claims ToClaims(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal == null)
+        {
             return null;
+        }
 
         return new Claims(claimsPrincipal.Claims.Select(c => new Claim(c.Type, c.Value, c.ValueType)));
     }
@@ -32,7 +34,9 @@ public static class ClaimsPrincipalExtensions
     public static ClaimsPrincipal ToClaimsPrincipal(this Claims claims)
     {
         if (claims == null)
+        {
             return new ClaimsPrincipal();
+        }
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims.Select(c => c.ToDotnetClaim())));
     }

@@ -54,13 +54,17 @@ public class EnumerableEqualityComparer<T> : IEqualityComparer<IEnumerable<T>>
         }
 
         if (left == null || right == null)
+        {
             return false;
+        }
 
         var firstArray = left.ToArray();
         var secondArray = right.ToArray();
 
         if (firstArray.Length != secondArray.Length)
+        {
             return false;
+        }
 
         for (var i = 0; i < firstArray.Length; i++)
         {

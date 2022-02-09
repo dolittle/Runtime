@@ -74,7 +74,10 @@ public class Policies : IPolicies
     /// <inheritdoc/>
     public INamedPolicy GetNamed(string name)
     {
-        if (_namedPolicies.ContainsKey(name)) return _namedPolicies[name];
+        if (_namedPolicies.ContainsKey(name))
+        {
+            return _namedPolicies[name];
+        }
         var policy = new NamedPolicy(name, Default);
         _namedPolicies[name] = policy;
         return policy;
@@ -83,7 +86,10 @@ public class Policies : IPolicies
     /// <inheritdoc/>
     public INamedAsyncPolicy GetAsyncNamed(string name)
     {
-        if (_namedAsyncPolicies.ContainsKey(name)) return _namedAsyncPolicies[name];
+        if (_namedAsyncPolicies.ContainsKey(name))
+        {
+            return _namedAsyncPolicies[name];
+        }
         var policy = new NamedAsyncPolicy(name, DefaultAsync);
         _namedAsyncPolicies[name] = policy;
         return policy;
@@ -93,7 +99,10 @@ public class Policies : IPolicies
     public IPolicyFor<T> GetFor<T>()
     {
         var type = typeof(T);
-        if (_typedPolicies.ContainsKey(type)) return _typedPolicies[type] as IPolicyFor<T>;
+        if (_typedPolicies.ContainsKey(type))
+        {
+            return _typedPolicies[type] as IPolicyFor<T>;
+        }
         var policyFor = typeof(PolicyFor<>).MakeGenericType(type);
 
         var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IPolicy) }, new ParameterModifier[] { new(1) });
@@ -106,7 +115,10 @@ public class Policies : IPolicies
     public IAsyncPolicyFor<T> GetAsyncFor<T>()
     {
         var type = typeof(T);
-        if (_typedAsyncPolicies.ContainsKey(type)) return _typedAsyncPolicies[type] as IAsyncPolicyFor<T>;
+        if (_typedAsyncPolicies.ContainsKey(type))
+        {
+            return _typedAsyncPolicies[type] as IAsyncPolicyFor<T>;
+        }
         var policyFor = typeof(AsyncPolicyFor<>).MakeGenericType(type);
 
         var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IAsyncPolicy) }, new ParameterModifier[] { new(1) });
@@ -175,16 +187,25 @@ public class Policies : IPolicies
 
     void ThrowIfMultipleDefaultPoilicyDefinersAreFound()
     {
-        if (_defaultPolicyDefiners.Count() > 1 || _defaultAsyncPolicyDefiners.Count() > 1) throw new MultipleDefaultPolicyDefinersFound();
+        if (_defaultPolicyDefiners.Count() > 1 || _defaultAsyncPolicyDefiners.Count() > 1)
+        {
+            throw new MultipleDefaultPolicyDefinersFound();
+        }
     }
 
     void ThrowIfMultiplePolicyForNameFound(string name)
     {
-        if (_namedPolicies.ContainsKey(name) || _namedAsyncPolicies.ContainsKey(name)) throw new MultiplePolicyDefinersForNameFound(name);
+        if (_namedPolicies.ContainsKey(name) || _namedAsyncPolicies.ContainsKey(name))
+        {
+            throw new MultiplePolicyDefinersForNameFound(name);
+        }
     }
 
     void ThrowIfMultiplePolicyForTypeFound(Type type)
     {
-        if (_typedPolicies.ContainsKey(type) || _typedAsyncPolicies.ContainsKey(type)) throw new MultiplePolicyDefinersForTypeFound(type);
+        if (_typedPolicies.ContainsKey(type) || _typedAsyncPolicies.ContainsKey(type))
+        {
+            throw new MultiplePolicyDefinersForTypeFound(type);
+        }
     }
 }

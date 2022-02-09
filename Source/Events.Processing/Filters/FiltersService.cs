@@ -107,13 +107,19 @@ public class FiltersService : FiltersBase
             _unpartitionedFiltersProtocol,
             cts.Token).ConfigureAwait(false);
 
-        if (!tryConnect.Success) return;
+        if (!tryConnect.Success)
+        {
+            return;
+        }
         var (dispatcher, arguments) = tryConnect.Result;
 
         _logger.SettingExecutionContext(arguments.ExecutionContext);
         _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-        if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false)) return;
+        if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false))
+        {
+            return;
+        }
 
         var filterDefinition = new FilterDefinition(StreamId.EventLog, arguments.Filter.Value, false);
         await RegisterFilter(
@@ -144,12 +150,18 @@ public class FiltersService : FiltersBase
             _partitionedFiltersProtocol,
             cts.Token).ConfigureAwait(false);
 
-        if (!tryConnect.Success) return;
+        if (!tryConnect.Success)
+        {
+            return;
+        }
         var (dispatcher, arguments) = tryConnect.Result;
 
         _logger.SettingExecutionContext(arguments.ExecutionContext);
         _executionContextManager.CurrentFor(arguments.ExecutionContext);
-        if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false)) return;
+        if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false))
+        {
+            return;
+        }
 
         var filterDefinition = new FilterDefinition(StreamId.EventLog, arguments.Filter.Value, true);
 
@@ -181,13 +193,19 @@ public class FiltersService : FiltersBase
             _publicFiltersProtocol,
             cts.Token).ConfigureAwait(false);
 
-        if (!tryConnect.Success) return;
+        if (!tryConnect.Success)
+        {
+            return;
+        }
         var (dispatcher, arguments) = tryConnect.Result;
 
         _logger.SettingExecutionContext(arguments.ExecutionContext);
         _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-        if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false)) return;
+        if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false))
+        {
+            return;
+        }
 
         var filterDefinition = new PublicFilterDefinition(StreamId.EventLog, arguments.Filter.Value);
         await RegisterFilter(

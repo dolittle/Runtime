@@ -44,7 +44,9 @@ public class AuthorizeActionResult
     public void ProcessAuthorizeTargetResult(AuthorizeTargetResult result)
     {
         if (!result.IsAuthorized)
+        {
             _authorizationFailures.Add(result);
+        }
     }
 
     /// <summary>

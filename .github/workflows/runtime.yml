@@ -15,18 +15,14 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "6.0.x"
-      - name: Setup dotCover
-        run: dotnet tool install JetBrains.dotCover.GlobalTool -g
       - name: Build
         run: dotnet build --configuration Release
       - name: Test
-        run: dotnet test --no-build --configuration Release
-      - name: Create coverage report
-        run: dotnet dotcover test --dcXML=coverage.xml
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
       - name: Report code coverage
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r CoverageReport.xml
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l CSharp $(find . -name coverage.cobertura.xml -printf '-r %p ')
 
   build-prod-docker-image:
     name: Build Production Docker Image

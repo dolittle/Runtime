@@ -55,7 +55,10 @@ public class AssemblyProvider : IAssemblyProvider
         {
             provider.Libraries.ForEach(library =>
             {
-                if (!_libraries.ContainsKey(library.Name)) _libraries.Add(library.Name, library);
+                if (!_libraries.ContainsKey(library.Name))
+                {
+                    _libraries.Add(library.Name, library);
+                }
             });
 
             var assembliesToInclude = provider.Libraries.Where(
@@ -74,7 +77,10 @@ public class AssemblyProvider : IAssemblyProvider
         var assembliesToRemove = _assemblies.Where(a =>
         {
             var name = a.GetName().Name;
-            if (!_libraries.ContainsKey(name)) return true;
+            if (!_libraries.ContainsKey(name))
+            {
+                return true;
+            }
             return !_assemblyFilters.ShouldInclude(_libraries[name]);
         }).ToArray();
         assembliesToRemove.ForEach((a) => _assemblies.Remove(a));

@@ -17,7 +17,10 @@ public class VersionConverter : IVersionConverter
     public Version FromString(string versionAsString)
     {
         var result = _versionRegex.Match(versionAsString);
-        if (!result.Success) throw new InvalidVersionString(versionAsString);
+        if (!result.Success)
+        {
+            throw new InvalidVersionString(versionAsString);
+        }
         var major = int.Parse(result.Groups[1].Value, CultureInfo.InvariantCulture);
         var minor = int.Parse(result.Groups[2].Value, CultureInfo.InvariantCulture);
         var patch = int.Parse(result.Groups[3].Value, CultureInfo.InvariantCulture);

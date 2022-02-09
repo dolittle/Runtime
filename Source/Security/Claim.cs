@@ -16,7 +16,9 @@ public record Claim(string Name, string Value, string ValueType)
     public static Claim FromDotnetClaim(System.Security.Claims.Claim claim)
     {
         if (claim == null)
+        {
             return null;
+        }
 
         return new Claim(claim.Type, claim.Value, claim.ValueType);
     }

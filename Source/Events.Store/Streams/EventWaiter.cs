@@ -65,11 +65,17 @@ public class EventWaiter
     /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
     public async Task Wait(StreamPosition position, CancellationToken token)
     {
-        if (IsAlreadyNotifiedOfPosition(position)) return;
+        if (IsAlreadyNotifiedOfPosition(position))
+        {
+            return;
+        }
         TaskCompletionSource<bool> tcs;
         lock (_lock)
         {
-            if (IsAlreadyNotifiedOfPosition(position)) return;
+            if (IsAlreadyNotifiedOfPosition(position))
+            {
+                return;
+            }
             tcs = GetOrAddTaskCompletionSourceLocking(position);
         }
         await tcs.Task.WaitAsync(token).ConfigureAwait(false);
@@ -92,7 +98,10 @@ public class EventWaiter
                     shouldUpdate = true;
                 }
             }
-            if (shouldUpdate) RemoveAllAtAndBelowLocking(position);
+            if (shouldUpdate)
+            {
+                RemoveAllAtAndBelowLocking(position);
+            }
         }
     }
 

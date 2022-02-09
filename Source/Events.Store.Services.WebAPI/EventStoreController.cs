@@ -29,7 +29,10 @@ public class EventStoreController : ControllerBase
             new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(request.Events.Select(_ => _.ToUncommittedEvent()).ToList())),
             request.CallContext.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (commitResult.Success) return Ok(CommitResponse.From(commitResult.Result));
+        if (commitResult.Success)
+        {
+            return Ok(CommitResponse.From(commitResult.Result));
+        }
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return new JsonResult(CommitResponse.From(commitResult.Exception.ToFailure()));
     }
@@ -40,7 +43,10 @@ public class EventStoreController : ControllerBase
             request.AggregateEvents.ToUncommittedAggregateEvents(),
             request.CallContext.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (commitResult.Success) return Ok(CommitForAggregateResponse.From(commitResult.Result));
+        if (commitResult.Success)
+        {
+            return Ok(CommitForAggregateResponse.From(commitResult.Result));
+        }
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return new JsonResult(CommitForAggregateResponse.From(commitResult.Exception.ToFailure(), request.AggregateEvents.EventSource, request.AggregateEvents.AggregateRoot));
     }
@@ -52,7 +58,10 @@ public class EventStoreController : ControllerBase
             request.EventSource,
             request.CallContext.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (fetchResult.Success) return Ok(FetchForAggregateResponse.From(fetchResult.Result));
+        if (fetchResult.Success)
+        {
+            return Ok(FetchForAggregateResponse.From(fetchResult.Result));
+        }
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return new JsonResult(FetchForAggregateResponse.From(fetchResult.Exception.ToFailure(), request.EventSource, request.AggregateRoot));
     }

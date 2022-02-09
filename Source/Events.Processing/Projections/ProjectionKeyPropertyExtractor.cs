@@ -18,7 +18,10 @@ public class ProjectionKeyPropertyExtractor : IProjectionKeyPropertyExtractor
         key = null;
         var jsonObject = JObject.Parse(jsonString);
         var property = jsonObject[keySelectorExpression.Value];
-        if (property == null) return false;
+        if (property == null)
+        {
+            return false;
+        }
 
         key = AsProjectionKey(property);
         return true;

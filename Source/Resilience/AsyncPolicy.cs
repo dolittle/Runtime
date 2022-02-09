@@ -49,8 +49,14 @@ public class AsyncPolicy : IAsyncPolicy
     /// <inheritdoc/>
     public Task Execute(Func<CancellationToken, Task> action, bool continueOnCapturedContext, CancellationToken cancellationToken)
     {
-        if (DelegatedPolicy != null) return DelegatedPolicy.Execute(action, continueOnCapturedContext, cancellationToken);
-        else return UnderlyingPolicy.ExecuteAsync(action, cancellationToken, continueOnCapturedContext);
+        if (DelegatedPolicy != null)
+        {
+            return DelegatedPolicy.Execute(action, continueOnCapturedContext, cancellationToken);
+        }
+        else
+        {
+            return UnderlyingPolicy.ExecuteAsync(action, cancellationToken, continueOnCapturedContext);
+        }
     }
 
     /// <inheritdoc/>
@@ -62,7 +68,10 @@ public class AsyncPolicy : IAsyncPolicy
     /// <inheritdoc/>
     public Task<TResult> Execute<TResult>(Func<CancellationToken, Task<TResult>> action, bool continueOnCapturedContext, CancellationToken cancellationToken)
     {
-        if (DelegatedPolicy != null) return DelegatedPolicy.Execute(action, continueOnCapturedContext, cancellationToken);
+        if (DelegatedPolicy != null)
+        {
+            return DelegatedPolicy.Execute(action, continueOnCapturedContext, cancellationToken);
+        }
         return UnderlyingPolicy.ExecuteAsync(action, cancellationToken, continueOnCapturedContext);
     }
 }

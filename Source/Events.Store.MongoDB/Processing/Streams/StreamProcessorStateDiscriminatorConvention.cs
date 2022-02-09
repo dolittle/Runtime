@@ -58,6 +58,8 @@ class StreamProcessorStateDiscriminatorConvention : IDiscriminatorConvention
     void ThrowIfNominalTypeIsIncorrect(Type nominalType)
     {
         if (!typeof(AbstractStreamProcessorState).IsAssignableFrom(nominalType))
+        {
             throw new UnsupportedTypeForStreamProcessorStateDiscriminatorConvention(nominalType);
+        }
     }
 }

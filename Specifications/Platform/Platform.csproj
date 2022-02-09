@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Platform.Specs</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Platform</RootNamespace>
+  </PropertyGroup>
+
+  <Import Project="../../specs.props"></Import>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Platform/Platform.csproj" />
+  </ItemGroup>
+
+</Project>

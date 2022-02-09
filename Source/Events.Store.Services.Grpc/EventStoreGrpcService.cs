@@ -39,9 +39,13 @@ public class EventStoreGrpcService : EventStoreBase
             context.CancellationToken).ConfigureAwait(false);
 
         if (commitResult.Success)
+        {
             response.Events.AddRange(commitResult.Result.ToProtobuf());
+        }
         else
+        {
             response.Failure = commitResult.Exception.ToFailure();
+        }
 
         return response;
     }
@@ -62,9 +66,13 @@ public class EventStoreGrpcService : EventStoreBase
             request.CallContext.ExecutionContext.ToExecutionContext(),
             context.CancellationToken).ConfigureAwait(false);
         if (commitResult.Success)
+        {
             response.Events = commitResult.Result.ToProtobuf();
+        }
         else
+        {
             response.Failure = commitResult.Exception.ToFailure();
+        }
 
         return response;
     }
@@ -79,9 +87,13 @@ public class EventStoreGrpcService : EventStoreBase
             request.CallContext.ExecutionContext.ToExecutionContext(),
             context.CancellationToken).ConfigureAwait(false);
         if (fetchResult.Success)
+        {
             response.Events = fetchResult.Result.ToProtobuf();
+        }
         else
+        {
             response.Failure = fetchResult.Exception.ToFailure();
+        }
 
         return response;
     }

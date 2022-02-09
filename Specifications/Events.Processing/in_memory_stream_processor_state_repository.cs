@@ -28,7 +28,13 @@ public class in_memory_stream_processor_state_repository : IResilientStreamProce
 
     public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
     {
-        if (states.ContainsKey(streamProcessorId as StreamProcessorId)) return Task.FromResult(Try<IStreamProcessorState>.Succeeded(states[streamProcessorId as StreamProcessorId]));
-        else return Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception()));
+        if (states.ContainsKey(streamProcessorId as StreamProcessorId))
+        {
+            return Task.FromResult(Try<IStreamProcessorState>.Succeeded(states[streamProcessorId as StreamProcessorId]));
+        }
+        else
+        {
+            return Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception()));
+        }
     }
 }

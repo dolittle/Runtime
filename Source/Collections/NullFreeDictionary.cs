@@ -60,9 +60,14 @@ public class NullFreeDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     /// <inheritdoc/>
     public void Add(TKey key, TValue value)
     {
-        if (key == null) throw new ArgumentNullException(nameof(key));
+        if (key == null)
+        {
+            throw new ArgumentNullException(nameof(key));
+        }
         if (value != null)
+        {
             _dict[key] = value;
+        }
     }
 
     /// <inheritdoc/>

@@ -223,7 +223,9 @@ public static class TypeExtensions
         {
             var currentType = typeToCheck.GetTypeInfo().IsGenericType ? typeToCheck.GetGenericTypeDefinition() : typeToCheck;
             if (openGenericType == currentType)
+            {
                 return true;
+            }
 
             typeToCheck = typeToCheck.GetTypeInfo().BaseType;
         }

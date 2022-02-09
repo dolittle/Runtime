@@ -36,7 +36,10 @@ public class FilterDefinitions : IFilterDefinitions
     {
         var tryGetStream = await _streamDefinitions.TryGet(scopeId, filterDefinition.TargetStream, cancellationToken).ConfigureAwait(false);
 
-        if (!tryGetStream.Success) return false;
+        if (!tryGetStream.Success)
+        {
+            return false;
+        }
         var newStreamDefinition = new StreamDefinition(filterDefinition);
         await _streamDefinitions.Persist(scopeId, newStreamDefinition, cancellationToken).ConfigureAwait(false);
         return true;

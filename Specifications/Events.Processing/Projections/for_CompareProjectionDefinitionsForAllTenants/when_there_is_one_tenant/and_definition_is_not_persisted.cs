@@ -10,6 +10,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
@@ -30,6 +31,7 @@ public class and_definition_is_not_persisted : given.all_dependencies
                 "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                 "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
             .with_selector(ProjectionEventSelector.EventSourceId(Guid.NewGuid()))
+            .with_copy_to_mongodb(CopyToMongoDBSpecification.Default)
             .build();
 
         definitions

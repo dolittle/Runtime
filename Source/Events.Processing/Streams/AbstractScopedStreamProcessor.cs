@@ -89,7 +89,10 @@ public abstract class AbstractScopedStreamProcessor
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public Task Start(CancellationToken cancellationToken)
     {
-        if (_started) throw new StreamProcessorAlreadyProcessingStream(Identifier);
+        if (_started)
+        {
+            throw new StreamProcessorAlreadyProcessingStream(Identifier);
+        }
         _started = true;
         return BeginProcessing(cancellationToken);
     }
@@ -301,7 +304,10 @@ public abstract class AbstractScopedStreamProcessor
                 }
                 while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
 
-                if (cancellationToken.IsCancellationRequested) break;
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
                 _currentState = await ProcessEvent(tryGetEvent, _currentState, cancellationToken).ConfigureAwait(false);
             }
             while (!cancellationToken.IsCancellationRequested);

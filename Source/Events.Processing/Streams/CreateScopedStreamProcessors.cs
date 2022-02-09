@@ -82,7 +82,10 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
             await _streamProcessorStates.Persist(streamProcessorId, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
         }
 
-        if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
+        if (!tryGetStreamProcessorState.Result.Partitioned)
+        {
+            throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
+        }
         NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
 
         return new Partitioned.ScopedStreamProcessor(
@@ -114,7 +117,10 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
             await _streamProcessorStates.Persist(streamProcessorId, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
         }
 
-        if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
+        if (tryGetStreamProcessorState.Result.Partitioned)
+        {
+            throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
+        }
         NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
         return new ScopedStreamProcessor(
             _tenant,
@@ -132,8 +138,17 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
 
     void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
     {
-        if (position == StreamPosition.Start) return;
-        if (streamDefinition.Public) _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
-        else _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
+        if (position == StreamPosition.Start)
+        {
+            return;
+        }
+        if (streamDefinition.Public)
+        {
+            _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
+        }
+        else
+        {
+            _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
+        }
     }
 }

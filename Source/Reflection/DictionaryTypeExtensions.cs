@@ -70,7 +70,9 @@ public static class DictionaryTypeExtensions
         var keyType = type.GetKeyTypeFromDictionary();
         var valueType = type.GetValueTypeFromDictionary();
         if (typeof(Dictionary<,>).MakeGenericType(keyType, valueType).IsAssignableFrom(type))
+        {
             return false;
+        }
 
         var readOnlyDictionaryType = typeof(IReadOnlyDictionary<,>);
         var interfaces = type.GetInterfaces().Append(type);

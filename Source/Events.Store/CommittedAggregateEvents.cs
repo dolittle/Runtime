@@ -26,7 +26,10 @@ public class CommittedAggregateEvents : CommittedEventSequence<CommittedAggregat
         AggregateRoot = aggregateRoot;
         for (var i = 0; i < events.Count; i++)
         {
-            if (i == 0) _currentCheckedVersion = events[0].AggregateRootVersion;
+            if (i == 0)
+            {
+                _currentCheckedVersion = events[0].AggregateRootVersion;
+            }
             var @event = events[i];
             ThrowIfEventWasAppliedToOtherEventSource(@event);
             ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
@@ -47,16 +50,25 @@ public class CommittedAggregateEvents : CommittedEventSequence<CommittedAggregat
 
     void ThrowIfEventWasAppliedToOtherEventSource(CommittedAggregateEvent @event)
     {
-        if (@event.EventSource != EventSource) throw new EventWasAppliedToOtherEventSource(AggregateRoot, @event.EventSource, EventSource);
+        if (@event.EventSource != EventSource)
+        {
+            throw new EventWasAppliedToOtherEventSource(AggregateRoot, @event.EventSource, EventSource);
+        }
     }
 
     void ThrowIfEventWasAppliedByOtherAggregateRoot(CommittedAggregateEvent @event)
     {
-        if (@event.AggregateRoot.Id != AggregateRoot) throw new EventWasAppliedByOtherAggregateRoot(EventSource, @event.AggregateRoot.Id, AggregateRoot);
+        if (@event.AggregateRoot.Id != AggregateRoot)
+        {
+            throw new EventWasAppliedByOtherAggregateRoot(EventSource, @event.AggregateRoot.Id, AggregateRoot);
+        }
     }
 
     void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event)
     {
-        if (@event.AggregateRootVersion != _currentCheckedVersion) throw new AggregateRootVersionIsOutOfOrder(EventSource, AggregateRoot, @event.AggregateRootVersion, _currentCheckedVersion);
+        if (@event.AggregateRootVersion != _currentCheckedVersion)
+        {
+            throw new AggregateRootVersionIsOutOfOrder(EventSource, AggregateRoot, @event.AggregateRootVersion, _currentCheckedVersion);
+        }
     }
 }
