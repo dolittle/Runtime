@@ -1,3 +1,17 @@
+# [7.6.0] - 2022-2-9 [PR: #614](https://github.com/dolittle/Runtime/pull/614)
+## Summary
+
+Introduces secondary storage mechanisms for Projection read models, this enables using existing databases as query engines for read models. The Projections that should be copied, are stored in Collections in the MongoDB resource for the Microservice, so that they can be accessed through the MongoDB resource in the SDKs. These collections will be created and dropped as per the copy specification in the Projection registration request. These collections should only be read from the client, and not modified - as this can cause strange behaviour.
+
+### Added
+
+- Implemented MongoDB copy storage for Projection read models, as introduced in https://github.com/dolittle/Contracts/pull/85
+
+### Changed
+
+- The Dolittle CLI now includes container names in the Runtime selection list when multiple Runtimes are detected.
+
+
 # [7.5.0] - 2022-1-24 [PR: #609](https://github.com/dolittle/Runtime/pull/609)
 ## Summary
 
