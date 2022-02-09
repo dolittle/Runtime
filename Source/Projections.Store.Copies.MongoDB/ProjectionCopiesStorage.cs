@@ -17,7 +17,7 @@ public class ProjectionCopiesStorage : IProjectionCopiesStorage
         var connectionString = readModelsDatabase.ConnectionString;
 
         var settings = MongoClientSettings.FromUrl(connectionString);
-        settings.GuidRepresentation = GuidRepresentation.Standard;
+        settings.GuidRepresentation = GuidRepresentation.Unspecified;
         
         var client = new MongoClient(settings.Freeze());
         Database = client.GetDatabase(connectionString.DatabaseName);
