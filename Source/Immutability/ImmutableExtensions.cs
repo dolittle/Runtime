@@ -42,10 +42,16 @@ public static class ImmutableExtensions
     public static void ShouldBeImmutable(this Type type)
     {
         var writeableProperties = type.GetWriteableProperties();
-        if (writeableProperties.Length > 0) throw new WriteableImmutablePropertiesFound(type, writeableProperties);
+        if (writeableProperties.Length > 0)
+        {
+            throw new WriteableImmutablePropertiesFound(type, writeableProperties);
+        }
 
         var writeableFields = type.GetWriteableFields();
-        if (writeableFields.Length > 0) throw new WriteableImmutableFieldsFound(type, writeableFields);
+        if (writeableFields.Length > 0)
+        {
+            throw new WriteableImmutableFieldsFound(type, writeableFields);
+        }
     }
 
     /// <summary>

@@ -52,17 +52,26 @@ public class WeakDelegate
 
     void ThrowIfTargetNotAlive()
     {
-        if (!IsAlive) throw new CannotInvokeMethodBecauseTargetIsNotAlive(_method);
+        if (!IsAlive)
+        {
+            throw new CannotInvokeMethodBecauseTargetIsNotAlive(_method);
+        }
     }
 
     void ThrowIfSignatureMismatches(object[] arguments)
     {
         var parameters = _method.GetParameters();
-        if (arguments.Length != parameters.Length) throw new InvalidMethodSignature(_method);
+        if (arguments.Length != parameters.Length)
+        {
+            throw new InvalidMethodSignature(_method);
+        }
 
         for (var argumentIndex = 0; argumentIndex < arguments.Length; argumentIndex++)
         {
-            if (!parameters[argumentIndex].ParameterType.GetTypeInfo().IsAssignableFrom(arguments[argumentIndex].GetType().GetTypeInfo())) throw new InvalidMethodSignature(_method);
+            if (!parameters[argumentIndex].ParameterType.GetTypeInfo().IsAssignableFrom(arguments[argumentIndex].GetType().GetTypeInfo()))
+            {
+                throw new InvalidMethodSignature(_method);
+            }
         }
     }
 }

@@ -45,7 +45,9 @@ public static class ObjectToDictionaryExtensions
     {
         var value = property.GetValue(source);
         if (IsOfType<T>(value))
+        {
             dictionary.Add(property.Name, (T)value);
+        }
     }
 
     static bool IsOfType<T>(object value)
@@ -55,6 +57,9 @@ public static class ObjectToDictionaryExtensions
 
     static void ThrowIfSourceArgumentIsNull(object source)
     {
-        if (source == null) throw new SourceObjectCannotBeNull();
+        if (source == null)
+        {
+            throw new SourceObjectCannotBeNull();
+        }
     }
 }

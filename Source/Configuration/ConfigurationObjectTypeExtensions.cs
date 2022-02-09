@@ -18,7 +18,10 @@ public static class ConfigurationObjectTypeExtensions
     /// <returns>Friendly name, or the type name if none is given.</returns>
     public static string GetFriendlyConfigurationName(this Type type)
     {
-        if (type.HasAttribute<NameAttribute>()) return ((NameAttribute)type.GetCustomAttributes(typeof(NameAttribute), false)[0]).Name;
+        if (type.HasAttribute<NameAttribute>())
+        {
+            return ((NameAttribute)type.GetCustomAttributes(typeof(NameAttribute), false)[0]).Name;
+        }
 #pragma warning disable CA1308
         return type.Name.ToLowerInvariant();
 #pragma warning restore CA1308

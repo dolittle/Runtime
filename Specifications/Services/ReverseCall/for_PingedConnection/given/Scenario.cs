@@ -26,7 +26,10 @@ public class Scenario
         build(new Builder(scenario));
 
         var error = scenario._steps.Select(_ => _.Validate()).FirstOrDefault(_ => _ != default);
-        if (error != default) throw error;
+        if (error != default)
+        {
+            throw error;
+        }
 
         scenario._steps.Sort((a, b) => a.At.Value - b.At.Value);
 
@@ -80,7 +83,10 @@ public class Scenario
 
         public SpecificationUsageException Validate()
         {
-            if (!At.HasValue) return new SpecificationUsageException("The time was not set for a step");
+            if (!At.HasValue)
+            {
+                return new SpecificationUsageException("The time was not set for a step");
+            }
 
             return default;
         }

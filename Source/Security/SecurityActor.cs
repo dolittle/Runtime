@@ -48,7 +48,9 @@ public class SecurityActor : ISecurityActor
             try
             {
                 if (!rule.IsAuthorized(actionToAuthorize))
+                {
                     result.AddBrokenRule(rule);
+                }
             }
             catch (Exception ex)
             {

@@ -173,7 +173,10 @@ public class AggregateRoots : IAggregateRoots
             throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
         }
 
-        if (result.ModifiedCount > 1) throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
+        if (result.ModifiedCount > 1)
+        {
+            throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
+        }
         return new AggregateRoot(eventSource, aggregateRoot, nextVersion);
     }
 

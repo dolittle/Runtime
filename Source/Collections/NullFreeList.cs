@@ -32,7 +32,10 @@ public class NullFreeList<T> : IList<T>
     {
         foreach (var element in collection)
         {
-            if (element == null) throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} can not contain null elements");
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} can not contain null elements");
+            }
             _elements.Add(element);
         }
     }
@@ -49,7 +52,10 @@ public class NullFreeList<T> : IList<T>
         get => _elements[index];
         set
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
             _elements[index] = value;
         }
     }
@@ -57,7 +63,10 @@ public class NullFreeList<T> : IList<T>
     /// <inheritdoc/>
     public void Add(T item)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
         _elements.Add(item);
     }
 
@@ -70,7 +79,10 @@ public class NullFreeList<T> : IList<T>
     /// <inheritdoc/>
     public bool Contains(T item)
     {
-        if (item == null) return false;
+        if (item == null)
+        {
+            return false;
+        }
         return _elements.Contains(item);
     }
 
@@ -83,21 +95,30 @@ public class NullFreeList<T> : IList<T>
     /// <inheritdoc/>
     public int IndexOf(T item)
     {
-        if (item == null) return -1;
+        if (item == null)
+        {
+            return -1;
+        }
         return _elements.IndexOf(item);
     }
 
     /// <inheritdoc/>
     public void Insert(int index, T item)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
         _elements.Insert(index, item);
     }
 
     /// <inheritdoc/>
     public bool Remove(T item)
     {
-        if (item == null) return false;
+        if (item == null)
+        {
+            return false;
+        }
         return _elements.Remove(item);
     }
 

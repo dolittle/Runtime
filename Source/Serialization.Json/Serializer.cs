@@ -74,7 +74,10 @@ public class Serializer : ISerializer
                 if (value == null || value.GetType() != type)
                 {
                     var converter = serializer.Converters.SingleOrDefault(c => c.CanConvert(type) && c.CanRead);
-                    if (converter != null) return converter.ReadJson(reader, type, null, serializer);
+                    if (converter != null)
+                    {
+                        return converter.ReadJson(reader, type, null, serializer);
+                    }
                 }
                 else
                 {
@@ -151,7 +154,9 @@ public class Serializer : ISerializer
         else
         {
             if (DoesPropertiesMatchConstructor(type, json))
+            {
                 return CreateInstanceByPropertiesMatchingConstructor(type, json, out propertiesMatched);
+            }
         }
 
         throw new UnableToInstantiateInstanceOfType(type);
@@ -246,12 +251,18 @@ public class Serializer : ISerializer
     {
         if ((options.Flags & SerializationOptionsFlags.IncludeTypeNames) != 0)
         {
-            if (ignoreReadOnlyProperties) return _cacheAutoTypeNameReadOnly.GetOrAdd(options, _ => CreateSerializer(options, TypeNameHandling.Auto, ignoreReadOnlyProperties));
+            if (ignoreReadOnlyProperties)
+            {
+                return _cacheAutoTypeNameReadOnly.GetOrAdd(options, _ => CreateSerializer(options, TypeNameHandling.Auto, ignoreReadOnlyProperties));
+            }
             return _cacheAutoTypeName.GetOrAdd(options, _ => CreateSerializer(options, TypeNameHandling.Auto, ignoreReadOnlyProperties));
         }
         else
         {
-            if (ignoreReadOnlyProperties) return _cacheNoneTypeNameReadOnly.GetOrAdd(options, _ => CreateSerializer(options, TypeNameHandling.None, ignoreReadOnlyProperties));
+            if (ignoreReadOnlyProperties)
+            {
+                return _cacheNoneTypeNameReadOnly.GetOrAdd(options, _ => CreateSerializer(options, TypeNameHandling.None, ignoreReadOnlyProperties));
+            }
             return _cacheNoneTypeName.GetOrAdd(options, _ => CreateSerializer(options, TypeNameHandling.None, ignoreReadOnlyProperties));
         }
     }
@@ -265,7 +276,10 @@ public class Serializer : ISerializer
             TypeNameHandling = typeNameHandling,
             ContractResolver = contractResolver,
         };
-        if (!options.IgnoreDiscoveredConverters) _converters.ForEach(serializer.Converters.Add);
+        if (!options.IgnoreDiscoveredConverters)
+        {
+            _converters.ForEach(serializer.Converters.Add);
+        }
         SetSerializerForConvertersRequiringIt(options.Converters);
         options.Converters.ForEach(serializer.Converters.Add);
         options.Callback(serializer);

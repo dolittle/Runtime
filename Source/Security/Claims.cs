@@ -58,7 +58,9 @@ public class Claims : IEnumerable<Claim>, IEquatable<Claims>
     public bool Equals(Claims other)
     {
         if (other == null || other.Count() != this.Count())
+        {
             return false;
+        }
 
         var thisClaims = _claims.OrderBy(_ => _.Name).ThenBy(_ => _.ValueType).ThenBy(_ => _.Value).ToArray();
         var otherClaims = other.OrderBy(_ => _.Name).ThenBy(_ => _.ValueType).ThenBy(_ => _.Value).ToArray();

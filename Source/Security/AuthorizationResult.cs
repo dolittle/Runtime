@@ -30,7 +30,9 @@ public class AuthorizationResult
     public void ProcessAuthorizeDescriptorResult(AuthorizeDescriptorResult result)
     {
         if (!result.IsAuthorized)
+        {
             _authorizationFailures.Add(result);
+        }
     }
 
     /// <summary>

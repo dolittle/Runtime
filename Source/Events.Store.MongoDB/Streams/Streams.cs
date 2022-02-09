@@ -45,7 +45,10 @@ public class Streams : EventStoreConnection, IStreams
     /// <inheritdoc/>
     public Task<IMongoCollection<MongoDB.Events.StreamEvent>> Get(ScopeId scopeId, StreamId streamId, CancellationToken token)
     {
-        if (streamId == StreamId.EventLog) throw new CannotGetEventLogStream();
+        if (streamId == StreamId.EventLog)
+        {
+            throw new CannotGetEventLogStream();
+        }
         return GetStreamCollection(scopeId, streamId, token);
     }
 

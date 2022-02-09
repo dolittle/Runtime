@@ -19,7 +19,9 @@ public static class ExpressionExtensions
     public static readonly Func<Expression, MemberExpression> Unwrap = toUnwrap =>
     {
         if (toUnwrap is UnaryExpression unwrap)
+        {
             return unwrap.Operand as MemberExpression;
+        }
 
         return toUnwrap as MemberExpression;
     };
@@ -136,7 +138,9 @@ public static class ExpressionExtensions
         {
             var innerMember = memberExpression.Expression as MemberExpression;
             if (innerMember.Member is FieldInfo info)
+            {
                 return info.GetValue(null);
+            }
 
             constantExpression = innerMember.Expression as ConstantExpression;
             return GetValue(innerMember, constantExpression);
@@ -148,10 +152,14 @@ public static class ExpressionExtensions
     static object GetValue(MemberExpression memberExpression, ConstantExpression constantExpression)
     {
         if (memberExpression.Member is PropertyInfo propertyInfo)
+        {
             return propertyInfo.GetValue(constantExpression.Value, null);
+        }
 
         if (memberExpression.Member is FieldInfo fieldInfo)
+        {
             return fieldInfo.GetValue(constantExpression.Value);
+        }
 
         return constantExpression.Value;
     }

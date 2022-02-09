@@ -31,12 +31,16 @@ public class SecurityManager : ISecurityManager
     {
         var result = new AuthorizationResult();
         if (!_securityDescriptors.Any())
+        {
             return result;
+        }
 
         var applicableSecurityDescriptors = _securityDescriptors.Where(sd => sd.CanAuthorize<T>(target));
 
         if (!applicableSecurityDescriptors.Any())
+        {
             return result;
+        }
 
         foreach (var securityDescriptor in applicableSecurityDescriptors)
             result.ProcessAuthorizeDescriptorResult(securityDescriptor.Authorize(target));

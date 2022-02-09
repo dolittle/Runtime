@@ -36,10 +36,14 @@ public class SerializerContractResolver : DefaultContractResolver
     {
         var properties = base.CreateProperties(type, memberSerialization);
         if (_ignoreReadOnlyProperties)
+        {
             properties = properties.Where(p => p.Writable).ToList();
+        }
 
         if (_options != null)
+        {
             return properties.Where(p => _options.ShouldSerializeProperty(type, p.PropertyName)).ToList();
+        }
 
         return properties;
     }
@@ -49,7 +53,9 @@ public class SerializerContractResolver : DefaultContractResolver
     {
         var result = base.ResolvePropertyName(propertyName);
         if (_options?.Flags.HasFlag(SerializationOptionsFlags.UseCamelCase) == true)
+        {
             result = result.ToCamelCase();
+        }
 
         return result;
     }
@@ -59,7 +65,9 @@ public class SerializerContractResolver : DefaultContractResolver
     {
         var contract = base.CreateObjectContract(type);
         if (type.HasDefaultConstructor())
+        {
             return contract;
+        }
 
         var ctor = type.GetNonDefaultConstructorWithGreatestNumberOfParameters();
         if (ctor != null)
@@ -75,7 +83,9 @@ public class SerializerContractResolver : DefaultContractResolver
     void AddConstructorParameterIfNotAlreadyAdded(JsonObjectContract contract, JsonProperty property)
     {
         if (ConstructorParameterAlreadyExists(contract, property))
+        {
             return;
+        }
 
         contract.CreatorParameters.Add(property);
     }

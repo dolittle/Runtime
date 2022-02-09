@@ -88,7 +88,10 @@ public class Endpoint : IEndpoint
     /// <param name="disposeManagedResources">Whether to dispose managed resources.</param>
     protected virtual void Dispose(bool disposeManagedResources)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         _server.ShutdownAsync().GetAwaiter().GetResult();
         _disposed = true;
     }

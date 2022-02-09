@@ -56,8 +56,14 @@ public class EventFetchers : IEventFetchers
     /// <inheritdoc/>
     public async Task<ICanFetchEventsFromPartitionedStream> GetPartitionedFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
     {
-        if (!streamDefinition.Partitioned) throw new CannotGetPartitionedFetcherForUnpartitionedStream(streamDefinition);
-        if (streamDefinition.StreamId == StreamId.EventLog) throw new CannotGetPartitionedFetcherForEventLog();
+        if (!streamDefinition.Partitioned)
+        {
+            throw new CannotGetPartitionedFetcherForUnpartitionedStream(streamDefinition);
+        }
+        if (streamDefinition.StreamId == StreamId.EventLog)
+        {
+            throw new CannotGetPartitionedFetcherForEventLog();
+        }
         if (streamDefinition.Public)
         {
             return CreateStreamFetcherForStreamEventCollection(

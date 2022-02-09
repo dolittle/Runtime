@@ -61,7 +61,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
             {
                 await Task.Delay(GetTimeToRetryProcessing(streamProcessorState), cancellationToken).ConfigureAwait(false);
                 var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(Identifier, cancellationToken).ConfigureAwait(false);
-                if (tryGetStreamProcessorState.Success) streamProcessorState = tryGetStreamProcessorState.Result as StreamProcessorState;
+                if (tryGetStreamProcessorState.Success)
+                {
+                    streamProcessorState = tryGetStreamProcessorState.Result as StreamProcessorState;
+                }
             }
             else
             {

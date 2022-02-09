@@ -16,7 +16,10 @@ public class ColoredShape
 
     public override bool Equals(object obj)
     {
-        if (obj == null || GetType() != obj.GetType()) return false;
+        if (obj == null || GetType() != obj.GetType())
+        {
+            return false;
+        }
 
         var target = (ColoredShape)obj;
         return target.Shape == Shape && target.Color == Color;

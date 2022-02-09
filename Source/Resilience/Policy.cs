@@ -42,20 +42,32 @@ public class Policy : IPolicy
     /// <inheritdoc/>
     public void Execute(Action action)
     {
-        if (DelegatedPolicy != null) DelegatedPolicy.Execute(action);
-        else UnderlyingPolicy.Execute(action);
+        if (DelegatedPolicy != null)
+        {
+            DelegatedPolicy.Execute(action);
+        }
+        else
+        {
+            UnderlyingPolicy.Execute(action);
+        }
     }
 
     /// <inheritdoc/>
     public TResult Execute<TResult>(Func<TResult> action)
     {
         ThrowIfAsyncAction(typeof(TResult));
-        if (DelegatedPolicy != null) return DelegatedPolicy.Execute(action);
+        if (DelegatedPolicy != null)
+        {
+            return DelegatedPolicy.Execute(action);
+        }
         return UnderlyingPolicy.Execute(action);
     }
 
     void ThrowIfAsyncAction(Type type)
     {
-        if (typeof(Task).IsAssignableFrom(type)) throw new SynchronousPolicyCannotReturnTask(type);
+        if (typeof(Task).IsAssignableFrom(type))
+        {
+            throw new SynchronousPolicyCannotReturnTask(type);
+        }
     }
 }

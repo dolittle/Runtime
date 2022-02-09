@@ -22,7 +22,9 @@ public static class StringExtensions
         if (!string.IsNullOrEmpty(stringToConvert))
         {
             if (stringToConvert.Length == 1)
+            {
                 return stringToConvert.ToLowerInvariant();
+            }
 
             var firstLetter = stringToConvert[0].ToString(CultureInfo.InvariantCulture).ToLowerInvariant();
             return $"{firstLetter}{stringToConvert.Substring(1)}";
@@ -41,7 +43,9 @@ public static class StringExtensions
         if (!string.IsNullOrEmpty(stringToConvert))
         {
             if (stringToConvert.Length == 1)
+            {
                 return stringToConvert.ToUpperInvariant();
+            }
 
             var firstLetter = stringToConvert[0].ToString(CultureInfo.InvariantCulture).ToUpperInvariant();
             return $"{firstLetter}{stringToConvert.Substring(1)}";

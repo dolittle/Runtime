@@ -39,6 +39,9 @@ public class ValueConverters : IValueConverters
 
     void ThrowIfMissingValueConverter(Type type, IValueConverter valueConverter)
     {
-        if (valueConverter == null) throw new MissingValueConverter(type);
+        if (valueConverter == null)
+        {
+            throw new MissingValueConverter(type);
+        }
     }
 }

@@ -32,7 +32,10 @@ public class BoundServices : IBoundServices
     {
         services.ForEach(service => _logger.RegisteringBoundService(service.Descriptor?.Name ?? "unknown"));
 
-        if (!_servicesPerServiceType.ContainsKey(type)) _servicesPerServiceType[type] = new List<Service>();
+        if (!_servicesPerServiceType.ContainsKey(type))
+        {
+            _servicesPerServiceType[type] = new List<Service>();
+        }
         _servicesPerServiceType[type].AddRange(services);
     }
 
@@ -50,6 +53,9 @@ public class BoundServices : IBoundServices
 
     void ThrowIfUnknownServiceType(ServiceType type)
     {
-        if (!_servicesPerServiceType.ContainsKey(type)) throw new UnknownServiceType(type);
+        if (!_servicesPerServiceType.ContainsKey(type))
+        {
+            throw new UnknownServiceType(type);
+        }
     }
 }

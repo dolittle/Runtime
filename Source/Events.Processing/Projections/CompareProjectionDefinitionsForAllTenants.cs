@@ -61,9 +61,18 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
     static ProjectionDefinitionComparisonResult DefinitionsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition)
     {
         var result = ProjectionDefinitionComparisonResult.Equal;
-        if (!InitialStatesAreEqual(newDefinition.InitialState, oldDefinition.InitialState, ref result)) return result;
-        if (!EventsAreEqual(newDefinition.Events, oldDefinition.Events, ref result)) return result;
-        if (!CopiesAreEqual(newDefinition.Copies, oldDefinition.Copies, ref result)) return result;
+        if (!InitialStatesAreEqual(newDefinition.InitialState, oldDefinition.InitialState, ref result))
+        {
+            return result;
+        }
+        if (!EventsAreEqual(newDefinition.Events, oldDefinition.Events, ref result))
+        {
+            return result;
+        }
+        if (!CopiesAreEqual(newDefinition.Copies, oldDefinition.Copies, ref result))
+        {
+            return result;
+        }
         return result;
     }
 

@@ -18,7 +18,10 @@ public class MessageDescriptions : IMessageDescriptions
     /// <inheritdoc/>
     public MessageDescription GetFor<T>()
     {
-        if (HasFor<T>()) return _descriptions[typeof(T)];
+        if (HasFor<T>())
+        {
+            return _descriptions[typeof(T)];
+        }
         var description = MessageDescription.DefaultFor<T>();
         SetFor<T>(description);
         return description;
@@ -37,11 +40,17 @@ public class MessageDescriptions : IMessageDescriptions
 
     void ThrowIfTypeHasMessageDescriptionRegistered<T>()
     {
-        if (HasFor<T>()) throw new MessageDescriptionAlreadyRegisteredForType(typeof(T));
+        if (HasFor<T>())
+        {
+            throw new MessageDescriptionAlreadyRegisteredForType(typeof(T));
+        }
     }
 
     void ThrowIfTypeMismatchForMessageDescription<T>(MessageDescription description)
     {
-        if (typeof(T) != description.Type) throw new TypeMismatchForMessageDescription(typeof(T), description.Type);
+        if (typeof(T) != description.Type)
+        {
+            throw new TypeMismatchForMessageDescription(typeof(T), description.Type);
+        }
     }
 }

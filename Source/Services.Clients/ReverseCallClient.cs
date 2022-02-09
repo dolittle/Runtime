@@ -430,7 +430,10 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
 
     void ThrowIfInvalidPingInterval(TimeSpan pingInterval)
     {
-        if (pingInterval.TotalMilliseconds <= 0) throw new PingIntervalNotGreaterThanZero();
+        if (pingInterval.TotalMilliseconds <= 0)
+        {
+            throw new PingIntervalNotGreaterThanZero();
+        }
     }
 
     void EnsureOnlyConnectingOnce()

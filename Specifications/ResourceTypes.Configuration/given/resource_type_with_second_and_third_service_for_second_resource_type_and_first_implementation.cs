@@ -21,7 +21,9 @@ public class resource_type_with_second_and_third_service_for_second_resource_typ
         get
         {
             if (_bindings == null)
+            {
                 InitializeBindings();
+            }
 
             return _bindings;
         }

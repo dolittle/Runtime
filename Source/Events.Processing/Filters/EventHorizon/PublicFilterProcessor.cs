@@ -40,7 +40,10 @@ public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinit
     /// <inheritdoc/>
     public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
     {
-        if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.None));
+        if (!@event.Public)
+        {
+            return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.None));
+        }
         var request = new FilterEventRequest
         {
             Event = @event.ToProtobuf(),
@@ -53,7 +56,10 @@ public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinit
     /// <inheritdoc/>
     public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
     {
-        if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.None));
+        if (!@event.Public)
+        {
+            return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.None));
+        }
         var request = new FilterEventRequest
         {
             Event = @event.ToProtobuf(),
