@@ -29,7 +29,9 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
             eventSelectors.Select(_ => new Store.Definition.ProjectionEventSelector(
                 _.EventType,
                 _.EventKeySelectorType,
-                _.EventKeySelectorExpression)),
+                _.EventKeySelectorExpression,
+                _.StaticKey ?? "",
+                _.OccurredFormat ?? "")),
             initialState,
             ToRuntimeCopies(copies));
 
@@ -66,6 +68,8 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
                 EventKeySelectorType = _.KeySelectorType,
                 EventKeySelectorExpression = _.KeySelectorExpression,
                 EventType = _.EventType,
+                StaticKey = _.StaticKey,
+                OccurredFormat = _.OccurredFormat
             }).ToArray(),
             Copies = ToStoredCopies(definition.Copies),
         };
