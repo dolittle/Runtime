@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 public interface IValidateOccurredFormat
 {
     /// <summary>
-    /// Checks whether the given <see cref="OccurredFormat"/> is valid.
+    /// Checks whether the given <see cref="OccurredFormat"/> is valid, meaning it can be used to format <see cref="DateTimeOffset"/> to a string.
     /// </summary>
     /// <param name="format">The <see cref="OccurredFormat"/>to check</param>
     /// <param name="errorMessage">A message describing why the format is invalid if validation fails, null otherwise.</param>
