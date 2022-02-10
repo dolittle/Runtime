@@ -14,7 +14,7 @@ public interface IValidateOccurredFormat
     /// Checks whether the given <see cref="OccurredFormat"/> is valid.
     /// </summary>
     /// <param name="format">The <see cref="OccurredFormat"/>to check</param>
-    /// <param name="errorMessage"></param>
-    /// <returns></returns>
+    /// <param name="errorMessage">A message describing why the format is invalid if validation fails, null otherwise.</param>
+    /// <returns>True if the format is valid, false if not.</returns>
     bool IsValid(OccurredFormat format, out string errorMessage);
 }
