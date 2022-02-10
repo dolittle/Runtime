@@ -40,7 +40,11 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Debug,"Persisting definition of projection {Projection} in scope {Scope} for tenant {Tenant}" )]
     internal static partial void PersistingProjectionDefinition(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant);
     
-    
+    [LoggerMessage(0, LogLevel.Debug,"Starting projection {Projection} in scope {Scope}" )]
+    internal static partial void StartingProjection(ILogger logger, ScopeId scope, ProjectionId projection);
+
+    [LoggerMessage(0, LogLevel.Warning,"An error occurred while starting projection {Projection} in scope {Scope}" )]
+    internal static partial void ErrorWhileStartingProjection(ILogger logger, ScopeId scope, ProjectionId projection, Exception exception);
     
     
     
@@ -63,23 +67,6 @@ static partial class Log
     internal static void ErrorWhileRegisteringProjection(this ILogger logger, Exception ex, ProjectionRegistrationArguments arguments)
         => _errorWhileRegisteringProjection(logger, arguments.ProjectionDefinition.Projection, ex);
 
-    static readonly Action<ILogger, Guid, Guid, Exception> _startingProjection = LoggerMessage
-        .Define<Guid, Guid>(
-            LogLevel.Debug,
-            new EventId(91153857, nameof(StartingProjection)),
-            "Starting projection {ProjectionId} in scope {Scope}");
-    
-    internal static void StartingProjection(this ILogger logger, ProjectionRegistrationArguments arguments)
-        => _startingProjection(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, null);
-
-    static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileStartingProjection = LoggerMessage
-        .Define<Guid, Guid>(
-            LogLevel.Warning,
-            new EventId(1426452095, nameof(ErrorWhileStartingProjection)),
-            "An error occurred while starting projection {Projection} in scope {Scope}");
-    
-    internal static void ErrorWhileStartingProjection(this ILogger logger, Exception ex, ProjectionRegistrationArguments arguments)
-        => _errorWhileStartingProjection(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, ex);
 
     static readonly Action<ILogger, Guid, Guid, Exception> _couldNotStartProjection = LoggerMessage
         .Define<Guid, Guid>(

@@ -110,30 +110,4 @@ public class ProjectionsService : ProjectionsBase
             Log.ProjectionDisconnected(_logger, projection.Definition.Scope, projection.Definition.Projection);
         }
     }
-
-    //async Task<Try<IEnumerable<Task>>> TryStartProjection(
-    //    IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
-    //    ProjectionRegistrationArguments arguments,
-    //    StreamProcessor eventProcessorStreamProcessor,
-    //    CancellationToken cancellationToken)
-    //{
-    //    _logger.StartingProjection(arguments);
-    //    try
-    //    {
-    //        var runningDispatcher = dispatcher.Accept(new ProjectionRegistrationResponse(), cancellationToken);
-
-    //        await ResetIfDefinitionChanged(arguments, cancellationToken).ConfigureAwait(false);
-    //        await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
-    //        return new[] { eventProcessorStreamProcessor.Start(), runningDispatcher };
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        if (!cancellationToken.IsCancellationRequested)
-    //        {
-    //            _logger.ErrorWhileStartingProjection(ex, arguments);
-    //        }
-
-    //        return ex;
-    //    }
-    //}
 }

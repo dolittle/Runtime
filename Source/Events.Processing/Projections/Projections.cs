@@ -104,7 +104,9 @@ public class Projections : IProjections
         var processor = new ProjectionProcessor(
             projection,
             registration.Result,
-            () => _projections.TryRemove(identifier, out _));
+            () => _projections.TryRemove(identifier, out _),
+            _loggerFactory.CreateLogger<ProjectionProcessor>(),
+            cancellationToken);
         
         if (!_projections.TryAdd(identifier, processor))
         {

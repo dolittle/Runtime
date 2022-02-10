@@ -3,34 +3,68 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
+/// <summary>
+/// Represents a Projection processor.
+/// </summary>
 public class ProjectionProcessor : IDisposable
 {
     readonly IProjection _projection;
     readonly StreamProcessor _streamProcessor;
     readonly Action _unregister;
+    readonly ILogger _logger;
+    readonly CancellationToken _cancellationToken;
 
-    public ProjectionProcessor(IProjection projection, StreamProcessor streamProcessor, Action unregister)
+    public ProjectionProcessor(IProjection projection, StreamProcessor streamProcessor, Action unregister, ILogger logger, CancellationToken cancellationToken)
     {
         _projection = projection;
         _streamProcessor = streamProcessor;
         _unregister = unregister;
+        _logger = logger;
+        _cancellationToken = cancellationToken;
     }
 
+    /// <summary>
+    /// Gets the <see cref="ProjectionDefinition"/> for this projection processor.
+    /// </summary>
     public ProjectionDefinition Definition => _projection.Definition;
 
+    /// <summary>
+    /// Starts the projection processor.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> that represents the asynchronous processing.</returns>
     public async Task Start()
     {
-        await _streamProcessor.Initialize();
-        await _streamProcessor.Start();
+        Task startedProcessor;
+        try
+        {
+            Log.StartingProjection(_logger, Definition.Scope, Definition.Projection);
+            
+            await _streamProcessor.Initialize().ConfigureAwait(false);
+            startedProcessor = _streamProcessor.Start();
+        }
+        catch (Exception exception)
+        {
+            if (_cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            
+            Log.ErrorWhileStartingProjection(_logger, Definition.Scope, Definition.Projection, exception);
+            throw;
+        }
+
+        await startedProcessor.ConfigureAwait(false);
     }
 
     /// <summary>
@@ -40,9 +74,11 @@ public class ProjectionProcessor : IDisposable
     public Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates()
         => _streamProcessor.GetCurrentStates();
 
+    /// <inheritdoc />
     public void Dispose()
     {
-        //TODO: Implement properly
+        _streamProcessor.Dispose();
         _unregister();
+        GC.SuppressFinalize(this);
     }
 }
