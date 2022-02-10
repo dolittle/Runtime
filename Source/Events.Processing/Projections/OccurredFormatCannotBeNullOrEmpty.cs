@@ -14,7 +14,7 @@ public class OccurredFormatCannotBeNullOrEmpty : Exception
     /// Initializes a new instance of the <see cref="OccurredFormatCannotBeNullOrEmpty"/> class.
     /// </summary>
     public OccurredFormatCannotBeNullOrEmpty()
-        : base($"Occurred format cannot be null or empty")
+        : base("Occurred format cannot be null or empty")
     {
     }
 }
