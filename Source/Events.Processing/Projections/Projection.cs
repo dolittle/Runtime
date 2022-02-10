@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 
 public class Projection : IProjection
 {
-    readonly ProjectionDefinition _projectionDefinition;
     readonly IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> _dispatcher;
 
     /// <summary>
@@ -27,9 +26,12 @@ public class Projection : IProjection
         ProjectionDefinition projectionDefinition,
         IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher)
     {
-        _projectionDefinition = projectionDefinition;
+        Definition = projectionDefinition;
         _dispatcher = dispatcher;
     }
+
+    /// <inheritdoc/>
+    public ProjectionDefinition Definition { get; }
 
     /// <inheritdoc/>
     public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
@@ -51,7 +53,7 @@ public class Projection : IProjection
         {
             Event = @event.ToProtobuf(),
             PartitionId = partitionId.Value,
-            ScopeId = _projectionDefinition.Scope.ToProtobuf(),
+            ScopeId = Definition.Scope.ToProtobuf(),
         };
         request.CurrentState = state.ToProtobuf();
 
