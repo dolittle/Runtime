@@ -6,6 +6,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Projections.Store;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -17,15 +18,30 @@ static partial class Log
 {
     [LoggerMessage(0, LogLevel.Debug, "Connecting Projections")]
     internal static partial void ConnectingProjections(ILogger logger);
-    static readonly Action<ILogger, Guid, Guid, Exception> _receivedProjection = LoggerMessage
-        .Define<Guid, Guid>(
-            LogLevel.Trace,
-            new EventId(281764920, nameof(ReceivedProjection)),
-            "Received arguments for projection {Projection} in scope {Scope}");
-    
-    internal static void ReceivedProjection(this ILogger logger, ProjectionRegistrationArguments arguments)
-        => _receivedProjection(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, null);
 
+    [LoggerMessage(0, LogLevel.Warning, "Projection {Projection} in scope {Scope} is already registered")]
+    internal static partial void ProjectionAlreadyRegistered(ILogger logger, ScopeId scope, ProjectionId projection);
+    
+    [LoggerMessage(0, LogLevel.Warning, "Failed to register stream processor for projection {Projection} in scope {Scope} is already registered")]
+    internal static partial void FailedToRegisterProjectionStreamProcessor(ILogger logger, ScopeId scope, ProjectionId projection, Exception exception);
+    
+    [LoggerMessage(0, LogLevel.Information, "Resetting projection {Projection} in scope {Scope} for tenant {Tenant} because: {Reason}" )]
+    internal static partial void ResettingProjection(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant, FailedProjectionDefinitionComparisonReason reason);
+
+    [LoggerMessage(0, LogLevel.Trace, "Received arguments for projection {Projection} in scope {Scope}")]
+    internal static partial void ReceivedProjectionArguments(ILogger logger, ScopeId scope, ProjectionId projection);
+    
+    [LoggerMessage(0, LogLevel.Debug, "Projection {Projection} in scope {Scope} disconnected")]
+    internal static partial void ProjectionDisconnected(ILogger logger, ScopeId scope, ProjectionId projection);
+
+    [LoggerMessage(0, LogLevel.Error, "An error occurred while running projection {Projection} in scope {Scope}")]
+    internal static partial void ErrorWhileRunningProjection(ILogger logger, ScopeId scope, ProjectionId projection, Exception exception);
+    
+    
+    
+    
+    
+    
     static readonly Action<ILogger, Guid, Guid, Exception> _registeringProjection = LoggerMessage
         .Define<Guid, Guid>(
             LogLevel.Debug,
@@ -43,15 +59,6 @@ static partial class Log
     
     internal static void ErrorWhileRegisteringProjection(this ILogger logger, Exception ex, ProjectionRegistrationArguments arguments)
         => _errorWhileRegisteringProjection(logger, arguments.ProjectionDefinition.Projection, ex);
-
-    static readonly Action<ILogger, Guid, Exception> _projectionAlreadyRegistered = LoggerMessage
-        .Define<Guid>(
-            LogLevel.Warning,
-            new EventId(379156563, nameof(ProjectionAlreadyRegistered)),
-            "Failed to register projection {Projection}. It is already registered");
-    
-    internal static void ProjectionAlreadyRegistered(this ILogger logger, ProjectionRegistrationArguments arguments)
-        => _projectionAlreadyRegistered(logger, arguments.ProjectionDefinition.Projection, null);
 
     static readonly Action<ILogger, Guid, Guid, Exception> _startingProjection = LoggerMessage
         .Define<Guid, Guid>(
@@ -98,32 +105,7 @@ static partial class Log
     internal static void PersistingProjectionDefinition(this ILogger logger, ProjectionRegistrationArguments arguments, TenantId tenant)
         => _persistingProjectionDefinition(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, tenant, null);
 
-    static readonly Action<ILogger, Guid, Guid, Guid, string, Exception> _resettingProjections = LoggerMessage
-        .Define<Guid, Guid, Guid, string>(
-            LogLevel.Debug,
-            new EventId(260459678, nameof(ResettingProjections)),
-            "Resetting projection {Projection} in scope {Scope} for tenant {Tenant} because: {Reason}");
-    
-    internal static void ResettingProjections(this ILogger logger, ProjectionRegistrationArguments arguments, TenantId tenant, FailedProjectionDefinitionComparisonReason reason)
-        => _resettingProjections(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, tenant, reason, null);
 
-    static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileRunningProjection = LoggerMessage
-        .Define<Guid, Guid>(
-            LogLevel.Warning,
-            new EventId(320592616, nameof(ErrorWhileRunningProjection)),
-            "An error occurred while running projection {Projection} in scope {Scope}");
-    
-    internal static void ErrorWhileRunningProjection(this ILogger logger, Exception ex, ProjectionRegistrationArguments arguments)
-        => _errorWhileRunningProjection(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, ex);
-
-    static readonly Action<ILogger, Guid, Guid, Exception> _eventHandlerDisconnected = LoggerMessage
-        .Define<Guid, Guid>(
-            LogLevel.Debug,
-            new EventId(397656028, nameof(ProjectionDisconnected)),
-            "Projection {Projection} in scope {Scope} disconnected");
-    
-    internal static void ProjectionDisconnected(this ILogger logger, ProjectionRegistrationArguments arguments)
-        => _eventHandlerDisconnected(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, null);
 
     static readonly Action<ILogger, Guid, Guid, string, Exception> _eventProcessorIsProcessing = LoggerMessage
         .Define<Guid, Guid, string>(

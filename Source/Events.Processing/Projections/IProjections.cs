@@ -32,12 +32,12 @@ public interface IProjections
     Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(ScopeId scopeId, ProjectionId projectionId);
 
     /// <summary>
-    /// Registers and starts a Projection for all tenants.
+    /// Registers a Projection for all tenants.
     /// </summary>
     /// <param name="projection">The <see cref="IProjection"/> to start.</param>
-    /// <param name="cancellationToken">Cancellation token to cancel the processing.</param>
-    /// <returns>A <see cref="Task"/> that represents the asynchronous processing operation.</returns>
-    Task RegisterAndStart(IProjection projection, CancellationToken cancellationToken);
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns a <see cref="Try"/> of the registered <see cref="ProjectionProcessor"/>.</returns>
+    Task<Try<ProjectionProcessor>> Register(IProjection projection, CancellationToken cancellationToken);
 
     /// <summary>
     /// Rebuilds Projection all read models for a specified Projection by dropping the old states and reprocessing all the events for a specific tenant.
