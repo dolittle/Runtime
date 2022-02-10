@@ -72,7 +72,7 @@ public class StreamProcessor : IDisposable
     /// <summary>
     /// Gets all current <see cref="IStreamProcessorState"/> states. 
     /// </summary>
-    /// <returns>The  <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
+    /// <returns>The <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
     public Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates()
         => _initialized
             ? _streamProcessors.ToDictionary(_ => _.Key, _ => _.Value.GetCurrentState())
@@ -81,7 +81,7 @@ public class StreamProcessor : IDisposable
     /// <summary>
     /// Initializes the stream processor.
     /// </summary>
-    /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
+    /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
     public async Task Initialize()
     {
         Log.InitializingStreamProcessor(_logger, _identifier);

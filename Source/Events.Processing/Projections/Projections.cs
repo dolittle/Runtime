@@ -62,12 +62,15 @@ public class Projections : IProjections
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<Projections>();
     }
+
+    /// <inheritdoc />
+    public IEnumerable<ProjectionDefinition> All => _projections.Values.Select(_ => _.Definition);
     
     /// <inheritdoc />
-    public IEnumerable<ProjectionDefinition> All { get; }
-    
-    /// <inheritdoc />
-    public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(ScopeId scopeId, ProjectionId projectionId) => throw new System.NotImplementedException();
+    public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(ScopeId scopeId, ProjectionId projectionId) 
+        => _projections.TryGetValue(new ProjectionIdentifier(scopeId, projectionId), out var processor)
+            ? processor.GetCurrentStates()
+            : new ProjectionNotRegistered(scopeId, projectionId);
 
     /// <inheritdoc />
     public async Task<Try<ProjectionProcessor>> Register(IProjection projection, CancellationToken cancellationToken)

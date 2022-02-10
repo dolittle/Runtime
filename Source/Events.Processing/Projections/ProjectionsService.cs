@@ -89,7 +89,7 @@ public class ProjectionsService : ProjectionsBase
 
         using var processor = registration.Result;
         var reverseCall = dispatcher.Accept(new ProjectionRegistrationResponse(), cts.Token);
-        var processing = processor.Start(cts.Token);
+        var processing = processor.Start();
 
         // TODO: Take this pattern out to a common extension, we use it all over!!
         var tasks = new[] { reverseCall, processing };
@@ -131,32 +131,6 @@ public class ProjectionsService : ProjectionsBase
     //        if (!cancellationToken.IsCancellationRequested)
     //        {
     //            _logger.ErrorWhileStartingProjection(ex, arguments);
-    //        }
-
-    //        return ex;
-    //    }
-    //}
-
-    //Try<StreamProcessor> TryRegisterProjection(
-    //    ProjectionRegistrationArguments arguments,
-    //    FactoryFor<IEventProcessor> getEventProcessor,
-    //    CancellationToken cancellationToken)
-    //{
-    //    _logger.RegisteringProjection(arguments);
-    //    try
-    //    {
-    //        return _streamProcessors.TryCreateAndRegister(
-    //            arguments.ProjectionDefinition.Scope,
-    //            arguments.ProjectionDefinition.Projection.Value,
-    //            new EventLogStreamDefinition(),
-    //            getEventProcessor,
-    //            cancellationToken);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        if (!cancellationToken.IsCancellationRequested)
-    //        {
-    //            _logger.ErrorWhileRegisteringProjection(ex, arguments);
     //        }
 
     //        return ex;
