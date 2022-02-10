@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Projections.Store.Definition;
 /// <summary>
 /// Represents the format used to represent the date time mapping of when events occurred to projections.
 /// </summary>
-/// <param name="Value">The key selector expression as a string.</param>
+/// <param name="Value">The occurred format as a string.</param>
 public record OccurredFormat(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
