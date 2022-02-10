@@ -37,16 +37,7 @@ public class ProjectionKeys : IProjectionKeys
     {
         key = null;
         var eventSelector = projectionDefinition.Events.FirstOrDefault(_ => _.EventType == @event.Type.Id);
-        try
-        {
-            return eventSelector != null && TryGetKey(eventSelector, @event, partition, out key);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to get projection key for key selector type {KeySelectorType}", eventSelector.KeySelectorType);
-            key = null;
-            return false;
-        }
+        return eventSelector != null && TryGetKey(eventSelector, @event, partition, out key);
     }
 
     bool TryGetKey(ProjectionEventSelector eventSelector, CommittedEvent @event, PartitionId partition, out ProjectionKey key)
@@ -56,15 +47,24 @@ public class ProjectionKeys : IProjectionKeys
             || StaticIsKey(eventSelector.KeySelectorType, eventSelector.StaticKey, out key)
             || OccurredIsKey(eventSelector.KeySelectorType, eventSelector.OccurredFormat, @event.Occurred, out key);
 
-    static bool OccurredIsKey(ProjectEventKeySelectorType type, OccurredFormat occurredFormat, DateTimeOffset eventOccurred, out ProjectionKey key)
+    bool OccurredIsKey(ProjectEventKeySelectorType type, OccurredFormat occurredFormat, DateTimeOffset eventOccurred, out ProjectionKey key)
     {
         key = null;
-        if (type != ProjectEventKeySelectorType.Occurred)
+        if (type != ProjectEventKeySelectorType.EventOccurred)
         {
             return false;
         }
-        key = eventOccurred.ToString(occurredFormat, CultureInfo.InvariantCulture);
-        return true;
+        try
+        {
+            key = eventOccurred.ToString(occurredFormat, CultureInfo.InvariantCulture);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get projection key for event occurred key selector type with occurred format {OccurredFormat}", occurredFormat);
+            key = null;
+            return false;
+        }
     }
 
     static bool StaticIsKey(ProjectEventKeySelectorType type, ProjectionKey staticKey, out ProjectionKey key)

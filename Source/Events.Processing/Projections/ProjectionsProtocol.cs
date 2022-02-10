@@ -88,21 +88,40 @@ public class ProjectionsProtocol : IProjectionsProtocol
     /// <inheritdoc/>
     public ConnectArgumentsValidationResult ValidateConnectArguments(ProjectionRegistrationArguments arguments)
     {
-        foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType))
+        if (HasDuplicateEventTypes(arguments.ProjectionDefinition.Events, out var result) || HasInvalidEventOccurredFormats(arguments.ProjectionDefinition.Events, out result))
         {
-            if (eventType.Count() > 1)
-            {
-                return ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
-            }
+            return result;
         }
-        foreach (var (eventType, occurredSelector) in arguments.ProjectionDefinition.Events.Where(_ => _. KeySelectorType == ProjectEventKeySelectorType.Occurred).ToDictionary(_ => _.EventType, _ => _))
+        return ConnectArgumentsValidationResult.Ok;
+    }
+
+    static bool HasDuplicateEventTypes(IEnumerable<RuntimeProjectionEventSelector> events, out ConnectArgumentsValidationResult result)
+    {
+        result = ConnectArgumentsValidationResult.Ok;
+        foreach (var eventType in events.GroupBy(_ => _.EventType))
+        {
+            if (eventType.Count() <= 1)
+            {
+                continue;
+            }
+            result = ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
+            return true;
+        }
+        return false;
+    }
+    
+    bool HasInvalidEventOccurredFormats(IEnumerable<RuntimeProjectionEventSelector> events, out ConnectArgumentsValidationResult result)
+    {
+        result = ConnectArgumentsValidationResult.Ok;
+        foreach (var (eventType, occurredSelector) in events.Where(_ => _. KeySelectorType == ProjectEventKeySelectorType.EventOccurred).ToDictionary(_ => _.EventType, _ => _))
         {
             if (!_occurredFormatValidator.IsValid(occurredSelector.OccurredFormat, out var errorMessage))
             {
-                return ConnectArgumentsValidationResult.Failed($"Event {eventType} has key from event occurred selector with an invalid occurred format {occurredSelector.OccurredFormat}. {errorMessage}");
+                result = ConnectArgumentsValidationResult.Failed($"Event {eventType} has key from event occurred selector with an invalid occurred format {occurredSelector.OccurredFormat}. {errorMessage}");
             }
+            return true;
         }
-        return ConnectArgumentsValidationResult.Ok;
+        return false;
     }
 
     static ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)

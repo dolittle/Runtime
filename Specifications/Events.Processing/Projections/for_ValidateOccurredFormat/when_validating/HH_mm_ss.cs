@@ -7,5 +7,5 @@ public class HH_mm_ss : given.all_dependencies
     Because of = () => is_valid = validator.IsValid("HH:mm:ss", out error);
 
     It should_be_valid = () => is_valid.ShouldBeTrue();
-    It should_not_output_error = () => string.IsNullOrEmpty(error).ShouldBeTrue();
+    It should_not_output_error = () => error.ShouldBeNull();
 }

@@ -10,7 +10,7 @@ public class hh_mm_ss : given.all_dependencies
     Because of = () => is_valid = validator.IsValid("hh:mm:ss", out error);
 
     It should_be_valid = () => is_valid.ShouldBeTrue();
-    It should_not_output_error = () => string.IsNullOrEmpty(error).ShouldBeTrue();
+    It should_not_output_error = () => error.ShouldBeNull();
 }
 
 public class HH_mm : given.all_dependencies
@@ -18,12 +18,12 @@ public class HH_mm : given.all_dependencies
     Because of = () => is_valid = validator.IsValid("HH:mm", out error);
 
     It should_be_valid = () => is_valid.ShouldBeTrue();
-    It should_not_output_error = () => string.IsNullOrEmpty(error).ShouldBeTrue();
+    It should_not_output_error = () => error.ShouldBeNull();
 }
 public class HH : given.all_dependencies
 {
     Because of = () => is_valid = validator.IsValid("HH", out error);
 
     It should_be_valid = () => is_valid.ShouldBeTrue();
-    It should_not_output_error = () => string.IsNullOrEmpty(error).ShouldBeTrue();
+    It should_not_output_error = () => error.ShouldBeNull();
 }

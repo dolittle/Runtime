@@ -43,7 +43,7 @@ public record ProjectionEventSelector
     /// <param name="eventType">The event type.</param>
     /// <param name="occurredFormat">The occurred format.</param>
     /// <returns>The <see cref="ProjectionEventSelector" />.</returns>
-    public static ProjectionEventSelector Occurred(ArtifactId eventType, OccurredFormat occurredFormat) => new(eventType, ProjectEventKeySelectorType.Occurred, "", "", occurredFormat);
+    public static ProjectionEventSelector Occurred(ArtifactId eventType, OccurredFormat occurredFormat) => new(eventType, ProjectEventKeySelectorType.EventOccurred, "", "", occurredFormat);
 
     /// <summary>
     /// Initializes an instance of the <see cref="ProjectionEventSelector" /> class.

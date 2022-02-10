@@ -12,21 +12,22 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// </summary>
 public class ValidateOccurredFormat : IValidateOccurredFormat
 {
-    public bool IsValid(OccurredFormat format, out string errorMessage)
+    public bool IsValid(OccurredFormat format, out Exception error)
     {
         try
         {
+            error = null;
             if (string.IsNullOrEmpty(format))
             {
-                throw new OccurredFormatCannotBeNullOrEmpty();
+                error = new OccurredFormatCannotBeNullOrEmpty();
+                return false;
             }
-            errorMessage = null;
             _ = DateTimeOffset.UtcNow.ToString(format, CultureInfo.InvariantCulture);
             return true;
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            error = ex;
             return false;
         }
     }

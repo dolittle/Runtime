@@ -7,5 +7,5 @@ public class empty_string : given.all_dependencies
     Because of = () => is_valid = validator.IsValid("", out error);
 
     It should_not_be_valid = () => is_valid.ShouldBeFalse();
-    It should_output_error = () => string.IsNullOrEmpty(error).ShouldBeFalse();
+    It should_output_error = () => error.ShouldNotBeNull();
 }
