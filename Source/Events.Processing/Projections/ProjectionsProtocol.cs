@@ -19,6 +19,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// </summary>
 public class ProjectionsProtocol : IProjectionsProtocol
 {
+    readonly IValidateOccurredFormat _occurredFormatValidator;
+
+    public ProjectionsProtocol(IValidateOccurredFormat occurredFormatValidator)
+    {
+        _occurredFormatValidator = occurredFormatValidator;
+    }
     /// <inheritdoc/>
     public ProjectionRegistrationArguments ConvertConnectArguments(ProjectionRegistrationRequest arguments)
         => new(
@@ -87,6 +93,13 @@ public class ProjectionsProtocol : IProjectionsProtocol
             if (eventType.Count() > 1)
             {
                 return ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
+            }
+        }
+        foreach (var (eventType, occurredSelector) in arguments.ProjectionDefinition.Events.Where(_ => _. KeySelectorType == ProjectEventKeySelectorType.Occurred).ToDictionary(_ => _.EventType, _ => _))
+        {
+            if (!_occurredFormatValidator.IsValid(occurredSelector.OccurredFormat, out var errorMessage))
+            {
+                return ConnectArgumentsValidationResult.Failed($"Event {eventType} has key from event occurred selector with an invalid occurred format {occurredSelector.OccurredFormat}. {errorMessage}");
             }
         }
         return ConnectArgumentsValidationResult.Ok;
