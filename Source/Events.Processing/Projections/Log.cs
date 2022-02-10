@@ -37,6 +37,9 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Error, "An error occurred while running projection {Projection} in scope {Scope}")]
     internal static partial void ErrorWhileRunningProjection(ILogger logger, ScopeId scope, ProjectionId projection, Exception exception);
     
+    [LoggerMessage(0, LogLevel.Debug,"Persisting definition of projection {Projection} in scope {Scope} for tenant {Tenant}" )]
+    internal static partial void PersistingProjectionDefinition(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant);
+    
     
     
     
@@ -95,15 +98,6 @@ static partial class Log
     
     internal static void ComparingProjectionDefintion(this ILogger logger, ProjectionRegistrationArguments arguments)
         => _comparingProjectionDefinition(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, null);
-
-    static readonly Action<ILogger, Guid, Guid, Guid, Exception> _persistingProjectionDefinition = LoggerMessage
-        .Define<Guid, Guid, Guid>(
-            LogLevel.Debug,
-            new EventId(802598225, nameof(PersistingProjectionDefinition)),
-            "Persisting definition of projection {Projection} in scope {Scope} for tenant {Tenant}");
-    
-    internal static void PersistingProjectionDefinition(this ILogger logger, ProjectionRegistrationArguments arguments, TenantId tenant)
-        => _persistingProjectionDefinition(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, tenant, null);
 
 
 

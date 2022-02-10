@@ -162,47 +162,4 @@ public class ProjectionsService : ProjectionsBase
     //        return ex;
     //    }
     //}
-    //async Task ResetIfDefinitionChanged(ProjectionRegistrationArguments arguments, CancellationToken token)
-    //{
-    //    _logger.ComparingProjectionDefintion(arguments);
-    //    var tenantsAndComparisonResult = await _projectionDefinitionComparer.DiffersFromPersisted(arguments.ProjectionDefinition, token).ConfigureAwait(false);
-
-    //    await _onAllTenants.PerformAsync(async tenant =>
-    //    {
-    //        var comparisonResult = tenantsAndComparisonResult[tenant];
-
-    //        if (!comparisonResult.Succeeded)
-    //        {
-    //            _logger.ResettingProjections(arguments, tenant, comparisonResult.FailureReason);
-
-    //            var persistedDefinition = await _getProjectionDefinitions()
-    //                .TryGet(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token)
-    //                .ConfigureAwait(false);
-    //            if (!persistedDefinition.Success)
-    //            {
-    //                throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
-    //            }
-
-    //            await ResetStreamProcessorState(persistedDefinition, token).ConfigureAwait(false);
-
-    //            if (!await _getProjectionPersister().TryDrop(persistedDefinition, token).ConfigureAwait(false))
-    //            {
-    //                throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
-    //            }
-    //        }
-
-    //        _logger.PersistingProjectionDefinition(arguments, tenant);
-    //        if (!await _getProjectionDefinitions().TryPersist(arguments.ProjectionDefinition, token).ConfigureAwait(false))
-    //        {
-    //            throw new CouldNotPersistProjectionDefinition(arguments.ProjectionDefinition, tenant);
-    //        }
-    //    }).ConfigureAwait(false);
-    //}
-
-    //Task ResetStreamProcessorState(ProjectionDefinition projection, CancellationToken token)
-    //{
-    //    var processorId = new StreamProcessorId(projection.Scope, new EventProcessorId(projection.Projection), StreamId.EventLog);
-    //    var processorState = StreamProcessorState.New;
-    //    return _getStreamProcessorStates().Persist(processorId, processorState, token);
-    //}
 }
