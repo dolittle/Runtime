@@ -82,6 +82,8 @@ public class Projections : IProjections
             return new ProjectionAlreadyRegistered(identifier.Scope, identifier.Projection);
         }
         
+        Log.RegisteringStreamProcessorForProjection(_logger, identifier.Scope, identifier.Projection);
+        
         var registration = _streamProcessors.TryCreateAndRegister(
             projection.Definition.Scope,
             projection.Definition.Projection.Value,
@@ -153,6 +155,7 @@ public class Projections : IProjections
     {
         var tenantsToResetFor = new List<TenantId>();
         
+        Log.ComparingProjectionDefiniton(_logger, identifier.Scope, identifier.Projection);
         var tenantComparisonResults = await _projectionDefinitionComparer.DiffersFromPersisted(definition, cancellationToken).ConfigureAwait(false);
         foreach (var (tenant, result) in tenantComparisonResults)
         {

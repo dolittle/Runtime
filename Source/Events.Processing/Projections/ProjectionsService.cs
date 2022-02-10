@@ -78,6 +78,7 @@ public class ProjectionsService : ProjectionsBase
 
         if (!registration.Success)
         {
+            Log.ErrorWhileRegisteringProjection(_logger, projectionDefinition.Scope, projectionDefinition.Projection, registration.Exception);
             await dispatcher.Reject(new ProjectionRegistrationResponse
             {
                 Failure = new Failure(
