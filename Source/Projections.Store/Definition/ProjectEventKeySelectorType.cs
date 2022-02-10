@@ -31,5 +31,5 @@ public enum ProjectEventKeySelectorType : ushort
     /// <summary>
     /// The type when the date time is the key.
     /// </summary>
-    Occurred
+    EventOccurred
 }
