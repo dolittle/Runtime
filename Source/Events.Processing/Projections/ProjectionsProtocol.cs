@@ -31,6 +31,8 @@ public class ProjectionsProtocol : IProjectionsProtocol
                     Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => RuntimeProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
                     Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => RuntimeProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
                     Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
+                    Contracts.ProjectionEventSelector.SelectorOneofCase.StaticKeySelector => RuntimeProjectionEventSelector.Static(eventSelector.EventType.Id.ToGuid(), eventSelector.StaticKeySelector.StaticKey),
+                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventOccurredKeySelector => RuntimeProjectionEventSelector.Occurred(eventSelector.EventType.Id.ToGuid(), eventSelector.EventOccurredKeySelector.Format),
                     _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
                 }),
                 arguments.InitialState,

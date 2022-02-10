@@ -28,4 +28,14 @@ public class ProjectionEventSelector
     /// Gets or sets the event type id that this definition filters on.
     /// </summary>
     public Guid EventType { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the static key that this definition filters on.
+    /// </summary>
+    public string StaticKey { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the occurred format string that this definition filters on.
+    /// </summary>
+    public string OccurredFormat { get; set; }
 }

@@ -21,5 +21,15 @@ public enum ProjectEventKeySelectorType : ushort
     /// <summary>
     /// The type when a specific property on the event is the key.
     /// </summary>
-    Property
+    Property,
+        
+    /// <summary>
+    /// The type when a constant, static, string is the key.
+    /// </summary>
+    Static,
+    
+    /// <summary>
+    /// The type when the date time is the key.
+    /// </summary>
+    Occurred
 }
