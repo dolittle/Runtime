@@ -20,6 +20,7 @@
     <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
     <PackageReference Include="Grpc" Version="$(GrpcVersion)" />
+    <PackageReference Include="Grpc.Reflection" Version="$(GrpcVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
   </ItemGroup>
 </Project>
