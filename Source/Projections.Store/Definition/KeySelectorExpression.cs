@@ -9,7 +9,6 @@ namespace Dolittle.Runtime.Projections.Store.Definition;
 /// Represents the projection key selector expression used to point to a property as the key.
 /// </summary>
 /// <param name="Value">The key selector expression as a string.</param>
-/// <typeparam name="string">The type of the concept.</typeparam>
 public record KeySelectorExpression(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
