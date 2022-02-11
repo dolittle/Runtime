@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Machine.Specifications;
-using Moq;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions.given;
 
