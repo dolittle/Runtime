@@ -27,11 +27,6 @@ public class VerifyContractsCompatibility : IVerifyContractsCompatibility
         {
             return ContractsCompatibility.RuntimeTooOld;
         }
-        
-        if (headContractsVersion.Minor < runtimeContractsVersion.Minor)
-        {
-            return ContractsCompatibility.ClientTooOld;
-        }
 
         return ContractsCompatibility.Compatible;
     }
