@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
@@ -21,21 +22,16 @@ public class ProjectionsProtocol : IProjectionsProtocol
 {
     /// <inheritdoc/>
     public ProjectionRegistrationArguments ConvertConnectArguments(ProjectionRegistrationRequest arguments)
-        => new(
-            arguments.CallContext.ExecutionContext.ToExecutionContext(),
-            new ProjectionDefinition(
-                arguments.ProjectionId.ToGuid(),
-                arguments.ScopeId.ToGuid(),
-                arguments.Events.Select(eventSelector => eventSelector.SelectorCase switch
-                {
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => RuntimeProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => RuntimeProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
-                    _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
-                }),
-                arguments.InitialState,
-                ConvertCopySpecification(arguments.Copies)
-            ));
+        => arguments.HasAlias switch
+        {
+            true => new ProjectionRegistrationArguments(
+                arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                ConvertProjectionDefinition(arguments),
+                arguments.Alias),
+            false => new ProjectionRegistrationArguments(
+                arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                ConvertProjectionDefinition(arguments)),
+        };
 
     /// <inheritdoc/>
     public ProjectionRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
@@ -89,6 +85,21 @@ public class ProjectionsProtocol : IProjectionsProtocol
         }
         return ConnectArgumentsValidationResult.Ok;
     }
+
+    static ProjectionDefinition ConvertProjectionDefinition(ProjectionRegistrationRequest arguments)
+        => new(
+            arguments.ProjectionId.ToGuid(),
+            arguments.ScopeId.ToGuid(),
+            arguments.Events.Select(eventSelector => eventSelector.SelectorCase switch
+            {
+                Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => RuntimeProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
+                Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => RuntimeProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
+                Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
+                _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
+            }),
+            arguments.InitialState,
+            ConvertCopySpecification(arguments.Copies)
+        );
 
     static ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)
     {

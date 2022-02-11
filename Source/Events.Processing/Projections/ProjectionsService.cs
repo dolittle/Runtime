@@ -66,19 +66,21 @@ public class ProjectionsService : ProjectionsBase
         {
             return;
         }
+        var (dispatcher, arguments) = tryConnect.Result;
+        var executionContext = arguments.ExecutionContext;
+        var definition = arguments.ProjectionDefinition;
         
-        var (dispatcher, (executionContext, projectionDefinition)) = tryConnect.Result;
-        Log.ReceivedProjectionArguments(_logger, projectionDefinition.Scope, projectionDefinition.Projection);
+        Log.ReceivedProjectionArguments(_logger, definition.Scope, definition.Projection);
         _logger.SettingExecutionContext(executionContext);
         _executionContextManager.CurrentFor(executionContext);
 
         
-        var projection = new Projection(projectionDefinition, dispatcher);
+        var projection = new Projection(dispatcher, definition, arguments.Alias, arguments.HasAlias);
         var registration = await _projections.Register(projection, cts.Token);
 
         if (!registration.Success)
         {
-            Log.ErrorWhileRegisteringProjection(_logger, projectionDefinition.Scope, projectionDefinition.Projection, registration.Exception);
+            Log.ErrorWhileRegisteringProjection(_logger, definition.Scope, definition.Projection, registration.Exception);
             await dispatcher.Reject(new ProjectionRegistrationResponse
             {
                 Failure = new Failure(

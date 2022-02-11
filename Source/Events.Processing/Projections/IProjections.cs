@@ -8,7 +8,6 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
-using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -19,9 +18,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 public interface IProjections
 {
     /// <summary>
-    /// Gets the definitions for all currently registered Projections.
+    /// Gets the information for all currently registered Projections.
     /// </summary>
-    IEnumerable<ProjectionDefinition> All { get; }
+    IEnumerable<ProjectionInfo> All { get; }
 
     /// <summary>
     /// Gets the current state of a Projection for all tenants.

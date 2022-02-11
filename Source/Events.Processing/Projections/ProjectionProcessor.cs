@@ -40,6 +40,14 @@ public class ProjectionProcessor : IDisposable
     public ProjectionDefinition Definition => _projection.Definition;
 
     /// <summary>
+    /// Gets the <see cref="ProjectionInfo"/> for this projection processor.
+    /// </summary>
+    public ProjectionInfo Info => new(
+        _projection.Definition,
+        _projection.HasAlias,
+        _projection.Alias);
+
+    /// <summary>
     /// Starts the projection processor.
     /// </summary>
     /// <returns>A <see cref="Task"/> that represents the asynchronous processing.</returns>

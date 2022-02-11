@@ -9,9 +9,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
-using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -20,12 +18,21 @@ using Artifact = Dolittle.Artifacts.Contracts.Artifact;
 
 namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
 
+/// <summary>
+/// Represents an implementation of <see cref="EventHandlersBase"/>.
+/// </summary>
 public class EventHandlersService : EventHandlersBase
 {
     readonly IEventHandlers _eventHandlers;
     readonly IExceptionToFailureConverter _exceptionToFailureConverter;
     readonly ILogger _logger;
         
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
+    /// </summary>
+    /// <param name="eventHandlers">The <see cref="IEventHandlers"/> to use to perform operations on Event Handlers.</param>
+    /// <param name="exceptionToFailureConverter">The <see cref="IExceptionToFailureConverter"/> to use to convert exceptions to failures.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public EventHandlersService(
         IEventHandlers eventHandlers,
         IExceptionToFailureConverter exceptionToFailureConverter,

@@ -12,6 +12,7 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
@@ -25,6 +26,7 @@ record ProjectionIdentifier(ScopeId Scope, ProjectionId Projection);
 /// <summary>
 /// Represents an implementation of <see cref="IProjections"/>.
 /// </summary>
+[Singleton]
 public class Projections : IProjections
 {
     readonly ConcurrentDictionary<ProjectionIdentifier, ProjectionProcessor> _projections = new();
@@ -64,7 +66,7 @@ public class Projections : IProjections
     }
 
     /// <inheritdoc />
-    public IEnumerable<ProjectionDefinition> All => _projections.Values.Select(_ => _.Definition);
+    public IEnumerable<ProjectionInfo> All => _projections.Values.Select(_ => _.Info);
     
     /// <inheritdoc />
     public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(ScopeId scopeId, ProjectionId projectionId) 
