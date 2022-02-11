@@ -64,6 +64,27 @@ public class ProjectionsService : ProjectionsBase
         return Task.FromResult(response);
     }
 
+    /// <inheritdoc />
+    public override async Task<ReplayProjectionResponse> Replay(ReplayProjectionRequest request, ServerCallContext context)
+    {
+        var result = request.TenantId == null
+            ? await _projections.ReplayEventsForAllTenants(request.ScopeId.ToGuid(), request.ProjectionId.ToGuid()).ConfigureAwait(false)
+            : await _projections.ReplayEventsForTenant(request.ScopeId.ToGuid(), request.ProjectionId.ToGuid(), request.TenantId.ToGuid()).ConfigureAwait(false);
+
+        var response = new ReplayProjectionResponse();
+        if (!result.Success)
+        {
+            response.Failure = new Failure
+            {
+                Id = FailureId.Other.ToProtobuf(),
+                Reason = result.Exception.Message,
+            };
+        }
+
+        return response;
+    }
+
+
     ProjectionStatus CreateStatusFromInfo(ProjectionInfo info, TenantId tenant = null)
     {
         var status = new ProjectionStatus

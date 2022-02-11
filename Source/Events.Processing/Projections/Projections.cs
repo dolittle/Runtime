@@ -129,10 +129,35 @@ public class Projections : IProjections
     }
 
     /// <inheritdoc />
-    public Task<Try> ReplayEventsForTenant(ScopeId scopeId, ProjectionId projectionId, TenantId tenantId) => throw new System.NotImplementedException();
+    public Task<Try> ReplayEventsForTenant(ScopeId scopeId, ProjectionId projectionId, TenantId tenantId)
+    {
+        if (!_projections.TryGetValue(new ProjectionIdentifier(scopeId, projectionId), out var processor))
+        {
+            return Task.FromResult(Try.Failed(new ProjectionNotRegistered(scopeId, projectionId)));
+        }
+
+        return processor.ReplayEventsForTenant(tenantId, DropStateForTenantCallback(processor));
+    }
 
     /// <inheritdoc />
-    public Task<Try> ReplayEventsForAllTenants(ScopeId scopeId, ProjectionId projectionId) => throw new System.NotImplementedException();
+    public async Task<Try> ReplayEventsForAllTenants(ScopeId scopeId, ProjectionId projectionId)
+    {
+        if (!_projections.TryGetValue(new ProjectionIdentifier(scopeId, projectionId), out var processor))
+        {
+            return new ProjectionNotRegistered(scopeId, projectionId);
+        }
+
+        var results = await processor.ReplayEventsForAllTenants(DropStateForTenantCallback(processor)).ConfigureAwait(false);
+        foreach (var (_, result) in results)
+        {
+            if (!result.Success)
+            {
+                return result;
+            }
+        }
+        
+        return Try.Succeeded();
+    }
 
     async Task<Try> ResetProjectionIfDefinitionHasChanged(ProjectionIdentifier identifier, ProjectionDefinition definition, CancellationToken cancellationToken)
     {
@@ -218,4 +243,7 @@ public class Projections : IProjections
             }
             return Try.Succeeded();
         });
+
+    Func<TenantId, CancellationToken, Task<Try>> DropStateForTenantCallback(ProjectionProcessor processor)
+        => (tenant, cancellationToken) => DropStatesAndResetStreamProcessorsFor(new []{ tenant }, processor.Definition, cancellationToken);
 }
