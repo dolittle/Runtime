@@ -14,10 +14,12 @@ namespace Dolittle.Runtime.Events.Processing.Management.Projections;
 public class ProjectionsService : ProjectionsBase
 {
     readonly IProjections _projections;
+    readonly IConvertProjectionDefinitions _definitionConverter;
 
-    public ProjectionsService(IProjections projections)
+    public ProjectionsService(IProjections projections, IConvertProjectionDefinitions definitionConverter)
     {
         _projections = projections;
+        _definitionConverter = definitionConverter;
     }
 
     /// <inheritdoc />
@@ -33,12 +35,13 @@ public class ProjectionsService : ProjectionsBase
         var status = new ProjectionStatus
         {
             Alias = info.Alias,
-            // Copies
-            // Others
+            Copies = _definitionConverter.ToContractsCopySpecification(info.Definition.Copies),
             InitialState = info.Definition.InitialState,
             ScopeId = info.Definition.Scope.ToProtobuf(),
             ProjectionId = info.Definition.Projection.ToProtobuf(),
         };
+        status.Events.AddRange(_definitionConverter.ToContractsEventSelectors(info.Definition.Events));
+        // Tenants
 
         return status;
     }
