@@ -94,23 +94,11 @@ public class ProjectionsService : ProjectionsBase
         var reverseCall = dispatcher.Accept(new ProjectionRegistrationResponse(), cts.Token);
         var processing = processor.Start();
 
-        // TODO: Take this pattern out to a common extension, we use it all over!!
-        var tasks = new[] { reverseCall, processing };
-        try
-        {
-            await Task.WhenAny(tasks).ConfigureAwait(false);
-
-            if (tasks.TryGetFirstInnerMostException(out var ex))
-            {
-                Log.ErrorWhileRunningProjection(_logger, projection.Definition.Scope, projection.Definition.Projection, ex);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-            }
-        }
-        finally
-        {
-            cts.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            Log.ProjectionDisconnected(_logger, projection.Definition.Scope, projection.Definition.Projection);
-        }
+        var tasks = new TaskGroup(new[] {reverseCall, processing});
+        
+        tasks.OnFirstTaskFailure += (_, ex) => Log.ErrorWhileRunningProjection(_logger, projection.Definition.Scope, projection.Definition.Projection, ex);
+        tasks.OnAllTasksCompleted += () => Log.ProjectionDisconnected(_logger, projection.Definition.Scope, projection.Definition.Projection);
+        
+        await tasks.WaitForAllCancellingOnFirst(cts).ConfigureAwait(false);
     }
 }

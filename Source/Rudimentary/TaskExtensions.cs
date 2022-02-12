@@ -22,11 +22,12 @@ public static class TaskExtension
     public static bool TryGetFirstInnerMostException(this IEnumerable<Task> tasks, out Exception exception)
     {
         exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
-        if (exception != default)
+        if (exception == default)
         {
-            while (exception.InnerException != null) exception = exception.InnerException;
+            return false;
         }
 
-        return exception != default;
+        exception = exception.GetInnerMostException();
+        return true;
     }
 }
