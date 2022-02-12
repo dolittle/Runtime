@@ -95,9 +95,21 @@ public class ManagementClient : IManagementClient
 
     public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
     {
-        var statuses = await GetAll(runtime, tenant).ConfigureAwait(false);
-        var result = statuses.FirstOrDefault(_ => _.Id.Equals(eventHandler));
-        return result == default ? new NoEventHandlerWithId(eventHandler) : result;
+        var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
+        var request = new GetOneRequest
+        {
+            EventHandlerId = eventHandler.EventHandler.ToProtobuf(),
+            ScopeId = eventHandler.Scope.ToProtobuf(),
+            TenantId = tenant?.ToProtobuf()
+        };
+
+        var response = await client.GetOneAsync(request);
+        if (response.Failure != null)
+        {
+            throw new GetOneEventHandlerFailed(eventHandler, response.Failure.Reason);
+        }
+
+        return CreateEventHandlerStatus(response.EventHandlers);
     }
 
     EventHandlerStatus CreateEventHandlerStatus(ManagementContracts.EventHandlerStatus status)
