@@ -15,27 +15,42 @@ using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.Projections;
 
 namespace Dolittle.Runtime.Events.Processing.Management.Projections;
 
+/// <summary>
+/// Represents an implementation of <see cref="ProjectionsBase"/>.
+/// </summary>
 public class ProjectionsService : ProjectionsBase
 {
     readonly IProjections _projections;
     readonly IExceptionToFailureConverter _exceptionToFailureConverter;
     readonly IConvertProjectionDefinitions _definitionConverter;
     readonly IConvertStreamProcessorStatuses _streamProcessorStatusConverter;
+    readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProjectionsService"/> class.
+    /// </summary>
+    /// <param name="projections">The <see cref="IProjections"/> to use to perform operations on Projections.</param>
+    /// <param name="exceptionToFailureConverter">The <see cref="IExceptionToFailureConverter"/> to use to convert exceptions to failures.</param>
+    /// <param name="definitionConverter">The <see cref="IConvertProjectionDefinitions"/> to use to convert projection definition fields.</param>
+    /// <param name="streamProcessorStatusConverter">The <see cref="IConvertStreamProcessorStatuses"/> to use to convert stream processor states.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public ProjectionsService(
         IProjections projections,
         IExceptionToFailureConverter exceptionToFailureConverter,
         IConvertProjectionDefinitions definitionConverter,
-        IConvertStreamProcessorStatuses streamProcessorStatusConverter)
+        IConvertStreamProcessorStatuses streamProcessorStatusConverter,
+        ILogger logger)
     {
         _projections = projections;
         _exceptionToFailureConverter = exceptionToFailureConverter;
         _definitionConverter = definitionConverter;
         _streamProcessorStatusConverter = streamProcessorStatusConverter;
+        _logger = logger;
     }
 
     /// <inheritdoc />
