@@ -13,7 +13,6 @@ using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Protobuf;
 using System.Threading;
 using Dolittle.Runtime.Rudimentary;
-using System.Runtime.ExceptionServices;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
@@ -123,22 +122,10 @@ public class EmbeddingsService : EmbeddingsBase
                 new Embedding(arguments.Definition.Embedding, dispatcher, _embeddingRequestFactory, _loggerFactory.CreateLogger<Embedding>()),
                 arguments.Definition.InititalState),
             cts.Token);
-        var tasks = new[] { dispatcherTask, processorTask };
 
-        try
-        {
-            await Task.WhenAny(tasks).ConfigureAwait(false);
 
-            if (tasks.TryGetFirstInnerMostException(out var ex))
-            {
-                ExceptionDispatchInfo.Capture(ex).Throw();
-            }
-        }
-        finally
-        {
-            cts.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-        }
+        var tasks = new TaskGroup(dispatcherTask, processorTask);
+        await tasks.WaitForAllCancellingOnFirst(cts).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

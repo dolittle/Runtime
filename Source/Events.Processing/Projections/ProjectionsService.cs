@@ -94,7 +94,7 @@ public class ProjectionsService : ProjectionsBase
         var reverseCall = dispatcher.Accept(new ProjectionRegistrationResponse(), cts.Token);
         var processing = processor.Start();
 
-        var tasks = new TaskGroup(new[] {reverseCall, processing});
+        var tasks = new TaskGroup(reverseCall, processing);
         
         tasks.OnFirstTaskFailure += (_, ex) => Log.ErrorWhileRunningProjection(_logger, projection.Definition.Scope, projection.Definition.Projection, ex);
         tasks.OnAllTasksCompleted += () => Log.ProjectionDisconnected(_logger, projection.Definition.Scope, projection.Definition.Projection);

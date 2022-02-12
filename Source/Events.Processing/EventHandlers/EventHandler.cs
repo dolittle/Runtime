@@ -332,24 +332,12 @@ public class EventHandler : IDisposable
             await EventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
             await ValidateFilter().ConfigureAwait(false);
 
-            var tasks = new[] { FilterStreamProcessor.Start(), EventProcessorStreamProcessor.Start(), runningDispatcher };
+            var tasks = new TaskGroup(FilterStreamProcessor.Start(), EventProcessorStreamProcessor.Start(), runningDispatcher);
+            
+            tasks.OnFirstTaskFailure += (_, ex) => _logger.ErrorWhileRunningEventHandler(ex, EventProcessor, Scope);
+            tasks.OnAllTasksCompleted += () => _logger.EventHandlerDisconnected(EventProcessor, Scope);
 
-            try
-            {
-                await Task.WhenAny(tasks).ConfigureAwait(false);
-
-                if (tasks.TryGetFirstInnerMostException(out var ex))
-                {
-                    _logger.ErrorWhileRunningEventHandler(ex, EventProcessor, Scope);
-                    ExceptionDispatchInfo.Capture(ex).Throw();
-                }
-            }
-            finally
-            {
-                _cancellationTokenSource.Cancel();
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-                _logger.EventHandlerDisconnected(EventProcessor, Scope);
-            }
+            await tasks.WaitForAllCancellingOnFirst(_cancellationTokenSource).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
