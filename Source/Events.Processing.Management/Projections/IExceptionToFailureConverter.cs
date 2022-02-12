@@ -4,10 +4,10 @@
 using System;
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
+namespace Dolittle.Runtime.Events.Processing.Management.Projections;
 
 /// <summary>
-/// Defines a system that can convert Event Handler Management exceptions to a failures.
+/// Defines a system that can convert Projection Management exceptions to a failures.
 /// </summary>
 public interface IExceptionToFailureConverter
 {

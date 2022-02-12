@@ -6,7 +6,7 @@ using Dolittle.Runtime.Protobuf;
 namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
 
 /// <summary>
-/// Holds the unique <see cref="FailureId"> failure ids </see> unique to the Event Handlers.
+/// Holds the unique <see cref="FailureId"> failure ids </see> for Event Handlers.
 /// </summary>
 public static class EventHandlersFailures
 {

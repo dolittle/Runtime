@@ -78,8 +78,9 @@ public class TaskGroup
             }
             catch
             {
+                // The first exception will be thrown later if any, other exceptions will be reported through the events
             }
-            
+
             OnAllTasksCompleted?.Invoke();
             InvokeOtherTaskFailures(firstFailure);
 

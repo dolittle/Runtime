@@ -1,39 +1,62 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
 using Dolittle.Runtime.Events.Processing.Projections;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.Projections;
-using Failure = Dolittle.Protobuf.Contracts.Failure;
 
 namespace Dolittle.Runtime.Events.Processing.Management.Projections;
 
+/// <summary>
+/// Represents an implementation of <see cref="ProjectionsBase"/>.
+/// </summary>
 public class ProjectionsService : ProjectionsBase
 {
     readonly IProjections _projections;
+    readonly IExceptionToFailureConverter _exceptionToFailureConverter;
     readonly IConvertProjectionDefinitions _definitionConverter;
     readonly IConvertStreamProcessorStatuses _streamProcessorStatusConverter;
+    readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProjectionsService"/> class.
+    /// </summary>
+    /// <param name="projections">The <see cref="IProjections"/> to use to perform operations on Projections.</param>
+    /// <param name="exceptionToFailureConverter">The <see cref="IExceptionToFailureConverter"/> to use to convert exceptions to failures.</param>
+    /// <param name="definitionConverter">The <see cref="IConvertProjectionDefinitions"/> to use to convert projection definition fields.</param>
+    /// <param name="streamProcessorStatusConverter">The <see cref="IConvertStreamProcessorStatuses"/> to use to convert stream processor states.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public ProjectionsService(
         IProjections projections,
+        IExceptionToFailureConverter exceptionToFailureConverter,
         IConvertProjectionDefinitions definitionConverter,
-        IConvertStreamProcessorStatuses streamProcessorStatusConverter)
+        IConvertStreamProcessorStatuses streamProcessorStatusConverter,
+        ILogger logger)
     {
         _projections = projections;
+        _exceptionToFailureConverter = exceptionToFailureConverter;
         _definitionConverter = definitionConverter;
         _streamProcessorStatusConverter = streamProcessorStatusConverter;
+        _logger = logger;
     }
 
     /// <inheritdoc />
     public override Task<GetAllProjectionsResponse> GetAll(GetAllProjectionsRequest request, ServerCallContext context)
     {
+        Log.GetAll(_logger);
         var response = new GetAllProjectionsResponse();
         response.Projections.AddRange(_projections.All.Select(_ => CreateStatusFromInfo(_, request.TenantId?.ToGuid())));
         return Task.FromResult(response);
@@ -42,48 +65,55 @@ public class ProjectionsService : ProjectionsBase
     /// <inheritdoc />
     public override Task<GetOneProjectionResponse> GetOne(GetOneProjectionRequest request, ServerCallContext context)
     {
-        var info = _projections.All.FirstOrDefault(projection =>
-            projection.Definition.Scope.Value == request.ScopeId.ToGuid() &&
-            projection.Definition.Projection.Value == request.ProjectionId.ToGuid());
-
         var response = new GetOneProjectionResponse();
         
+        var getIds = GetScopeAndProjectionIds(request.ScopeId, request.ProjectionId, out var scope, out var projection);
+        if (!getIds.Success)
+        {
+            response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
+            return Task.FromResult(response);
+        }
+        
+        Log.GetOne(_logger, projection, scope);
+
+        var info = _projections.All.FirstOrDefault(_ => _.Definition.Scope == scope && _.Definition.Projection == projection);
         if (info == default)
         {
-            response.Failure = new Failure
-            {
-                Id = FailureId.Other.ToProtobuf(),
-                Reason = $"Projection {request.ProjectionId.ToGuid()} in scope {request.ScopeId.ToGuid()} is not registered",
-            };
+            Log.ProjectionNotRegistered(_logger, projection, scope);
+            response.Failure = _exceptionToFailureConverter.ToFailure(new ProjectionNotRegistered(scope, projection));
+            return Task.FromResult(response);
         }
-        else
-        {
-            response.Projection = CreateStatusFromInfo(info, request.TenantId?.ToGuid());
-        }
-
+        
+        response.Projection = CreateStatusFromInfo(info, request.TenantId?.ToGuid());
         return Task.FromResult(response);
     }
 
     /// <inheritdoc />
     public override async Task<ReplayProjectionResponse> Replay(ReplayProjectionRequest request, ServerCallContext context)
     {
-        var result = request.TenantId == null
-            ? await _projections.ReplayEventsForAllTenants(request.ScopeId.ToGuid(), request.ProjectionId.ToGuid()).ConfigureAwait(false)
-            : await _projections.ReplayEventsForTenant(request.ScopeId.ToGuid(), request.ProjectionId.ToGuid(), request.TenantId.ToGuid()).ConfigureAwait(false);
-
         var response = new ReplayProjectionResponse();
+        
+        var getIds = GetScopeAndProjectionIds(request.ScopeId, request.ProjectionId, out var scope, out var projection);
+        if (!getIds.Success)
+        {
+            response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
+            return response;
+        }
+        
+        Log.Replay(_logger, projection, scope);
+        
+        var result = request.TenantId == null
+            ? await _projections.ReplayEventsForAllTenants(scope, projection).ConfigureAwait(false)
+            : await _projections.ReplayEventsForTenant(scope, projection, request.TenantId.ToGuid()).ConfigureAwait(false);
+
         if (!result.Success)
         {
-            response.Failure = new Failure
-            {
-                Id = FailureId.Other.ToProtobuf(),
-                Reason = result.Exception.Message,
-            };
+            Log.FailedToReplayProjection(_logger, projection, scope, result.Exception);
+            response.Failure = _exceptionToFailureConverter.ToFailure(result.Exception);
         }
 
         return response;
     }
-
 
     ProjectionStatus CreateStatusFromInfo(ProjectionInfo info, TenantId tenant = null)
     {
@@ -108,8 +138,33 @@ public class ProjectionsService : ProjectionsBase
             throw state.Exception;
         }
 
-        return tenant == null
-            ? _streamProcessorStatusConverter.Convert(state.Result)
-            : _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
+        if (tenant == null)
+        {
+            Log.CreatingProjectionStatusForAllTenants(_logger, info.Definition.Projection, info.Definition.Scope);
+            return _streamProcessorStatusConverter.Convert(state.Result);
+        }
+        
+        Log.CreatingProjectionStatusForTenant(_logger, info.Definition.Projection, info.Definition.Scope, tenant);
+        return _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
+    }
+
+    static Try GetScopeAndProjectionIds(Uuid scope, Uuid projection, out ScopeId scopeId, out ProjectionId projectionId)
+    {
+        scopeId = default;
+        projectionId = default;
+        
+        if (scope == default)
+        {
+            return Try.Failed(new ArgumentNullException(nameof(scope), "Scope id is missing in request"));
+        }
+        if (projection == default)
+        {
+            return Try.Failed(new ArgumentNullException(nameof(projection), "Projection id is missing in request"));
+        }
+        
+        scopeId = scope.ToGuid();
+        projectionId = projection.ToGuid();
+
+        return Try.Succeeded();
     }
 }

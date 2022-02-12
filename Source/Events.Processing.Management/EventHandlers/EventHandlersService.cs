@@ -1,15 +1,18 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
@@ -47,15 +50,60 @@ public class EventHandlersService : EventHandlersBase
     }
 
     /// <inheritdoc />
+    public override Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
+    {
+        Log.GetAll(_logger);
+        var response = new GetAllResponse();
+        response.EventHandlers.AddRange(_eventHandlers.All.Select(_ => CreateStatusFromInfo(_, request.TenantId?.ToGuid())));
+        return Task.FromResult(response);
+    }
+
+    /// <inheritdoc />
+    public override Task<GetOneResponse> GetOne(GetOneRequest request, ServerCallContext context)
+    {
+        var response = new GetOneResponse();
+
+        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId, out var eventHandler);
+        if (!getIds.Success)
+        {
+            response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
+            return Task.FromResult(response);
+        }
+        
+        Log.GetOne(_logger, eventHandler.EventHandler, eventHandler.Scope);
+
+        var info = _eventHandlers.All.FirstOrDefault(_ => _.Id == eventHandler);
+        if (info == default)
+        {
+            Log.EventHandlerNotRegistered(_logger, eventHandler.EventHandler, eventHandler.Scope);
+            response.Failure = _exceptionToFailureConverter.ToFailure(new EventHandlerNotRegistered(eventHandler));
+            return Task.FromResult(response);
+        }
+
+        response.EventHandlers = CreateStatusFromInfo(info, request.TenantId?.ToGuid());
+        return Task.FromResult(response);
+    }
+    
+    
+    /// <inheritdoc />
     public override async Task<ReprocessEventsFromResponse> ReprocessEventsFrom(ReprocessEventsFromRequest request, ServerCallContext context)
     {
         var response = new ReprocessEventsFromResponse();
-        var eventHandler = new EventHandlerId(request.ScopeId.ToGuid(), request.EventHandlerId.ToGuid());
+
+        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId, out var eventHandler);
+        if (!getIds.Success)
+        {
+            response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
+            return response;
+        }
+        
         TenantId tenant = request.TenantId.ToGuid(); 
-        _logger.ReprocessEventsFrom(eventHandler, tenant, request.StreamPosition);
+        Log.ReprocessEventsFrom(_logger, eventHandler.EventHandler, eventHandler.Scope, tenant, request.StreamPosition);
+        
         var reprocessing = await _eventHandlers.ReprocessEventsFrom(eventHandler, tenant, request.StreamPosition).ConfigureAwait(false);
         if (!reprocessing.Success)
         {
+            Log.FailedDuringReprocessing(_logger, reprocessing.Exception);
             response.Failure = _exceptionToFailureConverter.ToFailure(reprocessing.Exception);
         }
             
@@ -66,49 +114,38 @@ public class EventHandlersService : EventHandlersBase
     public override async Task<ReprocessAllEventsResponse> ReprocessAllEvents(ReprocessAllEventsRequest request, ServerCallContext context)
     {
         var response = new ReprocessAllEventsResponse();
-        var eventHandler = new EventHandlerId(request.ScopeId.ToGuid(), request.EventHandlerId.ToGuid());
-        _logger.ReprocessAllEvents(eventHandler);
+        
+        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId, out var eventHandler);
+        if (!getIds.Success)
+        {
+            response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
+            return response;
+        }
+        
+        Log.ReprocessAllEvents(_logger, eventHandler.EventHandler, eventHandler.Scope);
         var reprocessing = await _eventHandlers.ReprocessAllEvents(eventHandler).ConfigureAwait(false);
         if (!reprocessing.Success)
         {
+            Log.FailedDuringReprocessing(_logger, reprocessing.Exception);
             response.Failure = _exceptionToFailureConverter.ToFailure(reprocessing.Exception);
         }
 
         return response;
     }
 
-    /// <inheritdoc />
-    public override Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
+    EventHandlerStatus CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant = null)
     {
-        var response = new GetAllResponse();
-        _logger.GetAll();
-        var eventHandlerInfos = _eventHandlers.All;
-
-        foreach (var info in eventHandlerInfos)
-        {
-            var status = new EventHandlerStatus
-            {   
-                Alias = info.Alias,
-                Partitioned = info.Partitioned,
-                ScopeId = info.Id.Scope.ToProtobuf(),
-                EventHandlerId = info.Id.EventHandler.ToProtobuf()
-            };
-            status.EventTypes.AddRange(CreateEventTypes(info));
-                
-            status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info, request.TenantId?.ToGuid()));
-                
-            response.EventHandlers.Add(status);
-        }
-
-        return Task.FromResult(response);
+        var status = new EventHandlerStatus
+        {   
+            Alias = info.Alias,
+            Partitioned = info.Partitioned,
+            ScopeId = info.Id.Scope.ToProtobuf(),
+            EventHandlerId = info.Id.EventHandler.ToProtobuf()
+        };
+        status.EventTypes.AddRange(info.EventTypes.Select(CreateEventType));
+        status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info, tenant));
+        return status;
     }
-
-    IEnumerable<Artifact> CreateEventTypes(EventHandlerInfo info)
-        => info.EventTypes.Select(_ => new Artifact()
-        {
-            Id = _.ToProtobuf(),
-            Generation = ArtifactGeneration.First,
-        });
         
     IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(EventHandlerInfo info, TenantId tenant = null)
     {
@@ -121,5 +158,29 @@ public class EventHandlersService : EventHandlersBase
         return tenant == null
             ? _streamProcessorStatusConverter.Convert(state.Result)
             : _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
+    }
+
+    static Artifact CreateEventType(ArtifactId id)
+        => new()
+        {
+            Id = id.ToProtobuf(),
+            Generation = ArtifactGeneration.First,
+        };
+
+    static Try GetEventHandlerId(Uuid scope, Uuid eventHandler, out EventHandlerId eventHandlerId)
+    {
+        eventHandlerId = default;
+        
+        if (scope == default)
+        {
+            return Try.Failed(new ArgumentNullException(nameof(scope), "Scope id is missing in request"));
+        }
+        if (eventHandler == default)
+        {
+            return Try.Failed(new ArgumentNullException(nameof(eventHandler), "EventHandler id is missing in request"));
+        }
+
+        eventHandlerId = new EventHandlerId(scope.ToGuid(), eventHandler.ToGuid());
+        return Try.Succeeded();
     }
 }

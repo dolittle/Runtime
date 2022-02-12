@@ -25,7 +25,7 @@ public class ProjectionProcessor : IDisposable
     readonly Action _unregister;
     readonly ILogger _logger;
     readonly CancellationToken _cancellationToken;
-    bool _disposed = false;
+    bool _disposed;
 
     public ProjectionProcessor(IProjection projection, StreamProcessor streamProcessor, Action unregister, ILogger logger, CancellationToken cancellationToken)
     {

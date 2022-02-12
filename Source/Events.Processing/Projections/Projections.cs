@@ -175,15 +175,15 @@ public class Projections : IProjections
 
     async Task<Try> ResetProjectionIfDefinitionHasChanged(ProjectionIdentifier identifier, ProjectionDefinition definition, CancellationToken cancellationToken)
     {
-        var tenantsToResetFor = await GetTenantsWhereDefinitionHasChanged(identifier, definition, cancellationToken);
-        
-        var dropping = await DropStatesAndResetStreamProcessorsFor(tenantsToResetFor, definition, cancellationToken);
+        var tenantsToResetFor = await GetTenantsWhereDefinitionHasChanged(identifier, definition, cancellationToken).ConfigureAwait(false);
+
+        var dropping = await DropStatesAndResetStreamProcessorsFor(tenantsToResetFor, definition, cancellationToken).ConfigureAwait(false);
         if (!dropping.Success)
         {
             return dropping.Exception;
         }
 
-        var persistence = await PersistDefinitionForAllTenants(definition, cancellationToken);
+        var persistence = await PersistDefinitionForAllTenants(definition, cancellationToken).ConfigureAwait(false);
         if (!persistence.Success)
         {
             return persistence.Exception;
