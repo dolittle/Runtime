@@ -22,7 +22,7 @@ public class when_type_is_property : given.all_dependencies
         committed_event = committed_events.single("{\"property\": \"value\"}");
         partition = "/(partition!";
         definition = given.projection_definition_builder.create()
-            .with_selector(new ProjectionEventSelector(committed_event.Type.Id, ProjectEventKeySelectorType.Property, "property"))
+            .with_selector(ProjectionEventSelector.EventProperty(committed_event.Type.Id, "property"))
             .Build();
     };
     Because of = () => result = projection_keys.TryGetFor(definition, committed_event, partition, out key);

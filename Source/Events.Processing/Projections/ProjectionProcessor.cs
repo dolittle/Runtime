@@ -10,7 +10,6 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Reflection;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +25,7 @@ public class ProjectionProcessor : IDisposable
     readonly Action _unregister;
     readonly ILogger _logger;
     readonly CancellationToken _cancellationToken;
+    bool _disposed = false;
 
     public ProjectionProcessor(IProjection projection, StreamProcessor streamProcessor, Action unregister, ILogger logger, CancellationToken cancellationToken)
     {
@@ -84,13 +84,26 @@ public class ProjectionProcessor : IDisposable
     public Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates()
         => _streamProcessor.GetCurrentStates();
 
+    /// <summary>
+    /// Replays the events for this <see cref="ProjectionProcessor"/> for a specific tenant.
+    /// </summary>
+    /// <param name="tenant">The tenant to replay events for.</param>
+    /// <param name="dropStates">The drop persisted states action to perform while resetting the stream processor position.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="Try"/> result of the operation.</returns>
     public async Task<Try> ReplayEventsForTenant(TenantId tenant, Func<TenantId, CancellationToken, Task<Try>> dropStates)
     {
+        Log.ReplayingEventsForTenant(_logger, Definition.Scope, Definition.Projection, tenant);
         return await _streamProcessor.PerformActionAndSetToPosition(tenant, StreamPosition.Start, dropStates);
     }
 
+    /// <summary>
+    /// Replays the events for this <see cref="ProjectionProcessor"/> for all tenants.
+    /// </summary>
+    /// <param name="dropStates">The drop persisted states action to perform while resetting the stream processor position.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns a dictionary of the <see cref="Try"/> results of the operation per tenant.</returns>
     public async Task<IDictionary<TenantId, Try>> ReplayEventsForAllTenants(Func<TenantId, CancellationToken, Task<Try>> dropStates)
     {
+        Log.ReplayingEventsForAllTenants(_logger, Definition.Scope, Definition.Projection);
         var results = await _streamProcessor.PerformActionAndSetToInitialPositionForAllTenants(dropStates).ConfigureAwait(false);
         return results.ToDictionary(_ => _.Key, _ => (Try)_.Value);
     }
@@ -98,6 +111,13 @@ public class ProjectionProcessor : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        
         _streamProcessor.Dispose();
         _unregister();
         GC.SuppressFinalize(this);

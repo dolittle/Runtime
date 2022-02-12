@@ -11,6 +11,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Resilience;
+using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 
@@ -180,20 +181,17 @@ public class Subscription : ISubscription
 
             var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue, _processingMetrics));
 
-            var tasks = new[]
-            {
+            var tasks = new TaskGroup(
                 writeEventsStreamProcessor.StartAndWait(
                     processingCancellationToken.Token),
                 connection.StartReceivingEventsInto(
                     connectionToStreamProcessorQueue,
-                    processingCancellationToken.Token),
-            };
+                    processingCancellationToken.Token));
 
             State = SubscriptionState.Connected;
-            await Task.WhenAny(tasks).ConfigureAwait(false);
 
-            processingCancellationToken.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await tasks.WaitForAllCancellingOnFirst(processingCancellationToken).ConfigureAwait(false);
+            
             _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent, null);
             _metrics.IncrementSubscriptionsFailedDueToReceivingOrWritingEventsCompleted();
         }

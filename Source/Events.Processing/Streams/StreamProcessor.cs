@@ -126,15 +126,11 @@ public class StreamProcessor : IDisposable
         _started = true;
         try
         {
-            var tasks = StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token);
-            await Task.WhenAny(tasks).ConfigureAwait(false);
-            if (TryGetException(tasks, out var ex))
-            {
-                Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
-            }
+            var tasks = new TaskGroup(StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token));
+            
+            tasks.OnFirstTaskFailure += (_, ex) => Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
 
-            _stopAllScopedStreamProcessorsTokenSource.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await tasks.WaitForAllCancellingOnFirst(_stopAllScopedStreamProcessorsTokenSource).ConfigureAwait(false);
         }
         finally
         {
@@ -229,15 +225,4 @@ public class StreamProcessor : IDisposable
             _executionContextManager.CurrentFor(tenant);
             await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
         }, cancellationToken)).ToList();
-
-    static bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
-    {
-        exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
-        if (exception != default)
-        {
-            while (exception.InnerException != null) exception = exception.InnerException;
-        }
-
-        return exception != default;
-    }
 }

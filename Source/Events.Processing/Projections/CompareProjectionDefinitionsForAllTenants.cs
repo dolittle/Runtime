@@ -113,6 +113,18 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
                 result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector expressions");
                 return false;
             }
+
+            if (oldEvent.StaticKey != newEvent.StaticKey)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same static key");
+                return false;
+            }
+            
+            if (oldEvent.OccurredFormat != newEvent.OccurredFormat)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the occurred format");
+                return false;
+            }
         }
 
         return true;
