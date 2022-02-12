@@ -56,6 +56,7 @@ public class ProjectionsService : ProjectionsBase
     /// <inheritdoc />
     public override Task<GetAllProjectionsResponse> GetAll(GetAllProjectionsRequest request, ServerCallContext context)
     {
+        Log.GetAll(_logger);
         var response = new GetAllProjectionsResponse();
         response.Projections.AddRange(_projections.All.Select(_ => CreateStatusFromInfo(_, request.TenantId?.ToGuid())));
         return Task.FromResult(response);
@@ -72,11 +73,14 @@ public class ProjectionsService : ProjectionsBase
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
             return Task.FromResult(response);
         }
+        
+        Log.GetOne(_logger, projection, scope);
 
         var info = _projections.All.FirstOrDefault(_ => _.Definition.Scope == scope && _.Definition.Projection == projection);
         if (info == default)
         {
-            response.Failure = _exceptionToFailureConverter.ToFailure(new ProjectionNotRegistered(request.ScopeId.ToGuid(), request.ProjectionId.ToGuid()));
+            Log.ProjectionNotRegistered(_logger, projection, scope);
+            response.Failure = _exceptionToFailureConverter.ToFailure(new ProjectionNotRegistered(scope, projection));
             return Task.FromResult(response);
         }
         
@@ -96,12 +100,15 @@ public class ProjectionsService : ProjectionsBase
             return response;
         }
         
+        Log.Replay(_logger, projection, scope);
+        
         var result = request.TenantId == null
             ? await _projections.ReplayEventsForAllTenants(scope, projection).ConfigureAwait(false)
             : await _projections.ReplayEventsForTenant(scope, projection, request.TenantId.ToGuid()).ConfigureAwait(false);
 
         if (!result.Success)
         {
+            Log.FailedToReplayProjection(_logger, projection, scope, result.Exception);
             response.Failure = _exceptionToFailureConverter.ToFailure(result.Exception);
         }
 
@@ -131,9 +138,14 @@ public class ProjectionsService : ProjectionsBase
             throw state.Exception;
         }
 
-        return tenant == null
-            ? _streamProcessorStatusConverter.Convert(state.Result)
-            : _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
+        if (tenant == null)
+        {
+            Log.CreatingProjectionStatusForAllTenants(_logger, info.Definition.Projection, info.Definition.Scope);
+            return _streamProcessorStatusConverter.Convert(state.Result);
+        }
+        
+        Log.CreatingProjectionStatusForTenant(_logger, info.Definition.Projection, info.Definition.Scope, tenant);
+        return _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
     }
 
     static Try GetScopeAndProjectionIds(Uuid scope, Uuid projection, out ScopeId scopeId, out ProjectionId projectionId)
