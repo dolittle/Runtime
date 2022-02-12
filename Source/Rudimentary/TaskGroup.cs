@@ -16,14 +16,23 @@ namespace Dolittle.Runtime.Rudimentary;
 public class TaskGroup
 {
     readonly Task[] _tasks;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TaskGroup"/> class.
+    /// </summary>
+    /// <param name="tasks">The tasks to group.</param>
+    public TaskGroup(params Task[] tasks)
+    {
+        _tasks = tasks;
+    }
     
     /// <summary>
     /// Initializes a new instance of the <see cref="TaskGroup"/> class.
     /// </summary>
     /// <param name="tasks">The tasks to group.</param>
     public TaskGroup(IEnumerable<Task> tasks)
+        : this(tasks.ToArray())
     {
-        _tasks = tasks.ToArray();
     }
 
     /// <summary>
