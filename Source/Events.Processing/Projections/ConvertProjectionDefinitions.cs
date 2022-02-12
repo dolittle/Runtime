@@ -24,6 +24,8 @@ public class ConvertProjectionDefinitions : IConvertProjectionDefinitions
             Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => ProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
             Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => ProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
             Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => ProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
+            Contracts.ProjectionEventSelector.SelectorOneofCase.StaticKeySelector => ProjectionEventSelector.Static(eventSelector.EventType.Id.ToGuid(), eventSelector.StaticKeySelector.StaticKey),
+            Contracts.ProjectionEventSelector.SelectorOneofCase.EventOccurredKeySelector => ProjectionEventSelector.Occurred(eventSelector.EventType.Id.ToGuid(), eventSelector.EventOccurredKeySelector.Format),
             _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
         });
 
@@ -50,6 +52,12 @@ public class ConvertProjectionDefinitions : IConvertProjectionDefinitions
                     break;
                 case ProjectEventKeySelectorType.Property:
                     converted.EventPropertyKeySelector = new Contracts.EventPropertyKeySelector { PropertyName = eventSelector.KeySelectorExpression };
+                    break;
+                case ProjectEventKeySelectorType.Static:
+                    converted.StaticKeySelector = new Contracts.StaticKeySelector { StaticKey = eventSelector.StaticKey };
+                    break;
+                case ProjectEventKeySelectorType.EventOccurred:
+                    converted.EventOccurredKeySelector = new Contracts.EventOccurredKeySelector { Format = eventSelector.OccurredFormat };
                     break;
             }
             

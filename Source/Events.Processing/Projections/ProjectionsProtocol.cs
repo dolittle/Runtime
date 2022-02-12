@@ -1,8 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Dolittle.Runtime.Projections.Store.Definition;
@@ -16,14 +18,16 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 public class ProjectionsProtocol : IProjectionsProtocol
 {
     readonly IConvertProjectionDefinitions _converter;
+    readonly IValidateOccurredFormat _occurredFormatValidator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectionsProtocol"/> class.
     /// </summary>
     /// <param name="converter">The converter to use to convert projection definition fields.</param>
-    public ProjectionsProtocol(IConvertProjectionDefinitions converter)
+    public ProjectionsProtocol(IConvertProjectionDefinitions converter, IValidateOccurredFormat occurredFormatValidator)
     {
         _converter = converter;
+        _occurredFormatValidator = occurredFormatValidator;
     }
 
     /// <inheritdoc/>
@@ -82,14 +86,40 @@ public class ProjectionsProtocol : IProjectionsProtocol
     /// <inheritdoc/>
     public ConnectArgumentsValidationResult ValidateConnectArguments(ProjectionRegistrationArguments arguments)
     {
-        foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType))
+        if (HasDuplicateEventTypes(arguments.ProjectionDefinition.Events, out var result) || HasInvalidEventOccurredFormats(arguments.ProjectionDefinition.Events, out result))
         {
-            if (eventType.Count() > 1)
-            {
-                return ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
-            }
+            return result;
         }
         return ConnectArgumentsValidationResult.Ok;
+    }
+
+    static bool HasDuplicateEventTypes(IEnumerable<RuntimeProjectionEventSelector> events, out ConnectArgumentsValidationResult result)
+    {
+        result = ConnectArgumentsValidationResult.Ok;
+        foreach (var eventType in events.GroupBy(_ => _.EventType))
+        {
+            if (eventType.Count() <= 1)
+            {
+                continue;
+            }
+            result = ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
+            return true;
+        }
+        return false;
+    }
+    
+    bool HasInvalidEventOccurredFormats(IEnumerable<RuntimeProjectionEventSelector> events, out ConnectArgumentsValidationResult result)
+    {
+        result = ConnectArgumentsValidationResult.Ok;
+        foreach (var (eventType, occurredSelector) in events.Where(_ => _. KeySelectorType == ProjectEventKeySelectorType.EventOccurred).ToDictionary(_ => _.EventType, _ => _))
+        {
+            if (!_occurredFormatValidator.IsValid(occurredSelector.OccurredFormat, out var errorMessage))
+            {
+                result = ConnectArgumentsValidationResult.Failed($"Event {eventType} has key from event occurred selector with an invalid occurred format {occurredSelector.OccurredFormat}. {errorMessage}");
+            }
+            return true;
+        }
+        return false;
     }
 
     ProjectionDefinition ConvertProjectionDefinition(ProjectionRegistrationRequest arguments)
