@@ -90,6 +90,8 @@ public class Projections : IProjections
     public async Task<Try<ProjectionProcessor>> Register(IProjection projection, CancellationToken cancellationToken)
     {
         var identifier = new ProjectionIdentifier(projection.Definition.Scope, projection.Definition.Projection);
+        Log.RegisteringProjection(_logger, identifier.Scope, identifier.Projection);
+        
         if (_projections.ContainsKey(identifier))
         {
             Log.ProjectionAlreadyRegistered(_logger, identifier.Scope, identifier.Projection);
@@ -148,7 +150,7 @@ public class Projections : IProjections
             return Task.FromResult(Try.Failed(new ProjectionNotRegistered(scopeId, projectionId)));
         }
 
-        return processor.ReplayEventsForTenant(tenantId, DropStateForTenantCallback(processor));
+        return processor.ReplayEventsForTenant(tenantId, DropStateAndResetStreamProcessorForTenantCallback(processor));
     }
 
     /// <inheritdoc />
@@ -159,7 +161,7 @@ public class Projections : IProjections
             return new ProjectionNotRegistered(scopeId, projectionId);
         }
 
-        var results = await processor.ReplayEventsForAllTenants(DropStateForTenantCallback(processor)).ConfigureAwait(false);
+        var results = await processor.ReplayEventsForAllTenants(DropStateAndResetStreamProcessorForTenantCallback(processor)).ConfigureAwait(false);
         foreach (var (_, result) in results)
         {
             if (!result.Success)
@@ -218,6 +220,8 @@ public class Projections : IProjections
                 return Try.Succeeded();
             }
             
+            Log.ResettingStreamProcessorForTenant(_logger, newDefinition.Scope, newDefinition.Projection, tenant);
+            
             var getDefinition = await _getProjectionDefinitions().TryGet(newDefinition.Projection, newDefinition.Scope, cancellationToken).ConfigureAwait(false);
             if (!getDefinition.Success)
             {
@@ -236,7 +240,9 @@ public class Projections : IProjections
             {
                 return new CouldNotResetProjectionStates(newDefinition, tenant);
             }
-
+            
+            Log.DroppingStatesForTenant(_logger, newDefinition.Scope, newDefinition.Projection, tenant);
+            
             if (!await _getProjectionPersister().TryDrop(definition, cancellationToken).ConfigureAwait(false))
             {
                 return new CouldNotResetProjectionStates(newDefinition, tenant);
@@ -256,6 +262,6 @@ public class Projections : IProjections
             return Try.Succeeded();
         });
 
-    Func<TenantId, CancellationToken, Task<Try>> DropStateForTenantCallback(ProjectionProcessor processor)
+    Func<TenantId, CancellationToken, Task<Try>> DropStateAndResetStreamProcessorForTenantCallback(ProjectionProcessor processor)
         => (tenant, cancellationToken) => DropStatesAndResetStreamProcessorsFor(new []{ tenant }, processor.Definition, cancellationToken);
 }

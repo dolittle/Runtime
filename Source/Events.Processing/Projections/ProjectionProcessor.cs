@@ -92,6 +92,7 @@ public class ProjectionProcessor : IDisposable
     /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="Try"/> result of the operation.</returns>
     public async Task<Try> ReplayEventsForTenant(TenantId tenant, Func<TenantId, CancellationToken, Task<Try>> dropStates)
     {
+        Log.ReplayingEventsForTenant(_logger, Definition.Scope, Definition.Projection, tenant);
         return await _streamProcessor.PerformActionAndSetToPosition(tenant, StreamPosition.Start, dropStates);
     }
 
@@ -102,6 +103,7 @@ public class ProjectionProcessor : IDisposable
     /// <returns>A <see cref="Task"/> that, when resolved, returns a dictionary of the <see cref="Try"/> results of the operation per tenant.</returns>
     public async Task<IDictionary<TenantId, Try>> ReplayEventsForAllTenants(Func<TenantId, CancellationToken, Task<Try>> dropStates)
     {
+        Log.ReplayingEventsForAllTenants(_logger, Definition.Scope, Definition.Projection);
         var results = await _streamProcessor.PerformActionAndSetToInitialPositionForAllTenants(dropStates).ConfigureAwait(false);
         return results.ToDictionary(_ => _.Key, _ => (Try)_.Value);
     }

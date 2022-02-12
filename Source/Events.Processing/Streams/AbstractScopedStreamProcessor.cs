@@ -280,7 +280,7 @@ public abstract class AbstractScopedStreamProcessor
                         }
                         else
                         {
-                            // TODO: LOG
+                            Log.ScopedStreamProcessorPerformingSetToPositionAction(Logger, Identifier);
                             var result = await _resetStreamProcessorAction(_tenantId, cancellationToken).ConfigureAwait(false);
                             if (result.Success)
                             {
@@ -290,7 +290,7 @@ public abstract class AbstractScopedStreamProcessor
                             }
                             else
                             {
-                                // TODO: LOG
+                                Log.ScopedStreamProcessorPerformingSetToPositionActionFailed(Logger, Identifier, result.Exception);
                                 _resetStreamProcessorCompletionSource.SetResult(Try<StreamPosition>.Failed(result.Exception));
                             }
                             

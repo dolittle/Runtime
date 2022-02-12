@@ -23,6 +23,12 @@ static partial class Log
 
     [LoggerMessage(0, LogLevel.Warning, "A failure occurred in a scoped stream processor with id: {StreamProcessorId}")]
     internal static partial void ScopedStreamProcessorFailed(ILogger logger, Exception ex, StreamProcessorId streamProcessorId);
+    
+    [LoggerMessage(0, LogLevel.Debug, "Stream Processor: {StreamProcessorId} is performing action before setting new position")]
+    internal static partial void ScopedStreamProcessorPerformingSetToPositionAction(ILogger logger, IStreamProcessorId streamProcessorId);
+
+    [LoggerMessage(0, LogLevel.Warning, "Stream Processor: {StreamProcessorId} is failed while performing action before setting new position")]
+    internal static partial void ScopedStreamProcessorPerformingSetToPositionActionFailed(ILogger logger, IStreamProcessorId streamProcessorId, Exception exception);
 
     [LoggerMessage(0, LogLevel.Information, "Stream Processor: {StreamProcessorId} position has been set to {Position}")]
     internal static partial void ScopedStreamProcessorSetToPosition(ILogger logger, IStreamProcessorId streamProcessorId, StreamPosition position);

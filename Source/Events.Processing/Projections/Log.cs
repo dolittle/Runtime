@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// </summary>
 static partial class Log
 {
-    [LoggerMessage(0, LogLevel.Debug, "Connecting Projections")]
+    [LoggerMessage(0, LogLevel.Information, "Connecting Projections")]
     internal static partial void ConnectingProjections(ILogger logger);
     
     [LoggerMessage(0, LogLevel.Trace, "Received arguments for projection {Projection} in scope {Scope}")]
@@ -24,6 +24,9 @@ static partial class Log
     
     [LoggerMessage(0, LogLevel.Warning,"An error occurred while registering projection {Projection} in scope {Scope}" )]
     internal static partial void ErrorWhileRegisteringProjection(ILogger logger, ScopeId scope, ProjectionId projection, Exception exception);
+    
+    [LoggerMessage(0, LogLevel.Information, "Registering projection {Projection} in scope {Scope}")]
+    internal static partial void RegisteringProjection(ILogger logger, ScopeId scope, ProjectionId projection);
     
     [LoggerMessage(0, LogLevel.Warning, "Projection {Projection} in scope {Scope} is already registered")]
     internal static partial void ProjectionAlreadyRegistered(ILogger logger, ScopeId scope, ProjectionId projection);
@@ -36,6 +39,12 @@ static partial class Log
     
     [LoggerMessage(0, LogLevel.Information, "Resetting projection {Projection} in scope {Scope} for tenant {Tenant} because: {Reason}" )]
     internal static partial void ResettingProjection(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant, FailedProjectionDefinitionComparisonReason reason);
+    
+    [LoggerMessage(0, LogLevel.Debug, "Resetting stream processor for projection {Projection} in scope {Scope} for tenant {Tenant}" )]
+    internal static partial void ResettingStreamProcessorForTenant(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant);
+        
+    [LoggerMessage(0, LogLevel.Debug, "Dropping states for projection {Projection} in scope {Scope} for tenant {Tenant}" )]
+    internal static partial void DroppingStatesForTenant(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant);
     
     [LoggerMessage(0, LogLevel.Debug, "Projection {Projection} in scope {Scope} disconnected")]
     internal static partial void ProjectionDisconnected(ILogger logger, ScopeId scope, ProjectionId projection);
@@ -63,4 +72,10 @@ static partial class Log
 
     [LoggerMessage(0, LogLevel.Debug, "Could not get projection key for projection {Projection} in scope {Scope} for event at {EventLogPosition}")]
     internal static partial void CouldNotGetProjectionKey(ILogger logger, EventProcessorId projection, ScopeId scope, EventLogSequenceNumber eventLogPosition);
+    
+    [LoggerMessage(0, LogLevel.Information,"Replaying events for projection {Projection} in scope {Scope} for tenant {Tenant}" )]
+    internal static partial void ReplayingEventsForTenant(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant);
+    
+    [LoggerMessage(0, LogLevel.Information,"Replaying events for projection {Projection} in scope {Scope} for all tenants" )]
+    internal static partial void ReplayingEventsForAllTenants(ILogger logger, ScopeId scope, ProjectionId projection);
 }
