@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -14,6 +15,21 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// </summary>
 public interface IProjection
 {
+    /// <summary>
+    /// Gets the <see cref="ProjectionDefinition"/> for this <see cref="IProjection"/>.
+    /// </summary>
+    ProjectionDefinition Definition { get; }
+    
+    /// <summary>
+    /// Gets the alias of the Projection if set, or <see cref="ProjectionAlias.NotSet"/> if not passed from the Client.
+    /// </summary>
+    ProjectionAlias Alias { get; }
+    
+    /// <summary>
+    /// Gets a value indicating whether or not the Client passed along an alias for the Projection.
+    /// </summary>
+    bool HasAlias { get;  }
+    
     /// <summary>
     /// Project a <see cref="CommittedEvent" /> from a <see cref="PartitionId">partition</see> onto a <see cref="ProjectionCurrentState"/> to calculate the new <see cref="ProjectionState"/>.
     /// </summary>

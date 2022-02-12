@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Tenancy;
 
@@ -46,6 +47,29 @@ public class PerformActionOnAllTenants : IPerformActionOnAllTenants
         }
     }
 
+    /// <inheritdoc />
+    public Try TryPerform(Func<TenantId, Try> action)
+    {
+        var originalExecutionContext = _executionContextManager.Current;
+        try
+        {
+            foreach (var tenant in _tenants.All.ToArray())
+            {
+                _executionContextManager.CurrentFor(tenant);
+                var result = action(tenant);
+                if (!result.Success)
+                {
+                    return result;
+                }
+            }
+        }
+        finally
+        {
+            _executionContextManager.CurrentFor(originalExecutionContext);
+        }
+        return Try.Succeeded();
+    }
+
     /// <inheritdoc/>
     public async Task PerformAsync(Func<TenantId, Task> action)
     {
@@ -65,16 +89,41 @@ public class PerformActionOnAllTenants : IPerformActionOnAllTenants
     }
 
     /// <inheritdoc/>
+    public async Task<Try> TryPerformAsync(Func<TenantId, Task<Try>> action)
+    {
+        var originalExecutionContext = _executionContextManager.Current;
+        try
+        {
+            foreach (var tenant in _tenants.All.ToArray())
+            {
+                _executionContextManager.CurrentFor(tenant);
+                var result = await action(tenant).ConfigureAwait(false);
+                if (!result.Success)
+                {
+                    return result;
+                }
+            }
+        }
+        finally
+        {
+            _executionContextManager.CurrentFor(originalExecutionContext);
+        }
+        return Try.Succeeded();
+    }
+
+    /// <inheritdoc/>
     public Task PerformInParallel(Func<TenantId, Task> action)
     {
         var tenants = _tenants.All.ToArray();
-        var tasks = tenants.Length == 0 ?
-            new[] { Task.CompletedTask } :
-            tenants.Select(tenant => Task.Run(async () =>
-            {
-                _executionContextManager.CurrentFor(tenant);
-                await action(tenant).ConfigureAwait(false);
-            }));
-        return Task.WhenAll(tasks);
+        if (tenants.Length == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Task.WhenAll(tenants.Select(tenant => Task.Run(() =>
+        {
+            _executionContextManager.CurrentFor(tenant);
+            return action(tenant);
+        })));
     }
 }

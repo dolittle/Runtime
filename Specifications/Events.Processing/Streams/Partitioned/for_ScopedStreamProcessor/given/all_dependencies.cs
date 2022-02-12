@@ -13,6 +13,7 @@ using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
+using It = Moq.It;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStreamProcessor.given;
 
@@ -31,6 +32,7 @@ public class all_dependencies
     protected static Mock<IStreamProcessors> stream_processors;
     protected static Mock<IEventProcessor> event_processor;
     protected static CancellationTokenSource cancellation_token_source;
+    protected static Mock<Func<TenantId, CancellationToken, Task<Try>>> action_to_perform_before_reprocessing;
 
     Establish context = () =>
     {
@@ -68,6 +70,11 @@ public class all_dependencies
             event_waiter,
             new TimeToRetryForPartitionedStreamProcessor(),
             Mock.Of<ILogger<ScopedStreamProcessor>>());
+        
+        action_to_perform_before_reprocessing = new Mock<Func<TenantId, CancellationToken, Task<Try>>>();
+        action_to_perform_before_reprocessing
+            .Setup(_ => _(It.IsAny<TenantId>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Try.Succeeded());
     };
     Cleanup clean = () => cancellation_token_source.Dispose();
 
@@ -76,11 +83,11 @@ public class all_dependencies
         cancellation_token_source.CancelAfter(cancelAfter);
         return stream_processor.Start(cancellation_token_source.Token);
     }
-    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, TimeSpan cancelAfter)
+    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
     {
         var result = stream_processor.Start(cancellation_token_source.Token);
         Task.Delay(setPositionAfter).GetAwaiter().GetResult();
-        stream_processor.ReprocessEventsFrom(position).GetAwaiter().GetResult();
+        stream_processor.PerformActionAndReprocessEventsFrom(position, beforeReprocessingAction).GetAwaiter().GetResult();
         cancellation_token_source.CancelAfter(cancelAfter);
         return result;
     }

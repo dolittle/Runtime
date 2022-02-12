@@ -8,11 +8,8 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
-using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Projections.Store.State;
+using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
 using Dolittle.Runtime.Protobuf;
-using Google.Protobuf.Collections;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
@@ -20,19 +17,32 @@ using Artifact = Dolittle.Artifacts.Contracts.Artifact;
 
 namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
 
+/// <summary>
+/// Represents an implementation of <see cref="EventHandlersBase"/>.
+/// </summary>
 public class EventHandlersService : EventHandlersBase
 {
     readonly IEventHandlers _eventHandlers;
     readonly IExceptionToFailureConverter _exceptionToFailureConverter;
+    readonly IConvertStreamProcessorStatuses _streamProcessorStatusConverter;
     readonly ILogger _logger;
-        
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
+    /// </summary>
+    /// <param name="eventHandlers">The <see cref="IEventHandlers"/> to use to perform operations on Event Handlers.</param>
+    /// <param name="exceptionToFailureConverter">The <see cref="IExceptionToFailureConverter"/> to use to convert exceptions to failures.</param>
+    /// <param name="streamProcessorStatusConverter">The <see cref="IConvertStreamProcessorStatuses"/> to use to convert stream processor states.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public EventHandlersService(
         IEventHandlers eventHandlers,
         IExceptionToFailureConverter exceptionToFailureConverter,
+        IConvertStreamProcessorStatuses streamProcessorStatusConverter,
         ILogger logger)
     {
         _eventHandlers = eventHandlers;
         _exceptionToFailureConverter = exceptionToFailureConverter;
+        _streamProcessorStatusConverter = streamProcessorStatusConverter;
         _logger = logger;
     }
 
@@ -108,55 +118,8 @@ public class EventHandlersService : EventHandlersBase
             throw state.Exception;
         }
 
-        return state.Result.Where(_ => IsSpecificTenantOrAny(_, tenant)).Select(CreateStatusFromState);
-    }
-
-    static bool IsSpecificTenantOrAny(KeyValuePair<TenantId, IStreamProcessorState> state, TenantId tenant)
-        => tenant == null || state.Key.Equals(tenant);
-
-    static TenantScopedStreamProcessorStatus CreateStatusFromState(KeyValuePair<TenantId, IStreamProcessorState> tenantAndState)
-    {
-        var (tenant, state) = tenantAndState;
-        var status = new TenantScopedStreamProcessorStatus
-        {
-            StreamPosition = state.Position,
-            TenantId = tenant.ToProtobuf(),
-        };
-
-        switch (state)
-        {
-            case Streams.Partitioned.StreamProcessorState partitionedState:
-            {
-                status.LastSuccessfullyProcessed = partitionedState.LastSuccessfullyProcessed.ToTimestamp();
-                status.Partitioned = new PartitionedTenantScopedStreamProcessorStatus();
-                foreach (var (partition, failure) in partitionedState.FailingPartitions)
-                {
-                    status.Partitioned.FailingPartitions.Add(
-                        new FailingPartition
-                        {
-                            PartitionId = partition,
-                            FailureReason = failure.Reason,
-                            LastFailed = failure.LastFailed.ToTimestamp(),
-                            RetryCount = failure.ProcessingAttempts,
-                            RetryTime = failure.RetryTime.ToTimestamp(),
-                            StreamPosition = failure.Position
-                        });
-                }
-
-                break;
-            }
-            case Streams.StreamProcessorState unpartitionedState:
-                status.LastSuccessfullyProcessed = unpartitionedState.LastSuccessfullyProcessed.ToTimestamp();
-                status.Unpartitioned = new UnpartitionedTenantScopedStreamProcessorStatus
-                {
-                    FailureReason = unpartitionedState.FailureReason,
-                    IsFailing = unpartitionedState.IsFailing,
-                    RetryCount = unpartitionedState.ProcessingAttempts,
-                    RetryTime = unpartitionedState.RetryTime.ToTimestamp()
-                };
-                break;
-        }
-            
-        return status;
+        return tenant == null
+            ? _streamProcessorStatusConverter.Convert(state.Result)
+            : _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
     }
 }
