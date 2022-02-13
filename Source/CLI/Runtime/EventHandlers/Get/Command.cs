@@ -43,14 +43,14 @@ public class Command : CommandBase
     TenantId Tenant { get; init; }
         
     /// <summary>
-    /// The Event Handler identifier argument used to provide the unique identifier of the Event Handler to replay.
+    /// The Event Handler identifier argument used to provide the unique identifier of the Event Handler to get.
     /// </summary>
     [Required]
     [Argument(0, Description = "The Event Handler identifier of the Event Handler to get details for")]
     EventHandlerIdOrAlias EventHandlerIdentifier { get; init; }
 
     /// <summary>
-    /// The entrypoint for the "dolittle runtime eventhandlers list" command.
+    /// The entrypoint for the "dolittle runtime eventhandlers get" command.
     /// </summary>
     /// <param name="cli">The <see cref="CommandLineApplication"/> that is executed.</param>
     public async Task OnExecuteAsync(CommandLineApplication cli)
@@ -84,30 +84,16 @@ public class Command : CommandBase
         => Wide
             ? WriteDetailedOutput(cli, status)
             : WriteSimpleOutput(cli, status);
-        
-    async Task WriteSimpleOutput(CommandLineApplication cli, EventHandlerStatus status)
-    {
-        if (status.Partitioned)
-        {
-            await WriteOutput(cli, status.States.Cast<PartitionedTenantScopedStreamProcessorStatus>().Select(CreateSimpleStateView)).ConfigureAwait(false);
-        }
-        else
-        {
-            await WriteOutput(cli, status.States.Cast<UnpartitionedTenantScopedStreamProcessorStatus>().Select(CreateSimpleStateView)).ConfigureAwait(false);
-        }
-    }
 
-    async Task WriteDetailedOutput(CommandLineApplication cli, EventHandlerStatus status)
-    {
-        if (status.Partitioned)
-        {
-            await WriteOutput(cli, MergePartitionedStates(status)).ConfigureAwait(false);
-        }
-        else
-        {
-            await WriteOutput(cli, status.States.Cast<UnpartitionedTenantScopedStreamProcessorStatus>().Select(CreateDetailedStateView)).ConfigureAwait(false);
-        }
-    }
+    Task WriteSimpleOutput(CommandLineApplication cli, EventHandlerStatus status)
+        => status.Partitioned
+            ? WriteOutput(cli, status.States.Cast<PartitionedTenantScopedStreamProcessorStatus>().Select(CreateSimpleStateView))
+            : WriteOutput(cli, status.States.Cast<UnpartitionedTenantScopedStreamProcessorStatus>().Select(CreateSimpleStateView));
+
+    Task WriteDetailedOutput(CommandLineApplication cli, EventHandlerStatus status)
+        => status.Partitioned
+            ? WriteOutput(cli, MergePartitionedStates(status))
+            : WriteOutput(cli, status.States.Cast<UnpartitionedTenantScopedStreamProcessorStatus>().Select(CreateDetailedStateView));
 
     static IEnumerable<PartitionedEventHandlerDetailedView> MergePartitionedStates(EventHandlerStatus status)
     {

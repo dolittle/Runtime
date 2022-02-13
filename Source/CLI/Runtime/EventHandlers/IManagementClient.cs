@@ -35,20 +35,20 @@ public interface IManagementClient
     Task ReprocessAllEvents(EventHandlerId eventHandler, MicroserviceAddress runtime);
         
     /// <summary>
-    /// Gets all running Event Handlers or for a specific Tenant if specified.
+    /// Get the <see cref="EventHandlerStatus"/> of all registered Event Handlers.
     /// </summary>
     /// <param name="runtime">The address of the Runtime to connect to.</param>
-    /// <param name="tenant">The Tenant to get Event Handlers for.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="tenant">The Tenant to get Stream Processor states for, or null to get all.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="EventHandlerStatus"/> of all registered Projections.</returns>
     Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime, TenantId tenant = null);
 
     /// <summary>
-    /// Gets the running Event Handler with the given identifier and for a specific Tenant if specified.
+    /// Get the <see cref="EventHandlerStatus"/> of a registered Event Handler by <see cref="EventHandlerId"/>.
     /// </summary>
     /// <param name="runtime">The address of the Runtime to connect to.</param>
     /// <param name="eventHandler">The Event Handler identifier.</param>
-    /// <param name="tenant">The Tenant to get Event Handlers for.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="tenant">The Tenant to get Stream Processor states for, or null to get all.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="Try"/> containing the <see cref="EventHandlerStatus"/>-</returns>
     Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null);
 
 }

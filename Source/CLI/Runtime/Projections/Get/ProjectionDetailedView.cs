@@ -3,25 +3,23 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get;
+namespace Dolittle.Runtime.CLI.Runtime.Projections.Get;
 
 /// <summary>
-/// Represents a detailed view of a partitioned Event Handler Stream Processor state.
+/// Represents a detailed view of a Projection Stream Processor state.
 /// </summary>
 /// <param name="Tenant">The Tenant.</param>
 /// <param name="Position">The stream position.</param>
 /// <param name="Status">The status.</param>
-/// <param name="LastSuccessfulOrFailedProcessing">When the last event was successfully processed or failed processing.</param>
-/// <param name="Partition">The Partition identifier.</param>
 /// <param name="FailureReason">The reason for failure.</param>
 /// <param name="RetryTime">The retry time.</param>
 /// <param name="ProcessingAttempts">The number of processing attempts.</param>
-public record PartitionedEventHandlerDetailedView(
+/// <param name="LastSuccessfullyProcessed">When the last event was successfully processed</param>
+public record ProjectionDetailedView(
     Guid Tenant,
     ulong Position,
     string Status,
-    DateTimeOffset LastSuccessfulOrFailedProcessing,
-    string Partition,
     string FailureReason,
     DateTimeOffset RetryTime,
-    uint ProcessingAttempts);
+    uint ProcessingAttempts,
+    DateTimeOffset LastSuccessfullyProcessed);

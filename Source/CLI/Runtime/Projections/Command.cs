@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.CLI.Runtime.Projections;
 /// </summary>
 [Command("projections", Description = "Manage Projections")]
 [Subcommand(typeof(List.Command))]
+[Subcommand(typeof(Get.Command))]
 public class Command: CommandBase
 {
     public Command(ICanLocateRuntimes runtimes, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)

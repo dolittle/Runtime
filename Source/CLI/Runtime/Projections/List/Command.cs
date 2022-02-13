@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -22,6 +21,13 @@ public class Command : CommandBase
 {
     readonly IManagementClient _client;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Command"/> class.
+    /// </summary>
+    /// <param name="client">The management client to use to get all registered Projections.</param>
+    /// <param name="runtimes">The locator to use to find the Runtime to connect to.</param>
+    /// <param name="eventTypesDiscoverer">The event types discoverer to use to discover event types.</param>
+    /// <param name="jsonSerializer">The JSON serializer to use.</param>
     public Command(IManagementClient client, ICanLocateRuntimes runtimes, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
         : base(runtimes, eventTypesDiscoverer, jsonSerializer)
     {

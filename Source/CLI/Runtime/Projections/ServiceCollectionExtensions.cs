@@ -16,6 +16,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<IManagementClient, ManagementClient>();
         services.AddTransient<IConvertProjectionDefinitions, ConvertProjectionDefinitions>();
-        //services.AddTransient<IResolveEventHandlerId, EventHandlerIdResolver>();
+        services.AddTransient<IResolveProjectionIdAndScope, ProjectionIdAndScopeResolver>();
     }
 }

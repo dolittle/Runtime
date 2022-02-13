@@ -8,8 +8,11 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ManagementContracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
@@ -38,7 +41,6 @@ public class ManagementClient : IManagementClient
     public async Task<IEnumerable<ProjectionStatus>> GetAll(MicroserviceAddress runtime, TenantId tenant = null)
     {
         var client = _clients.CreateClientFor<ProjectionsClient>(runtime);
-
         var request = new GetAllProjectionsRequest
         {
             TenantId = tenant?.ToProtobuf()
@@ -51,6 +53,26 @@ public class ManagementClient : IManagementClient
         }
 
         return response.Projections.Select(CreateProjectionStatus);
+    }
+
+    /// <inheritdoc />
+    public async Task<Try<ProjectionStatus>> Get(MicroserviceAddress runtime, ScopeId scope, ProjectionId projection, TenantId tenant = null)
+    {
+        var client = _clients.CreateClientFor<ProjectionsClient>(runtime);
+        var request = new GetOneProjectionRequest
+        {
+            ScopeId = scope.ToProtobuf(),
+            ProjectionId = projection.ToProtobuf(),
+            TenantId = tenant?.ToProtobuf()
+        };
+
+        var response = await client.GetOneAsync(request);
+        if (response.Failure != null)
+        {
+            return new GetOneProjectionFailed(scope, projection, response.Failure.Reason);
+        }
+
+        return CreateProjectionStatus(response.Projection);
     }
 
     ProjectionStatus CreateProjectionStatus(ManagementContracts.ProjectionStatus status)

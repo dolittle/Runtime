@@ -93,6 +93,7 @@ public class ManagementClient : IManagementClient
         return response.EventHandlers.Select(CreateEventHandlerStatus);
     }
 
+    /// <inheritdoc />
     public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
     {
         var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
