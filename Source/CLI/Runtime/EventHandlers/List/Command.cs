@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
+using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
@@ -66,6 +67,7 @@ public class Command : CommandBase
         => Wide
             ? WriteOutput(cli, eventHandlerStatuses.Select(CreateDetailedView))
             : WriteOutput(cli, eventHandlerStatuses.Select(CreateSimpleView));
+    
     static EventHandlerSimpleView CreateSimpleView(EventHandlerStatus status)
         => status.Partitioned switch
         {

@@ -3,12 +3,12 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get;
+namespace Dolittle.Runtime.CLI.Runtime.Projections.Get;
 
 /// <summary>
-/// Represents a simple view of an Event Handler Stream Processor state.
+/// Represents a simple view of a Projection Stream Processor state.
 /// </summary>
 /// <param name="Tenant">The Tenant.</param>
 /// <param name="Position">The stream position.</param>
 /// <param name="Status">The status.</param>
-public record EventHandlerSimpleView(Guid Tenant, ulong Position, string Status);
+public record ProjectionSimpleView(Guid Tenant, ulong Position, string Status);

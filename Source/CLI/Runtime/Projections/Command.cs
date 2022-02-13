@@ -5,30 +5,24 @@ using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
-namespace Dolittle.Runtime.CLI.Runtime;
+namespace Dolittle.Runtime.CLI.Runtime.Projections;
 
 /// <summary>
-/// The "dolittle runtime" command.
+/// The "dolittle runtime projections" command.
 /// </summary>
-[Command("runtime", Description = "Manage a Runtime")]
-[Subcommand(typeof(Aggregates.Command))]
-[Subcommand(typeof(EventHandlers.Command))]
-[Subcommand(typeof(EventTypes.Command))]
-[Subcommand(typeof(Projections.Command))]
-public class Command : CommandBase
+[Command("projections", Description = "Manage Projections")]
+[Subcommand(typeof(List.Command))]
+[Subcommand(typeof(Get.Command))]
+[Subcommand(typeof(Replay.Command))]
+public class Command: CommandBase
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Command"/> class.
-    /// </summary>
-    /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
-    /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
     public Command(ICanLocateRuntimes runtimes, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
         : base(runtimes, eventTypesDiscoverer, jsonSerializer)
     {
     }
-        
+
     /// <summary>
-    /// The entrypoint for the "dolittle runtime" command.
+    /// The entrypoint for the "dolittle runtime projections" command.
     /// </summary>
     /// <param name="cli">The <see cref="CommandLineApplication"/> that is executed.</param>
     public void OnExecute(CommandLineApplication cli)
