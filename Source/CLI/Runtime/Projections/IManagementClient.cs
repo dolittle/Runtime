@@ -33,4 +33,14 @@ public interface IManagementClient
     /// <param name="tenant">The Tenant to get Stream Processor states for, or null to get all.</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="Try"/> containing the <see cref="ProjectionStatus"/>-</returns>
     Task<Try<ProjectionStatus>> Get(MicroserviceAddress runtime, ScopeId scope, ProjectionId projection, TenantId tenant = null);
+    
+    /// <summary>
+    /// Replay a registered Projection by <see cref="ScopeId"/> and <see cref="ProjectionId"/>, clearing persisted read models and reprocess events.
+    /// </summary>
+    /// <param name="runtime">The address of the Runtime to connect to.</param>
+    /// <param name="scope">The scope of the Projection.</param>
+    /// <param name="projection">The id of the Projection.</param>
+    /// <param name="tenant">The Tenant to replay the Projection for, or null to get all.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="Try"/> result of the operation.</returns>
+    Task<Try> Replay(MicroserviceAddress runtime, ScopeId scope, ProjectionId projection, TenantId tenant = null);
 }

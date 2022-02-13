@@ -75,6 +75,26 @@ public class ManagementClient : IManagementClient
         return CreateProjectionStatus(response.Projection);
     }
 
+    /// <inheritdoc />
+    public async Task<Try> Replay(MicroserviceAddress runtime, ScopeId scope, ProjectionId projection, TenantId tenant = null)
+    {
+        var client = _clients.CreateClientFor<ProjectionsClient>(runtime);
+        var request = new ReplayProjectionRequest
+        {
+            ScopeId = scope.ToProtobuf(),
+            ProjectionId = projection.ToProtobuf(),
+            TenantId = tenant?.ToProtobuf(),
+        };
+
+        var response = await client.ReplayAsync(request);
+        if (response.Failure != null)
+        {
+            return new ReplayProjectionFailed(scope, projection, response.Failure.Reason);
+        }
+
+        return Try.Succeeded();
+    }
+
     ProjectionStatus CreateProjectionStatus(ManagementContracts.ProjectionStatus status)
         => new (
             status.ProjectionId.ToGuid(),
