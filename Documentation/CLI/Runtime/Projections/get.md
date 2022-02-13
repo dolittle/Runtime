@@ -1,19 +1,20 @@
 ---
 title: Get
-description: Gets details of a specific Event Handler currently registered by Clients to the Runtime
+description: Gets details of a specific Projection currently registered by Clients to the Runtime
 weight: 20
 repository: https://github.com/dolittle/Runtime
 ---
 
 ```shell
-dolittle runtime eventhandlers get <identifier> [options]
+dolittle runtime projection get <identifier> <scope> [options]
 ```
 
 ### Arguments
 
-| Argument       | Description                                                                      |
-|----------------|----------------------------------------------------------------------------------|
-| `<identifier>` | The identifier of the Event Handler to get details for. Format: id/alias[:scope] |
+| Argument       | Description                                                                                                             |
+|----------------|-------------------------------------------------------------------------------------------------------------------------|
+| `<identifier>` | The identifier or alias of the Projection to get details for                                                            |
+| `<scope>`      | The scope of the Projection to get details for. Only required when the identifier or alias matches multiple projections |
 
 ### Options
 
