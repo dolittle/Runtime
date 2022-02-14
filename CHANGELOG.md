@@ -1,3 +1,23 @@
+# [7.8.0] - 2022-2-14 [PR: #627](https://github.com/dolittle/Runtime/pull/627)
+## Summary
+
+A new management service for Projections, and accompanying CLI commands to get the status and details for registered Projections, and a command to manually force a replay of a Projection. A replay of a projection involves removing all the persisted read models (and potential copies in MongoDB), and restarting the processing from the first event in the Event Store. This can be used to force a replay for changes in Projections that are not automatically detected (e.g. code changes), or to fix copies that have been changed by mistake.
+
+An unrelated, but also useful change is the gRPC Server Reflection service that has been added to all the endpoints. This makes it easier to interact with the Runtime while testing out things, without having to write a client in code.
+
+### Added
+
+- Projections can now register with an Alias
+- Implemented the Projections management service to List, Get and Replay registered Projections
+- Exposed the gRPC Server Reflection service on all endpoints. This allows for easier debugging and testing of gRPC endpoints using tools like Postman, grpc_cli, or gRPCurl
+- CLI commands "projections list", "projections get <id or alias> <scope>", "projections replay <id or alias> <scope>", to interact with the Projections management service.
+
+### Fixed
+
+- A bug in the Handshake service version compatibility checker rejected connections from a Head that was using a version of Contracts with the same major but a lesser minor (e.g. Runtime using v6.8.0 and Head using v6.7.0). This should be allowed, and is now fixed.
+- Implemented the GetOne endpoint on the Event Handler management service, and changed the CLI to use this method when getting a single Event Handler. This reduces a bit of work and traffic.
+
+
 # [7.7.0] - 2022-2-11 [PR: #625](https://github.com/dolittle/Runtime/pull/625)
 ## Summary
 
