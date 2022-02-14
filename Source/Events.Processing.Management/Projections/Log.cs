@@ -26,7 +26,7 @@ public static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "Projection {Projection} in scope {Scope} is not registered.")]
     internal static partial void ProjectionNotRegistered(ILogger logger, ProjectionId projection, ScopeId scope);
     
-    [LoggerMessage(0, LogLevel.Error, "Failed to replay projection {Projection} in scope {Scope} is not registered.")]
+    [LoggerMessage(0, LogLevel.Error, "Failed to replay projection {Projection} in scope {Scope}.")]
     internal static partial void FailedToReplayProjection(ILogger logger, ProjectionId projection, ScopeId scope, Exception exception);
 
     [LoggerMessage(0, LogLevel.Debug, "Creating status for projection {Projection} in scope {Scope} for tenant {Tenant}.")]
