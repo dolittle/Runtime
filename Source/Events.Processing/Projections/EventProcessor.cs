@@ -62,7 +62,7 @@ public class EventProcessor : IEventProcessor
     /// <inheritdoc />
     public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
     {
-        _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
+        Log.EventProcessorIsProcessing(_logger, Identifier, @event.Type.Id, partitionId);
         if (!ShouldProcessEvent(@event))
         {
             return new SuccessfulProcessing();
@@ -82,7 +82,7 @@ public class EventProcessor : IEventProcessor
     /// <inheritdoc/>
     public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
     {
-        _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
+        Log.EventProcessorIsProcessingAgain(_logger, Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
         if (!ShouldProcessEvent(@event))
         {
             return new SuccessfulProcessing();
@@ -107,7 +107,7 @@ public class EventProcessor : IEventProcessor
     {
         if (!_projectionKeys.TryGetFor(_projectionDefinition, @event, partitionId, out var projectionKey))
         {
-            _logger.CouldNotGetProjectionKey(Identifier, Scope);
+            Log.CouldNotGetProjectionKey(_logger, Identifier, Scope, @event.EventLogSequenceNumber);
             return new CouldNotGetProjectionKey(@event);
         }
         return await _projectionStore.TryGet(_projectionDefinition.Projection, Scope, projectionKey, token).ConfigureAwait(false);

@@ -1,15 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
@@ -17,11 +13,6 @@ using Dolittle.Runtime.Services;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Events.Processing.Contracts.Projections;
-using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Projections.Store.State;
-using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Tenancy;
-using Dolittle.Runtime.Projections.Store;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -30,65 +21,36 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// </summary>
 public class ProjectionsService : ProjectionsBase
 {
-    readonly IStreamProcessors _streamProcessors;
-    readonly IExecutionContextManager _executionContextManager;
     readonly IInitiateReverseCallServices _reverseCallServices;
+    readonly IExecutionContextManager _executionContextManager;
     readonly IProjectionsProtocol _protocol;
-    readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
-    readonly FactoryFor<IProjectionPersister> _getProjectionPersister;
-    readonly FactoryFor<IProjectionStore> _getProjectionStore;
-    readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
-    readonly FactoryFor<IResilientStreamProcessorStateRepository> _getStreamProcessorStates;
-    readonly IProjectionKeys _projectionKeys;
-    readonly IPerformActionOnAllTenants _onAllTenants;
-    readonly ILoggerFactory _loggerFactory;
-    readonly ILogger _logger;
+    readonly IProjections _projections;
     readonly IHostApplicationLifetime _hostApplicationLifetime;
+    readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectionsService"/> class.
     /// </summary>
-    /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
-    /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-    /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
-    /// <param name="protocol">The <see cref="IProjectionsProtocol" />.</param>
-    /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants" />.</param>
-    /// <param name="getProjectionPersister">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionPersister" />.</param>
-    /// <param name="getProjectionStore">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStore" />.</param>
-    /// <param name="getProjectionDefinitions">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionDefinitions" />.</param>
-    /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> for <see cref="IResilientStreamProcessorStateRepository" />.</param>
-    /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+    /// <param name="reverseCallServices">The initiator to use to start reverse call protocols.</param>
+    /// <param name="executionContextManager">The execution context manager to use to set the execution context from incoming requests.</param>
+    /// <param name="protocol">The projections protocol to use to parse and create messages.</param>
+    /// <param name="projections">The <see cref="IProjections"/> to use to register projections.</param>
+    /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime"/> to use to stop ongoing reverse calls when the application is shutting down.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public ProjectionsService(
-        IHostApplicationLifetime hostApplicationLifetime,
-        IStreamProcessors streamProcessors,
-        IExecutionContextManager executionContextManager,
         IInitiateReverseCallServices reverseCallServices,
+        IExecutionContextManager executionContextManager,
         IProjectionsProtocol protocol,
-        ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
-        FactoryFor<IProjectionPersister> getProjectionPersister,
-        FactoryFor<IProjectionStore> getProjectionStore,
-        FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
-        FactoryFor<IResilientStreamProcessorStateRepository> getStreamProcessorStates,
-        IProjectionKeys projectionKeys,
-        IPerformActionOnAllTenants onAllTenants,
-        ILoggerFactory loggerFactory)
+        IProjections projections,
+        IHostApplicationLifetime hostApplicationLifetime,
+        ILogger logger)
     {
-        _hostApplicationLifetime = hostApplicationLifetime;
-        _streamProcessors = streamProcessors;
-        _executionContextManager = executionContextManager;
         _reverseCallServices = reverseCallServices;
+        _executionContextManager = executionContextManager;
         _protocol = protocol;
-        _projectionDefinitionComparer = projectionDefinitionComparer;
-        _getProjectionPersister = getProjectionPersister;
-        _getProjectionStore = getProjectionStore;
-        _getProjectionDefinitions = getProjectionDefinitions;
-        _projectionKeys = projectionKeys;
-        _onAllTenants = onAllTenants;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<ProjectionsService>();
-        _getStreamProcessorStates = getStreamProcessorStates;
+        _projections = projections;
+        _hostApplicationLifetime = hostApplicationLifetime;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -99,174 +61,44 @@ public class ProjectionsService : ProjectionsBase
     {
         Log.ConnectingProjections(_logger);
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-        var tryConnect = await _reverseCallServices.Connect(
-            runtimeStream,
-            clientStream,
-            context,
-            _protocol,
-            cts.Token).ConfigureAwait(false);
+        var tryConnect = await _reverseCallServices.Connect(runtimeStream, clientStream, context, _protocol, cts.Token).ConfigureAwait(false);
         if (!tryConnect.Success)
         {
             return;
         }
         var (dispatcher, arguments) = tryConnect.Result;
-        _logger.ReceivedProjection(arguments);
-        _logger.SettingExecutionContext(arguments.ExecutionContext);
-        _executionContextManager.CurrentFor(arguments.ExecutionContext);
+        var executionContext = arguments.ExecutionContext;
+        var definition = arguments.ProjectionDefinition;
+        
+        Log.ReceivedProjectionArguments(_logger, definition.Scope, definition.Projection);
+        _logger.SettingExecutionContext(executionContext);
+        _executionContextManager.CurrentFor(executionContext);
 
-        var registration = TryRegisterProjection(
-            arguments,
-            () => new EventProcessor(
-                arguments.ProjectionDefinition,
-                _getProjectionPersister(),
-                _getProjectionStore(),
-                _projectionKeys,
-                new Projection(
-                    arguments.ProjectionDefinition,
-                    dispatcher),
-                _loggerFactory.CreateLogger<EventProcessor>()),
-            cts.Token);
+        
+        var projection = new Projection(dispatcher, definition, arguments.Alias, arguments.HasAlias);
+        var registration = await _projections.Register(projection, cts.Token);
 
         if (!registration.Success)
         {
-            if (registration.Exception is StreamProcessorAlreadyRegistered)
+            Log.ErrorWhileRegisteringProjection(_logger, definition.Scope, definition.Projection, registration.Exception);
+            await dispatcher.Reject(new ProjectionRegistrationResponse
             {
-                _logger.ProjectionAlreadyRegistered(arguments);
-                var failure = new Failure(
+                Failure = new Failure(
                     ProjectionFailures.FailedToRegisterProjection,
-                    $"Failed to register Projection: {arguments.ProjectionDefinition.Projection.Value}. Event Processor already registered with the same id.");
-                await dispatcher.Reject(new ProjectionRegistrationResponse { Failure = failure }, cts.Token).ConfigureAwait(false);
-                return;
-            }
-            var exception = registration.Exception;
-            ExceptionDispatchInfo.Capture(exception).Throw();
+                    $"Failed to register Projection {projection.Definition.Projection}. {registration.Exception.Message}")
+            }, cts.Token).ConfigureAwait(false);
+            return;
         }
 
-        using var eventProcessorStreamProcessor = registration.Result;
+        using var processor = registration.Result;
+        var reverseCall = dispatcher.Accept(new ProjectionRegistrationResponse(), cts.Token);
+        var processing = processor.Start();
 
-        var tryStart = await TryStartProjection(
-            dispatcher,
-            arguments,
-            eventProcessorStreamProcessor,
-            cts.Token).ConfigureAwait(false);
-        if (!tryStart.Success)
-        {
-            cts.Cancel();
-            var exception = tryStart.Exception;
-            ExceptionDispatchInfo.Capture(exception).Throw();
-        }
-
-        var tasks = tryStart.Result;
-        try
-        {
-            await Task.WhenAny(tasks).ConfigureAwait(false);
-
-            if (tasks.TryGetFirstInnerMostException(out var ex))
-            {
-                _logger.ErrorWhileRunningProjection(ex, arguments);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-            }
-        }
-        finally
-        {
-            cts.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            _logger.ProjectionDisconnected(arguments);
-        }
-    }
-
-    async Task<Try<IEnumerable<Task>>> TryStartProjection(
-        IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
-        ProjectionRegistrationArguments arguments,
-        StreamProcessor eventProcessorStreamProcessor,
-        CancellationToken cancellationToken)
-    {
-        _logger.StartingProjection(arguments);
-        try
-        {
-            var runningDispatcher = dispatcher.Accept(new ProjectionRegistrationResponse(), cancellationToken);
-
-            await ResetIfDefinitionChanged(arguments, cancellationToken).ConfigureAwait(false);
-            await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
-            return new[] { eventProcessorStreamProcessor.Start(), runningDispatcher };
-        }
-        catch (Exception ex)
-        {
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                _logger.ErrorWhileStartingProjection(ex, arguments);
-            }
-
-            return ex;
-        }
-    }
-
-    Try<StreamProcessor> TryRegisterProjection(
-        ProjectionRegistrationArguments arguments,
-        FactoryFor<IEventProcessor> getEventProcessor,
-        CancellationToken cancellationToken)
-    {
-        _logger.RegisteringProjection(arguments);
-        try
-        {
-            return _streamProcessors.TryCreateAndRegister(
-                arguments.ProjectionDefinition.Scope,
-                arguments.ProjectionDefinition.Projection.Value,
-                new EventLogStreamDefinition(),
-                getEventProcessor,
-                cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                _logger.ErrorWhileRegisteringProjection(ex, arguments);
-            }
-
-            return ex;
-        }
-    }
-    async Task ResetIfDefinitionChanged(ProjectionRegistrationArguments arguments, CancellationToken token)
-    {
-        _logger.ComparingProjectionDefintion(arguments);
-        var tenantsAndComparisonResult = await _projectionDefinitionComparer.DiffersFromPersisted(arguments.ProjectionDefinition, token).ConfigureAwait(false);
-
-        await _onAllTenants.PerformAsync(async tenant =>
-        {
-            var comparisonResult = tenantsAndComparisonResult[tenant];
-
-            if (!comparisonResult.Succeeded)
-            {
-                _logger.ResettingProjections(arguments, tenant, comparisonResult.FailureReason);
-
-                var persistedDefinition = await _getProjectionDefinitions()
-                    .TryGet(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token)
-                    .ConfigureAwait(false);
-                if (!persistedDefinition.Success)
-                {
-                    throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
-                }
-
-                await ResetStreamProcessorState(persistedDefinition, token).ConfigureAwait(false);
-
-                if (!await _getProjectionPersister().TryDrop(persistedDefinition, token).ConfigureAwait(false))
-                {
-                    throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
-                }
-            }
-
-            _logger.PersistingProjectionDefinition(arguments, tenant);
-            if (!await _getProjectionDefinitions().TryPersist(arguments.ProjectionDefinition, token).ConfigureAwait(false))
-            {
-                throw new CouldNotPersistProjectionDefinition(arguments.ProjectionDefinition, tenant);
-            }
-        }).ConfigureAwait(false);
-    }
-
-    Task ResetStreamProcessorState(ProjectionDefinition projection, CancellationToken token)
-    {
-        var processorId = new StreamProcessorId(projection.Scope, new EventProcessorId(projection.Projection), StreamId.EventLog);
-        var processorState = StreamProcessorState.New;
-        return _getStreamProcessorStates().Persist(processorId, processorState, token);
+        var tasks = new TaskGroup(reverseCall, processing);
+        
+        tasks.OnFirstTaskFailure += (_, ex) => Log.ErrorWhileRunningProjection(_logger, projection.Definition.Scope, projection.Definition.Projection, ex);
+        tasks.OnAllTasksCompleted += () => Log.ProjectionDisconnected(_logger, projection.Definition.Scope, projection.Definition.Projection);
+        
+        await tasks.WaitForAllCancellingOnFirst(cts).ConfigureAwait(false);
     }
 }

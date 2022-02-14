@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 

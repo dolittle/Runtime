@@ -4,12 +4,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
-using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
-using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -19,31 +17,31 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// </summary>
 public class ProjectionsProtocol : IProjectionsProtocol
 {
+    readonly IConvertProjectionDefinitions _converter;
     readonly IValidateOccurredFormat _occurredFormatValidator;
 
-    public ProjectionsProtocol(IValidateOccurredFormat occurredFormatValidator)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProjectionsProtocol"/> class.
+    /// </summary>
+    /// <param name="converter">The converter to use to convert projection definition fields.</param>
+    public ProjectionsProtocol(IConvertProjectionDefinitions converter, IValidateOccurredFormat occurredFormatValidator)
     {
+        _converter = converter;
         _occurredFormatValidator = occurredFormatValidator;
     }
+
     /// <inheritdoc/>
     public ProjectionRegistrationArguments ConvertConnectArguments(ProjectionRegistrationRequest arguments)
-        => new(
-            arguments.CallContext.ExecutionContext.ToExecutionContext(),
-            new ProjectionDefinition(
-                arguments.ProjectionId.ToGuid(),
-                arguments.ScopeId.ToGuid(),
-                arguments.Events.Select(eventSelector => eventSelector.SelectorCase switch
-                {
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => RuntimeProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => RuntimeProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.StaticKeySelector => RuntimeProjectionEventSelector.Static(eventSelector.EventType.Id.ToGuid(), eventSelector.StaticKeySelector.StaticKey),
-                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventOccurredKeySelector => RuntimeProjectionEventSelector.Occurred(eventSelector.EventType.Id.ToGuid(), eventSelector.EventOccurredKeySelector.Format),
-                    _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
-                }),
-                arguments.InitialState,
-                ConvertCopySpecification(arguments.Copies)
-            ));
+        => arguments.HasAlias switch
+        {
+            true => new ProjectionRegistrationArguments(
+                arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                ConvertProjectionDefinition(arguments),
+                arguments.Alias),
+            false => new ProjectionRegistrationArguments(
+                arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                ConvertProjectionDefinition(arguments)),
+        };
 
     /// <inheritdoc/>
     public ProjectionRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
@@ -124,39 +122,11 @@ public class ProjectionsProtocol : IProjectionsProtocol
         return false;
     }
 
-    static ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)
-    {
-        var mongoDB = CopyToMongoDBSpecification.Default;
-        if (copies?.MongoDB is { } copyToMongoDb)
-        {
-            mongoDB = new CopyToMongoDBSpecification(true, copyToMongoDb.Collection, ConvertPropertyConversions(copyToMongoDb.Conversions));
-        }
-
-        return new ProjectionCopySpecification(mongoDB);
-    }
-
-    static PropertyConversion[] ConvertPropertyConversions(IEnumerable<ProjectionCopyToMongoDB.Types.PropertyConversion> conversions)
-        => conversions.Select(conversion =>
-            new PropertyConversion(
-                conversion.PropertyName,
-                conversion.ConvertTo switch
-                {
-                    ProjectionCopyToMongoDB.Types.BSONType.None => ConversionBSONType.None,
-                    
-                    ProjectionCopyToMongoDB.Types.BSONType.DateAsDate => ConversionBSONType.DateAsDate,
-                    ProjectionCopyToMongoDB.Types.BSONType.DateAsArray => ConversionBSONType.DateAsArray,
-                    ProjectionCopyToMongoDB.Types.BSONType.DateAsDocument => ConversionBSONType.DateAsDocument,
-                    ProjectionCopyToMongoDB.Types.BSONType.DateAsString => ConversionBSONType.DateAsString,
-                    ProjectionCopyToMongoDB.Types.BSONType.DateAsInt64 => ConversionBSONType.DateAsInt64,
-                    
-                    ProjectionCopyToMongoDB.Types.BSONType.GuidasStandardBinary => ConversionBSONType.GuidAsStandardBinary,
-                    ProjectionCopyToMongoDB.Types.BSONType.GuidasCsharpLegacyBinary => ConversionBSONType.GuidAsCsharpLegacyBinary,
-                    ProjectionCopyToMongoDB.Types.BSONType.GuidasString => ConversionBSONType.GuidAsString,
-                    
-                    _ => throw new InvalidMongoDBFieldConversion(conversion.PropertyName, conversion.ConvertTo),
-                },
-                conversion.RenameTo != default,
-                conversion.RenameTo ?? "",
-                ConvertPropertyConversions(conversion.Children))
-            ).ToArray();
+    ProjectionDefinition ConvertProjectionDefinition(ProjectionRegistrationRequest arguments)
+        => new(
+            arguments.ProjectionId.ToGuid(),
+            arguments.ScopeId.ToGuid(),
+            _converter.ToRuntimeEventSelectors(arguments.Events),
+            arguments.InitialState,
+            _converter.ToRuntimeCopySpecification(arguments.Copies));
 }

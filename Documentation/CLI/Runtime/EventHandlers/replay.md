@@ -1,6 +1,6 @@
 ---
 title: Replay
-description: Initiates reprocessing of events for a specific Event Handler currently registered a Client to the Runtime
+description: Initiates reprocessing of events for a specific Event Handler currently registered by Clients to the Runtime
 weight: 30
 repository: https://github.com/dolittle/Runtime
 ---
@@ -16,9 +16,9 @@ dolittle runtime eventhandlers replay all <identifier> [options]
 
 ### Arguments
 
-| Argument | Description                                             |
-|----------|---------------------------------------------------------|
-| `<identifier>`   | The identifier of the Event Handler to replay. Format: id/alias[:scope] |
+| Argument       | Description                                                             |
+|----------------|-------------------------------------------------------------------------|
+| `<identifier>` | The identifier of the Event Handler to replay. Format: id/alias[:scope] |
 
 ### Options
 
@@ -39,10 +39,10 @@ dolittle runtime eventhandlers replay from <identifier> <position> [options]
 
 ### Arguments
 
-| Argument     | Description                                                                                                               |
-|--------------|---------------------------------------------------------------------------------------------------------------------------|
-| `<identifier>`   | The identifier of the Event Handler to replay. Format: id/alias[:scope] |
-| `<position>` | The position _in the Event Handler stream_ to star reprocessing events from. Cannot be greater than the current position. |
+| Argument       | Description                                                                                                               |
+|----------------|---------------------------------------------------------------------------------------------------------------------------|
+| `<identifier>` | The identifier of the Event Handler to replay. Format: id/alias[:scope]                                                   |
+| `<position>`   | The position _in the Event Handler stream_ to star reprocessing events from. Cannot be greater than the current position. |
 
 ### Options
 

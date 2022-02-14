@@ -4,7 +4,9 @@
 using Docker.DotNet;
 using Dolittle.Runtime.CLI.Runtime.Aggregates;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
+using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
+using Dolittle.Runtime.CLI.Runtime.Projections;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.CLI.Runtime;
@@ -23,8 +25,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDockerClient>(provider =>
             new DockerClientConfiguration().CreateClient());
             
-        services.AddEventHandlerServices();
         services.AddAggregatesServices();
+        services.AddEventHandlerServices();
         services.AddEventTypesServices();
+        services.AddEventsProcessingServices();
+        services.AddProjectionServices();
     }
 }

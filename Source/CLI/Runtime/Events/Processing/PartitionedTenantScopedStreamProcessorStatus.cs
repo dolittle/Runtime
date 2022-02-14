@@ -4,18 +4,21 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+namespace Dolittle.Runtime.CLI.Runtime.Events.Processing;
 
 /// <summary>
-/// Represents the status of a Partitioned Event Handler for a specific Tenant.
+/// Represents the status of a Partitioned Stream Processor for a specific Tenant.
 /// </summary>
 /// <param name="TenantId">The identifier of the Tenant.</param>
-/// <param name="Position">The position of the next Event the Event Handler will process.</param>
-/// <param name="FailingPartitions">The failing partitions for the Event Handler.</param>
+/// <param name="Position">The position of the next Event the Stream Processor will process.</param>
+/// <param name="FailingPartitions">The failing partitions for the Stream Processor.</param>
 /// <param name="LastSuccessfullyProcessed">When the last successfully processing of an Event was.</param>
 public record PartitionedTenantScopedStreamProcessorStatus(
         Guid TenantId,
         ulong Position,
         IEnumerable<FailingPartition> FailingPartitions,
         DateTimeOffset LastSuccessfullyProcessed)
-    : TenantScopedStreamProcessorStatus(TenantId, Position, LastSuccessfullyProcessed);
+    : TenantScopedStreamProcessorStatus(
+        TenantId,
+        Position,
+        LastSuccessfullyProcessed);

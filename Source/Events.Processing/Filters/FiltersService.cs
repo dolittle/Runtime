@@ -295,23 +295,12 @@ public class FiltersService : FiltersBase
             ExceptionDispatchInfo.Capture(exception).Throw();
         }
 
-        var tasks = tryStartFilter.Result;
-        try
-        {
-            await Task.WhenAny(tasks).ConfigureAwait(false);
-            if (TryGetException(tasks, out var ex))
-            {
-                _logger.ErrorWhileRunningFilter(ex, filterDefinition.TargetStream, scopeId);
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-            }
-        }
-        finally
-        {
-            linkedTokenSource.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            _logger.FilterStopped(filterDefinition.TargetStream, scopeId);
-        }
+        var tasks = new TaskGroup(tryStartFilter.Result);
+        
+        tasks.OnFirstTaskFailure += (_, ex) => _logger.ErrorWhileRunningFilter(ex, filterDefinition.TargetStream, scopeId);
+        tasks.OnAllTasksCompleted += () => _logger.FilterStopped(filterDefinition.TargetStream, scopeId);
+
+        await tasks.WaitForAllCancellingOnFirst(linkedTokenSource).ConfigureAwait(false);
     }
 
     async Task<Try<IEnumerable<Task>>> TryStartFilter<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
@@ -397,17 +386,6 @@ public class FiltersService : FiltersBase
         var filteredStreamDefinition = new StreamDefinition(filterDefinition);
         _logger.PersistingStreamDefinition(filteredStreamDefinition.StreamId);
         await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
-    }
-
-    bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
-    {
-        exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
-        if (exception != default)
-        {
-            while (exception.InnerException != null) exception = exception.InnerException;
-        }
-
-        return exception != default;
     }
 
     Task WriteFailedRegistrationResponse<TClientMessage, TConnectRequest, TResponse>(

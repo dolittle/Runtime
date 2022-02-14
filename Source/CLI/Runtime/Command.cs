@@ -11,9 +11,10 @@ namespace Dolittle.Runtime.CLI.Runtime;
 /// The "dolittle runtime" command.
 /// </summary>
 [Command("runtime", Description = "Manage a Runtime")]
-[Subcommand(typeof(EventHandlers.Command))]
 [Subcommand(typeof(Aggregates.Command))]
+[Subcommand(typeof(EventHandlers.Command))]
 [Subcommand(typeof(EventTypes.Command))]
+[Subcommand(typeof(Projections.Command))]
 public class Command : CommandBase
 {
     /// <summary>

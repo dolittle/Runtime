@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Tenancy;
 
@@ -14,24 +15,36 @@ namespace Dolittle.Runtime.Tenancy;
 public interface IPerformActionOnAllTenants
 {
     /// <summary>
-    /// Perform an <see cref ="Action" /> for <see cref="ITenants.All" />.
+    /// Perform an action on all tenants.
     /// </summary>
-    /// <param name="action">The <see cref="Action" />.</param>
+    /// <param name="action">The <see cref="Action{TenantId}">action</see> to perform.</param>
     void Perform(Action<TenantId> action);
 
     /// <summary>
-    /// Performs a <see cref="Task" /> for <see cref="ITenants.All" /> sequentially meaning that it will for each tenant
-    /// perform the <see cref="Task" /> and then wait for that to finish before performing for the next Tenant.
+    /// Try to perform an action on all tenants, stopping on the first failure.
     /// </summary>
-    /// <param name="action">The <see cref="Func{T1, TReturn}" /> that returns the <see cref="Task" /> to perform on the <see cref="TenantId" />.</param>
-    /// <returns>The <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task PerformAsync(Func<TenantId, Task> action);
+    /// <param name="action">The <see cref="Func{TenantId, Try}">action</see> to perform.</param>
+    /// <returns>The first <see cref="Try"/> that failed, or success if all succeeded.</returns>
+    Try TryPerform(Func<TenantId, Try> action);
 
     /// <summary>
-    /// Performs a <see cref="Task" /> for <see cref="ITenants.All" /> in parallel meaning that it will
-    /// perform the <see cref="Task" /> for all Tenants at the same time.
+    /// Perform an asynchronous action on all tenants in sequence by waiting for the <see cref="Task"/> for each tenant to complete.
     /// </summary>
-    /// <param name="action">The <see cref="Func{T1, TReturn}" /> that returns the <see cref="Task" /> to perform on the <see cref="TenantId" />.</param>
-    /// <returns>The <see cref="Task" /> representing the asynchronous operation.</returns>
+    /// <param name="action">The <see cref="Func{TenantId, Task}">action</see> to perform.</param>
+    /// <returns>A <see cref="Task"/> that is resolved when the action is performed on all tenants.</returns>
+    Task PerformAsync(Func<TenantId, Task> action);
+    
+    /// <summary>
+    /// Try to perform an asynchronous action on all tenants in sequence by waiting for the <see cref="Task{Try}"/> for each tenant to complete, stopping on the first failure.
+    /// </summary>
+    /// <param name="action">The <see cref="Func{TenantId, Task}">action</see> to perform.</param>
+    /// <returns>A <see cref="Task"/> that, when resolved, returns the first <see cref="Try"/> that failed, or success if all succeeded.</returns>
+    Task<Try> TryPerformAsync(Func<TenantId, Task<Try>> action);
+
+    /// <summary>
+    /// Perform an asynchronous action on all tenants in parallel.
+    /// </summary>
+    /// <param name="action">The <see cref="Func{TenantId, Task}">action</see> to perform.</param>
+    /// <returns>A <see cref="Task"/> that is resolved when the action is performed on all tenants.</returns>
     Task PerformInParallel(Func<TenantId, Task> action);
 }

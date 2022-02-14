@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -14,6 +15,7 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using ManagementContracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
+using TenantScopedStreamProcessorStatus = Dolittle.Runtime.CLI.Runtime.Events.Processing.TenantScopedStreamProcessorStatus;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
 
@@ -23,14 +25,17 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
 public class ManagementClient : IManagementClient
 {
     readonly ICanCreateClients _clients;
+    readonly IConvertStreamProcessorStatus _converter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ManagementClient"/> class.
     /// </summary>
     /// <param name="clients">The client creator to us to create clients that connect to the Runtime.</param>
-    public ManagementClient(ICanCreateClients clients)
+    /// <param name="converter">The converter to use to convert stream processor statuses.</param>
+    public ManagementClient(ICanCreateClients clients, IConvertStreamProcessorStatus converter)
     {
         _clients = clients;
+        _converter = converter;
     }
 
     /// <inheritdoc />
@@ -88,49 +93,31 @@ public class ManagementClient : IManagementClient
         return response.EventHandlers.Select(CreateEventHandlerStatus);
     }
 
+    /// <inheritdoc />
     public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
     {
-        var statuses = await GetAll(runtime, tenant).ConfigureAwait(false);
-        var result = statuses.FirstOrDefault(_ => _.Id.Equals(eventHandler));
-        return result == default ? new NoEventHandlerWithId(eventHandler) : result;
+        var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
+        var request = new GetOneRequest
+        {
+            EventHandlerId = eventHandler.EventHandler.ToProtobuf(),
+            ScopeId = eventHandler.Scope.ToProtobuf(),
+            TenantId = tenant?.ToProtobuf()
+        };
+
+        var response = await client.GetOneAsync(request);
+        if (response.Failure != null)
+        {
+            throw new GetOneEventHandlerFailed(eventHandler, response.Failure.Reason);
+        }
+
+        return CreateEventHandlerStatus(response.EventHandlers);
     }
 
-    static EventHandlerStatus CreateEventHandlerStatus(ManagementContracts.EventHandlerStatus status)
+    EventHandlerStatus CreateEventHandlerStatus(ManagementContracts.EventHandlerStatus status)
         => new(
             new EventHandlerId(status.ScopeId.ToGuid(), status.EventHandlerId.ToGuid()),
             status.EventTypes.Select(_ => new Artifact(_.Id.ToGuid(), _.Generation)),
             status.Partitioned,
             status.Alias,
-            GetStates(status));
-
-    static IEnumerable<TenantScopedStreamProcessorStatus> GetStates(ManagementContracts.EventHandlerStatus status)
-        => status.Tenants.Select(_ => _.StatusCase switch
-        {
-            ManagementContracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Partitioned => CreatePartitionedState(_, _.Partitioned),
-            ManagementContracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Unpartitioned => CreateUnpartitionedState(_, _.Unpartitioned) as TenantScopedStreamProcessorStatus,
-            _ => throw new InvalidTenantScopedStreamProcessorStatusTypeReceived(_.StatusCase),
-        });
-
-    static PartitionedTenantScopedStreamProcessorStatus CreatePartitionedState(ManagementContracts.TenantScopedStreamProcessorStatus status, ManagementContracts.PartitionedTenantScopedStreamProcessorStatus partitionedStatus)
-        => new(
-            status.TenantId.ToGuid(),
-            status.StreamPosition,
-            partitionedStatus.FailingPartitions.Select(_ => new FailingPartition(
-                _.PartitionId,
-                _.StreamPosition,
-                _.FailureReason,
-                _.RetryCount,
-                _.RetryTime.ToDateTimeOffset(),
-                _.LastFailed.ToDateTimeOffset())),
-            status.LastSuccessfullyProcessed.ToDateTimeOffset());
-
-    static UnpartitionedTenantScopedStreamProcessorStatus CreateUnpartitionedState(ManagementContracts.TenantScopedStreamProcessorStatus status, ManagementContracts.UnpartitionedTenantScopedStreamProcessorStatus unpartitionedStatus)
-        => new(
-            status.TenantId.ToGuid(),
-            status.StreamPosition,
-            unpartitionedStatus.IsFailing,
-            unpartitionedStatus.FailureReason,
-            unpartitionedStatus.RetryCount,
-            unpartitionedStatus.RetryTime.ToDateTimeOffset(),
-            status.LastSuccessfullyProcessed.ToDateTimeOffset());
+            _converter.Convert(status.Tenants));
 }

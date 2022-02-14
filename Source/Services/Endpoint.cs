@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Runtime.Collections;
+using Grpc.Reflection;
+using Grpc.Reflection.V1Alpha;
 using Microsoft.Extensions.Logging;
 using grpc = Grpc.Core;
 
@@ -73,6 +76,9 @@ public class Endpoint : IEndpoint
                 _logger.ExposingService(_.Descriptor.FullName);
                 _server.Services.Add(_.ServerDefinition);
             });
+
+            var reflectionService = new ReflectionServiceImpl(services.Select(_ => _.Descriptor));
+            _server.Services.Add(ServerReflection.BindService(reflectionService));
 
             _server.Start();
         }

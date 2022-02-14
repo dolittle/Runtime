@@ -28,6 +28,7 @@ public abstract class AbstractScopedStreamProcessor
     readonly object _setPositionLock = new();
     CancellationTokenSource _resetStreamProcessor;
     TaskCompletionSource<Try<StreamPosition>> _resetStreamProcessorCompletionSource;
+    Func<TenantId, CancellationToken, Task<Try>> _resetStreamProcessorAction;
     IStreamProcessorState _currentState;
     bool _started;
     StreamPosition _newPosition;
@@ -105,8 +106,9 @@ public abstract class AbstractScopedStreamProcessor
     /// from a <see cref="StreamPosition"/> that is higher than the current <see cref="StreamPosition"/>.
     /// </remarks>
     /// <param name="position">The <see cref="StreamPosition"/> to start processing events from.</param>
+    /// <param name="action">The action to perform before setting the position.</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with a <see cref="StreamPosition"/>.</returns>
-    public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamPosition position)
+    public Task<Try<StreamPosition>> PerformActionAndReprocessEventsFrom(StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> action)
     {
         try
         {
@@ -122,6 +124,7 @@ public abstract class AbstractScopedStreamProcessor
                     return Task.FromResult<Try<StreamPosition>>(new AlreadySettingNewStreamProcessorPosition(Identifier));
                 }
                 _newPosition = position;
+                _resetStreamProcessorAction = action;
                 _resetStreamProcessorCompletionSource = tcs;
             }
             
@@ -277,11 +280,24 @@ public abstract class AbstractScopedStreamProcessor
                         }
                         else
                         {
-                            Log.ScopedStreamProcessorSetToPosition(Logger, Identifier, _newPosition);
-                            _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
-                            _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
+                            Log.ScopedStreamProcessorPerformingSetToPositionAction(Logger, Identifier);
+                            var result = await _resetStreamProcessorAction(_tenantId, cancellationToken).ConfigureAwait(false);
+                            if (result.Success)
+                            {
+                                Log.ScopedStreamProcessorSetToPosition(Logger, Identifier, _newPosition);
+                                _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
+                                _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
+                            }
+                            else
+                            {
+                                Log.ScopedStreamProcessorPerformingSetToPositionActionFailed(Logger, Identifier, result.Exception);
+                                _resetStreamProcessorCompletionSource.SetResult(Try<StreamPosition>.Failed(result.Exception));
+                            }
+                            
                         }
+
                         _resetStreamProcessorCompletionSource = default;
+                        _resetStreamProcessorAction = default;
                     }
                     try
                     {

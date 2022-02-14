@@ -6,10 +6,10 @@ using System;
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get;
 
 /// <summary>
-/// Represents a detailed view of an unpartitioned Event Handler state.
+/// Represents a detailed view of an unpartitioned Event Handler Stream Processor state.
 /// </summary>
 /// <param name="Tenant">The Tenant.</param>
-/// <param name="Position">The stream position-</param>
+/// <param name="Position">The stream position.</param>
 /// <param name="Status">The status.</param>
 /// <param name="FailureReason">The reason for failure.</param>
 /// <param name="RetryTime">The retry time.</param>

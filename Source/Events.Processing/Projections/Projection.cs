@@ -15,21 +15,35 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 
 public class Projection : IProjection
 {
-    readonly ProjectionDefinition _projectionDefinition;
     readonly IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> _dispatcher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Projection"/> class.
     /// </summary>
-    /// <param name="projectionDefinition">The <see cref="ProjectionDefinition" />.</param>
     /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> dispatcher to use to send requests to the head.</param>
+    /// <param name="projectionDefinition">The <see cref="ProjectionDefinition" />.</param>
+    /// <param name="alias">The alias of the Projection (if provided) from the Client.</param>
+    /// <param name="hasAlias">A value indicating whether an alias was provided by the Client.</param>
     public Projection(
+        IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
         ProjectionDefinition projectionDefinition,
-        IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher)
+        ProjectionAlias alias,
+        bool hasAlias)
     {
-        _projectionDefinition = projectionDefinition;
+        Definition = projectionDefinition;
         _dispatcher = dispatcher;
+        Alias = alias;
+        HasAlias = hasAlias;
     }
+
+    /// <inheritdoc/>
+    public ProjectionDefinition Definition { get; }
+
+    /// <inheritdoc />
+    public ProjectionAlias Alias { get; }
+
+    /// <inheritdoc />
+    public bool HasAlias { get; }
 
     /// <inheritdoc/>
     public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
@@ -51,7 +65,7 @@ public class Projection : IProjection
         {
             Event = @event.ToProtobuf(),
             PartitionId = partitionId.Value,
-            ScopeId = _projectionDefinition.Scope.ToProtobuf(),
+            ScopeId = Definition.Scope.ToProtobuf(),
         };
         request.CurrentState = state.ToProtobuf();
 

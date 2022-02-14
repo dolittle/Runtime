@@ -6,10 +6,10 @@ using System;
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get;
 
 /// <summary>
-/// Represents a detailed view of a partitioned Event Handler state.
+/// Represents a detailed view of a partitioned Event Handler Stream Processor state.
 /// </summary>
 /// <param name="Tenant">The Tenant.</param>
-/// <param name="Position">The stream position-</param>
+/// <param name="Position">The stream position.</param>
 /// <param name="Status">The status.</param>
 /// <param name="LastSuccessfulOrFailedProcessing">When the last event was successfully processed or failed processing.</param>
 /// <param name="Partition">The Partition identifier.</param>
