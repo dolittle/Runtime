@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
-        <AutofacVersion>5.0.0</AutofacVersion>
-        <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
+        <AutofacVersion>6.3.0</AutofacVersion>
+        <AutofacExtensionsVersion>7.2.0</AutofacExtensionsVersion>
         <ConsoleTablesVersion>2.4.2</ConsoleTablesVersion>
         <ContractsVersion>6.8.0</ContractsVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
