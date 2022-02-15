@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.DependencyInversion;
+using System;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -19,9 +19,9 @@ public class all_dependencies
 {
     protected static ExecutionContext execution_context;
     protected static Mock<IExecutionContextManager> execution_context_manager;
-    protected static Mock<FactoryFor<IEventStore>> factory_for_event_store;
-    protected static Mock<FactoryFor<IEmbeddingStore>> factory_for_embedding_store;
-    protected static Mock<FactoryFor<IStreamEventWatcher>> factory_for_stream_event_watcher;
+    protected static Mock<Func<IEventStore>> factory_for_event_store;
+    protected static Mock<Func<IEmbeddingStore>> factory_for_embedding_store;
+    protected static Mock<Func<IStreamEventWatcher>> factory_for_stream_event_watcher;
     protected static Mock<IDetectEmbeddingLoops> detect_embedding_loops;
     protected static Mock<ICompareStates> compare_states;
     protected static EmbeddingProcessorFactory factory;
@@ -44,11 +44,11 @@ public class all_dependencies
         execution_context_manager
             .Setup(_ => _.CurrentFor(It.IsAny<ExecutionContext>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
             .Returns<ExecutionContext, string, int, string>((context, _, _, _) => context);
-        factory_for_event_store = new Mock<FactoryFor<IEventStore>>();
+        factory_for_event_store = new Mock<Func<IEventStore>>();
         factory_for_event_store.Setup(_ => _.Invoke()).Returns(Mock.Of<IEventStore>());
-        factory_for_embedding_store = new Mock<FactoryFor<IEmbeddingStore>>();
+        factory_for_embedding_store = new Mock<Func<IEmbeddingStore>>();
         factory_for_embedding_store.Setup(_ => _.Invoke()).Returns(Mock.Of<IEmbeddingStore>());
-        factory_for_stream_event_watcher = new Mock<FactoryFor<IStreamEventWatcher>>();
+        factory_for_stream_event_watcher = new Mock<Func<IStreamEventWatcher>>();
         factory_for_stream_event_watcher.Setup(_ => _.Invoke()).Returns(Mock.Of<IStreamEventWatcher>());
         detect_embedding_loops = new Mock<IDetectEmbeddingLoops>();
         compare_states = new Mock<ICompareStates>();

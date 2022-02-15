@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.State;
@@ -20,16 +20,16 @@ namespace Dolittle.Runtime.Projections.Store.Services;
 [Singleton]
 public class ProjectionsService : IProjectionsService
 {
-    readonly FactoryFor<IProjectionStore> _getProjectionStore;
+    readonly Func<IProjectionStore> _getProjectionStore;
     readonly IExecutionContextManager _executionContextManager;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EventStoreService"/> class.
+    /// Initializes a new instance of the <see cref="ProjectionsService"/> class.
     /// </summary>
-    /// <param name="getProjectionStore"><see cref="FactoryFor{T}"/><see cref="IProjectionStore" />.</param>
+    /// <param name="getProjectionStore"><see cref="Func{T}"/><see cref="IProjectionStore" />.</param>
     /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
     public ProjectionsService(
-        FactoryFor<IProjectionStore> getProjectionStore,
+        Func<IProjectionStore> getProjectionStore,
         IExecutionContextManager executionContextManager
     )
     {

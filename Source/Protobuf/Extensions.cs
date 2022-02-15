@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Rudimentary;
 using Google.Protobuf;
 using FailureContract = Dolittle.Protobuf.Contracts.Failure;
@@ -33,10 +34,10 @@ public static class Extensions
         };
 
     /// <summary>
-    /// Convert a <see cref="ConceptAs{T}"/> of type <see cref="Guid"/> to <see cref="Contracts.Uuid"/>.
+    /// Convert a <see cref="ConceptAs{T}"/> of type <see cref="Guid"/> to <see cref="Uuid"/>.
     /// </summary>
     /// <param name="id"><see cref="ConceptAs{T}"/> of type <see cref="Guid"/> to convert.</param>
-    /// <returns>Converted <see cref="Contracts.Uuid"/>.</returns>
+    /// <returns>Converted <see cref="Uuid"/>.</returns>
     public static UuidContract ToProtobuf(this ConceptAs<Guid> id) => id.Value.ToProtobuf();
 
     /// <summary>

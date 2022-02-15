@@ -3,7 +3,7 @@
 
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.ResourceTypes.Configuration;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -19,10 +19,10 @@ public class DatabaseConnection
     /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
     /// </summary>
-    /// <param name="configuration">A <see cref="IConfigurationFor{EmbeddingsConfiguration}"/> with database connection parameters.</param>
-    public DatabaseConnection(IConfigurationFor<EmbeddingsConfiguration> configuration)
+    /// <param name="configuration">A <see cref="IOptions{TOptions}"/> with database connection parameters.</param>
+    public DatabaseConnection(IOptions<EmbeddingsConfiguration> configuration)
     {
-        var config = configuration.Instance;
+        var config = configuration.Value;
         var settings = new MongoClientSettings
         {
             Servers = config.Servers.Select(_ => MongoServerAddress.Parse(_)),

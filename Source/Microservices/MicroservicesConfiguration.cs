@@ -5,23 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.Microservices;
 
 /// <summary>
 /// Represents the configuration for microservices.
 /// </summary>
-[Name(ConfigurationName)]
 public class MicroservicesConfiguration :
-    ReadOnlyDictionary<Guid, MicroserviceAddressConfiguration>,
-    IConfigurationObject
+    ReadOnlyDictionary<Guid, MicroserviceAddressConfiguration>
 {
-    /// <summary>
-    /// The name of the <see cref="IConfigurationObject" />.
-    /// </summary>
-    public const string ConfigurationName = "microservices";
-
     /// <summary>
     /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.
     /// </summary>

@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management.Contracts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
@@ -21,13 +20,13 @@ namespace Dolittle.Runtime.Aggregates.Management;
 public class AggregateRootsService : AggregateRootsBase
 {
     readonly IGetTenantScopedAggregateRoot _tenantScopedAggregateRoot;
-    readonly FactoryFor<IEventStore> _getEventStore;
+    readonly Func<IEventStore> _getEventStore;
     readonly IExecutionContextManager _executionContextManager;
     readonly ILogger _logger;
         
     public AggregateRootsService(
         IGetTenantScopedAggregateRoot tenantScopedAggregateRoot,
-        FactoryFor<IEventStore> getEventStore,
+        Func<IEventStore> getEventStore,
         IExecutionContextManager executionContextManager,
         ILogger logger)
     {

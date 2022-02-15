@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
@@ -22,8 +21,8 @@ public class all_dependencies
     protected static StreamProcessorId stream_processor_id;
     protected static IPerformActionOnAllTenants on_all_tenants;
     protected static IStreamDefinition stream_definition;
-    protected static Mock<FactoryFor<IEventProcessor>> get_event_processor;
-    protected static Mock<FactoryFor<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
+    protected static Mock<Func<IEventProcessor>> get_event_processor;
+    protected static Mock<Func<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
     protected static Mock<ICreateScopedStreamProcessors> scoped_stream_processors_creator;
     protected static Mock<IExecutionContextManager> execution_context_manager;
     protected static StreamProcessor stream_processor;
@@ -36,9 +35,9 @@ public class all_dependencies
         tenants = new Mock<ITenants>();
         execution_context_manager = new Mock<IExecutionContextManager>();
         scoped_stream_processors_creator = new Mock<ICreateScopedStreamProcessors>();
-        get_scoped_stream_processors_creator = new Mock<FactoryFor<ICreateScopedStreamProcessors>>();
+        get_scoped_stream_processors_creator = new Mock<Func<ICreateScopedStreamProcessors>>();
         get_scoped_stream_processors_creator.Setup(_ => _.Invoke()).Returns(scoped_stream_processors_creator.Object);
-        get_event_processor = new Mock<FactoryFor<IEventProcessor>>();
+        get_event_processor = new Mock<Func<IEventProcessor>>();
         on_all_tenants = new PerformActionOnAllTenants(tenants.Object, execution_context_manager.Object);
         scoped_stream_processors_creator
             .Setup(_ => _.Create(Moq.It.IsAny<IStreamDefinition>(), Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IEventProcessor>(), Moq.It.IsAny<CancellationToken>()))

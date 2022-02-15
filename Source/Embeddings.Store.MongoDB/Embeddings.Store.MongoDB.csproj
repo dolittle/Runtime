@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+  <Import Project="../../default.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Embeddings.Store.MongoDB</AssemblyName>
@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)"/>
+    <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -25,13 +25,9 @@ public class when_providing_from_two_providers_with_two_collectors_each
         var firstProvider = new Mock<ICanProvideMetrics>();
         var secondProvider = new Mock<ICanProvideMetrics>();
 
-        var providerInstances = new StaticInstancesOf<ICanProvideMetrics>(
-            firstProvider.Object,
-            secondProvider.Object);
-
         metric_factory = new Mock<IMetricFactory>();
 
-        providers = new MetricProviders(providerInstances, metric_factory.Object);
+        providers = new MetricProviders(new []{ firstProvider.Object, secondProvider.Object}, metric_factory.Object);
 
         first_provider_first_collector = Prometheus.Metrics.CreateCounter("FirstFirst", "");
         first_provider_second_collector = Prometheus.Metrics.CreateCounter("FirstSecond", "");

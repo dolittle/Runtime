@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Applications.Configuration;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
@@ -37,8 +36,8 @@ public class ConsumerService : ConsumerBase, IDisposable
     readonly IExecutionContextManager _executionContextManager;
     readonly EventHorizonConsentsConfiguration _eventHorizonConsents;
     readonly ITenants _tenants;
-    readonly FactoryFor<IEventFetchers> _getEventFetchers;
-    readonly FactoryFor<IStreamEventWatcher> _getStreamWatcher;
+    readonly Func<IEventFetchers> _getEventFetchers;
+    readonly Func<IStreamEventWatcher> _getStreamWatcher;
     readonly IInitiateReverseCallServices _reverseCalls;
     readonly IConsumerProtocol _protocol;
     readonly IMetricsCollector _metrics;
@@ -53,8 +52,8 @@ public class ConsumerService : ConsumerBase, IDisposable
     /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
     /// <param name="eventHorizonConsents">The <see cref="EventHorizonConsentsConfiguration" />.</param>
     /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-    /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
-    /// <param name="getStreamWatcher">The <see cref="FactoryFor{T}" /> <see cref="IStreamEventWatcher" />.</param>
+    /// <param name="getEventFetchers">The <see cref="Func{T}" /> <see cref="IEventFetchers" />.</param>
+    /// <param name="getStreamWatcher">The <see cref="Func{T}" /> <see cref="IStreamEventWatcher" />.</param>
     /// <param name="reverseCalls">The <see cref="IInitiateReverseCallServices" />.</param>
     /// <param name="protocol">The <see cref="IConsumerProtocol" />.</param>
     /// <param name="metrics">The system for capturing metrics.</param>
@@ -64,8 +63,8 @@ public class ConsumerService : ConsumerBase, IDisposable
         IExecutionContextManager executionContextManager,
         EventHorizonConsentsConfiguration eventHorizonConsents,
         ITenants tenants,
-        FactoryFor<IEventFetchers> getEventFetchers,
-        FactoryFor<IStreamEventWatcher> getStreamWatcher,
+        Func<IEventFetchers> getEventFetchers,
+        Func<IStreamEventWatcher> getStreamWatcher,
         IInitiateReverseCallServices reverseCalls,
         IConsumerProtocol protocol,
         IMetricsCollector metrics,

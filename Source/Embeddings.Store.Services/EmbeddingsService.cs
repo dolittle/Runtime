@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
@@ -19,16 +19,16 @@ namespace Dolittle.Runtime.Embeddings.Store.Services;
 [Singleton]
 public class EmbeddingsService : IEmbeddingsService
 {
-    readonly FactoryFor<IEmbeddingStore> _getEmbeddingStore;
+    readonly Func<IEmbeddingStore> _getEmbeddingStore;
     readonly IExecutionContextManager _executionContextManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingsService"/> class.
     /// </summary>
-    /// <param name="getEmbeddingStore"><see cref="FactoryFor{T}"/><see cref="IEmbeddingStore" />.</param>
+    /// <param name="getEmbeddingStore"><see cref="Func{T}"/><see cref="IEmbeddingStore" />.</param>
     /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
     public EmbeddingsService(
-        FactoryFor<IEmbeddingStore> getEmbeddingStore,
+        Func<IEmbeddingStore> getEmbeddingStore,
         IExecutionContextManager executionContextManager)
     {
         _getEmbeddingStore = getEmbeddingStore;

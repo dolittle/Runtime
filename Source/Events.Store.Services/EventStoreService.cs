@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.Services;
 [Singleton]
 public class EventStoreService : IEventStoreService
 {
-    readonly FactoryFor<IEventStore> _eventStoreFactory;
+    readonly Func<IEventStore> _eventStoreFactory;
     readonly IExecutionContextManager _executionContextManager;
     readonly ILogger _logger;
 
@@ -31,7 +30,7 @@ public class EventStoreService : IEventStoreService
     /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
     /// <param name="logger"><see cref="ILogger"/> for logging.</param>
     public EventStoreService(
-        FactoryFor<IEventStore> eventStoreFactory,
+        Func<IEventStore> eventStoreFactory,
         IExecutionContextManager executionContextManager,
         ILogger logger)
     {

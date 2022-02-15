@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Tenancy;
@@ -20,18 +19,18 @@ namespace Dolittle.Runtime.Aggregates.Management;
 [Singleton]
 public class GetTenantScopedAggregateRoot : IGetTenantScopedAggregateRoot
 {
-    readonly FactoryFor<IAggregateRootInstances> _getAggregateRootInstances;
+    readonly Func<IAggregateRootInstances> _getAggregateRootInstances;
     readonly IAggregateRoots _aggregateRoots;
     readonly IPerformActionOnAllTenants _onAllTenants;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetTenantScopedAggregateRoot"/> class.
     /// </summary>
-    /// <param name="getAggregateRootInstances">The <see cref="FactoryFor{T}"/> <see cref="IAggregateRootInstances"/>./></param>
+    /// <param name="getAggregateRootInstances">The <see cref="Func{T}"/> <see cref="IAggregateRootInstances"/>./></param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots"/>.</param>
     /// <param name="onAllTenants">The performer to use to fetch aggregate root instances for all tenants.</param>
     public GetTenantScopedAggregateRoot(
-        FactoryFor<IAggregateRootInstances> getAggregateRootInstances,
+        Func<IAggregateRootInstances> getAggregateRootInstances,
         IAggregateRoots aggregateRoots,
         IPerformActionOnAllTenants onAllTenants)
     {

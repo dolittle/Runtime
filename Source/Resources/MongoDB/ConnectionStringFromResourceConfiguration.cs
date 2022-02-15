@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.ResourceTypes.Configuration;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Resources.MongoDB;
@@ -17,10 +17,10 @@ public class ConnectionStringFromResourceConfiguration : IKnowTheConnectionStrin
     /// <summary>
     /// Initializes a new instance of the <see cref="ConnectionStringFromResourceConfiguration"/> class. 
     /// </summary>
-    /// <param name="configuration">The <see cref="IConfigurationFor{T}"/> of type <see cref="ResourceConfiguration"/> to use.</param>
-    public ConnectionStringFromResourceConfiguration(IConfigurationFor<ResourceConfiguration> configuration)
+    /// <param name="configuration">The <see cref="IOptions{T}"/> of type <see cref="ResourceConfiguration"/> to use.</param>
+    public ConnectionStringFromResourceConfiguration(IOptions<ResourceConfiguration> configuration)
     {
-        ConnectionString = BuildConnectionString(configuration.Instance);
+        ConnectionString = BuildConnectionString(configuration.Value);
     }
 
     /// <inheritdoc />

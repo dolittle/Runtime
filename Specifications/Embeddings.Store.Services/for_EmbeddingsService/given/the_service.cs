@@ -1,9 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Globalization;
 using System.Threading;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store;
 using Machine.Specifications;
@@ -19,7 +19,7 @@ public class the_service
     protected static ExecutionContext execution_context;
     protected static CancellationToken cancellation_token;
     protected static EmbeddingCurrentState a_current_state;
-    protected static FactoryFor<IEmbeddingStore> get_embedding_store;
+    protected static Func<IEmbeddingStore> get_embedding_store;
     protected static Mock<IExecutionContextManager> execution_context_manager;
     protected static Mock<IEmbeddingStore> embedding_store;
     protected static EmbeddingsService service;

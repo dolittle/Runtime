@@ -5,7 +5,7 @@ using System.Linq;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.ResourceTypes.Configuration;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
@@ -30,10 +30,10 @@ public class DatabaseConnection
     /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
     /// </summary>
-    /// <param name="configuration">A <see cref="IConfigurationFor{EventStoreConfiguration}"/> with database connection parameters.</param>
-    public DatabaseConnection(IConfigurationFor<EventStoreConfiguration> configuration)
+    /// <param name="configuration">A <see cref="IOptions{TOptions}"/> with database connection parameters.</param>
+    public DatabaseConnection(IOptions<EventStoreConfiguration> configuration)
     {
-        var config = configuration.Instance;
+        var config = configuration.Value;
         var settings = new MongoClientSettings
         {
             Servers = config.Servers.Select(MongoServerAddress.Parse),

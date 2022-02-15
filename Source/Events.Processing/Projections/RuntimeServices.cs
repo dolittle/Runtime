@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;

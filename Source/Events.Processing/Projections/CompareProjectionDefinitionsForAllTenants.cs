@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.Definition.Copies;
@@ -24,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefinitionsForAllTenants
 {
     readonly IPerformActionOnAllTenants _onTenants;
-    readonly FactoryFor<IProjectionDefinitions> _getDefinitions;
+    readonly Func<IProjectionDefinitions> _getDefinitions;
 
     /// <summary>
     /// Initializes an instance of the <see cref="CompareProjectionDefinitionsForAllTenants" /> class.
@@ -33,7 +32,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
     /// <param name="getDefinitions">The factory for getting projection definitions.</param>
     public CompareProjectionDefinitionsForAllTenants(
         IPerformActionOnAllTenants onTenants,
-        FactoryFor<IProjectionDefinitions> getDefinitions)
+        Func<IProjectionDefinitions> getDefinitions)
     {
         _onTenants = onTenants;
         _getDefinitions = getDefinitions;

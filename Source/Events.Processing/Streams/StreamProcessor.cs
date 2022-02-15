@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
@@ -25,9 +24,9 @@ public class StreamProcessor : IDisposable
     readonly StreamProcessorId _identifier;
     readonly IPerformActionOnAllTenants _onAllTenants;
     readonly IStreamDefinition _streamDefinition;
-    readonly FactoryFor<IEventProcessor> _getEventProcessor;
+    readonly Func<IEventProcessor> _getEventProcessor;
     readonly Action _unregister;
-    readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
+    readonly Func<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
     readonly IExecutionContextManager _executionContextManager;
     readonly ILogger<StreamProcessor> _logger;
     readonly CancellationTokenSource _stopAllScopedStreamProcessorsTokenSource;
@@ -51,9 +50,9 @@ public class StreamProcessor : IDisposable
         StreamProcessorId streamProcessorId,
         IPerformActionOnAllTenants onAllTenants,
         IStreamDefinition streamDefinition,
-        FactoryFor<IEventProcessor> getEventProcessor,
+        Func<IEventProcessor> getEventProcessor,
         Action unregister,
-        FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
+        Func<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
         IExecutionContextManager executionContextManager,
         ILogger<StreamProcessor> logger,
         CancellationToken cancellationToken)

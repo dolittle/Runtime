@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
@@ -26,7 +25,7 @@ public class StreamProcessors : IStreamProcessors
 {
     readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
     readonly IPerformActionOnAllTenants _onAllTenants;
-    readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
+    readonly Func<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
     readonly IExecutionContextManager _executionContextManager;
     readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
@@ -35,12 +34,12 @@ public class StreamProcessors : IStreamProcessors
     /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
     /// </summary>
     /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-    /// <param name="getScopedStreamProcessorsCreator">The <see cref="FactoryFor{T}" /> <see cref="ICreateScopedStreamProcessors" />.</param>
+    /// <param name="getScopedStreamProcessorsCreator">The <see cref="Func{T}" /> <see cref="ICreateScopedStreamProcessors" />.</param>
     /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public StreamProcessors(
         IPerformActionOnAllTenants onAllTenants,
-        FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
+        Func<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
         IExecutionContextManager executionContextManager,
         ILoggerFactory loggerFactory)
     {
@@ -57,7 +56,7 @@ public class StreamProcessors : IStreamProcessors
         ScopeId scopeId,
         EventProcessorId eventProcessorId,
         IStreamDefinition sourceStreamDefinition,
-        FactoryFor<IEventProcessor> getEventProcessor,
+        Func<IEventProcessor> getEventProcessor,
         CancellationToken cancellationToken)
     {
         try

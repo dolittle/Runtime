@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
@@ -22,10 +22,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 [Singleton]
 public class FilterValidators : IFilterValidators
 {
-    readonly ITypeFinder _typeFinder;
     readonly IContainer _container;
-    readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
-    readonly FactoryFor<IFilterDefinitions> _getFilterDefinitions;
+    readonly Func<IStreamProcessorStateRepository> _getStreamProcessorStates;
+    readonly Func<IFilterDefinitions> _getFilterDefinitions;
     readonly IExecutionContextManager _executionContextManager;
     readonly ICompareFilterDefinitions _definitionComparer;
     readonly ILogger _logger;
@@ -34,23 +33,21 @@ public class FilterValidators : IFilterValidators
     /// <summary>
     /// Initializes a new instance of the <see cref="FilterValidators"/> class.
     /// </summary>
-    /// <param name="typeFinder">The <see cref="ITypeFinder" />.</param>
     /// <param name="container">The <see cref="IContainer" />.</param>
-    /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository"/>.</param>
-    /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitions" />.</param>
+    /// <param name="getStreamProcessorStates">The <see cref="Func{T}" /> <see cref="IStreamProcessorStateRepository"/>.</param>
+    /// <param name="getFilterDefinitions">The <see cref="Func{T}" /> <see cref="IFilterDefinitions" />.</param>
     /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
     /// <param name="definitionComparer">The <see cref="ICompareFilterDefinitions" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public FilterValidators(
-        ITypeFinder typeFinder,
+        //TODO: This used the ITypeFinder to find filter validators for filter definitions
         IContainer container,
-        FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-        FactoryFor<IFilterDefinitions> getFilterDefinitions,
+        Func<IStreamProcessorStateRepository> getStreamProcessorStates,
+        Func<IFilterDefinitions> getFilterDefinitions,
         IExecutionContextManager executionContextManager,
         ICompareFilterDefinitions definitionComparer,
         ILogger logger)
     {
-        _typeFinder = typeFinder;
         _container = container;
         _getStreamProcessorStates = getStreamProcessorStates;
         _getFilterDefinitions = getFilterDefinitions;
@@ -147,46 +144,53 @@ public class FilterValidators : IFilterValidators
 
     void PopulateFilterValidatorMap()
     {
-        _typeFinder.FindMultiple<IFilterDefinition>().ForEach(filterDefinitionType =>
-        {
-            if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
-            {
-                _logger.FoundValidatorForFilter(filterDefinitionType, validatorType);
-                _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
-            }
-        });
+        // TODO: Do this another way
+        // _typeFinder.FindMultiple<IFilterDefinition>().ForEach(filterDefinitionType =>
+        // {
+        //     if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
+        //     {
+        //         _logger.FoundValidatorForFilter(filterDefinitionType, validatorType);
+        //         _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
+        //     }
+        // });
     }
 
     bool TryGetValidatorTypeFor(Type filterDefinitionType, out Type validatorType)
     {
-        var implementations = _typeFinder.FindMultiple(typeof(ICanValidateFilterFor<>).MakeGenericType(filterDefinitionType));
-        if (implementations.Any())
-        {
-            if (implementations.Count() > 1)
-            {
-                _logger.MultipleValidatorsForFilter(
-                    filterDefinitionType,
-                    implementations);
-            }
-
-            validatorType = implementations.First();
-            return true;
-        }
-
+        // TODO: Do this another way
         validatorType = null;
+        // var implementations = _typeFinder.FindMultiple(typeof(ICanValidateFilterFor<>).MakeGenericType(filterDefinitionType));
+        // if (implementations.Any())
+        // {
+        //     if (implementations.Count() > 1)
+        //     {
+        //         _logger.MultipleValidatorsForFilter(
+        //             filterDefinitionType,
+        //             implementations);
+        //     }
+        //
+        //     validatorType = implementations.First();
+        //     return true;
+        // }
+        //
+        // validatorType = null;
+        // return false;
         return false;
     }
 
     bool TryGetValidatorFor<TDefinition>(out ICanValidateFilterFor<TDefinition> validator)
         where TDefinition : IFilterDefinition
     {
-        if (_filterDefinitionToValidatorMap.TryGetValue(typeof(TDefinition), out var validatorType))
-        {
-            validator = _container.Get(validatorType) as ICanValidateFilterFor<TDefinition>;
-            return true;
-        }
-
         validator = null;
+        // TODO: Do this another way.
+        // if (_filterDefinitionToValidatorMap.TryGetValue(typeof(TDefinition), out var validatorType))
+        // {
+        //     validator = _container.Get(validatorType) as ICanValidateFilterFor<TDefinition>;
+        //     return true;
+        // }
+        //
+        // validator = null;
+        // return false;
         return false;
     }
 }

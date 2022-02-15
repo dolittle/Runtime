@@ -1,9 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
@@ -26,7 +26,7 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     /// </summary>
     /// <param name="scope">The <see cref="ScopeId" />.</param>
     /// <param name="filterDefinition">The <see typeparam="TDefinition"/> <see cref="IFilterDefinition" /> for the filter processor.</param>
-    /// <param name="eventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
+    /// <param name="eventsToStreamsWriter">The <see cref="Func{TResult}" />.</param>
     /// <param name="logger"><see cref="ILogger" />.</param>
     protected AbstractFilterProcessor(
         ScopeId scope,

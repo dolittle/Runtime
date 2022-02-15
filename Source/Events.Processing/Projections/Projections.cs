@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -33,10 +32,10 @@ public class Projections : IProjections
     
     readonly IStreamProcessors _streamProcessors;
     readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
-    readonly FactoryFor<IProjectionPersister> _getProjectionPersister;
-    readonly FactoryFor<IProjectionStore> _getProjectionStore;
-    readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
-    readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
+    readonly Func<IProjectionPersister> _getProjectionPersister;
+    readonly Func<IProjectionStore> _getProjectionStore;
+    readonly Func<IProjectionDefinitions> _getProjectionDefinitions;
+    readonly Func<IStreamProcessorStateRepository> _getStreamProcessorStates;
     readonly IProjectionKeys _projectionKeys;
     readonly IPerformActionOnAllTenants _onAllTenants;
     readonly ILoggerFactory _loggerFactory;
@@ -47,20 +46,20 @@ public class Projections : IProjections
     /// </summary>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors"/> to use for registering the Projections stream processors.</param>
     /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants"/> to use to decide if Projections need to be replayed when registered.</param>
-    /// <param name="getProjectionPersister">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IProjectionPersister"/> to use to persist Projection read models.</param>
-    /// <param name="getProjectionStore">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IProjectionStore"/> to use to get the current state while processing events.</param>
-    /// <param name="getProjectionDefinitions">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IProjectionDefinitions"/> to use to persist new definitions.</param>
-    /// <param name="getStreamProcessorStates">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IStreamProcessorStateRepository"/> to use to reset the stream processor if a Projection definition has been changed.</param>
+    /// <param name="getProjectionPersister">A <see cref="Func{T}"/> to resolve the <see cref="IProjectionPersister"/> to use to persist Projection read models.</param>
+    /// <param name="getProjectionStore">A <see cref="Func{T}"/> to resolve the <see cref="IProjectionStore"/> to use to get the current state while processing events.</param>
+    /// <param name="getProjectionDefinitions">A <see cref="Func{T}"/> to resolve the <see cref="IProjectionDefinitions"/> to use to persist new definitions.</param>
+    /// <param name="getStreamProcessorStates">A <see cref="Func{T}"/> to resolve the <see cref="IStreamProcessorStateRepository"/> to use to reset the stream processor if a Projection definition has been changed.</param>
     /// <param name="projectionKeys">The <see cref="IProjectionKeys"/> to use to resolve the <see cref="ProjectionKey"/> for events.</param>
     /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants"/> to use to perform actions in the execution context of tenants.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use to create loggers.</param>
     public Projections(
         IStreamProcessors streamProcessors,
         ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
-        FactoryFor<IProjectionPersister> getProjectionPersister,
-        FactoryFor<IProjectionStore> getProjectionStore,
-        FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
-        FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
+        Func<IProjectionPersister> getProjectionPersister,
+        Func<IProjectionStore> getProjectionStore,
+        Func<IProjectionDefinitions> getProjectionDefinitions,
+        Func<IStreamProcessorStateRepository> getStreamProcessorStates,
         IProjectionKeys projectionKeys,
         IPerformActionOnAllTenants onAllTenants,
         ILoggerFactory loggerFactory)

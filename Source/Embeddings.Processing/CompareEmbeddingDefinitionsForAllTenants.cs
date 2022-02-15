@@ -1,12 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinitionsForAllTenants
 {
     readonly IPerformActionOnAllTenants _onTenants;
-    readonly FactoryFor<IEmbeddingDefinitions> _getDefinitions;
+    readonly Func<IEmbeddingDefinitions> _getDefinitions;
 
     /// <summary>
     /// Initializes an instance of the <see cref="CompareEmbeddingDefinitionsForAllTenants" /> class.
@@ -29,7 +29,7 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
     /// <param name="getDefinitions">The factory for getting Embedding definitions.</param>
     public CompareEmbeddingDefinitionsForAllTenants(
         IPerformActionOnAllTenants onTenants,
-        FactoryFor<IEmbeddingDefinitions> getDefinitions)
+        Func<IEmbeddingDefinitions> getDefinitions)
     {
         _onTenants = onTenants;
         _getDefinitions = getDefinitions;

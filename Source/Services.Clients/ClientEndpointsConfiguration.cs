@@ -3,17 +3,14 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.Services.Clients;
 
 /// <summary>
 /// Represents the configuration for clients by their <see cref="EndpointVisibility"/>.
 /// </summary>
-[Name("clients")]
 public class ClientEndpointsConfiguration :
-    ReadOnlyDictionary<EndpointVisibility, ClientEndpointConfiguration>,
-    IConfigurationObject
+    ReadOnlyDictionary<EndpointVisibility, ClientEndpointConfiguration>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ClientEndpointsConfiguration"/> class.

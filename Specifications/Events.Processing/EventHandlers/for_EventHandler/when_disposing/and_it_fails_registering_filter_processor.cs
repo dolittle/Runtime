@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -21,7 +20,7 @@ public class and_it_fails_registering_filter_processor : given.an_event_handler
                 event_handler.Scope,
                 event_handler.EventProcessor,
                 IsAny<EventLogStreamDefinition>(),
-                IsAny<FactoryFor<IEventProcessor>>(),
+                IsAny<Func<IEventProcessor>>(),
                 IsAny<CancellationToken>()
             )).Returns(new Exception(""));
     };
@@ -38,7 +37,7 @@ public class and_it_fails_registering_filter_processor : given.an_event_handler
             event_handler.Scope,
             event_handler.EventProcessor,
             IsAny<EventLogStreamDefinition>(),
-            IsAny<FactoryFor<IEventProcessor>>(),
+            IsAny<Func<IEventProcessor>>(),
             IsAny<CancellationToken>()), Moq.Times.Once());
 
     It should_skip_trying_to_register_event_processor = () => stream_processors.Verify(_ => _
@@ -46,6 +45,6 @@ public class and_it_fails_registering_filter_processor : given.an_event_handler
             event_handler.Scope,
             event_handler.EventProcessor,
             event_handler.FilteredStreamDefinition,
-            IsAny<FactoryFor<IEventProcessor>>(),
+            IsAny<Func<IEventProcessor>>(),
             IsAny<CancellationToken>()), Moq.Times.Never());
 }

@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Runtime.DependencyInversion;
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;

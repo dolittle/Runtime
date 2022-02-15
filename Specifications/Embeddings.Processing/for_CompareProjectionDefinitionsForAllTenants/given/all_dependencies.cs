@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Tenancy;
@@ -18,7 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionDefinition
 public class all_dependencies
 {
     protected static IExecutionContextManager execution_context_manager;
-    protected static FactoryFor<IEmbeddingDefinitions> get_definitions;
+    protected static Func<IEmbeddingDefinitions> get_definitions;
     protected static ITenants tenants;
     protected static Dictionary<TenantId, Mock<IEmbeddingDefinitions>> embedding_definitions_per_tenant;
 

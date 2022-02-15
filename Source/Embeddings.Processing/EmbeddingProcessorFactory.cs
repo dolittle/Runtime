@@ -1,8 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -20,9 +20,9 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
 {
     readonly IExecutionContextManager _executionContextManager;
-    readonly FactoryFor<IEventStore> _eventStoreFactory;
-    readonly FactoryFor<IEmbeddingStore> _embeddingStoreFactory;
-    readonly FactoryFor<IStreamEventWatcher> _streamEventWatcherFactory;
+    readonly Func<IEventStore> _eventStoreFactory;
+    readonly Func<IEmbeddingStore> _embeddingStoreFactory;
+    readonly Func<IStreamEventWatcher> _streamEventWatcherFactory;
     readonly IDetectEmbeddingLoops _embeddingLoopDetector;
     readonly ICompareStates _stateComparer;
     readonly ILoggerFactory _loggerFactory;
@@ -32,9 +32,9 @@ public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
     /// </summary>
     public EmbeddingProcessorFactory(
         IExecutionContextManager executionContextManager,
-        FactoryFor<IEventStore> eventStoreFactory,
-        FactoryFor<IEmbeddingStore> embeddingStoreFactory,
-        FactoryFor<IStreamEventWatcher> streamEventWatcherFactory,
+        Func<IEventStore> eventStoreFactory,
+        Func<IEmbeddingStore> embeddingStoreFactory,
+        Func<IStreamEventWatcher> streamEventWatcherFactory,
         IDetectEmbeddingLoops embeddingLoopDetector,
         ICompareStates stateComparer,
         ILoggerFactory loggerFactory

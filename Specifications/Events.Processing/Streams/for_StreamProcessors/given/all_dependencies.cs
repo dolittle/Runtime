@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.DependencyInversion;
+using System;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
@@ -14,13 +14,13 @@ public class all_dependencies
 {
     protected static Mock<IPerformActionOnAllTenants> on_all_tenants;
     protected static NullLoggerFactory logger_factory;
-    protected static Mock<FactoryFor<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
+    protected static Mock<Func<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
     protected static Mock<IExecutionContextManager> execution_context_manager;
     protected static IStreamProcessors stream_processors;
 
     Establish context = () =>
     {
-        get_scoped_stream_processors_creator = new Mock<FactoryFor<ICreateScopedStreamProcessors>>();
+        get_scoped_stream_processors_creator = new Mock<Func<ICreateScopedStreamProcessors>>();
         on_all_tenants = new Mock<IPerformActionOnAllTenants>();
         logger_factory = new NullLoggerFactory();
         execution_context_manager = new Mock<IExecutionContextManager>();

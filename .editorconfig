@@ -97,7 +97,7 @@ dotnet_diagnostic.CA1710.severity = none
 #CA1711: Identifiers should not have incorrect suffix
 dotnet_diagnostic.CA1711.severity = none
 # Add missing cases to switch expression (IDE0072 and IDE0010)
-# a bug in roslyn: https://github.com/dotnet/roslyn/issues/48876
+# a problem with roslyn: https://github.com/dotnet/roslyn/issues/48876
 dotnet_diagnostic.IDE0072.severity = none
 dotnet_diagnostic.IDE0010.severity = none
 # CA1834: Use StringBuilder.Append(char) for single character strings

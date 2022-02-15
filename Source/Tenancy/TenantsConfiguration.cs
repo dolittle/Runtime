@@ -4,17 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.Tenancy;
 
 /// <summary>
 /// Represents the configuration for tenants.
 /// </summary>
-[Name("tenants")]
 public class TenantsConfiguration :
-    ReadOnlyDictionary<Guid, TenantConfiguration>,
-    IConfigurationObject
+    ReadOnlyDictionary<Guid, TenantConfiguration>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantsConfiguration"/> class.

@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
@@ -42,7 +41,7 @@ public class all_dependencies
     protected static Mock<IWriteEventsToStreams> stream_writer;
     protected static EventHandlerRegistrationArguments arguments;
     protected static ILoggerFactory logger_factory;
-    protected static FactoryFor<IWriteEventsToStreams> factory_for_stream_writer;
+    protected static Func<IWriteEventsToStreams> factory_for_stream_writer;
     protected static CancellationToken cancellation_token;
     protected static ExecutionContext execution_context;
     protected static EventProcessorId event_handler_id = Guid.Parse("6afafdf6-33e8-4135-b271-2f7634b70a7f");

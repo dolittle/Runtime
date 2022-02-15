@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -47,7 +46,7 @@ public class EventHandler : IDisposable
     readonly IStreamDefinitions _streamDefinitions;
     readonly ReverseCallDispatcherType _dispatcher;
     readonly EventHandlerRegistrationArguments _arguments;
-    readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
+    readonly Func<IWriteEventsToStreams> _getEventsToStreamsWriter;
     readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
     readonly CancellationTokenSource _cancellationTokenSource;
@@ -71,7 +70,7 @@ public class EventHandler : IDisposable
         IStreamDefinitions streamDefinitions,
         ReverseCallDispatcherType dispatcher,
         EventHandlerRegistrationArguments arguments,
-        FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
+        Func<IWriteEventsToStreams> getEventsToStreamsWriter,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
@@ -301,7 +300,7 @@ public class EventHandler : IDisposable
 
     async Task<bool> RegisterStreamProcessor(
         IStreamDefinition streamDefinition,
-        FactoryFor<IEventProcessor> getProcessor,
+        Func<IEventProcessor> getProcessor,
         Func<Exception, Failure> onException,
         Action<StreamProcessor> onStreamProcessor)
     {

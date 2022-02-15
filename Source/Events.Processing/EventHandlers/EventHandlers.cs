@@ -1,13 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -35,7 +35,7 @@ public class EventHandlers : IEventHandlers
         
     readonly IValidateFilterForAllTenants _filterValidator;
     readonly IStreamProcessors _streamProcessors;
-    readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
+    readonly Func<IWriteEventsToStreams> _getEventsToStreamsWriter;
     readonly IStreamDefinitions _streamDefinitions;
     readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
@@ -45,13 +45,13 @@ public class EventHandlers : IEventHandlers
     /// </summary>
     /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
-    /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> <see cref="IWriteEventsToStreams" />.</param>
+    /// <param name="getEventsToStreamsWriter">The <see cref="Func{T}" /> <see cref="IWriteEventsToStreams" />.</param>
     /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     public EventHandlers(
         IValidateFilterForAllTenants filterForAllTenants,
         IStreamProcessors streamProcessors,
-        FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
+        Func<IWriteEventsToStreams> getEventsToStreamsWriter,
         IStreamDefinitions streamDefinitions,
         ILoggerFactory loggerFactory)
     {

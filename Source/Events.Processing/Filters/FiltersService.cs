@@ -8,7 +8,6 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -38,8 +37,8 @@ public class FiltersService : FiltersBase
     readonly IStreamProcessors _streamProcessors;
     readonly IValidateFilterForAllTenants _filterForAllTenants;
     readonly IExecutionContextManager _executionContextManager;
-    readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-    readonly FactoryFor<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
+    readonly Func<IWriteEventsToStreams> _getEventsToStreamsWriter;
+    readonly Func<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
     readonly IInitiateReverseCallServices _reverseCallServices;
     readonly IUnpartitionedFiltersProtocol _unpartitionedFiltersProtocol;
     readonly IPartitionedFiltersProtocol _partitionedFiltersProtocol;
@@ -56,8 +55,8 @@ public class FiltersService : FiltersBase
     /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
     /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
     /// <param name="streamDefinitions">The <see cref="IFilterDefinitions" />.</param>
-    /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
-    /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
+    /// <param name="getEventsToStreamsWriter">The <see cref="Func{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
+    /// <param name="getEventsToPublicStreamsWriter">The <see cref="Func{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
     /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
     /// <param name="unpartitionedFiltersProtocol">The <see cref="IUnpartitionedFiltersProtocol" />.</param>
     /// <param name="partitionedFiltersProtocol">The <see cref="IPartitionedFiltersProtocol" />.</param>
@@ -69,8 +68,8 @@ public class FiltersService : FiltersBase
         IValidateFilterForAllTenants filterForAllTenants,
         IExecutionContextManager executionContextManager,
         IStreamDefinitions streamDefinitions,
-        FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-        FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
+        Func<IWriteEventsToStreams> getEventsToStreamsWriter,
+        Func<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
         IInitiateReverseCallServices reverseCallServices,
         IUnpartitionedFiltersProtocol unpartitionedFiltersProtocol,
         IPartitionedFiltersProtocol partitionedFiltersProtocol,

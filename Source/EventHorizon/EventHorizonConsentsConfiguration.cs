@@ -6,17 +6,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.EventHorizon;
 
 /// <summary>
 /// Represents the configuration for event horizon consents.
 /// </summary>
-[Name("event-horizon-consents")]
 public class EventHorizonConsentsConfiguration :
-    ReadOnlyDictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>>,
-    IConfigurationObject
+    ReadOnlyDictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="EventHorizonConsentsConfiguration"/> class.

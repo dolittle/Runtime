@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
@@ -19,7 +18,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer;
 [Singleton]
 public class SubscriptionsService : SubscriptionsBase
 {
-    readonly FactoryFor<ISubscriptions> _getSubscriptions;
+    readonly Func<ISubscriptions> _getSubscriptions;
     readonly IExecutionContextManager _executionContextManager;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
@@ -27,11 +26,11 @@ public class SubscriptionsService : SubscriptionsBase
     /// <summary>
     /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
     /// </summary>
-    /// <param name="getSubscriptions">The <see cref="FactoryFor{T}" /> <see cref="ISubscriptions" />.</param>
+    /// <param name="getSubscriptions">The <see cref="Func{T}" /> <see cref="ISubscriptions" />.</param>
     /// <param name="metrics">The system for capturing metrics.</param>
     /// <param name="logger"><see cref="ILogger"/> for logging.</param>
     public SubscriptionsService(
-        FactoryFor<ISubscriptions> getSubscriptions,
+        Func<ISubscriptions> getSubscriptions,
         IExecutionContextManager executionContextManager,
         IMetricsCollector metrics,
         ILogger logger)

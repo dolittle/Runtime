@@ -1,12 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 public class PersistEmbeddingDefinitionForAllTenants : IPersistEmbeddingDefinitionForAllTenants
 {
     readonly IPerformActionOnAllTenants _onTenants;
-    readonly FactoryFor<IEmbeddingDefinitions> _getDefinitions;
+    readonly Func<IEmbeddingDefinitions> _getDefinitions;
     readonly ILogger _logger;
 
     /// <summary>
@@ -33,7 +33,7 @@ public class PersistEmbeddingDefinitionForAllTenants : IPersistEmbeddingDefiniti
     /// <param name="logger">The logger for logging messages.</param>
     public PersistEmbeddingDefinitionForAllTenants(
         IPerformActionOnAllTenants onTenants,
-        FactoryFor<IEmbeddingDefinitions> getDefinitions,
+        Func<IEmbeddingDefinitions> getDefinitions,
         ILogger logger)
     {
         _onTenants = onTenants;

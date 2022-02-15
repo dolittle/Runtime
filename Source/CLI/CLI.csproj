@@ -24,6 +24,7 @@
         <ProjectReference Include="../Events.Management/Events.Management.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="..\Resources\Resources.csproj" />
     </ItemGroup>
 
     <ItemGroup>
