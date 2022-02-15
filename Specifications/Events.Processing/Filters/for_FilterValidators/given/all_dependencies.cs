@@ -14,7 +14,6 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Security;
-using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;

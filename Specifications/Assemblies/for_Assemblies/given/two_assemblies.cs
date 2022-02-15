@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Reflection;
-using Dolittle.Runtime.Assemblies;
 using Machine.Specifications;
 using Moq;
 

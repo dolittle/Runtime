@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Resilience;
 
@@ -21,12 +20,12 @@ namespace Dolittle.Runtime.Resilience;
 [Singleton]
 public class Policies : IPolicies
 {
-    readonly IInstancesOf<IDefineDefaultPolicy> _defaultPolicyDefiners;
-    readonly IInstancesOf<IDefineDefaultAsyncPolicy> _defaultAsyncPolicyDefiners;
-    readonly IInstancesOf<IDefineNamedPolicy> _namedPolicyDefiners;
-    readonly IInstancesOf<IDefineNamedAsyncPolicy> _namedAsyncPolicyDefiners;
-    readonly IInstancesOf<IDefinePolicyForType> _typedPolicyDefiners;
-    readonly IInstancesOf<IDefineAsyncPolicyForType> _typedAsyncPolicyDefiners;
+    readonly IEnumerable<IDefineDefaultPolicy> _defaultPolicyDefiners;
+    readonly IEnumerable<IDefineDefaultAsyncPolicy> _defaultAsyncPolicyDefiners;
+    readonly IEnumerable<IDefineNamedPolicy> _namedPolicyDefiners;
+    readonly IEnumerable<IDefineNamedAsyncPolicy> _namedAsyncPolicyDefiners;
+    readonly IEnumerable<IDefinePolicyForType> _typedPolicyDefiners;
+    readonly IEnumerable<IDefineAsyncPolicyForType> _typedAsyncPolicyDefiners;
     readonly IDictionary<string, INamedPolicy> _namedPolicies = new Dictionary<string, INamedPolicy>();
     readonly IDictionary<string, INamedAsyncPolicy> _namedAsyncPolicies = new Dictionary<string, INamedAsyncPolicy>();
     readonly IDictionary<Type, IPolicy> _typedPolicies = new Dictionary<Type, IPolicy>();
@@ -42,12 +41,12 @@ public class Policies : IPolicies
     /// <param name="typedPolicyDefiners">Instances of <see cref="IDefinePolicyForType">typed policy definers</see>.</param>
     /// <param name="typedAsyncPolicyDefiners">Instances of <see cref="IDefineAsyncPolicyForType">typed async policy definers</see>.</param>
     public Policies(
-        IInstancesOf<IDefineDefaultPolicy> defaultPolicyDefiners,
-        IInstancesOf<IDefineDefaultAsyncPolicy> defaultAsyncPolicyDefiners,
-        IInstancesOf<IDefineNamedPolicy> namedPolicyDefiners,
-        IInstancesOf<IDefineNamedAsyncPolicy> namedAsyncPolicyDefiners,
-        IInstancesOf<IDefinePolicyForType> typedPolicyDefiners,
-        IInstancesOf<IDefineAsyncPolicyForType> typedAsyncPolicyDefiners)
+        IEnumerable<IDefineDefaultPolicy> defaultPolicyDefiners,
+        IEnumerable<IDefineDefaultAsyncPolicy> defaultAsyncPolicyDefiners,
+        IEnumerable<IDefineNamedPolicy> namedPolicyDefiners,
+        IEnumerable<IDefineNamedAsyncPolicy> namedAsyncPolicyDefiners,
+        IEnumerable<IDefinePolicyForType> typedPolicyDefiners,
+        IEnumerable<IDefineAsyncPolicyForType> typedAsyncPolicyDefiners)
     {
         _defaultPolicyDefiners = defaultPolicyDefiners;
         _defaultAsyncPolicyDefiners = defaultAsyncPolicyDefiners;

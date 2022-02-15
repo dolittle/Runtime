@@ -5,7 +5,6 @@ using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting;
 

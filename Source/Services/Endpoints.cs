@@ -9,7 +9,6 @@ using Dolittle.Runtime.Configuration;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Services;
 
@@ -40,9 +39,9 @@ public class Endpoints : IEndpoints
     /// <param name="boundServices"><see cref="IBoundServices"/> for registering services that gets bound.</param>
     /// <param name="logger"><see cref="ILogger"/> for logging.</param>
     public Endpoints(
-        IInstancesOf<IRepresentServiceType> serviceTypes,
+        IEnumerable<IRepresentServiceType> serviceTypes,
         EndpointsConfiguration configuration,
-        IInstancesOf<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>> defaultConfigurationProviders,
+        IEnumerable<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>> defaultConfigurationProviders,
         ITypeFinder typeFinder,
         IContainer container,
         IBoundServices boundServices,

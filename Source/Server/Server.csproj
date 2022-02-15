@@ -12,7 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        
+        <PackageReference Include="BaselineTypeDiscovery" Version="$(BaselineTypeDiscoveryVersion)" />
+        <PackageReference Include="JetBrains.Profiler.SelfApi" Version="2.2.0" />
         <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />

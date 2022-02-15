@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
-using Microsoft.Extensions.Logging;
 using Moq;
 using It = Machine.Specifications.It;
 

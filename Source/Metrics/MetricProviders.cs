@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Types;
 using Prometheus;
 
 namespace Dolittle.Runtime.Metrics;
@@ -13,16 +12,16 @@ namespace Dolittle.Runtime.Metrics;
 /// </summary>
 public class MetricProviders : IMetricProviders
 {
-    readonly IInstancesOf<ICanProvideMetrics> _providers;
+    readonly IEnumerable<ICanProvideMetrics> _providers;
     readonly IMetricFactory _metricFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MetricProviders"/> class.
     /// </summary>
-    /// <param name="providers"><see cref="IInstancesOf{T}"/> of <see cref="ICanProvideMetrics"/>.</param>
+    /// <param name="providers"><see cref="IEnumerable{T}"/> of <see cref="ICanProvideMetrics"/>.</param>
     /// <param name="metricFactory"><see cref="IMetricFactory"/>.</param>
     public MetricProviders(
-        IInstancesOf<ICanProvideMetrics> providers,
+        IEnumerable<ICanProvideMetrics> providers,
         IMetricFactory metricFactory)
     {
         _providers = providers;

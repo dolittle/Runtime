@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Reflection;
-using Dolittle.Runtime.Types;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Services.Clients;
@@ -20,8 +19,8 @@ public class KnownClients : IKnownClients
     /// <summary>
     /// Initializes a new instance of the <see cref="KnownClients"/> class.
     /// </summary>
-    /// <param name="clientProviders"><see cref="IInstancesOf{T}"/> <see cref="IKnowAboutClients"/>.</param>
-    public KnownClients(IInstancesOf<IKnowAboutClients> clientProviders)
+    /// <param name="clientProviders"><see cref="IEnumerable{T}"/> <see cref="IKnowAboutClients"/>.</param>
+    public KnownClients(IEnumerable<IKnowAboutClients> clientProviders)
     {
         clientProviders.ForEach(provider => provider.Clients.ForEach(client => _clientsByType.Add(client.Type, client)));
     }

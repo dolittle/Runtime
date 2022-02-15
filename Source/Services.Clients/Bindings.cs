@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Types;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Services.Clients;

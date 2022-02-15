@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Security;
 using Machine.Specifications;

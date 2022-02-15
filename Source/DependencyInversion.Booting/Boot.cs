@@ -10,7 +10,6 @@ using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.DependencyInversion.Conventions;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.DependencyInversion.Booting;
 

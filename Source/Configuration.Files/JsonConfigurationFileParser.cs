@@ -6,7 +6,6 @@ using System.IO;
 using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Serialization.Json;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration.Files;
 

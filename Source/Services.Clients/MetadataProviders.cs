@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Types;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Services.Clients;
@@ -13,13 +12,13 @@ namespace Dolittle.Runtime.Services.Clients;
 /// </summary>
 public class MetadataProviders : IMetadataProviders
 {
-    readonly IInstancesOf<ICanProvideClientMetadata> _metadataProviders;
+    readonly IEnumerable<ICanProvideClientMetadata> _metadataProviders;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MetadataProviders"/> class.
     /// </summary>
-    /// <param name="metadataProviders"><see cref="IInstancesOf{T}"/> of <see cref="ICanProvideClientMetadata"/>.</param>
-    public MetadataProviders(IInstancesOf<ICanProvideClientMetadata> metadataProviders)
+    /// <param name="metadataProviders"><see cref="IEnumerable{T}"/> of <see cref="ICanProvideClientMetadata"/>.</param>
+    public MetadataProviders(IEnumerable<ICanProvideClientMetadata> metadataProviders)
     {
         _metadataProviders = metadataProviders;
     }

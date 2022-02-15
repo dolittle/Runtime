@@ -4,7 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
-using Dolittle.Services.Contracts;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dolittle.Runtime.Assemblies;

@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Serialization.Protobuf;
 
@@ -12,13 +10,13 @@ namespace Dolittle.Runtime.Serialization.Protobuf;
 /// </summary>
 public class ValueConverters : IValueConverters
 {
-    readonly IInstancesOf<IValueConverter> _converters;
+    readonly IEnumerable<IValueConverter> _converters;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ValueConverters"/> class.
     /// </summary>
-    /// <param name="converters"><see cref="IInstancesOf{T}"/> <see cref="IValueConverter"/>.</param>
-    public ValueConverters(IInstancesOf<IValueConverter> converters)
+    /// <param name="converters"><see cref="IEnumerable{T}"/> <see cref="IValueConverter"/>.</param>
+    public ValueConverters(IEnumerable<IValueConverter> converters)
     {
         _converters = converters;
     }

@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Contracts;
-using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Aggregates.Contracts.AggregateRoots;
 

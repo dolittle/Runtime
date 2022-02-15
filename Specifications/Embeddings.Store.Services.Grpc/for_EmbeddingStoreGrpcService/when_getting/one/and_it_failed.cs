@@ -3,13 +3,10 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Embeddings.Processing;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
-using static Moq.It;
 using static Moq.Times;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpcService.when_getting.one;
 

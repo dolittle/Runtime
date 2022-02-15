@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;

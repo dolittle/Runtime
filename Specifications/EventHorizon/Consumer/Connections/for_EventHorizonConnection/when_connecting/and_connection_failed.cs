@@ -1,11 +1,7 @@
 using System.Threading.Tasks;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
 using Machine.Specifications;
-using System.Threading;
-using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.when_connecting;

@@ -12,7 +12,6 @@ using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Reflection;
-using Dolittle.Runtime.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -29,7 +28,7 @@ public class Serializer : ISerializer
     readonly ConcurrentDictionary<ISerializationOptions, JsonSerializer> _cacheNoneTypeName;
     readonly ConcurrentDictionary<ISerializationOptions, JsonSerializer> _cacheNoneTypeNameReadOnly;
 
-    readonly IInstancesOf<ICanProvideConverters> _converterProviders;
+    readonly IEnumerable<ICanProvideConverters> _converterProviders;
 
     readonly List<JsonConverter> _converters = new();
 
@@ -37,7 +36,7 @@ public class Serializer : ISerializer
     /// Initializes a new instance of the <see cref="Serializer"/> class.
     /// </summary>
     /// <param name="converterProviders">Instances of <see cref="ICanProvideConverters"/>.</param>
-    public Serializer(IInstancesOf<ICanProvideConverters> converterProviders)
+    public Serializer(IEnumerable<ICanProvideConverters> converterProviders)
     {
         _converterProviders = converterProviders;
         _cacheAutoTypeName = new ConcurrentDictionary<ISerializationOptions, JsonSerializer>();

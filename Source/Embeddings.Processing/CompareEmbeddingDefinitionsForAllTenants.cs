@@ -10,8 +10,6 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
-using System;
-using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 

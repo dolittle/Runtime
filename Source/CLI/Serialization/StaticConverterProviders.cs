@@ -5,14 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Serialization.Json;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.CLI.Serialization;
 
 /// <summary>
 /// Represents an implementation of <see cref="InstancesOf{T}"/> of <see cref="ICanProvideConverters"/> that consists of a static set of providers.
 /// </summary>
-public class StaticConverterProviders : IInstancesOf<ICanProvideConverters>
+public class StaticConverterProviders : IEnumerable<ICanProvideConverters>
 {
     readonly ICanProvideConverters[] _providers;
 

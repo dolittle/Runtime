@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Types;
-using Dolittle.Runtime.Types.Testing;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -13,7 +11,7 @@ namespace Dolittle.Runtime.Resilience.for_Policies.when_creating;
 public class with_multiple_definers_for_typed_policy
 {
     static Type policy_type = typeof(string);
-    static IInstancesOf<IDefinePolicyForType> typed_policy_definers;
+    static IEnumerable<IDefinePolicyForType> typed_policy_definers;
     static Exception result;
 
     Establish context = () =>

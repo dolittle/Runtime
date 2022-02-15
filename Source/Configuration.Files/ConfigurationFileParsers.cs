@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration.Files;
 

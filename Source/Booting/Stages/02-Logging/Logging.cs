@@ -1,9 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq;
-using System.Collections;
 using System.Reflection;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;

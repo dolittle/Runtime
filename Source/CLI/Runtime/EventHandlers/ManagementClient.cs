@@ -15,7 +15,6 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using ManagementContracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
-using TenantScopedStreamProcessorStatus = Dolittle.Runtime.CLI.Runtime.Events.Processing.TenantScopedStreamProcessorStatus;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
 

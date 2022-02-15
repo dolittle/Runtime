@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.ResourceTypes.Configuration;
 
@@ -19,9 +18,9 @@ public class TenantResourceManager : ITenantResourceManager
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantResourceManager"/> class.
     /// </summary>
-    /// <param name="resourceDefinitions"><see cref="IInstancesOf{T}"/> of <see cref="IRepresentAResourceType"/>.</param>
+    /// <param name="resourceDefinitions"><see cref="IEnumerable{T}"/> of <see cref="IRepresentAResourceType"/>.</param>
     /// <param name="resourceConfigurationByTenantProvider"><see cref="ICanProvideResourceConfigurationsByTenant"/> for providing configuration for resources.</param>
-    public TenantResourceManager(IInstancesOf<IRepresentAResourceType> resourceDefinitions, ICanProvideResourceConfigurationsByTenant resourceConfigurationByTenantProvider)
+    public TenantResourceManager(IEnumerable<IRepresentAResourceType> resourceDefinitions, ICanProvideResourceConfigurationsByTenant resourceConfigurationByTenantProvider)
     {
         _resourceDefinitions = resourceDefinitions;
         _resourceConfigurationByTenantProvider = resourceConfigurationByTenantProvider;

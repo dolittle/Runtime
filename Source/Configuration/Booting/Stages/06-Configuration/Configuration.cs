@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Booting;
-using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Immutability;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration;
 

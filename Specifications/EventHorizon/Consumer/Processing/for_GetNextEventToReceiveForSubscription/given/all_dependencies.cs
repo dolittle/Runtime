@@ -4,7 +4,6 @@
 using System;
 using Machine.Specifications;
 using Moq;
-using Dolittle.Runtime.Events.Processing.Streams;
 using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 

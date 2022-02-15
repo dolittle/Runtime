@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Moq;
 
@@ -25,7 +24,7 @@ public class two_procedures : all_dependencies
         second_procedure = new Mock<ICanPerformBootProcedure>();
         second_procedure.Setup(_ => _.CanPerform()).Returns(() => second_procedure_can_perform);
 
-        var instances = new Mock<IInstancesOf<ICanPerformBootProcedure>>();
+        var instances = new Mock<IEnumerable<ICanPerformBootProcedure>>();
         var listOfInstances = new List<ICanPerformBootProcedure>();
         listOfInstances.AddRange(new[]
         {
@@ -34,7 +33,7 @@ public class two_procedures : all_dependencies
         });
         instances.Setup(_ => _.GetEnumerator()).Returns(listOfInstances.GetEnumerator());
 
-        container.Setup(_ => _.Get<IInstancesOf<ICanPerformBootProcedure>>()).Returns(instances.Object);
+        container.Setup(_ => _.Get<IEnumerable<ICanPerformBootProcedure>>()).Returns(instances.Object);
 
         boot_procedures = new BootProcedures(instances.Object, Mock.Of<ILogger>(), execution_context_manager.Object);
     };

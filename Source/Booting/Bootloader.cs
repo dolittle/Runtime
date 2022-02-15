@@ -4,7 +4,6 @@
 using System;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting;
 

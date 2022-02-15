@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Moq;
 
@@ -10,7 +9,7 @@ namespace Dolittle.Runtime.Security.Specs.for_SecurityManager.given;
 
 public class a_security_manager_with_discovered_descriptors
 {
-    protected static Mock<IInstancesOf<ISecurityDescriptor>> security_descriptors;
+    protected static Mock<IEnumerable<ISecurityDescriptor>> security_descriptors;
     protected static SecurityManager security_manager;
 
     protected static Mock<ISecurityDescriptor> first_security_descriptor;
@@ -21,7 +20,7 @@ public class a_security_manager_with_discovered_descriptors
         first_security_descriptor = new Mock<ISecurityDescriptor>();
         second_security_descriptor = new Mock<ISecurityDescriptor>();
 
-        security_descriptors = new Mock<IInstancesOf<ISecurityDescriptor>>();
+        security_descriptors = new Mock<IEnumerable<ISecurityDescriptor>>();
         security_descriptors.Setup(_ => _.GetEnumerator()).Returns(new List<ISecurityDescriptor>(new[]
         {
             first_security_descriptor.Object,

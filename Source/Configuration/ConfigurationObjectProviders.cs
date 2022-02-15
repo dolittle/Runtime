@@ -8,7 +8,6 @@ using System.Reflection;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration;
 

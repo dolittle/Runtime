@@ -11,7 +11,6 @@ using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Services;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_updating;

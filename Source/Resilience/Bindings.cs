@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq.Expressions;
-using System.Reflection;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Reflection;
 

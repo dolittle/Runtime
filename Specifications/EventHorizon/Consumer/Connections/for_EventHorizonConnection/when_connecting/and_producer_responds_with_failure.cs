@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 
 using System;
 using Machine.Specifications;
-using System.Threading;
-using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Protobuf;
 

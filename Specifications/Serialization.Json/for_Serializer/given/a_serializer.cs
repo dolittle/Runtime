@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Moq;
 
@@ -11,14 +10,14 @@ namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer.given;
 public class a_serializer
 {
     protected static Serializer serializer;
-    protected static Mock<IInstancesOf<ICanProvideConverters>> converter_provider_instances;
+    protected static Mock<IEnumerable<ICanProvideConverters>> converter_provider_instances;
     protected static List<ICanProvideConverters> converter_providers;
 
     Establish context = () =>
     {
         converter_providers = new List<ICanProvideConverters>();
 
-        converter_provider_instances = new Mock<IInstancesOf<ICanProvideConverters>>();
+        converter_provider_instances = new Mock<IEnumerable<ICanProvideConverters>>();
         converter_provider_instances.Setup(c => c.GetEnumerator()).Returns(() => converter_providers.GetEnumerator());
         serializer = new Serializer(converter_provider_instances.Object);
     };

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
-using Dolittle.Runtime.ResourceTypes;
 
 namespace Dolittle.Runtime.Applications.Configuration;
 

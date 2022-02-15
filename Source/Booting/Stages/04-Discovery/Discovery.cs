@@ -7,7 +7,6 @@ using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Assemblies.Rules;
 using Dolittle.Runtime.Collections;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting.Stages;
 

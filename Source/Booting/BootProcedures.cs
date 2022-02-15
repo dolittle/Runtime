@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting;
 
@@ -19,18 +18,18 @@ public class BootProcedures : IBootProcedures
     /// </summary>
     public static readonly CorrelationId BootProceduresCorrelationId = Guid.Parse("85c1a3c9-7d70-4e65-8996-914fa4bc8300");
 
-    readonly IInstancesOf<ICanPerformBootProcedure> _procedures;
+    readonly IEnumerable<ICanPerformBootProcedure> _procedures;
     readonly ILogger _logger;
     readonly IExecutionContextManager _executionContextManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BootProcedures"/> class.
     /// </summary>
-    /// <param name="procedures"><see cref="IInstancesOf{T}"/> of <see cref="ICanPerformBootProcedure"/>.</param>
+    /// <param name="procedures"><see cref="IEnumerable{T}"/> of <see cref="ICanPerformBootProcedure"/>.</param>
     /// <param name="logger"><see cref="ILogger"/> for logging.</param>
     /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for working with the <see cref="ExecutionContext"/>.</param>
     public BootProcedures(
-        IInstancesOf<ICanPerformBootProcedure> procedures,
+        IEnumerable<ICanPerformBootProcedure> procedures,
         ILogger logger,
         IExecutionContextManager executionContextManager)
     {

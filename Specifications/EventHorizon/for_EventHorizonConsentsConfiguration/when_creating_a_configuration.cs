@@ -1,11 +1,6 @@
-using System.Reflection.PortableExecutable;
 using System.Linq;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Threading;
-using Dolittle.Runtime.Events.Processing;
-using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using System.Collections.Generic;
 using Dolittle.Runtime.ApplicationModel;

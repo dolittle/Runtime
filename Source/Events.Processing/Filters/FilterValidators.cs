@@ -3,15 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Events.Processing.Streams;

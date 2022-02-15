@@ -1,12 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading.Tasks;
-using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
-using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;

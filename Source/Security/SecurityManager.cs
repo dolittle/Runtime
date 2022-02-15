@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Security;
 
@@ -19,8 +18,8 @@ public class SecurityManager : ISecurityManager
     /// <summary>
     /// Initializes a new instance of the <see cref="SecurityManager"/> class.
     /// </summary>
-    /// <param name="securityDescriptors"><see cref="IInstancesOf{ISecurityDescriptor}">Instances of security descriptors</see>.</param>
-    public SecurityManager(IInstancesOf<ISecurityDescriptor> securityDescriptors)
+    /// <param name="securityDescriptors"><see cref="IEnumerable{ISecurityDescriptor}">Instances of security descriptors</see>.</param>
+    public SecurityManager(IEnumerable<ISecurityDescriptor> securityDescriptors)
     {
         _securityDescriptors = securityDescriptors;
     }

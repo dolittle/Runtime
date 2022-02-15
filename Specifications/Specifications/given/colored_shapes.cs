@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Dolittle.Runtime.Specifications;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Specifications.given;

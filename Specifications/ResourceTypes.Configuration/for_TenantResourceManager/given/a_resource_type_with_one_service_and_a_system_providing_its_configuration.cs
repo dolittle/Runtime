@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.ResourceTypes.Configuration.Specs.given;
-using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Moq;
 
@@ -11,14 +10,14 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.for_TenantResourceM
 
 public class a_resource_type_with_one_service_and_a_system_providing_its_configuration : all_dependencies
 {
-    protected static Mock<IInstancesOf<IRepresentAResourceType>> instance_of_mongo_db_read_models_representation_mock;
+    protected static Mock<IEnumerable<IRepresentAResourceType>> instance_of_mongo_db_read_models_representation_mock;
     protected static Mock<ICanProvideResourceConfigurationsByTenant> a_system_provding_resource_configuration_for_read_models_mock;
 
     Establish context = () =>
     {
         var read_models_representation = new resource_type_with_first_service_for_first_resource_type_and_first_implementation();
         var read_models_representations = new List<IRepresentAResourceType> { read_models_representation };
-        instance_of_mongo_db_read_models_representation_mock = new Mock<IInstancesOf<IRepresentAResourceType>>();
+        instance_of_mongo_db_read_models_representation_mock = new Mock<IEnumerable<IRepresentAResourceType>>();
         instance_of_mongo_db_read_models_representation_mock.Setup(_ => _.GetEnumerator()).Returns(read_models_representations.GetEnumerator());
 
         a_system_provding_resource_configuration_for_read_models_mock = new Mock<ICanProvideResourceConfigurationsByTenant>();

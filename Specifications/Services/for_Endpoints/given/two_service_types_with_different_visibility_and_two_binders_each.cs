@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
-using Dolittle.Runtime.Types.Testing;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;

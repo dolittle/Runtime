@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
-using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
