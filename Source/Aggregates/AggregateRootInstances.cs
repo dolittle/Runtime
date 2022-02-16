@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+
 
 namespace Dolittle.Runtime.Aggregates;
 

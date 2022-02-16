@@ -4,7 +4,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
+
 
 namespace Dolittle.Runtime.Aggregates;
 

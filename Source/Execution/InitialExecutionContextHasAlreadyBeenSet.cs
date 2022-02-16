@@ -8,6 +8,7 @@ namespace Dolittle.Runtime.Execution;
 /// <summary>
 /// Exception that gets thrown when the execution context has initially been set already.
 /// </summary>
+///  TODO: Remove this
 public class InitialExecutionContextHasAlreadyBeenSet : Exception
 {
     /// <summary>

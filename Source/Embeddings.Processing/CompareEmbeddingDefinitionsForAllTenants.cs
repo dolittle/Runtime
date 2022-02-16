@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
 

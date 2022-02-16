@@ -1,12 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Lifecycle;
+
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 

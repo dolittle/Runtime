@@ -4,9 +4,10 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Microsoft.Extensions.Logging;

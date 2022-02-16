@@ -4,7 +4,8 @@
 using System.Linq;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
+
 
 namespace Dolittle.Runtime.Tenancy;
 

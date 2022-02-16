@@ -8,11 +8,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<

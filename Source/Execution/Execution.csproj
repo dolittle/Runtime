@@ -11,7 +11,6 @@
   
   <ItemGroup>
     <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
     <ProjectReference Include="../Security/Security.csproj" />
     <ProjectReference Include="../Versioning/Versioning.csproj" />
   </ItemGroup>

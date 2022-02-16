@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

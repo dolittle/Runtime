@@ -8,6 +8,7 @@ namespace Dolittle.Runtime.Execution;
 /// <summary>
 /// Exception that gets thrown when <see cref="ExecutionContext"/> is not set.
 /// </summary>
+// TODO: Remove this
 public class ExecutionContextNotSet : Exception
 {
 }

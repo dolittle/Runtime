@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

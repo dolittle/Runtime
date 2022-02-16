@@ -7,8 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Aggregates.Management;

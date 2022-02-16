@@ -2,42 +2,33 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Autofac;
 using BaselineTypeDiscovery;
+using Dolittle.Runtime.Configuration.Legacy;
+using Dolittle.Runtime.DependencyInversion.Booting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 // var services = new AutofacServiceProviderFactory();
-// var stopWatch = new Stopwatch();
-// stopWatch.Start();
 var assemblies = AssemblyFinder.FindAssemblies(
     _ => { },
     _ => _.FullName!.StartsWith("Dolittle.Runtime", StringComparison.InvariantCulture) && !_.FullName.Contains("Contracts", StringComparison.InvariantCulture),
     false);
-// stopWatch.Stop();
-// Console.WriteLine($"Found {assemblies.Count()} dolittle assemblies, took {stopWatch.Elapsed} {stopWatch.Elapsed.Milliseconds} {stopWatch.ElapsedTicks}");
-Console.WriteLine($"{AppDomain.CurrentDomain.GetAssemblies().Length}");
-return;
-// var builder = WebApplication.CreateBuilder(args);
-//
-// builder.Host.UseServiceProviderFactory(services);
-// builder.Host.ConfigureContainer<ContainerBuilder>(_ =>
-// {
-//     foreach (var assembly in assemblies)
-//     {
-//         _.RegisterAssemblyTypes(assembly).AsImplementedInterfaces();
-//         _.RegisterAssemblyModules(assembly);   
-//     }
-// });
-// builder.Configuration.AddLegacyDolittleFiles();
-// builder.Services
-//     .AddRouting()
-//     .AddControllers();
-// builder.Services.AddGrpc();
-//
-// var app = builder.Build();
-//
-// app.MapControllers();
-// // app.MapGrpcService<Program>();
-//
-// app.Run();
+var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseAutofac();
+builder.Configuration.AddLegacyDolittleFiles();
+builder.Services
+    .AddRouting()
+    .AddControllers();
+builder.Services.AddGrpc();
+
+var app = builder.Build();
+
+app.MapControllers();
+app.MapGrpcService<Program>();
+
+app.Run();
 
 // var host = Host.CreateDefaultBuilder(args)
 //     .UseServiceProviderFactory(services)

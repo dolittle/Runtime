@@ -6,8 +6,9 @@ using System.Collections.Generic;
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Lifecycle;
+
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Execution;

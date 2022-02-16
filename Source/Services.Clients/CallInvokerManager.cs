@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 using Grpc.Core.Interceptors;

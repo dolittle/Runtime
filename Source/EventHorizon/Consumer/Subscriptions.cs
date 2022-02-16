@@ -4,7 +4,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;

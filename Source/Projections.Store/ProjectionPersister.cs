@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Projections.Store.Copies;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;

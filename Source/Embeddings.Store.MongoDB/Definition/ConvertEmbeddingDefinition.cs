@@ -3,7 +3,8 @@
 
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
+
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 

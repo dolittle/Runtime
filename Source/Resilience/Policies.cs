@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
+
 
 namespace Dolittle.Runtime.Resilience;
 

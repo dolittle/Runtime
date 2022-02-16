@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
 namespace Dolittle.Runtime.Configuration;
 
 /// <summary>
@@ -8,7 +9,7 @@ namespace Dolittle.Runtime.Configuration;
 /// <see cref="IConfigurationObject">configuration objects</see>.
 /// </summary>
 /// <typeparam name="TConfiguration">Type of <see cref="IConfigurationObject"/>.</typeparam>
-public interface ICanProvideDefaultConfigurationFor<TConfiguration>
+public interface ICanProvideDefaultConfigurationFor<out TConfiguration>
     where TConfiguration : IConfigurationObject
 {
     /// <summary>

@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;

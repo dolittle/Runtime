@@ -3,9 +3,10 @@
 
 using System.Linq;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+
 using MongoDB.Bson;
 using System.Collections.Generic;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition;

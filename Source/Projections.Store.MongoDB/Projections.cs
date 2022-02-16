@@ -3,8 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB;

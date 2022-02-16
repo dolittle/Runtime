@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;

@@ -3,13 +3,20 @@
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.DependencyInversion</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.DependencyInversion</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Assemblies/Assemblies.csproj" />
-    <ProjectReference Include="../Collections/Collections.csproj" />
-    <ProjectReference Include="../Lifecycle/Lifecycle.csproj" />
-    <ProjectReference Include="../Reflection/Reflection.csproj" />
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Configuration/Configuration.csproj" />
+  </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Autofac" Version="$(AutofacVersion)" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
+        <PackageReference Include="BaselineTypeDiscovery" Version="$(BaselineTypeDiscoveryVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsVersion)" />
   </ItemGroup>
 
 </Project>

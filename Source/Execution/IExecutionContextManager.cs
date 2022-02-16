@@ -11,6 +11,7 @@ namespace Dolittle.Runtime.Execution;
 /// <summary>
 /// Defines the manager for <see cref="ExecutionContext"/>.
 /// </summary>
+///  TODO: Remove this
 public interface IExecutionContextManager
 {
     /// <summary>

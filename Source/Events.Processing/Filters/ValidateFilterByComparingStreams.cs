@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Lifecycle;
+
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 

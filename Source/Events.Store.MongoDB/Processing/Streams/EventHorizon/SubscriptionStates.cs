@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 

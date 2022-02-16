@@ -3,12 +3,13 @@
 
 using System;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Lifecycle;
+
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing;

@@ -3,7 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion;
+
 
 namespace Dolittle.Runtime.Security;
 
