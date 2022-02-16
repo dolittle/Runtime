@@ -11,9 +11,9 @@ public class and_there_is_no_filter_validator_for_the_definition_type : given.al
 {
     Establish context = () =>
     {
-        type_finder
-            .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
-            .Returns(Array.Empty<Type>());
+        // type_finder
+        //     .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
+        //     .Returns(Array.Empty<Type>());
     };
 
     static FilterValidationResult result;

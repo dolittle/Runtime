@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.ComponentModel;
+
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,9 +34,8 @@ public class all_dependencies
     protected static IFilterProcessor<FilterDefinition> filter_processor;
     protected static Mock<ICanValidateFilterFor<FilterDefinition>> filter_validator;
     protected static StreamProcessorState stream_processor_state;
-
-    protected static Mock<ITypeFinder> type_finder;
-    protected static Mock<IContainer> container;
+    
+    // protected static Mock<IContainer> container;
     protected static Mock<IStreamProcessorStateRepository> stream_processor_state_repository;
     protected static Mock<IFilterDefinitions> filter_definitions;
     protected static Mock<ICompareFilterDefinitions> definition_comparer;
@@ -74,18 +73,18 @@ public class all_dependencies
 
         stream_processor_state = new StreamProcessorState(10, DateTimeOffset.Now);
 
-        type_finder = mocks.Create<ITypeFinder>();
-        type_finder
-            .Setup(_ => _.FindMultiple<IFilterDefinition>())
-            .Returns(new[] { typeof(FilterDefinition) });
-        type_finder
-            .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
-            .Returns(new[] { filter_validator_type });
+        // type_finder = mocks.Create<ITypeFinder>();
+        // type_finder
+        //     .Setup(_ => _.FindMultiple<IFilterDefinition>())
+        //     .Returns(new[] { typeof(FilterDefinition) });
+        // type_finder
+        //     .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
+        //     .Returns(new[] { filter_validator_type });
 
-        container = mocks.Create<IContainer>();
-        container
-            .Setup(_ => _.Get(filter_validator_type))
-            .Returns(filter_validator.Object);
+        // container = mocks.Create<IContainer>();
+        // container
+        //     .Setup(_ => _.Get(filter_validator_type))
+        //     .Returns(filter_validator.Object);
 
         stream_processor_state_repository = mocks.Create<IStreamProcessorStateRepository>();
         stream_processor_state_repository
@@ -115,8 +114,8 @@ public class all_dependencies
                 CultureInfo.InvariantCulture));
 
         filter_validators = () => new FilterValidators(
-            type_finder.Object,
-            container.Object,
+            // type_finder.Object,
+            // container.Object,
             () => stream_processor_state_repository.Object,
             () => filter_definitions.Object,
             execution_context_manager.Object,

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.CLI.Runtime;
 

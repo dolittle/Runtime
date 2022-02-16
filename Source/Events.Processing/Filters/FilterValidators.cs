@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 [Singleton]
 public class FilterValidators : IFilterValidators
 {
-    readonly IContainer _container;
+    // readonly IContainer _container;
     readonly Func<IStreamProcessorStateRepository> _getStreamProcessorStates;
     readonly Func<IFilterDefinitions> _getFilterDefinitions;
     readonly IExecutionContextManager _executionContextManager;
@@ -41,14 +41,14 @@ public class FilterValidators : IFilterValidators
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public FilterValidators(
         //TODO: This used the ITypeFinder to find filter validators for filter definitions
-        IContainer container,
+        // IContainer container,
         Func<IStreamProcessorStateRepository> getStreamProcessorStates,
         Func<IFilterDefinitions> getFilterDefinitions,
         IExecutionContextManager executionContextManager,
         ICompareFilterDefinitions definitionComparer,
         ILogger logger)
     {
-        _container = container;
+        // _container = container;
         _getStreamProcessorStates = getStreamProcessorStates;
         _getFilterDefinitions = getFilterDefinitions;
         _executionContextManager = executionContextManager;

@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Machine.Specifications;
 using Moq;
 
@@ -9,7 +10,7 @@ namespace Dolittle.Runtime.Services.Clients.for_KnownClients.given;
 public class two_known_clients_from_two_different_providers
 {
     protected static KnownClients known_clients;
-    protected static StaticInstancesOf<IKnowAboutClients> providers;
+    protected static IEnumerable<IKnowAboutClients> providers;
 
     protected static Mock<IKnowAboutClients> first_provider;
     protected static Mock<IKnowAboutClients> second_provider;
@@ -27,7 +28,7 @@ public class two_known_clients_from_two_different_providers
         second_provider = new Mock<IKnowAboutClients>();
         second_provider.Setup(_ => _.Clients).Returns(new[] { second_client });
 
-        providers = new StaticInstancesOf<IKnowAboutClients>(first_provider.Object, second_provider.Object);
+        providers = new []{first_provider.Object, second_provider.Object};
         known_clients = new KnownClients(providers);
     };
 }

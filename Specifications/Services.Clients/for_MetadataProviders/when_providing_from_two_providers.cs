@@ -29,9 +29,8 @@ public class when_providing_from_two_providers
         firstProvider.Setup(_ => _.Provide()).Returns(new[] { first_provider_first_entry, first_provider_second_entry });
         var secondProvider = new Mock<ICanProvideClientMetadata>();
         secondProvider.Setup(_ => _.Provide()).Returns(new[] { second_provider_first_entry, second_provider_second_entry });
-
-        var instances = new StaticInstancesOf<ICanProvideClientMetadata>(firstProvider.Object, secondProvider.Object);
-        providers = new MetadataProviders(instances);
+        
+        providers = new MetadataProviders(new []{firstProvider.Object, secondProvider.Object});
     };
 
     Because of = () => result = providers.Provide();
