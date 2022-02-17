@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Platform;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 
 
 namespace Dolittle.Runtime.Platform.Handshake;

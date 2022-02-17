@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services;

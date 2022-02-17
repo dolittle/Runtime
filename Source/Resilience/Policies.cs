@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 
 
 namespace Dolittle.Runtime.Resilience;

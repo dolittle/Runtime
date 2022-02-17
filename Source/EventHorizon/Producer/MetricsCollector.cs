@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
 using IMetricFactory = Dolittle.Runtime.Metrics.IMetricFactory;

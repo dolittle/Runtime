@@ -5,6 +5,7 @@ using System;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Clients;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 using Grpc.Core.Interceptors;

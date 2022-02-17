@@ -4,6 +4,7 @@
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;

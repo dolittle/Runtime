@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using DolittleExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;

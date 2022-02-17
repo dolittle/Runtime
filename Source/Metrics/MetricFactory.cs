@@ -3,6 +3,7 @@
 
 
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Prometheus;
 
 namespace Dolittle.Runtime.Metrics;

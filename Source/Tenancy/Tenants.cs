@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Tenants;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 
 
 namespace Dolittle.Runtime.Tenancy;

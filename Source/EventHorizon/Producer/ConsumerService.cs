@@ -11,6 +11,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Applications.Configuration;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.EventHorizonConsents;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;

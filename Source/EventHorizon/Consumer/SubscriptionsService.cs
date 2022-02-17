@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;

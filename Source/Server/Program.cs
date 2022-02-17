@@ -4,18 +4,20 @@
 using Dolittle.Runtime.Configuration.ConfigurationObjects;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Booting;
+using Dolittle.Runtime.DependencyInversion.Building;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services
     .AddRouting()
     .AddControllers();
 builder.Configuration.AddLegacyDolittleFiles();
 builder.Services.AddDolittleConfigurations(builder.Configuration);
 builder.Services.AddGrpc();
-builder.Host.UseAutofac();
+builder.Host.UseDolittleServices();
 
 var app = builder.Build();
 

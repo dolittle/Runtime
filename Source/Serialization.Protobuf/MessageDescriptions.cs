@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 
 
 namespace Dolittle.Runtime.Serialization.Protobuf;
