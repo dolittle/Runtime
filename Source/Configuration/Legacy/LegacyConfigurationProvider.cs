@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
@@ -33,16 +35,43 @@ public class LegacyConfigurationProvider : ConfigurationProvider
             case "endpoints.json":
                 MapEndpoints(configuration);
                 break;
+            case "tenants.json":
+                MapTenants(configuration);
+                break;
+            case "resources.json":
+                MapResources(configuration);
+                break;
         }
     }
 
     void MapEndpoints(IConfiguration endpoints)
     {
-        Data["dolittle:runtime:endpoints:public:port"] = endpoints["public:port"];
-        Data["dolittle:runtime:endpoints:public:enabled"] = endpoints["public:enabled"];
-        Data["dolittle:runtime:endpoints:private:port"] = endpoints["private:port"];
-        Data["dolittle:runtime:endpoints:private:enabled"] = endpoints["private:enabled"];
-        Data["dolittle:runtime:endpoints:management:port"] = endpoints["management:port"];
-        Data["dolittle:runtime:endpoints:management:enabled"] = endpoints["management:enabled"];
+        const string rootPath = "dolittle:runtime:endpoints";
+        foreach (var kvp in GetData(rootPath, endpoints))
+        {
+            Data.Add(kvp);
+        }
+        
     }
+    void MapTenants(IConfiguration tenants)
+    {
+        const string rootPath = "dolittle:runtime:tenants";
+        foreach (var kvp in GetData(rootPath, tenants))
+        {
+            Data.Add(kvp);
+        }
+    }
+    void MapResources(IConfiguration resources)
+    {
+        const string rootPath = "dolittle:runtime:resources";
+        foreach (var kvp in GetData(rootPath, resources))
+        {
+            Data.Add(kvp);
+        }
+    }
+
+    static IEnumerable<KeyValuePair<string, string>> GetData(string rootPath, IConfiguration config)
+        => config.AsEnumerable()
+            .Where(keyAndValue => keyAndValue.Value != null || !config.GetSection(keyAndValue.Key).GetChildren().Any())
+            .Select(keyAndValue => new KeyValuePair<string,string>($"{rootPath}:{keyAndValue.Key}", keyAndValue.Value));
 }

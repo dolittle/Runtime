@@ -7,8 +7,8 @@ using System.Collections.Generic;
 namespace Dolittle.Runtime.Configuration.ConfigurationObjects;
 
 /// <summary>
-/// Represents the configuration for tenants.
+/// Represents the configuration for resources.
 /// </summary>
-public class TenantsConfiguration : TenantSpecificConfigurationObject<TenantConfiguration>
+public class ResourcesConfiguration : TenantSpecificConfigurationObject<ResourcePerTypeConfiguration>
 {
 }
