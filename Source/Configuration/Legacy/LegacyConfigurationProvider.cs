@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
@@ -10,6 +11,7 @@ namespace Dolittle.Runtime.Configuration.Legacy;
 
 public class LegacyConfigurationProvider : ConfigurationProvider
 {
+    static string _delimiter = ConfigurationPath.KeyDelimiter;
     readonly IFileProvider _fileProvider;
 
     public LegacyConfigurationProvider(IFileProvider fileProvider)
@@ -23,48 +25,14 @@ public class LegacyConfigurationProvider : ConfigurationProvider
         {
             var fileBuilder = new ConfigurationBuilder();
             fileBuilder.AddJsonFile(_fileProvider, file.Name, false, false);
-            var fileConfiguration = fileBuilder.Build();
-            MapConfiguration(file.Name, fileConfiguration);
+            var configuration = fileBuilder.Build();
+            MapData(file.Name, configuration); 
         }
     }
 
-    void MapConfiguration(string file, IConfiguration configuration)
+    void MapData(string file, IConfiguration config)
     {
-        switch (file)
-        {
-            case "endpoints.json":
-                MapEndpoints(configuration);
-                break;
-            case "tenants.json":
-                MapTenants(configuration);
-                break;
-            case "resources.json":
-                MapResources(configuration);
-                break;
-        }
-    }
-
-    void MapEndpoints(IConfiguration endpoints)
-    {
-        const string rootPath = "dolittle:runtime:endpoints";
-        foreach (var kvp in GetData(rootPath, endpoints))
-        {
-            Data.Add(kvp);
-        }
-        
-    }
-    void MapTenants(IConfiguration tenants)
-    {
-        const string rootPath = "dolittle:runtime:tenants";
-        foreach (var kvp in GetData(rootPath, tenants))
-        {
-            Data.Add(kvp);
-        }
-    }
-    void MapResources(IConfiguration resources)
-    {
-        const string rootPath = "dolittle:runtime:resources";
-        foreach (var kvp in GetData(rootPath, resources))
+        foreach (var kvp in GetData($"dolittle{_delimiter}runtime{_delimiter}{Path.GetFileNameWithoutExtension(file)}", config))
         {
             Data.Add(kvp);
         }
@@ -73,5 +41,5 @@ public class LegacyConfigurationProvider : ConfigurationProvider
     static IEnumerable<KeyValuePair<string, string>> GetData(string rootPath, IConfiguration config)
         => config.AsEnumerable()
             .Where(keyAndValue => keyAndValue.Value != null || !config.GetSection(keyAndValue.Key).GetChildren().Any())
-            .Select(keyAndValue => new KeyValuePair<string,string>($"{rootPath}:{keyAndValue.Key}", keyAndValue.Value));
+            .Select(keyAndValue => new KeyValuePair<string,string>($"{rootPath}{_delimiter}{keyAndValue.Key}", keyAndValue.Value));
 }

@@ -39,34 +39,16 @@ public class TenantScopedProviders : ITenantScopedProviders
             });
         }
     }
-    //
-    // /// <summary>
-    // /// Initializes a new instance of the <see cref="TenantScopedProviders"/> class.
-    // /// </summary>
-    // /// <param name="rootContainer"></param>
-    // /// <param name="serviceCollections"></param>
-    // public TenantScopedProviders(ILifetimeScope rootContainer, IOptions<TenantsConfiguration> serviceCollections)
-    // {
-    //     _rootContainer = rootContainer;
-    //     foreach (var (tenant, services) in serviceCollections)
-    //     {
-    //         _serviceProviders[tenant] = rootContainer.BeginLifetimeScope(_ =>
-    //         {
-    //             _.Populate(services);
-    //             _.RegisterInstance(tenant);
-    //         });
-    //     }
-    // }
 
     /// <inheritdoc />
     public IServiceScope ScopedForTenant(TenantId tenant)
-        => GetProvider(tenant).BeginLifetimeScope().Resolve<IServiceScopeFactory>().CreateScope();
+        => GetLifetimeScope(tenant).Resolve<IServiceScopeFactory>().CreateScope();
 
     /// <inheritdoc />
     public IServiceProvider ForTenant(TenantId tenant)
-        => GetProvider(tenant).BeginLifetimeScope().Resolve<IServiceProvider>();
+        => GetLifetimeScope(tenant).Resolve<IServiceProvider>();
 
-    ILifetimeScope GetProvider(TenantId tenant)
+    ILifetimeScope GetLifetimeScope(TenantId tenant)
     {
         if (!_serviceProviders.TryGetValue(tenant, out var provider))
         {
