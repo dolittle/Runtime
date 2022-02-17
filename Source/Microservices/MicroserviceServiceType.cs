@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Microservices;
+namespace Microservices;
 
 /// <summary>
 /// Represents a <see cref="IRepresentServiceType">host type</see> that is for interaction communication.

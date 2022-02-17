@@ -4,8 +4,9 @@
 using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Options.Parsers.Microservices;
 

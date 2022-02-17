@@ -5,14 +5,15 @@ using System;
 using Machine.Specifications;
 using Moq;
 using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Microservices;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using System.Threading.Tasks;
 using System.Threading;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
+using Microservices;
 using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.given;

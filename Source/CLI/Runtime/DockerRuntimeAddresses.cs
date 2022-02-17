@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.CLI.Runtime;

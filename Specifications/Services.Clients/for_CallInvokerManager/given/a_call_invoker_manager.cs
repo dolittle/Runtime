@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Clients;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Machine.Specifications;
 using Moq;
 

@@ -7,6 +7,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using System;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.EventHorizonConsents;
 
 namespace Dolittle.Runtime.EventHorizon.for_EventHorizonConsentsConfiguration;
 

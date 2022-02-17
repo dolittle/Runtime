@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Configuration;
 /// </summary>
 /// <typeparam name="TConfiguration">Type of <see cref="IConfigurationObject"/>.</typeparam>
 public interface ICanProvideDefaultConfigurationFor<out TConfiguration>
-    where TConfiguration : IConfigurationObject
+    where TConfiguration : class
 {
     /// <summary>
     /// Provide an instance of the <see cref="IConfigurationObject"/>.

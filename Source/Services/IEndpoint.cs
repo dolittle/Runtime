@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 
 namespace Dolittle.Runtime.Services;
 

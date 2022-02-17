@@ -4,15 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.Microservices;
+namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 
 /// <summary>
 /// Represents the configuration for microservices.
 /// </summary>
-public class MicroservicesConfiguration :
-    ReadOnlyDictionary<Guid, MicroserviceAddressConfiguration>
+[Name("microservices")]
+public class MicroservicesConfiguration : Dictionary<Guid, MicroserviceAddressConfiguration>, IConfigurationObject
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.

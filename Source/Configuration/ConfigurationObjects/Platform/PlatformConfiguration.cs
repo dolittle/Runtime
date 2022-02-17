@@ -3,11 +3,12 @@
 
 using System;
 
-namespace Dolittle.Runtime.Platform;
+namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Platform;
 
 /// <summary>
 /// Represents the definition of the Platform configuration.
 /// </summary>
+[Name("platform")]
 public record PlatformConfiguration(
     Guid CustomerID,
     Guid ApplicationID,
@@ -15,4 +16,4 @@ public record PlatformConfiguration(
     string CustomerName,
     string ApplicationName,
     string MicroserviceName,
-    string Environment);
+    string Environment) : IConfigurationObject;

@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Events;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime;
 

@@ -4,9 +4,10 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
+using Microservices;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer;

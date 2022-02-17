@@ -50,7 +50,7 @@ public class ConvertDolittleConfigurationToJson : IConvertDolittleConfigurationT
         {
             return new JValue(real);
         }
-        return new JValue(section.Value);
 
+        return new JValue(section.Value);
     }
 }

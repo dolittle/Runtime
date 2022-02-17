@@ -3,10 +3,11 @@
 
 using System;
 using System.Reflection;
-using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Services.Clients;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime;
 

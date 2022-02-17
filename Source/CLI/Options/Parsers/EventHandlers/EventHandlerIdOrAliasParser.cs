@@ -4,10 +4,11 @@
 using System;
 using System.Globalization;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Microservices;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Options.Parsers.EventHandlers;
 

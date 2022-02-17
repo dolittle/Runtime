@@ -4,14 +4,15 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 

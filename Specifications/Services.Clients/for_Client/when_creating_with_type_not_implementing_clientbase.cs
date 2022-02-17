@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients;

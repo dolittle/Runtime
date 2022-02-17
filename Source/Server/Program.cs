@@ -1,32 +1,29 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using Autofac;
-using BaselineTypeDiscovery;
+using Dolittle.Runtime.Configuration.ConfigurationObjects;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Booting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
-// var services = new AutofacServiceProviderFactory();
-var assemblies = AssemblyFinder.FindAssemblies(
-    _ => { },
-    _ => _.FullName!.StartsWith("Dolittle.Runtime", StringComparison.InvariantCulture) && !_.FullName.Contains("Contracts", StringComparison.InvariantCulture),
-    false);
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseAutofac();
-builder.Configuration.AddLegacyDolittleFiles();
 builder.Services
     .AddRouting()
     .AddControllers();
+builder.Configuration.AddLegacyDolittleFiles();
+builder.Services.AddDolittleConfigurations(builder.Configuration);
 builder.Services.AddGrpc();
+builder.Host.UseAutofac();
 
 var app = builder.Build();
 
-app.MapControllers();
-app.MapGrpcService<Program>();
+var services = app.Services;
+var endpoints = services.GetRequiredService<DolittleConfigurations>();
+
+// app.MapControllers();
+// app.MapGrpcService<Program>();
 
 app.Run();
 

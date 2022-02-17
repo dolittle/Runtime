@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Resources;
 using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;

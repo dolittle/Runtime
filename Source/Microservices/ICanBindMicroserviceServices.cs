@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Microservices;
+namespace Microservices;
 
 /// <summary>
 /// Defines a system that can bind a gRPC service for interaction purpose.

@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Services;
+namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 
 /// <summary>
 /// Represents the configuration typically used by a <see cref="IEndpoint"/>.

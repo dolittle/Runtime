@@ -3,13 +3,14 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Configuration.ConfigurationObjects;
+namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 
 /// <summary>
 /// Represents the configuration for hosts by <see cref="EndpointVisibility"/>.
 /// </summary>
+[Name("endpoints")]
 public class EndpointsConfiguration :
-    Dictionary<EndpointVisibility, EndpointConfiguration>
-    // IConfigurationObject
+    Dictionary<EndpointVisibility, EndpointConfiguration>,
+    IConfigurationObject
 {
 }

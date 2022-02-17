@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Text.Json;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Tenants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,11 +9,10 @@ namespace Dolittle.Runtime.Configuration.ConfigurationObjects;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDolittleConfigurations(this IServiceCollection services, IConfiguration dolittleConfiguration)
+    public static IServiceCollection AddDolittleConfigurations(this IServiceCollection services, IConfiguration configuration)
     {
-        var json = new ConvertDolittleConfigurationToJson().Convert(dolittleConfiguration);
-        var x2 = JsonSerializer.Deserialize<EndpointsConfiguration>(json["endpoints"], new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
-        var x3 = JsonSerializer.Deserialize<TenantsConfiguration>(json["tenants"], new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
+        services.AddSingleton(_ => new DolittleConfigurations(_.GetRequiredService<IConvertDolittleConfigurationToJson>().Convert(configuration.GetSection("dolittle:runtime"))));
+        services.AddTenantsConfig();
         return services;
     }
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Configuration.ConfigurationObjects;
+namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Resources;
 
 /// <summary>
 /// Represents the resource configuration for a MongoDB resource.
@@ -31,7 +31,7 @@ public class ResourceConfiguration
     /// <summary>
     /// Gets or sets the maximum connection pool size for the MongoDB client.
     /// </summary>
-    public int MaxConnectionPoolSize { get; set; } = MongoDefaults.MaxConnectionPoolSize;
+    public int MaxConnectionPoolSize { get; set; } = 100;//MongoDefaults.MaxConnectionPoolSize;
 
     public bool IsLegacy => !string.IsNullOrEmpty(Host);
 }

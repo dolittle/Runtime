@@ -1,11 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Machine.Specifications;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
 using Dolittle.Runtime.Services.Clients;
-using Dolittle.Runtime.Microservices;
+using Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnectionFactory.given;
 

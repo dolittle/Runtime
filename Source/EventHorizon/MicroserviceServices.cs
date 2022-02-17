@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.EventHorizon.Producer;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Services;
+using Microservices;
 
 namespace Dolittle.Runtime.EventHorizon;
 

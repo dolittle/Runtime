@@ -4,6 +4,7 @@
 using System.Linq;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Tenants;
 using Dolittle.Runtime.DependencyInversion;
 
 

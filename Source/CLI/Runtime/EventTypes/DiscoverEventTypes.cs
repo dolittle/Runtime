@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Events;
-using Dolittle.Runtime.Microservices;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventTypes;
 

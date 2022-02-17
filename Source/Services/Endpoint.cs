@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Collections;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Grpc.Reflection;
 using Grpc.Reflection.V1Alpha;
 using Microsoft.Extensions.Logging;

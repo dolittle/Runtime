@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration.ConfigurationObjects;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Tenants;
 using Dolittle.Runtime.DependencyInversion.Booting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Dolittle.Runtime.DependencyInversion;
 
@@ -28,10 +26,10 @@ public class TenantScopedProviders : ITenantScopedProviders
     /// <param name="rootContainer"></param>
     /// <param name="tenants"></param>
     /// <param name="configureTenantServices"></param>
-    public TenantScopedProviders(ILifetimeScope rootContainer, IOptions<TenantsConfiguration> tenants, ConfigureTenantServices configureTenantServices)
+    public TenantScopedProviders(ILifetimeScope rootContainer, TenantsConfiguration tenants, ConfigureTenantServices configureTenantServices)
     {
         _rootContainer = rootContainer;
-        foreach (var (tenantId, _) in tenants.Value)
+        foreach (var (tenantId, _) in tenants)
         {
             _serviceProviders[tenantId] = rootContainer.BeginLifetimeScope(containerBuilder =>
             {
