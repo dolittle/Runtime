@@ -27,8 +27,8 @@ public class EndpointsConfigurationDefaultProvider : ICanProvideDefaultConfigura
     public EndpointsConfiguration Provide()
         => new()
         {
-            [EndpointVisibility.Public] = new() { Port = DefaultPublicPort },
-            [EndpointVisibility.Private] = new() { Port = DefaultPrivatePort },
-            [EndpointVisibility.Management] = new() { Port = DefaultManagementPort }
+            [EndpointVisibility.Public] = new EndpointConfiguration { Port = DefaultPublicPort },
+            [EndpointVisibility.Private] = new EndpointConfiguration { Port = DefaultPrivatePort },
+            [EndpointVisibility.Management] = new EndpointConfiguration { Port = DefaultManagementPort }
         };
 }

@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store;
 
 using MongoDB.Driver;
@@ -13,7 +15,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB;
 /// <summary>
 /// Represents a <see cref="IProjections" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class Projections : ProjectionsConnection, IProjections
 {
     const string ProjectionDefinitionCollectionName = "projection-definitions";

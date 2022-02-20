@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
@@ -12,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 /// <summary>
 /// Represents an implementation of <see cref="ISubscriptionStates" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class SubscriptionStates : EventStoreConnection, ISubscriptionStates
 {
     readonly ILogger _logger;

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Protobuf;
 using Microservices;
 using Microsoft.Extensions.Logging;
@@ -15,7 +17,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer;
 /// <summary>
 /// Represents an implementation of <see cref="ISubscriptions" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class Subscriptions : ISubscriptions
 {
     readonly ConcurrentDictionary<SubscriptionId, ISubscription> _subscriptions = new();
@@ -84,7 +86,7 @@ public class Subscriptions : ISubscriptions
         {
             return false;
         }
-        microserviceAddress = microserviceAddressConfig;
+        microserviceAddress = new MicroserviceAddress(microserviceAddressConfig.Host, microserviceAddressConfig.Port);
         return true;
     }
 }

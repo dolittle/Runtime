@@ -3,6 +3,8 @@
 
 using System.Linq;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
 
@@ -17,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 /// <summary>
 /// Represents a connection to the MongoDB database.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class DatabaseConnection
 {
     /// <summary>

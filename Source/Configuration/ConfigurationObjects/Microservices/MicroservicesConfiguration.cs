@@ -10,8 +10,8 @@ namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 /// <summary>
 /// Represents the configuration for microservices.
 /// </summary>
-[Name("microservices")]
-public class MicroservicesConfiguration : Dictionary<Guid, MicroserviceAddressConfiguration>, IConfigurationObject
+[Config("microservices")]
+public class MicroservicesConfiguration : Dictionary<Guid, MicroserviceAddressConfiguration>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.

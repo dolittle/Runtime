@@ -3,14 +3,11 @@
 
 using Dolittle.Runtime.Configuration.ConfigurationObjects;
 using Dolittle.Runtime.Configuration.Legacy;
-using Dolittle.Runtime.DependencyInversion.Booting;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services
     .AddRouting()
     .AddControllers();
@@ -22,7 +19,7 @@ builder.Host.UseDolittleServices();
 var app = builder.Build();
 
 var services = app.Services;
-var endpoints = services.GetRequiredService<DolittleConfigurations>();
+var dolittleConfig = services.GetRequiredService<DolittleConfigurations>();
 
 // app.MapControllers();
 // app.MapGrpcService<Program>();

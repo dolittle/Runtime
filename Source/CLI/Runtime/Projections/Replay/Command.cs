@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Serialization.Json;

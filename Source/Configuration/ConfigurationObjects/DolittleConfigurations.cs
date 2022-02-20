@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using System.Text.Json;
 
 namespace Dolittle.Runtime.Configuration.ConfigurationObjects;
@@ -15,10 +14,6 @@ public class DolittleConfigurations : ReadOnlyDictionary<string, string>
         {
             PropertyNameCaseInsensitive = true
         });
-
-    public TConfig GetFor<TConfig>(JsonSerializerOptions options = default)
-        where TConfig : class
-        => Get<TConfig>(typeof(TConfig).GetTypeInfo().GetCustomAttribute<NameAttribute>()!.Name, options);
 
     public DolittleConfigurations(IDictionary<string, string> dictionary)
         : base(dictionary)

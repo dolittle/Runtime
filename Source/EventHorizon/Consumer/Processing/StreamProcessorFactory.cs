@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -14,7 +16,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 /// <summary>
 /// Represents an implementation <see cref="IStreamProcessorFactory" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class StreamProcessorFactory : IStreamProcessorFactory
 {
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;

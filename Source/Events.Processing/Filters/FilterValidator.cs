@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
@@ -13,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 /// <summary>
 /// Represents an implementation of <see cref="ICanValidateFilterFor{T}" /> that can validate a <see cref="FilterDefinition" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class FilterValidator : ICanValidateFilterFor<FilterDefinition>
 {
     readonly IValidateFilterByComparingStreams _byComparingStreams;

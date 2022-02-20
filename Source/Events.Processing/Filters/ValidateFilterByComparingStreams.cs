@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
@@ -16,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 /// <summary>
 /// Represents an implementation of <see cref="IValidateFilterByComparingStreams" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class ValidateFilterByComparingStreams : IValidateFilterByComparingStreams
 {
     readonly IEventFetchers _eventFetchers;

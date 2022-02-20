@@ -10,8 +10,8 @@ namespace Dolittle.Runtime.Configuration.ConfigurationObjects.EventHorizonConsen
 /// <summary>
 /// Represents the configuration for event horizon consents.
 /// </summary>
-[Name("event-horizon-consents")]
-public class EventHorizonConsentsConfiguration : TenantSpecificConfigurationObject<IEnumerable<EventHorizonConsentConfiguration>>
+[Config("event-horizon-consents")]
+public class EventHorizonConsentsConfiguration : Dictionary<Guid, EventHorizonConsentConfiguration[]>
 {
     /// <summary>
     /// Gets the <see cref="IEnumerable{T}" /> list of <see cref="EventHorizonConsent" /> configured for a producer <see cref="TenantId" />.

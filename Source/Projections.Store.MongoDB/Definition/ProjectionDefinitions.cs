@@ -5,6 +5,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store;
 
 using Dolittle.Runtime.Projections.Store.Definition;
@@ -16,7 +18,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 /// <summary>
 /// Represents an implementation of <see cref="IProjectionDefinitions" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class ProjectionDefinitions : IProjectionDefinitions
 {
     readonly IProjections _projections;

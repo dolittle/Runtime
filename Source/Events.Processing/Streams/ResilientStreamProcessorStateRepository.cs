@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Rudimentary;
 
 using Dolittle.Runtime.Resilience;
@@ -14,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 /// <summary>
 /// Represents an implementation of <see cref="IResilientStreamProcessorStateRepository" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class ResilientStreamProcessorStateRepository : IResilientStreamProcessorStateRepository
 {
     readonly IStreamProcessorStateRepository _repository;

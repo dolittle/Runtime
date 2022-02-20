@@ -357,6 +357,14 @@ public class ConsumerService : ConsumerBase, IDisposable
 
         var consentsForSubscription = _eventHorizonConsents
             .GetConsentConfigurationsFor(producerTenant)
+            .Select(_ => new EventHorizonConsent
+            {
+                Consent = _.Consent,
+                Microservice = _.Microservice,
+                Partition = _.Partition,
+                Stream = _.Stream,
+                Tenant = _.Tenant
+            })
             .Where(_ => _.Microservice == consumerMicroservice && _.Tenant == consumerTenant && _.Stream == publicStream && _.Partition == partition).ToArray();
 
         if (consentsForSubscription.Length == 0)

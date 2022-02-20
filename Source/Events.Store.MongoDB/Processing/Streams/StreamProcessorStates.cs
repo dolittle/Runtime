@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 
 using Microsoft.Extensions.Logging;
@@ -14,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 /// <summary>
 /// Represents an implementation of <see cref="IStreamProcessorStates" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class StreamProcessorStates : EventStoreConnection, IStreamProcessorStates
 {
     const string StreamProcessorStateCollectionName = "stream-processor-states";

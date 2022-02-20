@@ -6,5 +6,5 @@ namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Metrics;
 /// <summary>
 /// Represents the configuration for Metrics.
 /// </summary>
-[Name("metrics")]
-public record MetricsConfiguration(int Port) : IConfigurationObject;
+[Config("metrics")]
+public record MetricsConfiguration(int Port);

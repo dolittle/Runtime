@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.Extensions.Configuration;
 
 namespace Dolittle.Runtime.Configuration;
 
@@ -13,19 +14,19 @@ namespace Dolittle.Runtime.Configuration;
 /// The decision is up to each <see cref="ICanProvideConfigurationObjects">provider</see>.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class NameAttribute : Attribute
+public class ConfigAttribute : Attribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="NameAttribute"/> class.
+    /// Initializes a new instance of the <see cref="ConfigAttribute"/> class.
     /// </summary>
-    /// <param name="name">Name to use.</param>
-    public NameAttribute(string name)
+    /// <param name="section">Name to use.</param>
+    public ConfigAttribute(string section)
     {
-        Name = name;
+        Section = section;
     }
 
     /// <summary>
-    /// Gets the name to be associated with the <see cref="IConfigurationObject"/>.
+    /// Gets the sub-section where this configuration belongs in the dolittle:runtime <see cref="IConfiguration"/>.
     /// </summary>
-    public string Name { get; }
+    public string Section { get; }
 }

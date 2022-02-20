@@ -3,6 +3,8 @@
 
 
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
@@ -11,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 /// <summary>
 /// Represents an implementation of <see cref="IAggregatesCollection" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class AggregatesCollection : EventStoreConnection, IAggregatesCollection
 {
     const string CollectionName = "aggregates";

@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.Streams;
@@ -13,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 /// <summary>
 /// Represents an implementation of <see cref="IStreamEventWatcher" /> and <see cref="IWaitForEventInStream" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class StreamEventWatcher : IStreamEventWatcher
 {
     readonly ConcurrentDictionary<EventWaiterId, EventWaiter> _waiters = new();

@@ -3,6 +3,8 @@
 
 using System.Linq;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
@@ -13,7 +15,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB;
 /// <summary>
 /// Represents a connection to the MongoDB database.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class DatabaseConnection
 {
     /// <summary>
