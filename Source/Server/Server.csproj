@@ -11,6 +11,7 @@
         <!-- <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" /> -->
         <ProjectReference Include="../Configuration/Configuration.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+        <ProjectReference Include="../Hosting/Hosting.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -14,10 +14,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Dolittle.Runtime.DependencyInversion;
 
 /// <summary>
-/// Represents an implementation of <see cref="ITenantServiceProviders"/>.
+/// Represents an implementation of <see cref="ITenantServiceProviders"/> that uses Autofac child lifetime scopes.
 /// </summary>
 [Singleton]
-public class TenantServiceProviders : ITenantServiceProviders, IDisposable
+public class TenantServiceProviders : ITenantServiceProviders
 {
     readonly ILifetimeScope _globalContainer;
     readonly IEnumerable<ICanAddTenantServices> _serviceAdders;
@@ -48,15 +48,6 @@ public class TenantServiceProviders : ITenantServiceProviders, IDisposable
         provider.Dispose();
         provider = _providers[tenant];
         return provider;
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        foreach (var (_, provider) in _providers)
-        {
-            provider.Dispose();
-        }
     }
 
     AutofacServiceProvider BuildTenantServiceProvider(TenantId tenant)
