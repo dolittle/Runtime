@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Net;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Hosting;
+using Dolittle.Runtime.Services.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,44 +13,7 @@ using Microsoft.Extensions.Hosting;
 
 var host = Host.CreateDefaultBuilder(args)
     .UseDolittleServices()
-    .AddScopedHost(builder =>
-    {
-        builder.ConfigureWebHost(webBuilder =>
-        {
-            webBuilder.UseKestrel(_ => _.Listen(IPAddress.Any, 50052));
-            webBuilder.ConfigureServices(webServices =>
-            {
-                webServices.AddRouting();
-            });
-            webBuilder.Configure(app =>
-            {
-                app.UseRouting();
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapGet("/", () => "Hello from the first host");
-                });
-            });
-        });
-    })
-    .AddScopedHost(builder =>
-    {
-        builder.ConfigureWebHost(webBuilder =>
-        {
-            webBuilder.UseKestrel(_ => _.Listen(IPAddress.Any, 50053));
-            webBuilder.ConfigureServices(webServices =>
-            {
-                webServices.AddRouting();
-            });
-            webBuilder.Configure(app =>
-            {
-                app.UseRouting();
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapGet("/", () => "Hello from the second host");
-                });
-            });
-        });
-    })
+    .AddGrpcHost(EndpointVisibility.Private, 50053)
     .Build();
 
 

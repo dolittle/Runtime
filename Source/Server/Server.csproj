@@ -12,6 +12,7 @@
         <ProjectReference Include="../Configuration/Configuration.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
         <ProjectReference Include="../Hosting/Hosting.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
     </ItemGroup>
 
     <ItemGroup>

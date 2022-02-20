@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props" />
+    <Import Project="../../default.props"/>
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Metrics</AssemblyName>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="prometheus-net" Version="$(PrometheusVersion)" />
-  </ItemGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Metrics</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Metrics</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../Booting/Booting.csproj" />
-    <ProjectReference Include="../Configuration/Configuration.csproj" />
-    <ProjectReference Include="../Types/Types.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Configuration/Configuration.csproj"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="prometheus-net" Version="$(PrometheusVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)"/>
+    </ItemGroup>
 
 </Project>
