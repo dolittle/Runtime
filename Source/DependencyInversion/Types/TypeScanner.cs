@@ -16,21 +16,10 @@ namespace Dolittle.Runtime.DependencyInversion.Types;
 public static class TypeScanner
 {
     /// <summary>
-    /// Scans all the Runtime assemblies to find classes and groups them by scope and lifecycle.
+    /// Scans all the Runtime assemblies to find exported classes.
     /// </summary>
-    /// <returns>The discovered <see cref="ClassesByScope"/>.</returns>
-    public static ClassesByScope ScanRuntimeAssemblies()
-    {
-        var classes = GetAllClassesInRuntimeAssemblies();
-
-        var classesByScope = classes.ToLookup(_ => _.GetScope());
-
-        return new ClassesByScope(
-            GroupClassesByLifecycle(classesByScope[Scopes.Global]),
-            GroupClassesByLifecycle(classesByScope[Scopes.PerTenant]));
-    }
-
-    static IEnumerable<Type> GetAllClassesInRuntimeAssemblies()
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="Type"/> with all classes in Runtime assemblies.</returns>
+    public static IEnumerable<Type> GetAllClassesInRuntimeAssemblies()
     {
         var assemblies = AssemblyFinder.FindAssemblies(
             _ => { },
@@ -39,6 +28,20 @@ public static class TypeScanner
                         && !assembly.FullName.Contains("Contracts", StringComparison.InvariantCulture),
             true);
         return assemblies.SelectMany(_ => _.ExportedTypes).Where(_ => _.IsClass);
+    }
+    
+    /// <summary>
+    /// Groups classes from an <see cref="IEnumerable{T}"/> of <see cref="Type"/> by scope and lifetime.
+    /// </summary>
+    /// <param name="classes">The classes to group.</param>
+    /// <returns>The <see cref="ClassesByScope"/> grouped by scope and lifetime.</returns>
+    public static ClassesByScope GroupClassesByScopeAndLifecycle(IEnumerable<Type> classes)
+    {
+        var classesByScope = classes.ToLookup(_ => _.GetScope());
+
+        return new ClassesByScope(
+            GroupClassesByLifecycle(classesByScope[Scopes.Global]),
+            GroupClassesByLifecycle(classesByScope[Scopes.PerTenant]));
     }
 
     static ClassesByLifecycle GroupClassesByLifecycle(IEnumerable<Type> classes)

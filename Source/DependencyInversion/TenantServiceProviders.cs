@@ -3,25 +3,31 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.DependencyInversion;
 
 /// <summary>
 /// Represents an implementation of <see cref="ITenantServiceProviders"/>.
 /// </summary>
+[Singleton]
 public class TenantServiceProviders : ITenantServiceProviders, IDisposable
 {
     readonly ILifetimeScope _globalContainer;
+    readonly IEnumerable<ICanAddTenantServices> _serviceAdders;
     readonly ClassesByLifecycle _perTenantClasses;
     readonly ConcurrentDictionary<TenantId, AutofacServiceProvider> _providers = new();
 
-    public TenantServiceProviders(ILifetimeScope globalContainer, ClassesByLifecycle perTenantClasses)
+    public TenantServiceProviders(ILifetimeScope globalContainer, IEnumerable<ICanAddTenantServices> serviceAdders, ClassesByLifecycle perTenantClasses)
     {
         _globalContainer = globalContainer;
+        _serviceAdders = serviceAdders;
         _perTenantClasses = perTenantClasses;
     }
 
@@ -58,6 +64,15 @@ public class TenantServiceProviders : ITenantServiceProviders, IDisposable
         var tenantContainer = _globalContainer.BeginLifetimeScope(builder =>
         {
             builder.RegisterInstance(tenant);
+
+            var services = new ServiceCollection();
+
+            foreach (var adder in _serviceAdders)
+            {
+                adder.AddFor(tenant, services);
+            }
+            
+            builder.Populate(services);
             builder.RegisterClassesByLifecycle(_perTenantClasses);
         });
         return new AutofacServiceProvider(tenantContainer);

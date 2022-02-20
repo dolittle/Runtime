@@ -1,33 +1,18 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Configuration.ConfigurationObjects;
-using Dolittle.Runtime.Configuration.Legacy;
-using Dolittle.Runtime.DependencyInversion.Booting;
 using Dolittle.Runtime.DependencyInversion.Building;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
+var host = Host.CreateDefaultBuilder(args)
+    .UseDolittleServices()
+    .Build();
 
-builder.Services
-    .AddRouting()
-    .AddControllers();
-builder.Configuration.AddLegacyDolittleFiles();
-builder.Services.AddDolittleConfigurations(builder.Configuration);
-builder.Services.AddGrpc();
-builder.Host.UseDolittleServices();
-
-var app = builder.Build();
-
-var services = app.Services;
-var endpoints = services.GetRequiredService<DolittleConfigurations>();
 
 // app.MapControllers();
 // app.MapGrpcService<Program>();
 
-app.Run();
+host.Run();
 
 // var host = Host.CreateDefaultBuilder(args)
 //     .UseServiceProviderFactory(services)
