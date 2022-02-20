@@ -8,9 +8,7 @@ namespace Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 /// <summary>
 /// Represents the configuration for hosts by <see cref="EndpointVisibility"/>.
 /// </summary>
-[Name("endpoints")]
-public class EndpointsConfiguration :
-    Dictionary<EndpointVisibility, EndpointConfiguration>,
-    IConfigurationObject
+[TenantConfiguration("endpoints")]
+public class EndpointsConfiguration : Dictionary<EndpointVisibility, EndpointConfiguration>
 {
 }
