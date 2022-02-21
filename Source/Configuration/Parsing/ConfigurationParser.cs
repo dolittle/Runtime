@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -38,21 +40,61 @@ public class ConfigurationParser : IParseConfigurationObjects
     {
         if (section.Value != default)
         {
+            if (section.Value == "null" ||
+                double.TryParse(section.Value, NumberStyles.AllowLeadingSign | NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var _) ||
+                bool.TryParse(section.Value, out var _))
+            {
+                stream.Write(section.Value.ToLower(CultureInfo.InvariantCulture));
+                return;
+            }
+            
+            stream.Write('"');
             stream.Write(section.Value);
+            stream.Write('"');
             return;
         }
-        
-        stream.Write("{");
-        foreach (var child in section.GetChildren())
+
+        var children = section.GetChildren().ToList();
+
+        var isArray = children.Select(_ => _.Key).All(_ => int.TryParse(_, NumberStyles.None, CultureInfo.InvariantCulture, out var _));
+
+        if (isArray)
         {
-            stream.Write('"');
-            stream.Write(child.Key);
-            stream.Write('"');
-            stream.Write(':');
+            children = children.OrderBy(_ => int.Parse(_.Key, CultureInfo.InvariantCulture)).ToList();
+            stream.Write('[');
+        }
+        else
+        {
+            stream.Write('{');
+        }
+
+        for (var i = 0; i < children.Count; i++)
+        {
+            if (i > 0)
+            {
+                stream.Write(',');
+            }
+
+            var child = children[i];
+
+            if (!isArray)
+            {
+                stream.Write('"');
+                stream.Write(child.Key);
+                stream.Write('"');
+                stream.Write(':');
+            }
             
             WriteSectionToStream(child, stream);
-            stream.Write(',');
         }
-        stream.Write("}");
+
+        if (isArray)
+        {
+            stream.Write(']');
+        }
+        else
+        {
+            stream.Write('}');
+        }
     }
 }

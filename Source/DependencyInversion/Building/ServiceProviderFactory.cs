@@ -7,6 +7,7 @@ using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.DependencyInversion.Attributes;
+using Dolittle.Runtime.DependencyInversion.Logging;
 using Dolittle.Runtime.DependencyInversion.Types;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -57,6 +58,8 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
                     groupedClasses.PerTenant))
                 .As<ITenantServiceProviders>()
                 .SingleInstance();
+
+        containerBuilder.AddLogging();
 
         return _factory.CreateServiceProvider(containerBuilder);
     }

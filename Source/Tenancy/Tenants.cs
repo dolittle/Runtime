@@ -1,12 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Tenants;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Microsoft.Extensions.Options;
 
 
 namespace Dolittle.Runtime.Tenancy;
@@ -17,14 +15,17 @@ namespace Dolittle.Runtime.Tenancy;
 [Singleton]
 public class Tenants : ITenants
 {
-    readonly TenantsConfiguration _tenantsConfiguration;
+    readonly TenantsConfiguration _configuration;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Tenants"/> class.
     /// </summary>
-    /// <param name="tenantsConfiguration">The <see cref="TenantsConfiguration">configuration</see> for tenants.</param>
-    public Tenants(TenantsConfiguration tenantsConfiguration) => _tenantsConfiguration = tenantsConfiguration;
+    /// <param name="configuration">The <see cref="TenantsConfiguration">configuration</see> for tenants.</param>
+    public Tenants(IOptions<TenantsConfiguration> configuration)
+    {
+        _configuration = configuration.Value;
+    }
 
     /// <inheritdoc/>
-    public ObservableCollection<TenantId> All => new(_tenantsConfiguration.Keys.Select(tenant => new TenantId(tenant)));
+    public ObservableCollection<TenantId> All => new(_configuration.Keys);
 }

@@ -17,5 +17,6 @@ public class Services : ICanAddServicesForTypesWith<ServiceAttribute>
     {
         Console.WriteLine($"Registering gRPC service from {type}");
         services.AddSingleton(new ServiceDefinition(attribute.Visibility, type));
+        services.AddSingleton(type);
     }
 }
