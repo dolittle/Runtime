@@ -46,7 +46,7 @@ public abstract class EventSequence<TEvent> : IReadOnlyList<TEvent>
     /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator() => Events.GetEnumerator();
 
-    void ThrowIfEventIsNull(TEvent @event)
+    static void ThrowIfEventIsNull(TEvent @event)
     {
         if (@event == null)
         {

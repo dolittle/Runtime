@@ -14,6 +14,7 @@
         <ProjectReference Include="../Hosting/Hosting.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
     </ItemGroup>
 
     <ItemGroup>
