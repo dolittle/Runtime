@@ -3,4 +3,7 @@
 
 namespace Dolittle.Runtime.Tenancy;
 
+/// <summary>
+/// Represents the configuration of a tenant.
+/// </summary>
 public record TenantConfiguration();

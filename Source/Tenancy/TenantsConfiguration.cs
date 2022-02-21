@@ -8,6 +8,9 @@ using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.Tenancy;
 
+/// <summary>
+/// Represents the configuration of tenants.
+/// </summary>
 [Configuration("tenants")]
 public class TenantsConfiguration : ReadOnlyDictionary<TenantId, TenantConfiguration>
 {
