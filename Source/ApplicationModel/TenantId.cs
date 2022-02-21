@@ -12,11 +12,6 @@ namespace Dolittle.Runtime.ApplicationModel;
 public record TenantId(Guid Value) : ConceptAs<Guid>(Value)
 {
     /// <summary>
-    /// Gets the definition of an unknown tenant.
-    /// </summary>
-    public static readonly TenantId Unknown = Guid.Parse("762a4bd5-2ee8-4d33-af06-95806fb73f4e");
-
-    /// <summary>
     /// Gets the tenant used when outside the scope of a tenant, typically the system.
     /// </summary>
     public static readonly TenantId System = Guid.Parse("08831584-e016-42f6-bc5e-c4f098fed42b");

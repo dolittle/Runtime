@@ -13,6 +13,9 @@ static partial class Log
     
     [LoggerMessage(0, LogLevel.Warning, "Received arguments, but call execution context was not set.")]
     internal static partial void ReceivedArgumentsButCallExecutionContextNotSet(ILogger logger);
+
+    [LoggerMessage(0, LogLevel.Warning, "Received invalid execution context.")]
+    internal static partial void ReceivedInvalidExecutionContext(ILogger logger, Exception exception);
     
     [LoggerMessage(0, LogLevel.Warning, "Received initial message from client, but arguments was not set.")]
     internal static partial void ReceivedInitialMessageByArgumentsNotSet(ILogger logger);

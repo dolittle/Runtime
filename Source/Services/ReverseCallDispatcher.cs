@@ -11,6 +11,7 @@ using Dolittle.Runtime.Services.ReverseCalls;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Services;
 
@@ -35,7 +36,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
     readonly IPingedConnection<TClientMessage, TServerMessage> _reverseCallConnection;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
-    readonly IExecutionContextManager _executionContextManager;
+    readonly ICreateExecutionContexts _executionContextFactory;
     readonly ILogger _logger;
 
     readonly object _receiveArgumentsLock = new();
@@ -52,22 +53,25 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     /// </summary>
     /// <param name="reverseCallConnection">The <see cref="IPingedConnection{TClientMessage, TServerMessage}"/></param>
     /// <param name="messageConverter">The <see cref="IConvertReverseCallMessages{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
+    /// <param name="executionContextFactory">The <see cref="ICreateExecutionContexts"/> to use.</param>
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     public ReverseCallDispatcher(
         IPingedConnection<TClientMessage, TServerMessage> reverseCallConnection,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
-        IExecutionContextManager executionContextManager,
+        ICreateExecutionContexts executionContextFactory,
         ILogger logger)
     {
         _reverseCallConnection = reverseCallConnection;
         _messageConverter = messageConverter;
-        _executionContextManager = executionContextManager;
+        _executionContextFactory = executionContextFactory;
         _logger = logger;
     }
 
     /// <inheritdoc/>
     public TConnectArguments Arguments { get; private set; }
+
+    /// <inheritdoc />
+    public ExecutionContext ExecutionContext { get; private set; }
 
     /// <inheritdoc/>
     public async Task<bool> ReceiveArguments(CancellationToken cancellationToken)
@@ -92,14 +96,23 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
                     return false;
                 }
 
-                if (callContext?.ExecutionContext != null)
+                if (callContext?.ExecutionContext == null)
                 {
-                    _executionContextManager.CurrentFor(callContext.ExecutionContext.ToExecutionContext());
-                    Arguments = arguments;
-                    return true;
+                    Log.ReceivedArgumentsButCallExecutionContextNotSet(_logger);
+                    return false;
                 }
 
-                Log.ReceivedArgumentsButCallExecutionContextNotSet(_logger);
+                var createExecutionContext = _executionContextFactory.TryCreateUsing(callContext.ExecutionContext);
+                if (!createExecutionContext.Success)
+                {
+                    Log.ReceivedInvalidExecutionContext(_logger, createExecutionContext.Exception);
+                    return false;
+                }
+
+                Arguments = arguments;
+                ExecutionContext = createExecutionContext.Result;
+                
+                return true;
             }
             else
             {
@@ -142,7 +155,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Call(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> Call(TRequest request, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         ThrowIfCompletedCall();
 
@@ -158,7 +171,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
             var callContext = new ReverseCallRequestContext
             {
                 CallId = callId.ToProtobuf(),
-                ExecutionContext = _executionContextManager.Current.ToProtobuf(),
+                ExecutionContext = executionContext.ToProtobuf(),
             };
             _messageConverter.SetRequestContext(callContext, request);
 
