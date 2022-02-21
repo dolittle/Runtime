@@ -15,6 +15,8 @@
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Events.Store.MongoDB/Events.Store.MongoDB.csproj" />
+        <ProjectReference Include="../Events.Store.Services.Grpc/Events.Store.Services.Grpc.csproj" />
     </ItemGroup>
 
     <ItemGroup>

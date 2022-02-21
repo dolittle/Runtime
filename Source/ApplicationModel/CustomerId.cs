@@ -19,12 +19,12 @@ public record CustomerId(Guid Value) : ConceptAs<Guid>(Value)
     /// <summary>
     /// Implicitly converts from a <see cref="Guid"/> to a <see cref="CustomerId"/>.
     /// </summary>
-    /// <param name="customer"><see cref="Guid"/> representing the microservice.</param>
+    /// <param name="customer"><see cref="Guid"/> representing the customer.</param>
     public static implicit operator CustomerId(Guid customer) => new(customer);
 
     /// <summary>
-    /// Create a new <see cref="CustomerId"/> identifier.
+    /// Implicitly converts from a <see cref="string"/> to a <see cref="CustomerId"/>.
     /// </summary>
-    /// <returns><see cref="CustomerId"/>.</returns>
-    public static CustomerId New() => Guid.NewGuid();
+    /// <param name="customer"><see cref="string"/> representing the customer.</param>
+    public static implicit operator CustomerId(string customer) => new(Guid.Parse(customer));
 }

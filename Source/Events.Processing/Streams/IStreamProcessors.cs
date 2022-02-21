@@ -27,15 +27,14 @@ public interface IStreamProcessors
     /// <param name="scopeId">The <see cref="ScopeId" />.</param>
     /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
     /// <param name="sourceStreamDefinition">The <see cref="IStreamDefinition" /> of the stream that the <see cref="AbstractScopedStreamProcessor" /> is processing.</param>
-    /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> <see cref="IEventProcessor" />.</param>
+    /// <param name="getEventProcessor">The <see cref="Func{TArg, TResult}" /> <see cref="IEventProcessor" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <param name="streamProcessor">The registered <see cref="StreamProcessor" />.</param>
     /// <returns>A value indicating whether a new <see cref="StreamProcessor" /> was registered.</returns>
     Try<StreamProcessor> TryCreateAndRegister(
         ScopeId scopeId,
         EventProcessorId eventProcessorId,
         IStreamDefinition sourceStreamDefinition,
-        Func<IEventProcessor> getEventProcessor,
+        Func<IServiceProvider, IEventProcessor> getEventProcessor,
         CancellationToken cancellationToken);
 
 

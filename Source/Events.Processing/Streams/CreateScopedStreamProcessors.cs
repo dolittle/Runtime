@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
@@ -27,24 +26,24 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateScopedStreamProcessors"/> class.
     /// </summary>
+    /// <param name="tenant">The current tenant.</param>
     /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
     /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
     /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public CreateScopedStreamProcessors(
+        TenantId tenant,
         IEventFetchers eventFetchers,
         IResilientStreamProcessorStateRepository streamProcessorStates,
-        IExecutionContextManager executionContextManager,
         IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
         IStreamEventWatcher streamWatcher,
         ILoggerFactory loggerFactory)
     {
+        _tenant = tenant;
         _eventFetchers = eventFetchers;
         _streamProcessorStates = streamProcessorStates;
         _eventsFetcherPolicy = eventsFetcherPolicy;
-        _tenant = executionContextManager.Current.Tenant;
         _streamWatcher = streamWatcher;
         _loggerFactory = loggerFactory;
     }

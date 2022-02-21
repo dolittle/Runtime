@@ -4,6 +4,7 @@
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Security;
+using Dolittle.Runtime.Versioning;
 
 namespace Dolittle.Runtime.Execution;
 
@@ -16,10 +17,11 @@ public interface ICreateExecutionContexts
     /// Creates an execution context for a <see cref="TenantId"/>, <see cref="CorrelationId"/> and <see cref="Claims"/>, combined with the current configuration of the Runtime.
     /// </summary>
     /// <param name="tenant">The tenant to use in the created execution context.</param>
+    /// <param name="version">The version to use in the created execution context.</param>
     /// <param name="correlation">The correlation to use in the created execution context.</param>
     /// <param name="claims">The claims to use in the created execution context.</param>
     /// <returns>A new <see cref="ExecutionContext"/> with the specified fields.</returns>
-    ExecutionContext CreateFor(TenantId tenant, CorrelationId correlation, Claims claims);
+    ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, Claims claims);
 
     /// <summary>
     /// Tries to create a new <see cref="ExecutionContext"/> from the requested <see cref="ExecutionContext"/>.

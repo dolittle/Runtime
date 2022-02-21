@@ -18,7 +18,6 @@
     <ProjectReference Include="../Execution/Execution.csproj" />
     <ProjectReference Include="../Events.Store/Events.Store.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
-    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
     <ProjectReference Include="../Services/Services.csproj" />
     <ProjectReference Include="../Tenancy/Tenancy.csproj" />
   </ItemGroup>

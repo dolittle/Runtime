@@ -3,12 +3,12 @@
 
 using System;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Clients;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+using Microsoft.Extensions.Options;
+using Services.Clients;
 
 namespace Dolittle.Runtime.Services.Clients;
 
@@ -30,11 +30,11 @@ public class CallInvokerManager : ICallInvokerManager
     /// <param name="metadataProviders"><see cref="IMetadataProviders"/> for providing metadata to calls.</param>
     public CallInvokerManager(
         IKnownClients knownClients,
-        ClientEndpointsConfiguration configuration,
+        IOptions<ClientEndpointsConfiguration> configuration,
         IMetadataProviders metadataProviders)
     {
         _knownClients = knownClients;
-        _configuration = configuration;
+        _configuration = configuration.Value;
         _metadataProviders = metadataProviders;
     }
 

@@ -21,10 +21,10 @@ public record ApplicationId(Guid Value) : ConceptAs<Guid>(Value)
     /// </summary>
     /// <param name="application"><see cref="Guid"/> representing the application.</param>
     public static implicit operator ApplicationId(Guid application) => new(application);
-
+    
     /// <summary>
-    /// Create a new <see cref="ApplicationId"/>identifier.
+    /// Implicitly converts from a <see cref="string"/> to a <see cref="ApplicationId"/>.
     /// </summary>
-    /// <returns><see cref="ApplicationId"/>.</returns>
-    public static ApplicationId New() => Guid.NewGuid();
+    /// <param name="application"><see cref="string"/> representing the application.</param>
+    public static implicit operator ApplicationId(string application) => new(Guid.Parse(application));
 }

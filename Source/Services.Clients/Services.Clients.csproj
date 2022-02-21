@@ -1,21 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props" />
+    <Import Project="../../default.props"/>
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Services.Clients</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Services.Clients</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Services.Clients</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
-    <ProjectReference Include="../Metrics/Metrics.csproj" />
-    <ProjectReference Include="../Services/Services.csproj" />
-    <ProjectReference Include="../Reflection/Reflection.csproj" />
-    <ProjectReference Include="../Resilience/Resilience.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj"/>
+        <ProjectReference Include="../Metrics/Metrics.csproj"/>
+        <ProjectReference Include="../Services/Services.csproj"/>
+        <ProjectReference Include="../Reflection/Reflection.csproj"/>
+        <ProjectReference Include="../Resilience/Resilience.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
-    <PackageReference Include="Grpc" Version="$(GrpcVersion)" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)"/>
+        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)"/>
+        <PackageReference Include="Grpc" Version="$(GrpcVersion)"/>
+    </ItemGroup>
 </Project>

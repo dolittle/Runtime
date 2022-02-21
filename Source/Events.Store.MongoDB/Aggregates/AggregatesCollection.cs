@@ -23,9 +23,9 @@ public class AggregatesCollection : EventStoreConnection, IAggregatesCollection
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregatesCollection"/> class.
     /// </summary>
-    /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
+    /// <param name="connection">The <see cref="IDatabaseConnection" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
-    public AggregatesCollection(DatabaseConnection connection, ILogger logger)
+    public AggregatesCollection(IDatabaseConnection connection, ILogger logger)
         : base(connection)
     {
         _logger = logger;

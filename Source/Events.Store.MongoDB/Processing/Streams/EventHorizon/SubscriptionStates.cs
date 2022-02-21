@@ -3,7 +3,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Logging;
@@ -22,9 +21,9 @@ public class SubscriptionStates : EventStoreConnection, ISubscriptionStates
     /// <summary>
     /// Initializes a new instance of the <see cref="SubscriptionStates"/> class.
     /// </summary>
-    /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
+    /// <param name="connection">The <see cref="IDatabaseConnection" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
-    public SubscriptionStates(DatabaseConnection connection, ILogger logger)
+    public SubscriptionStates(IDatabaseConnection connection, ILogger logger)
         : base(connection)
     {
         _logger = logger;

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Dolittle.Runtime.Configuration;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB;
@@ -9,6 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 /// <summary>
 /// Represents a resource configuration for a MongoDB Read model implementation.
 /// </summary>
+[TenantConfiguration("resources:eventStore")]
 public class EventStoreConfiguration
 {
     /// <summary>

@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer;
@@ -15,7 +14,7 @@ public interface ISubscriptionFactory
     /// Creates an <see cref="ISubscription" />.
     /// </summary>
     /// <param name="subscriptionId">The subscription identifier.</param>
-    /// <param name="producerMicroserviceAddress">The producer microserice's address.</param>
+    /// <param name="producerMicroserviceAddress">The producer microservice address.</param>
     /// <returns>The created <see cref="ISubscription" />.</returns>
     ISubscription Create(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress);
 }

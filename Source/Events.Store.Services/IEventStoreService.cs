@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Services;
 public interface IEventStoreService
 {
     /// <summary>
-    /// Try to commmit the <see cref="UncommittedEvents" />.
+    /// Try to commit the <see cref="UncommittedEvents" />.
     /// </summary>
     /// <param name="events"><see cref="UncommittedEvents" /> to commit.</param>
     /// <param name="context"><see cref="DolittleExecutionContext" /> the <see cref="UncommittedEvents" /> are committed in.</param>
@@ -24,7 +24,7 @@ public interface IEventStoreService
     Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, DolittleExecutionContext context, CancellationToken token);
 
     /// <summary>
-    /// Try to commmit the <see cref="UncommittedAggregateEvents" />.
+    /// Try to commit the <see cref="UncommittedAggregateEvents" />.
     /// </summary>
     /// <param name="events"><see cref="UncommittedAggregateEvents" /> to commit.</param>
     /// <param name="context"><see cref="DolittleExecutionContext" /> the <see cref="UncommittedAggregateEvents" /> are committed in.</param>

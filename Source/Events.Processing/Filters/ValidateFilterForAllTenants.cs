@@ -17,37 +17,37 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 /// </summary>
 public class ValidateFilterForAllTenants : IValidateFilterForAllTenants
 {
-    readonly IPerformActionOnAllTenants _onAllTenants;
+    readonly IPerformActionsForAllTenants _performer;
     readonly IFilterValidators _filterValidators;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ValidateFilterForAllTenants"/> class.
     /// </summary>
-    /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
+    /// <param name="performer">The <see cref="IPerformActionsForAllTenants" />.</param>
     /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public ValidateFilterForAllTenants(
-        IPerformActionOnAllTenants onAllTenants,
+        IPerformActionsForAllTenants performer,
         IFilterValidators filterValidators,
         ILogger logger)
     {
-        _onAllTenants = onAllTenants;
+        _performer = performer;
         _filterValidators = filterValidators;
         _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task<IDictionary<TenantId, FilterValidationResult>> Validate<TDefinition>(Func<IFilterProcessor<TDefinition>> getFilterProcessor, CancellationToken cancellationToken)
+    public async Task<IDictionary<TenantId, FilterValidationResult>> Validate<TDefinition>(Func<IServiceProvider, IFilterProcessor<TDefinition>> getFilterProcessor, CancellationToken cancellationToken)
         where TDefinition : IFilterDefinition
     {
         var result = new Dictionary<TenantId, FilterValidationResult>();
-        await _onAllTenants.PerformAsync(async tenantId =>
+        await _performer.PerformAsync(async (tenant, services) =>
         {
-            var filterProcessor = getFilterProcessor();
-            _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenantId);
+            var filterProcessor = getFilterProcessor(services);
+            _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenant);
             var validationResult = await _filterValidators.Validate(filterProcessor, cancellationToken).ConfigureAwait(false);
-            result.Add(tenantId, validationResult);
+            result.Add(tenant, validationResult);
         }).ConfigureAwait(false);
         return result;
     }

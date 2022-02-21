@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+  <Import Project="../../default.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Events.Store.Services.Grpc</AssemblyName>

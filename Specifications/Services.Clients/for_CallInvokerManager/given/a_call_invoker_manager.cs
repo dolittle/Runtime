@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Clients;
 using Machine.Specifications;
 using Moq;
+using Services.Clients;
 
 namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager.given;
 
