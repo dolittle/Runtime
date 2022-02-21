@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Services;
 using Microservices;

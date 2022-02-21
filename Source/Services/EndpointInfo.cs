@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
+using Dolittle.Runtime.Services.Configuration;
 
 namespace Dolittle.Runtime.Services;
 

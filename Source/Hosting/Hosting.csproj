@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../Configuration/Configuration.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
     </ItemGroup>
 

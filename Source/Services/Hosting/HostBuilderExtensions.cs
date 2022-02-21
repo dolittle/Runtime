@@ -4,13 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Dolittle.Runtime.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -21,13 +18,14 @@ namespace Dolittle.Runtime.Services.Hosting;
 /// </summary>
 public static class HostBuilderExtensions
 {
-    public static IHostBuilder AddGrpcHost(this IHostBuilder builder, EndpointVisibility visibility, int port)
+    public static IHostBuilder AddGrpcHost(this IHostBuilder builder, EndpointVisibility visibility)
         => builder.AddScopedHost(_ => _.ConfigureWebHost(grpcHost =>
         {
-            grpcHost.UseKestrel(_ => _.Listen(IPAddress.Any, port, _ => _.Protocols = HttpProtocols.Http2));
-            
+            grpcHost.UseKestrel();
+
             grpcHost.ConfigureServices(services =>
             {
+                services.AddKestrelConfigurationFor(visibility);
                 services.AddGrpc();
                 services.AddGrpcReflection();
             });
@@ -38,26 +36,10 @@ public static class HostBuilderExtensions
 
                 app.UseEndpoints(endpoints =>
                 {
-                    var implementedServices = app
-                        .ApplicationServices
-                        .GetRequiredService<IEnumerable<ServiceDefinition>>()
-                        .Where(_ => _.Visibility == visibility);
-
-                    foreach (var definition in implementedServices)
-                    {
-                        endpoints.MapDynamicGrpcService(definition.ImplementationType);
-                    }
-
+                    endpoints.MapDiscoveredGrpcServicesOf(visibility);
                     endpoints.MapGrpcReflectionService();
                 });
             });
         }));
 
-    static GrpcServiceEndpointConventionBuilder MapDynamicGrpcService(this IEndpointRouteBuilder builder, Type service)
-    {
-        Console.WriteLine($"Mapping grpc endpoint for {service}");
-        var method = typeof(GrpcEndpointRouteBuilderExtensions).GetMethod(nameof(GrpcEndpointRouteBuilderExtensions.MapGrpcService));
-        var methodForServiceType = method.MakeGenericMethod(service);
-        return methodForServiceType.Invoke(null, new object[] { builder }) as GrpcServiceEndpointConventionBuilder;
-    }
 }

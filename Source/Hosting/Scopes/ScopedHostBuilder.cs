@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Configuration.DependencyInversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -74,6 +75,9 @@ public class ScopedHostBuilder : IHostBuilder
     void RegisterHostedServiceProxies(HostBuilderContext context, IServiceCollection parentServices)
     {
         var scopedServices = CreateScopedHostServiceCollection(context);
+        
+        // TODO: Can we do this in a nicer way?
+        new Services().AddTo(scopedServices);
 
         var scopedHost = new ScopedHostDefinition(scopedServices);
 

@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Clients;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Endpoints;
 using Machine.Specifications;
 using Moq;
 
