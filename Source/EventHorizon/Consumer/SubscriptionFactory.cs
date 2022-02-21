@@ -4,6 +4,8 @@
 using System.Threading;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Resilience;
@@ -15,7 +17,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer;
 /// <summary>
 /// Represents an implementation of <see cref="ISubscriptionFactory" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class SubscriptionFactory : ISubscriptionFactory
 {
     readonly ILoggerFactory _loggerFactory;

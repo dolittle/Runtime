@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Serialization.Json;

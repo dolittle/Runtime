@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Serialization.Json;

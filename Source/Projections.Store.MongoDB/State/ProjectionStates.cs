@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store;
 
 using Dolittle.Runtime.MongoDB;
@@ -20,7 +22,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State;
 /// <summary>
 /// Represents an implementation of <see cref="IProjectionStates" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class ProjectionStates : IProjectionStates
 {
     readonly IProjections _projections;

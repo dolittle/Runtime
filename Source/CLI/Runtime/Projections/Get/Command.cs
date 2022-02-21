@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;

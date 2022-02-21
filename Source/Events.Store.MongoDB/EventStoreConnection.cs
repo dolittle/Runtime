@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB;
@@ -11,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 /// <summary>
 /// Represents a connection to the MongoDB EventStore database.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class EventStoreConnection : IEventStoreConnection
 {
     /// <summary>

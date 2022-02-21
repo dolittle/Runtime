@@ -4,6 +4,8 @@
 
 using Dolittle.Runtime.Configuration.ConfigurationObjects.Resources;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -12,7 +14,7 @@ namespace Dolittle.Runtime.Resources.MongoDB;
 /// <summary>
 /// Represents an implementation of <see cref="IKnowTheConnectionString"/>.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class ConnectionStringFromResourceConfiguration : IKnowTheConnectionString
 {
 

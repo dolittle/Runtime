@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Projections.Store.Copies;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
@@ -16,7 +18,7 @@ namespace Dolittle.Runtime.Projections.Store;
 /// <summary>
 /// Represents an implementation of <see cref="IProjectionPersister"/>.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class ProjectionPersister : IProjectionPersister
 {
     readonly IProjectionStore _projectionStore;

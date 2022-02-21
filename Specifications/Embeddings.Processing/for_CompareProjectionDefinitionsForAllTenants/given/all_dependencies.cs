@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration.ConfigurationObjects.Tenants;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Tenancy;

@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store;
 
 
@@ -12,7 +14,7 @@ namespace Dolittle.Runtime.Aggregates;
 /// <summary>
 /// Represents an implementation of <see cref="IAggregateRootInstances"/>.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class AggregateRootInstances : IAggregateRootInstances
 {
     readonly IAggregateRoots _aggregateRoots;
