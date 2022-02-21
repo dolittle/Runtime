@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -22,22 +23,22 @@ namespace Dolittle.Runtime.Events.Store.Services;
 public class EventStoreService : IEventStoreService
 {
     readonly ICreateExecutionContexts _executionContextCreator;
-    readonly ITenantServiceProviders _serviceProviders;
+    readonly Func<TenantId, IEventStore> _getEventStore;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreService"/> class.
     /// </summary>
     /// <param name="executionContextCreator">The <see cref="ICreateExecutionContexts"/> to use to validate incoming execution contexts.</param>
-    /// <param name="serviceProviders">The <see cref="ITenantServiceProviders"/> to use to resolve the <see cref="IEventStore"/> for a specific tenant.</param>
+    /// <param name="getEventStore">Factory to use to resolve the <see cref="IEventStore"/> for a specific tenant.</param>
     /// <param name="logger">The logger to use for logging.</param>
     public EventStoreService(
         ICreateExecutionContexts executionContextCreator,
-        ITenantServiceProviders serviceProviders,
+        Func<TenantId, IEventStore> getEventStore,
         ILogger logger)
     {
         _executionContextCreator = executionContextCreator;
-        _serviceProviders = serviceProviders;
+        _getEventStore = getEventStore;
         _logger = logger;
     }
 
@@ -45,6 +46,7 @@ public class EventStoreService : IEventStoreService
     public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, ExecutionContext context, CancellationToken token)
     {
         _logger.EventsReceivedForCommitting(false, events.Count);
+        
 
         var commitEvents = await TryPerformInExecutionContext(
                 context, 
@@ -109,6 +111,7 @@ public class EventStoreService : IEventStoreService
 
     async Task<Try<T>> TryPerformInExecutionContext<T>(ExecutionContext requested, Func<IEventStore, ExecutionContext, Task<T>> action)
     {
+        // TODO: This isn't really all that nice, can we move something out another place or make an extension method?
         var createExecutionContext = _executionContextCreator.TryCreateUsing(requested);
         if (!createExecutionContext.Success)
         {
@@ -119,7 +122,7 @@ public class EventStoreService : IEventStoreService
 
         try
         {
-            var eventStore = _serviceProviders.ForTenant(executionContext.Tenant).GetRequiredService<IEventStore>();
+            var eventStore = _getEventStore(executionContext.Tenant);
             return await action(eventStore, executionContext).ConfigureAwait(false);
         }
         catch (Exception exception)
