@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Execution</AssemblyName>
@@ -7,13 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj"/>
-        <ProjectReference Include="../Security/Security.csproj"/>
-        <ProjectReference Include="../Versioning/Versioning.csproj"/>
+        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+        <ProjectReference Include="../Security/Security.csproj" />
+        <ProjectReference Include="../Versioning/Versioning.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityVersion)"/>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 </Project>
