@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Handshake.Contracts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Handshake.Contracts.Handshake;
@@ -16,6 +17,7 @@ namespace Dolittle.Runtime.Platform.Handshake;
 /// <summary>
 /// Represents the implementation of.
 /// </summary>
+[PrivateService]
 public class HandshakeService : HandshakeBase
 {
     readonly IResolvePlatformEnvironment _platformEnvironment;
