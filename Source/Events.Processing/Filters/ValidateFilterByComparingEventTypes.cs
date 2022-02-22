@@ -17,10 +17,10 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
 /// <summary>
-/// Represents an implementation of <see cref="IValidateFilterByComparingEventTypes"/>.
+/// Represents an implementation of <see cref="ICanValidateFilterFor{TDefinition}"/> for filters defined with <see cref="TypeFilterWithEventSourcePartitionDefinition"/>.
 /// </summary>
 [Singleton, PerTenant]
-public class ValidateFilterByComparingEventTypes : IValidateFilterByComparingEventTypes
+public class ValidateFilterByComparingEventTypes : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
 {
     readonly IEventFetchers _eventFetchers;
 

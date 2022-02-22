@@ -18,22 +18,22 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 public class ValidateFilterForAllTenants : IValidateFilterForAllTenants
 {
     readonly IPerformActionsForAllTenants _performer;
-    readonly IFilterValidators _filterValidators;
+    readonly Func<TenantId, IFilterValidators> _getFilterValidators;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ValidateFilterForAllTenants"/> class.
     /// </summary>
     /// <param name="performer">The <see cref="IPerformActionsForAllTenants" />.</param>
-    /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
+    /// <param name="getFilterValidators">The <see cref="IFilterValidators" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public ValidateFilterForAllTenants(
         IPerformActionsForAllTenants performer,
-        IFilterValidators filterValidators,
+        Func<TenantId, IFilterValidators> getFilterValidators,
         ILogger logger)
     {
         _performer = performer;
-        _filterValidators = filterValidators;
+        _getFilterValidators = getFilterValidators;
         _logger = logger;
     }
 
@@ -46,7 +46,7 @@ public class ValidateFilterForAllTenants : IValidateFilterForAllTenants
         {
             var filterProcessor = getFilterProcessor(services);
             _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenant);
-            var validationResult = await _filterValidators.Validate(filterProcessor, cancellationToken).ConfigureAwait(false);
+            var validationResult = await _getFilterValidators(tenant).Validate(filterProcessor, cancellationToken).ConfigureAwait(false);
             result.Add(tenant, validationResult);
         }).ConfigureAwait(false);
         return result;

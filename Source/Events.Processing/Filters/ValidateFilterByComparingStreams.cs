@@ -6,20 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
 /// <summary>
-/// Represents an implementation of <see cref="IValidateFilterByComparingStreams" />.
+/// Represents an implementation of <see cref="ICanValidateFilterFor{TDefinition}"/> for filters defined with <see cref="FilterDefinition"/> or <see cref="PublicFilterDefinition"/>.
 /// </summary>
 [Singleton, PerTenant]
-public class ValidateFilterByComparingStreams : IValidateFilterByComparingStreams
+public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefinition>, ICanValidateFilterFor<PublicFilterDefinition>
 {
     readonly IEventFetchers _eventFetchers;
 
@@ -33,9 +33,15 @@ public class ValidateFilterByComparingStreams : IValidateFilterByComparingStream
         _eventFetchers = eventFetchers;
     }
 
-    /// <inheritdoc/>
-    public async Task<FilterValidationResult> Validate<TFilterDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
-        where TFilterDefinition : IFilterDefinition
+    /// <inheritdoc />
+    public Task<FilterValidationResult> Validate(FilterDefinition persistedDefinition, IFilterProcessor<FilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+        => PerformValidation(filter, lastUnprocessedEvent, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<FilterValidationResult> Validate(PublicFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+        => PerformValidation(filter, lastUnprocessedEvent, cancellationToken);
+
+    async Task<FilterValidationResult> PerformValidation(IFilterProcessor<IFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
     {
         try
         {

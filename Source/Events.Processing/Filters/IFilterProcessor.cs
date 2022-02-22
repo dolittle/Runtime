@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 /// Defines an <see cref="IEventProcessor" /> that filters a <see cref="CommittedEvent" />.
 /// </summary>
 /// <typeparam name="TDefinition">The <see cref="IFilterDefinition" />.</typeparam>
-public interface IFilterProcessor<TDefinition> : IEventProcessor
+public interface IFilterProcessor<out TDefinition> : IEventProcessor
     where TDefinition : IFilterDefinition
 {
     /// <summary>
