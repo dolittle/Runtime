@@ -123,7 +123,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Embeddings.Store.Services.G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLI", "Source\CLI\CLI.csproj", "{E41F088D-0357-4B9A-A6CB-EAF1A0F6F656}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Processing.Managment", "Source\Events.Processing.Management\Events.Processing.Managment.csproj", "{D7696D25-712B-4921-8EAA-ABFA767D7C91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Processing.Management", "Source\Events.Processing.Management\Events.Processing.Management.csproj", "{D7696D25-712B-4921-8EAA-ABFA767D7C91}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events", "Source\Events\Events.csproj", "{2C43489A-FE58-41E3-B6BB-25BF3A4B2E47}"
 EndProject

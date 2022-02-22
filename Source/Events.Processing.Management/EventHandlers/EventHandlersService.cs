@@ -13,6 +13,7 @@ using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
@@ -23,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
 /// <summary>
 /// Represents an implementation of <see cref="EventHandlersBase"/>.
 /// </summary>
+[ManagementService]
 public class EventHandlersService : EventHandlersBase
 {
     readonly IEventHandlers _eventHandlers;
