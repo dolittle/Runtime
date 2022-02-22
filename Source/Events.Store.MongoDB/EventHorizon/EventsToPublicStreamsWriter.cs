@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -15,6 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 /// <summary>
 /// Represents an implementation of <see cref="IWriteEventsToPublicStreams" />.
 /// </summary>
+[DisableAutoRegistration] // TODO: This gets resolved for private filters as well
 public class EventsToPublicStreamsWriter : IWriteEventsToPublicStreams
 {
     readonly FilterDefinitionBuilder<Events.StreamEvent> _filter = Builders<Events.StreamEvent>.Filter;

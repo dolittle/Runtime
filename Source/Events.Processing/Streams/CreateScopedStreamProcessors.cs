@@ -21,8 +21,8 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
     readonly IEventFetchers _eventFetchers;
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
     readonly IStreamEventWatcher _streamWatcher;
-    readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, Partitioned.ScopedStreamProcessor> _createPartitionedStreamProcessor;
-    readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ScopedStreamProcessor> _createUnpartitionedStreamProcessor;
+    readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, ExecutionContext, Partitioned.ScopedStreamProcessor> _createPartitionedStreamProcessor;
+    readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ExecutionContext, ScopedStreamProcessor> _createUnpartitionedStreamProcessor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateScopedStreamProcessors"/> class.
@@ -36,8 +36,8 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
         IEventFetchers eventFetchers,
         IResilientStreamProcessorStateRepository streamProcessorStates,
         IStreamEventWatcher streamWatcher,
-        Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, Partitioned.ScopedStreamProcessor> createPartitionedStreamProcessor,
-        Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ScopedStreamProcessor> createUnpartitionedStreamProcessor)
+        Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, ExecutionContext, Partitioned.ScopedStreamProcessor> createPartitionedStreamProcessor,
+        Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ExecutionContext, ScopedStreamProcessor> createUnpartitionedStreamProcessor)
     {
         _eventFetchers = eventFetchers;
         _streamProcessorStates = streamProcessorStates;
@@ -72,7 +72,7 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
             }
             
             var eventFetcher = await _eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-            streamProcessor = _createPartitionedStreamProcessor(streamDefinition, streamProcessorId, eventFetcher, eventProcessor, partitionedProcessorState);
+            streamProcessor = _createPartitionedStreamProcessor(streamDefinition, streamProcessorId, eventFetcher, eventProcessor, partitionedProcessorState, executionContext);
         }
         else
         {
@@ -82,7 +82,7 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
             }
             
             var eventFetcher = await _eventFetchers.GetFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-            streamProcessor = _createUnpartitionedStreamProcessor(streamDefinition, streamProcessorId, eventFetcher, eventProcessor, unpartitionedProcessorState);
+            streamProcessor = _createUnpartitionedStreamProcessor(streamDefinition, streamProcessorId, eventFetcher, eventProcessor, unpartitionedProcessorState, executionContext);
         }
         
         NotifyStream(streamProcessorId.ScopeId, streamDefinition, processorState.Position);

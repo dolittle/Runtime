@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 /// <summary>
 /// Represents an implementation of <see cref="IResilientStreamProcessorStateRepository" />.
 /// </summary>
-[Singleton, PerTenant]
+[Singleton, PerTenant, DisableAutoRegistration] // TODO: We get circular dependencies since we register this as IStreamProcessorStateRepository by convention
 public class ResilientStreamProcessorStateRepository : IResilientStreamProcessorStateRepository
 {
     readonly IStreamProcessorStateRepository _repository;

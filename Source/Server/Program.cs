@@ -6,12 +6,14 @@ using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 var host = Host.CreateDefaultBuilder(args)
     .UseDolittleServices()
     .ConfigureHostConfiguration(configuration =>
     {
+        configuration.AddJsonFile("appsettings.json");
         configuration.AddLegacyDolittleFiles();
     })
     .AddMetrics()
