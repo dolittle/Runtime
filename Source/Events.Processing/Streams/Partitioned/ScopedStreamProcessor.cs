@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;

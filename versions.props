@@ -22,7 +22,7 @@
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <ProtobufVersion>3.18.1</ProtobufVersion>
         <PollyVersion>7.2.0</PollyVersion>
-        <PrometheusVersion>4.1.1</PrometheusVersion>
+        <PrometheusVersion>5.0.2</PrometheusVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
         <SystemLinqAsyncVersion>5.1.0</SystemLinqAsyncVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>

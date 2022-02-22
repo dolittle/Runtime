@@ -1,13 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Dolittle.Runtime.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -36,7 +32,7 @@ public static class HostBuilderExtensions
 
                 app.UseEndpoints(endpoints =>
                 {
-                    endpoints.MapDiscoveredGrpcServicesOf(visibility);
+                    endpoints.MapDiscoveredGrpcServicesOf(visibility); // TODO: Make this a little nicer with some logs to show the endpoints
                     endpoints.MapGrpcReflectionService();
                 });
             });

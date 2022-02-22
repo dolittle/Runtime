@@ -19,6 +19,7 @@
         <ProjectReference Include="../Events.Store.Services.Grpc/Events.Store.Services.Grpc.csproj" />
         <ProjectReference Include="../Platform/Platform.csproj" />
         <ProjectReference Include="../Resources/Resources.csproj" />
+        <ProjectReference Include="../Metrics/Metrics.csproj" />
     </ItemGroup>
 
     <ItemGroup>
