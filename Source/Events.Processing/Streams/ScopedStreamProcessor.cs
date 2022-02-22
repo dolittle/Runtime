@@ -8,6 +8,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
@@ -29,6 +30,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
     /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
     /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
     /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="eventWatcher">The <see cref="IStreamEventWatcher" /> to wait for events to be available in stream.</param>
     /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
@@ -41,11 +43,12 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         IEventProcessor processor,
         IResilientStreamProcessorStateRepository streamProcessorStates,
         ICanFetchEventsFromStream eventsFromStreamsFetcher,
+        ExecutionContext executionContext,
         IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
         IStreamEventWatcher eventWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
-        ILogger<ScopedStreamProcessor> logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWatcher, logger)
+        ILogger logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventsFetcherPolicy, eventWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _timeToRetryGetter = timeToRetryGetter;
@@ -68,8 +71,15 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
             }
             else
             {
-                var @event = await FetchNextEventToProcess(streamProcessorState, cancellationToken).ConfigureAwait(false);
-                streamProcessorState = (await RetryProcessingEvent(@event, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, cancellationToken).ConfigureAwait(false)) as StreamProcessorState;
+                var getNextEvent = await FetchNextEventToProcess(streamProcessorState, cancellationToken).ConfigureAwait(false);
+                if (!getNextEvent.Success)
+                {
+                    throw getNextEvent.Exception; // TODO: This check wasn't here before - does it make sense?
+                }
+
+                var eventToProcess = getNextEvent.Result;
+                var executionContext = GetExecutionContextForEvent(eventToProcess);
+                streamProcessorState = (await RetryProcessingEvent(eventToProcess, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, executionContext, cancellationToken).ConfigureAwait(false)) as StreamProcessorState;
             }
         }
 

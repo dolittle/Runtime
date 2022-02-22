@@ -19,6 +19,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -34,14 +35,9 @@ public class Projections : IProjections
     
     readonly IStreamProcessors _streamProcessors;
     readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
-    //TODO: It's not really nice in terms of specs to resolve all of these from the container. Should we maybe abstract away this pattern, we probably use it more places.
-    //readonly Func<IProjectionPersister> _getProjectionPersister;
-    //readonly Func<IProjectionStore> _getProjectionStore;
-    //readonly Func<IProjectionDefinitions> _getProjectionDefinitions;
-    //readonly Func<IStreamProcessorStateRepository> _getStreamProcessorStates;
-    readonly IProjectionKeys _projectionKeys;
+    readonly Func<TenantId, ProjectionDefinition, IProjection, EventProcessor> _createEventProcessor;
+    readonly Func<IProjection, StreamProcessor, Action, CancellationToken, ProjectionProcessor> _createProjectionProcessor;
     readonly IPerformActionsForAllTenants _forAllTenants;
-    readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
 
     /// <summary>
@@ -49,22 +45,24 @@ public class Projections : IProjections
     /// </summary>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors"/> to use for registering the Projections stream processors.</param>
     /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants"/> to use to decide if Projections need to be replayed when registered.</param>
-    /// <param name="projectionKeys">The <see cref="IProjectionKeys"/> to use to resolve the <see cref="ProjectionKey"/> for events.</param>
+    /// <param name="createEventProcessor">The factor to use to create projection event processors.</param>
+    /// <param name="createProjectionProcessor">The factory to use to create projection processors.</param>
     /// <param name="forAllTenants">The <see cref="IPerformActionsForAllTenants"/> to use to perform actions in the execution context of tenants.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use to create loggers.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public Projections(
         IStreamProcessors streamProcessors,
         ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
-        IProjectionKeys projectionKeys,
+        Func<TenantId, ProjectionDefinition, IProjection, EventProcessor> createEventProcessor, // TODO: This should maybe return the interface?
+        Func<IProjection, StreamProcessor, Action, CancellationToken, ProjectionProcessor> createProjectionProcessor,
         IPerformActionsForAllTenants forAllTenants,
-        ILoggerFactory loggerFactory)
+        ILogger logger)
     {
         _streamProcessors = streamProcessors;
         _projectionDefinitionComparer = projectionDefinitionComparer;
-        _projectionKeys = projectionKeys;
+        _createEventProcessor = createEventProcessor;
+        _createProjectionProcessor = createProjectionProcessor;
         _forAllTenants = forAllTenants;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<Projections>();
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -77,7 +75,7 @@ public class Projections : IProjections
             : new ProjectionNotRegistered(scopeId, projectionId);
 
     /// <inheritdoc />
-    public async Task<Try<ProjectionProcessor>> Register(IProjection projection, CancellationToken cancellationToken)
+    public async Task<Try<ProjectionProcessor>> Register(IProjection projection, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var identifier = new ProjectionIdentifier(projection.Definition.Scope, projection.Definition.Projection);
         Log.RegisteringProjection(_logger, identifier.Scope, identifier.Projection);
@@ -94,13 +92,8 @@ public class Projections : IProjections
             projection.Definition.Scope,
             projection.Definition.Projection.Value,
             new EventLogStreamDefinition(),
-            (services) => new EventProcessor(
-                projection.Definition,
-                services.GetRequiredService<IProjectionPersister>(),
-                services.GetRequiredService<IProjectionStore>(),
-                _projectionKeys,
-                projection,
-                _loggerFactory.CreateLogger<EventProcessor>()),
+            (tenant) => _createEventProcessor(tenant, projection.Definition, projection),
+            executionContext,
             cancellationToken);
 
         if (!registration.Success)
@@ -108,12 +101,11 @@ public class Projections : IProjections
             Log.FailedToRegisterProjectionStreamProcessor(_logger, identifier.Scope, identifier.Projection, registration.Exception);
             return registration.Exception;
         }
-
-        var processor = new ProjectionProcessor(
+        
+        var processor = _createProjectionProcessor(
             projection,
             registration.Result,
             () => _projections.TryRemove(identifier, out _),
-            _loggerFactory.CreateLogger<ProjectionProcessor>(),
             cancellationToken);
         
         if (!_projections.TryAdd(identifier, processor))

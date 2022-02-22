@@ -38,13 +38,13 @@ public class ValidateFilterForAllTenants : IValidateFilterForAllTenants
     }
 
     /// <inheritdoc/>
-    public async Task<IDictionary<TenantId, FilterValidationResult>> Validate<TDefinition>(Func<IServiceProvider, IFilterProcessor<TDefinition>> getFilterProcessor, CancellationToken cancellationToken)
+    public async Task<IDictionary<TenantId, FilterValidationResult>> Validate<TDefinition>(Func<TenantId, IFilterProcessor<TDefinition>> getFilterProcessor, CancellationToken cancellationToken)
         where TDefinition : IFilterDefinition
     {
         var result = new Dictionary<TenantId, FilterValidationResult>();
-        await _performer.PerformAsync(async (tenant, services) =>
+        await _performer.PerformAsync(async (tenant, _) =>
         {
-            var filterProcessor = getFilterProcessor(services);
+            var filterProcessor = getFilterProcessor(tenant);
             _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenant);
             var validationResult = await _getFilterValidators(tenant).Validate(filterProcessor, cancellationToken).ConfigureAwait(false);
             result.Add(tenant, validationResult);

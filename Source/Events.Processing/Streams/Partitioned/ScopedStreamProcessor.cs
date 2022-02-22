@@ -8,8 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 
@@ -32,7 +34,8 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
     /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
     /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
-    /// <param name="failingPartitions">The <see cref="IFailingPartitions" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
+    /// <param name="failingPartitionsFactory">The factory to use to create the <see cref="IFailingPartitions" />.</param>
     /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
     /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
@@ -45,25 +48,26 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         IEventProcessor processor,
         IResilientStreamProcessorStateRepository streamProcessorStates,
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
-        IFailingPartitions failingPartitions,
+        ExecutionContext executionContext,
+        Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,
         IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
         IStreamEventWatcher streamWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
-        ILogger<ScopedStreamProcessor> logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, streamWatcher, logger)
+        ILogger logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventsFetcherPolicy, streamWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
-        _failingPartitions = failingPartitions;
+        _failingPartitions = failingPartitionsFactory(processor, eventsFromStreamsFetcher, GetExecutionContextForEvent);
         _timeToRetryGetter = timeToRetryGetter;
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, CancellationToken cancellationToken)
+    protected override async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var streamProcessorState = currentState as StreamProcessorState;
         if (!streamProcessorState.FailingPartitions.ContainsKey(@event.Partition))
         {
-            return await base.ProcessEvent(@event, streamProcessorState, cancellationToken).ConfigureAwait(false);
+            return await base.ProcessEvent(@event, streamProcessorState, executionContext, cancellationToken).ConfigureAwait(false);
         }
         var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions, streamProcessorState.LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);

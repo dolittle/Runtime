@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
@@ -28,13 +29,13 @@ public class TypeFilterWithEventSourcePartition : AbstractFilterProcessor<TypeFi
         ScopeId scope,
         TypeFilterWithEventSourcePartitionDefinition definition,
         IWriteEventsToStreams eventsToStreamsWriter,
-        ILogger<TypeFilterWithEventSourcePartition> logger)
+        ILogger<TypeFilterWithEventSourcePartition> logger) // TODO: Just regular logger? Probably some factories we can get rid of here
         : base(scope, definition, eventsToStreamsWriter, logger)
     {
     }
 
     /// <inheritdoc/>
-    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
+    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var included = Definition.Types.Contains(@event.Type.Id);
         var outPartitionId = PartitionId.None;
@@ -47,6 +48,6 @@ public class TypeFilterWithEventSourcePartition : AbstractFilterProcessor<TypeFi
     }
 
     /// <inheritdoc/>
-    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken) =>
-        Filter(@event, partitionId, eventProcessorId, cancellationToken);
+    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
+        => Filter(@event, partitionId, eventProcessorId, executionContext, cancellationToken);
 }

@@ -10,6 +10,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
@@ -23,6 +24,7 @@ public abstract class AbstractScopedStreamProcessor
     readonly TenantId _tenantId;
     readonly IEventProcessor _processor;
     readonly ICanFetchEventsFromStream _eventsFetcher;
+    readonly ExecutionContext _executionContext;
     readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _fetchEventToProcessPolicy;
     readonly IStreamEventWatcher _eventWaiter;
     readonly object _setPositionLock = new();
@@ -42,6 +44,7 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="initialState">The initial state of the <see cref="IStreamProcessorState" />.</param>
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
     /// <param name="eventsFetcher">The <see cref="ICanFetchEventsFromStream" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
     /// <param name="fetchEventsToProcessPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" /> to wait for events to be available in stream.</param>
     /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
@@ -52,6 +55,7 @@ public abstract class AbstractScopedStreamProcessor
         IStreamProcessorState initialState,
         IEventProcessor processor,
         ICanFetchEventsFromStream eventsFetcher,
+        ExecutionContext executionContext,
         IAsyncPolicyFor<ICanFetchEventsFromStream> fetchEventsToProcessPolicy,
         IStreamEventWatcher streamWatcher,
         ILogger logger)
@@ -63,6 +67,7 @@ public abstract class AbstractScopedStreamProcessor
         _tenantId = tenantId;
         _processor = processor;
         _eventsFetcher = eventsFetcher;
+        _executionContext = executionContext;
         _fetchEventToProcessPolicy = fetchEventsToProcessPolicy;
         _eventWaiter = streamWatcher;
     }
@@ -193,11 +198,12 @@ public abstract class AbstractScopedStreamProcessor
     /// </summary>
     /// <param name="event">The <see cref="StreamEvent" />.</param>
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    protected virtual async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, CancellationToken cancellationToken)
+    protected virtual async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        var processingResult = await _processor.Process(@event.Event, @event.Partition, cancellationToken).ConfigureAwait(false);
+        var processingResult = await _processor.Process(@event.Event, @event.Partition, executionContext, cancellationToken).ConfigureAwait(false);
         return await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false);
     }
 
@@ -218,9 +224,13 @@ public abstract class AbstractScopedStreamProcessor
     protected TimeSpan GetTimeToRetryProcessing(IStreamProcessorState state)
     {
         var result = _eventWaiterTimeout;
+        
         if (TryGetTimeToRetry(state, out var timeToRetry))
         {
-            result = new[] { result, timeToRetry }.Min();
+            if (timeToRetry < result)
+            {
+                result = timeToRetry;
+            }
         }
 
         return result;
@@ -233,11 +243,12 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="failureReason">The reason for why processing failed the last time.</param>
     /// <param name="processingAttempts">The number of times that this event has been processed before.</param>
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts, IStreamProcessorState currentState, CancellationToken cancellationToken)
+    protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        var processingResult = await _processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, cancellationToken).ConfigureAwait(false);
+        var processingResult = await _processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, executionContext, cancellationToken).ConfigureAwait(false);
         return await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false);
     }
 
@@ -261,6 +272,19 @@ public abstract class AbstractScopedStreamProcessor
 
         return OnSuccessfulProcessingResult(processingResult as SuccessfulProcessing, processedEvent, currentState);
     }
+
+    /// <summary>
+    /// Gets the <see cref="ExecutionContext"/> to use while processing the specified <see cref="StreamEvent"/>.
+    /// </summary>
+    /// <param name="eventToProcess">The event to create the processing execution context for.</param>
+    /// <returns>The <see cref="ExecutionContext"/> to use while processing the event.</returns>
+    protected ExecutionContext GetExecutionContextForEvent(StreamEvent eventToProcess)
+        => _executionContext with
+        {
+            Tenant = _tenantId,
+            CorrelationId = eventToProcess.Event.ExecutionContext.CorrelationId,
+            // TODO: Does this make sense? Do we want more, or less?
+        };
 
     async Task BeginProcessing(CancellationToken cancellationToken)
     {
@@ -324,7 +348,10 @@ public abstract class AbstractScopedStreamProcessor
                 {
                     break;
                 }
-                _currentState = await ProcessEvent(tryGetEvent, _currentState, cancellationToken).ConfigureAwait(false);
+
+                var eventToProcess = tryGetEvent.Result;
+                var executionContext = GetExecutionContextForEvent(eventToProcess);
+                _currentState = await ProcessEvent(eventToProcess, _currentState, executionContext, cancellationToken).ConfigureAwait(false);
             }
             while (!cancellationToken.IsCancellationRequested);
         }

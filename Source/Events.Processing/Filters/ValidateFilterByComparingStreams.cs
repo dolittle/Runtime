@@ -27,8 +27,7 @@ public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefi
     /// Initializes a new instance of the <see cref="ValidateFilterByComparingStreams"/> class.
     /// </summary>
     /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
-    public ValidateFilterByComparingStreams(
-        IEventFetchers eventFetchers)
+    public ValidateFilterByComparingStreams(IEventFetchers eventFetchers)
     {
         _eventFetchers = eventFetchers;
     }
@@ -63,7 +62,8 @@ public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefi
             var streamPosition = 0;
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
-                var processingResult = await filter.Filter(@event, PartitionId.None, filter.Identifier, cancellationToken).ConfigureAwait(false);
+                var executionContext = @event.ExecutionContext; // TODO: What should this be set to?
+                var processingResult = await filter.Filter(@event, PartitionId.None, filter.Identifier, executionContext, cancellationToken).ConfigureAwait(false);
                 if (processingResult is FailedFiltering failedResult)
                 {
                     return FilterValidationResult.Failed(failedResult.FailureReason);

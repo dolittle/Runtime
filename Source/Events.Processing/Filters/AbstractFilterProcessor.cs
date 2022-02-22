@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
@@ -50,20 +51,16 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     public EventProcessorId Identifier => Definition.TargetStream.Value;
 
     /// <inheritdoc/>
-    public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken);
+    public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <inheritdoc/>
-    public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken);
+    public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <inheritdoc />
-    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
+    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        _logger.FilteringEvent(
-            Identifier,
-            Scope,
-            @event.Type.Id,
-            partitionId);
-        var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
+        _logger.FilteringEvent(Identifier, Scope, @event.Type.Id, partitionId);
+        var result = await Filter(@event, partitionId, Identifier, executionContext, cancellationToken).ConfigureAwait(false);
 
         await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
 
@@ -71,16 +68,10 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     }
 
     /// <inheritdoc/>
-    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        _logger.FilteringEventAgain(
-            Identifier,
-            Scope,
-            @event.Type.Id,
-            partitionId,
-            retryCount,
-            failureReason);
-        var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
+        _logger.FilteringEventAgain(Identifier, Scope, @event.Type.Id, partitionId, retryCount, failureReason);
+        var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, executionContext, cancellationToken).ConfigureAwait(false);
 
         await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
 
@@ -89,21 +80,14 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
 
     Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
     {
-        _logger.HandleFilterResult(
-            Identifier,
-            Scope,
-            @event.Type.Id,
-            partitionId);
+        _logger.HandleFilterResult(Identifier, Scope, @event.Type.Id, partitionId);
         if (result.Succeeded && result.IsIncluded)
         {
-            _logger.FilteredEventIsIncluded(
-                Identifier,
-                Scope,
-                @event.Type.Id,
-                partitionId,
-                Definition.TargetStream);
+            _logger.FilteredEventIsIncluded(Identifier, Scope, @event.Type.Id, partitionId, Definition.TargetStream);
             return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
         }
+        
+        // TODO: Shouldn't we be throwing here if not successful!?
 
         return Task.CompletedTask;
     }

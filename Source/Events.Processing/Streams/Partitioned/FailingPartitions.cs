@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Resilience;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 
@@ -20,6 +21,7 @@ public class FailingPartitions : IFailingPartitions
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
     readonly IEventProcessor _eventProcessor;
     readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
+    readonly Func<StreamEvent, ExecutionContext> _createExecutionContextForEvent;
     readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
 
     /// <summary>
@@ -28,16 +30,19 @@ public class FailingPartitions : IFailingPartitions
     /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
     /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
     /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromPartitionedStream" />.</param>
+    /// <param name="createExecutionContextForEvent">The factory to use to create execution contexts for event processing.</param>
     /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
     public FailingPartitions(
         IResilientStreamProcessorStateRepository streamProcessorStates,
         IEventProcessor eventProcessor,
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
+        Func<StreamEvent, ExecutionContext> createExecutionContextForEvent, //TODO: Oh man, here we go again.
         IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy)
     {
         _streamProcessorStates = streamProcessorStates;
         _eventProcessor = eventProcessor;
         _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
+        _createExecutionContextForEvent = createExecutionContextForEvent;
         _eventsFetcherPolicy = eventsFetcherPolicy;
     }
 
@@ -107,6 +112,7 @@ public class FailingPartitions : IFailingPartitions
                         failingPartitionState,
                         streamEvent.Event,
                         partition,
+                        _createExecutionContextForEvent(streamEvent),
                         cancellationToken).ConfigureAwait(false);
 
                     if (processingResult.Succeeded)
@@ -213,8 +219,8 @@ public class FailingPartitions : IFailingPartitions
         return (newState, newFailingPartitionState);
     }
 
-    Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition, CancellationToken cancellationToken) =>
-        _eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts - 1, cancellationToken);
+    Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition, ExecutionContext executionContext, CancellationToken cancellationToken) =>
+        _eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts - 1, executionContext, cancellationToken);
 
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);

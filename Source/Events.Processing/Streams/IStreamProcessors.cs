@@ -9,6 +9,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
@@ -22,19 +23,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 public interface IStreamProcessors
 {
     /// <summary>
-    /// Registers a <see cref="StreamProcessor" />.
+    /// Tries to create and register a new instance of <see cref="StreamProcessor"/>.
     /// </summary>
-    /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-    /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
-    /// <param name="sourceStreamDefinition">The <see cref="IStreamDefinition" /> of the stream that the <see cref="AbstractScopedStreamProcessor" /> is processing.</param>
-    /// <param name="getEventProcessor">The <see cref="Func{TArg, TResult}" /> <see cref="IEventProcessor" />.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A value indicating whether a new <see cref="StreamProcessor" /> was registered.</returns>
+    /// <param name="scopeId">The scope that the processor should process events from.</param>
+    /// <param name="eventProcessorId">The identifier of the event processor.</param>
+    /// <param name="sourceStreamDefinition">The definition of the stream (in the specified scope) that the stream processor should process events from.</param>
+    /// <param name="createEventProcessor">The factory to use to create the event processor to call for a tenant.</param>
+    /// <param name="executionContext">The execution context to use for the created stream processor.</param>
+    /// <param name="cancellationToken">The cancellation token that will be cancelled to indicate that the created stream processor should stop processing.</param>
+    /// <returns>A <see cref="Try{TResult}"/> that contains the newly created and registered <see cref="StreamProcessor"/> if successful.</returns>
     Try<StreamProcessor> TryCreateAndRegister(
         ScopeId scopeId,
         EventProcessorId eventProcessorId,
         IStreamDefinition sourceStreamDefinition,
-        Func<IServiceProvider, IEventProcessor> getEventProcessor,
+        Func<TenantId, IEventProcessor> createEventProcessor,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken);
 
 
