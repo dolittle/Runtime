@@ -18,6 +18,7 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .AddMetrics()
     .AddGrpcHost(EndpointVisibility.Private)
+    .AddGrpcHost(EndpointVisibility.Management)
     .AddMetricsHost()
     .Build();
 

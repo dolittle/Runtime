@@ -20,6 +20,8 @@
         <ProjectReference Include="../Platform/Platform.csproj" />
         <ProjectReference Include="../Resources/Resources.csproj" />
         <ProjectReference Include="../Metrics/Metrics.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
+        <ProjectReference Include="../Events.Management/Events.Management.csproj" />
     </ItemGroup>
 
     <ItemGroup>
