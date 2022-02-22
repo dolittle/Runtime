@@ -22,6 +22,7 @@
         <ProjectReference Include="../Metrics/Metrics.csproj" />
         <ProjectReference Include="../Events/Events.csproj" />
         <ProjectReference Include="../Events.Management/Events.Management.csproj" />
+        <ProjectReference Include="../Events.Processing.Management/Events.Processing.Management.csproj" />
     </ItemGroup>
 
     <ItemGroup>

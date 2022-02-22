@@ -44,9 +44,13 @@ public static class HostBuilderExtensions
             .AddMetrics()
             .AddScopedHost(_ => _.ConfigureWebHost(metricsHost =>
             {
-                metricsHost.UseKestrel(_ => _.ListenAnyIP(9007));
+                metricsHost.UseKestrel();
 
-                metricsHost.ConfigureServices(services => { services.AddRouting(); });
+                metricsHost.ConfigureServices(services =>
+                {
+                    services.AddKestrelConfiguration();
+                    services.AddRouting();
+                });
                 metricsHost.Configure(app =>
                 {
                     app.UseRouting();
