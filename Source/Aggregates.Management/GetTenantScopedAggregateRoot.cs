@@ -21,24 +21,25 @@ namespace Dolittle.Runtime.Aggregates.Management;
 [Singleton]
 public class GetTenantScopedAggregateRoot : IGetTenantScopedAggregateRoot
 {
-    readonly Func<IAggregateRootInstances> _getAggregateRootInstances;
     readonly IAggregateRoots _aggregateRoots;
-    readonly IPerformActionOnAllTenants _onAllTenants;
+    readonly IPerformActionsForAllTenants _forAllTenants;
+    readonly Func<TenantId, IAggregateRootInstances> _getAggregateRootInstancesFor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetTenantScopedAggregateRoot"/> class.
     /// </summary>
-    /// <param name="getAggregateRootInstances">The <see cref="Func{T}"/> <see cref="IAggregateRootInstances"/>./></param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots"/>.</param>
-    /// <param name="onAllTenants">The performer to use to fetch aggregate root instances for all tenants.</param>
+    /// <param name="forAllTenants">The performer to use to fetch aggregate root instances for all tenants.</param>
+    /// <param name="getAggregateRootInstancesFor">The factory to use to get <see cref="IAggregateRootInstances"/> for each tenant./></param>
     public GetTenantScopedAggregateRoot(
-        Func<IAggregateRootInstances> getAggregateRootInstances,
         IAggregateRoots aggregateRoots,
-        IPerformActionOnAllTenants onAllTenants)
+        IPerformActionsForAllTenants forAllTenants,
+        Func<TenantId, IAggregateRootInstances> getAggregateRootInstancesFor) 
+        // TODO: Instead of this "perform for all tenants" + "func<TenantId, something>" pattern, we should really make a thing to to this with types
     {
-        _getAggregateRootInstances = getAggregateRootInstances;
+        _getAggregateRootInstancesFor = getAggregateRootInstancesFor;
         _aggregateRoots = aggregateRoots;
-        _onAllTenants = onAllTenants;
+        _forAllTenants = forAllTenants;
     }
 
     /// <inheritdoc />
@@ -86,15 +87,15 @@ public class GetTenantScopedAggregateRoot : IGetTenantScopedAggregateRoot
     {
         var instances = new List<TenantScopedAggregateRootInstance>();
 
-        await _onAllTenants.PerformAsync(async tenantId =>
+        await _forAllTenants.PerformAsync(async (tenant, _) =>
         {
-            if (!shouldFetchForTenant(tenantId))
+            if (!shouldFetchForTenant(tenant))
             {
                 return;
             }
 
-            var forTenant = await _getAggregateRootInstances().GetFor(aggregateRoot.Identifier).ConfigureAwait(false);
-            instances.AddRange(forTenant.Instances.Select(_ => new TenantScopedAggregateRootInstance(tenantId, _)));
+            var forTenant = await _getAggregateRootInstancesFor(tenant).GetFor(aggregateRoot.Identifier).ConfigureAwait(false);
+            instances.AddRange(forTenant.Instances.Select(_ => new TenantScopedAggregateRootInstance(tenant, _)));
         }).ConfigureAwait(false);
 
         return new AggregateRootWithTenantScopedInstances(aggregateRoot, instances);

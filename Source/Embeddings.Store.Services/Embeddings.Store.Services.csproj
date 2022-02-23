@@ -1,27 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+    <Import Project="../../default.props"/>
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Embeddings.Store.Services</AssemblyName>
-    <RootNamespace>Dolittle.Runtime.Embeddings.Store.Services</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Embeddings.Store.Services</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Embeddings.Store.Services</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj"/>
+        <ProjectReference Include="../Artifacts/Artifacts.csproj"/>
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
+        <ProjectReference Include="../Execution/Execution.csproj"/>
+        <ProjectReference Include="../Events.Store/Events.Store.csproj"/>
+        <ProjectReference Include="../Embeddings.Store/Embeddings.Store.csproj"/>
+        <ProjectReference Include="../Protobuf/Protobuf.csproj"/>
+        <ProjectReference Include="../Services/Services.csproj"/>
+        <ProjectReference Include="../Tenancy/Tenancy.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../Artifacts/Artifacts.csproj" />
-    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
-    <ProjectReference Include="../Execution/Execution.csproj" />
-    <ProjectReference Include="../Events.Store/Events.Store.csproj" />
-    <ProjectReference Include="../Embeddings.Store/Embeddings.Store.csproj" />
-    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
-    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
-    <ProjectReference Include="../Services/Services.csproj" />
-    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-  </ItemGroup>
-
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)"/>
+    </ItemGroup>
 </Project>
