@@ -9,22 +9,6 @@
 
     <ItemGroup>
         <ProjectReference Include="../**/*.csproj" Exclude="../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
-        <!--
-        <ProjectReference Include="../Configuration/Configuration.csproj" />
-        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
-        <ProjectReference Include="../Hosting/Hosting.csproj" />
-        <ProjectReference Include="../Services/Services.csproj" />
-        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
-        <ProjectReference Include="../Events.Store.MongoDB/Events.Store.MongoDB.csproj" />
-        <ProjectReference Include="../Events.Store.Services.Grpc/Events.Store.Services.Grpc.csproj" />
-        <ProjectReference Include="../Platform/Platform.csproj" />
-        <ProjectReference Include="../Resources/Resources.csproj" />
-        <ProjectReference Include="../Metrics/Metrics.csproj" />
-        <ProjectReference Include="../Events/Events.csproj" />
-        <ProjectReference Include="../Events.Management/Events.Management.csproj" />
-        <ProjectReference Include="../Events.Processing.Management/Events.Processing.Management.csproj" />
-        -->
     </ItemGroup>
 
     <ItemGroup>

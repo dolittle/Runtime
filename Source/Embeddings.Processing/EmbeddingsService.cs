@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
+using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Services;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
-using static Dolittle.Runtime.Embeddings.Contracts.Embeddings;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Protobuf;
 using System.Threading;
@@ -17,31 +17,41 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using System.Linq;
+using Dolittle.Runtime.Projections.Store.State;
+using Dolittle.Runtime.Services.Hosting;
+using static Dolittle.Runtime.Embeddings.Contracts.Embeddings;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingClientToRuntimeMessage,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRuntimeToClientMessage,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRegistrationRequest,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRegistrationResponse,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRequest,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingResponse>;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
 /// <summary>
 /// Represents the implementation of <see cref="EmbeddingsBase"/>.
 /// </summary>
+[PrivateService]
 public class EmbeddingsService : EmbeddingsBase
 {
-    readonly IExecutionContextManager _executionContextManager;
     readonly IInitiateReverseCallServices _reverseCallServices;
     readonly IEmbeddingsProtocol _protocol;
-    readonly IEmbeddingProcessorFactory _embeddingProcessorFactory;
+    readonly Func<TenantId, EmbeddingId, ReverseCallDispatcherType, ProjectionState, ExecutionContext, IEmbeddingProcessor> _createEmbeddingProcessor;
     readonly IEmbeddingProcessors _embeddingProcessors;
-    readonly IEmbeddingRequestFactory _embeddingRequestFactory;
     readonly ICompareEmbeddingDefinitionsForAllTenants _embeddingDefinitionComparer;
     readonly IPersistEmbeddingDefinitionForAllTenants _embeddingDefinitionPersister;
     readonly ILogger _logger;
-    readonly ILoggerFactory _loggerFactory;
     readonly IHostApplicationLifetime _hostApplicationLifetime;
+    readonly ICreateExecutionContexts _executionContextCreator;
 
     /// <summary>
     /// Initializes an instance of the <see cref="EmbeddingsService" /> class.
     /// </summary>
     /// <param name="hostApplicationLifetime"></param>
-    /// <param name="executionContextManager"></param>
+    /// <param name="executionContextCreator"></param>
     /// <param name="reverseCallServices"></param>
     /// <param name="protocol"></param>
     /// <param name="embeddingProcessorFactory"></param>
@@ -52,28 +62,24 @@ public class EmbeddingsService : EmbeddingsBase
     /// <param name="logger"></param>
     public EmbeddingsService(
         IHostApplicationLifetime hostApplicationLifetime,
-        IExecutionContextManager executionContextManager,
+        ICreateExecutionContexts executionContextCreator,
         IInitiateReverseCallServices reverseCallServices,
         IEmbeddingsProtocol protocol,
-        IEmbeddingProcessorFactory embeddingProcessorFactory,
+        Func<TenantId, EmbeddingId, ReverseCallDispatcherType, ProjectionState, ExecutionContext, IEmbeddingProcessor> createEmbeddingProcessor,
         IEmbeddingProcessors embeddingProcessors,
-        IEmbeddingRequestFactory embeddingRequestFactory,
         ICompareEmbeddingDefinitionsForAllTenants embeddingDefinitionComparer,
         IPersistEmbeddingDefinitionForAllTenants embeddingDefinitionPersister,
-        ILogger<EmbeddingsService> logger,
-        ILoggerFactory loggerFactory)
+        ILogger logger)
     {
         _hostApplicationLifetime = hostApplicationLifetime;
-        _executionContextManager = executionContextManager;
+        _executionContextCreator = executionContextCreator;
         _reverseCallServices = reverseCallServices;
         _protocol = protocol;
-        _embeddingProcessorFactory = embeddingProcessorFactory;
+        _createEmbeddingProcessor = createEmbeddingProcessor;
         _embeddingProcessors = embeddingProcessors;
-        _embeddingRequestFactory = embeddingRequestFactory;
         _embeddingDefinitionComparer = embeddingDefinitionComparer;
         _embeddingDefinitionPersister = embeddingDefinitionPersister;
         _logger = logger;
-        _loggerFactory = loggerFactory;
     }
 
     /// <inheritdoc/>
@@ -90,7 +96,17 @@ public class EmbeddingsService : EmbeddingsBase
             return;
         }
         var (dispatcher, arguments) = connection.Result;
-        _executionContextManager.CurrentFor(arguments.ExecutionContext);
+
+        var tryCreateExecutionContext = _executionContextCreator.TryCreateUsing(arguments.ExecutionContext);
+        if (!tryCreateExecutionContext.Success)
+        {
+            await dispatcher.Reject(
+                _protocol.CreateFailedConnectResponse($"Failed to register embedding because the execution context is invalid: ${tryCreateExecutionContext.Exception.Message}"),
+                cts.Token).ConfigureAwait(false);
+            return;
+        }
+
+        var executionContext = tryCreateExecutionContext.Result; // TODO: Use this
 
         if (_embeddingProcessors.HasEmbeddingProcessors(arguments.Definition.Embedding))
         {
@@ -116,11 +132,12 @@ public class EmbeddingsService : EmbeddingsBase
         var dispatcherTask = dispatcher.Accept(new EmbeddingRegistrationResponse(), cts.Token);
         var processorTask = _embeddingProcessors.TryStartEmbeddingProcessorForAllTenants(
             arguments.Definition.Embedding,
-            tenant => _embeddingProcessorFactory.Create(
-                tenant,
+            tenant => _createEmbeddingProcessor(
+                tenant, 
                 arguments.Definition.Embedding,
-                new Embedding(arguments.Definition.Embedding, dispatcher, _embeddingRequestFactory, _loggerFactory.CreateLogger<Embedding>()),
-                arguments.Definition.InititalState),
+                dispatcher,
+                arguments.Definition.InititalState,
+                executionContext),
             cts.Token);
 
 
@@ -132,15 +149,29 @@ public class EmbeddingsService : EmbeddingsBase
     public override async Task<UpdateResponse> Update(UpdateRequest request, ServerCallContext context)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-        _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
-        if (!TryGetRegisteredEmbeddingProcessorForTenant(_executionContextManager.Current.Tenant, request.EmbeddingId.ToGuid(), out var processor, out var failure))
+        
+        var tryCreateExecutionContext = _executionContextCreator.TryCreateUsing(request.CallContext.ExecutionContext);
+        if (!tryCreateExecutionContext.Success)
+        {
+            return new UpdateResponse
+            {
+                Failure = new Dolittle.Protobuf.Contracts.Failure
+                {
+                    Id = EmbeddingFailures.FailedToUpdateEmbedding.ToProtobuf(),
+                    Reason = $"Failed to update embedding {request.EmbeddingId.ToGuid()} because the execution context was invalid: {tryCreateExecutionContext.Exception.Message}"
+                }
+            };
+        }
+
+        var executionContext = tryCreateExecutionContext.Result;
+        if (!TryGetRegisteredEmbeddingProcessorForTenant(executionContext.Tenant, request.EmbeddingId.ToGuid(), out var processor, out var failure))
         {
             return new UpdateResponse
             {
                 Failure = failure
             };
         }
-        var newState = await processor.Update(request.Key, request.State, cts.Token).ConfigureAwait(false);
+        var newState = await processor.Update(request.Key, request.State, executionContext, cts.Token).ConfigureAwait(false);
         if (!newState.Success)
         {
             return new UpdateResponse
@@ -148,7 +179,7 @@ public class EmbeddingsService : EmbeddingsBase
                 Failure = new Dolittle.Protobuf.Contracts.Failure
                 {
                     Id = EmbeddingFailures.FailedToUpdateEmbedding.ToProtobuf(),
-                    Reason = $"Failed to update embedding {request.EmbeddingId.ToGuid()} for tenant {_executionContextManager.Current.Tenant.Value} with key {request.Key}. {newState.Exception.Message}"
+                    Reason = $"Failed to update embedding {request.EmbeddingId.ToGuid()} for tenant {executionContext.Tenant} with key {request.Key}. {newState.Exception.Message}"
                 }
             };
         }
@@ -166,15 +197,29 @@ public class EmbeddingsService : EmbeddingsBase
     public override async Task<DeleteResponse> Delete(DeleteRequest request, ServerCallContext context)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-        _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
-        if (!TryGetRegisteredEmbeddingProcessorForTenant(_executionContextManager.Current.Tenant, request.EmbeddingId.ToGuid(), out var processor, out var failure))
+        
+        var tryCreateExecutionContext = _executionContextCreator.TryCreateUsing(request.CallContext.ExecutionContext);
+        if (!tryCreateExecutionContext.Success)
+        {
+            return new DeleteResponse
+            {
+                Failure = new Dolittle.Protobuf.Contracts.Failure
+                {
+                    Id = EmbeddingFailures.FailedToUpdateEmbedding.ToProtobuf(),
+                    Reason = $"Failed to delete embedding {request.EmbeddingId.ToGuid()} because the execution context was invalid: {tryCreateExecutionContext.Exception.Message}"
+                }
+            };
+        }
+
+        var executionContext = tryCreateExecutionContext.Result;
+        if (!TryGetRegisteredEmbeddingProcessorForTenant(executionContext.Tenant, request.EmbeddingId.ToGuid(), out var processor, out var failure))
         {
             return new DeleteResponse
             {
                 Failure = failure
             };
         }
-        var deleteEmbedding = await processor.Delete(request.Key, cts.Token).ConfigureAwait(false);
+        var deleteEmbedding = await processor.Delete(request.Key, executionContext, cts.Token).ConfigureAwait(false);
         if (!deleteEmbedding.Success)
         {
             return new DeleteResponse
@@ -182,7 +227,7 @@ public class EmbeddingsService : EmbeddingsBase
                 Failure = new Dolittle.Protobuf.Contracts.Failure
                 {
                     Id = EmbeddingFailures.FailedToDeleteEmbedding.ToProtobuf(),
-                    Reason = $"Failed to delete embedding {request.EmbeddingId.ToGuid()} for tenant {_executionContextManager.Current.Tenant.Value}. {deleteEmbedding.Exception.Message}"
+                    Reason = $"Failed to delete embedding {request.EmbeddingId.ToGuid()} for tenant {executionContext.Tenant}. {deleteEmbedding.Exception.Message}"
                 }
             };
         }
@@ -218,16 +263,15 @@ public class EmbeddingsService : EmbeddingsBase
                 definition.InititalState),
             cancellationToken).ConfigureAwait(false);
 
-        if (!tenantsAndComparisonResult.Values.Any(_ => !_.Succeeded))
+        if (tenantsAndComparisonResult.Values.All(_ => _.Succeeded))
         {
             return false;
         }
+        
         var unsuccessfulComparisons = tenantsAndComparisonResult
             .Where(_ => !_.Value.Succeeded)
-            .Select(_ =>
-            {
-                return (_.Key, _.Value);
-            });
+            .Select(_ => (_.Key, _.Value));
+        
         _logger.InvalidEmbeddingDefinition(definition, unsuccessfulComparisons);
 
         await dispatcher.Reject(CreateInvalidValidationResponse(

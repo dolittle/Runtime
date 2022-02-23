@@ -11,12 +11,14 @@ using Dolittle.Runtime.Rudimentary;
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Services.Hosting;
 
 namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc;
 
 /// <summary>
 /// Represents the implementation of the <see cref="EmbeddingStoreBase" /> grpc service.
 /// </summary>
+[PrivateService]
 public class EmbeddingStoreGrpcService : EmbeddingStoreBase
 {
     readonly IEmbeddingsService _embeddingsService;

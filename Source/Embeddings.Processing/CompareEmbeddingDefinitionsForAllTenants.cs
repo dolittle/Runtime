@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
@@ -20,20 +19,20 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 [Singleton]
 public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinitionsForAllTenants
 {
-    readonly IPerformActionOnAllTenants _onTenants;
-    readonly Func<IEmbeddingDefinitions> _getDefinitions;
+    readonly IPerformActionsForAllTenants _forAllTenants;
+    readonly Func<TenantId, IEmbeddingDefinitions> _getDefinitionsFor;
 
     /// <summary>
     /// Initializes an instance of the <see cref="CompareEmbeddingDefinitionsForAllTenants" /> class.
     /// </summary>
-    /// <param name="onTenants">The tool for performing an action on all tenants.</param>
-    /// <param name="getDefinitions">The factory for getting Embedding definitions.</param>
+    /// <param name="forAllTenants">The tool for performing an action on all tenants.</param>
+    /// <param name="getDefinitionsFor">The factory for getting Embedding definitions.</param>
     public CompareEmbeddingDefinitionsForAllTenants(
-        IPerformActionOnAllTenants onTenants,
-        Func<IEmbeddingDefinitions> getDefinitions)
+        IPerformActionsForAllTenants forAllTenants,
+        Func<TenantId, IEmbeddingDefinitions> getDefinitionsFor)
     {
-        _onTenants = onTenants;
-        _getDefinitions = getDefinitions;
+        _forAllTenants = forAllTenants;
+        _getDefinitionsFor = getDefinitionsFor;
     }
 
     /// <inheritdoc/>
@@ -42,9 +41,9 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
         CancellationToken token)
     {
         var results = new Dictionary<TenantId, EmbeddingDefinitionComparisonResult>();
-        await _onTenants.PerformAsync(async tenant =>
+        await _forAllTenants.PerformAsync(async (tenant, _) =>
         {
-            var definitions = _getDefinitions();
+            var definitions = _getDefinitionsFor(tenant);
             var tryGetDefinition = await definitions.TryGet(definition.Embedding, token).ConfigureAwait(false);
             var comparisonResult = tryGetDefinition.Success switch
             {
@@ -101,7 +100,7 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
             {
                 continue;
             }
-            failedComparison = EmbeddingDefinitionComparisonResult.Unequal($"Event {newEvent.Id.Value} was not in previous Embeddingdefinition");
+            failedComparison = EmbeddingDefinitionComparisonResult.Unequal($"Event {newEvent.Id.Value} was not in previous Embedding definition");
             return false;
         }
 

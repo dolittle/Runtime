@@ -12,6 +12,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -53,19 +54,19 @@ public class StateTransitionEventsCalculator : ICalculateStateTransitionEvents
     }
 
     /// <inheritdoc/>
-    public Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, CancellationToken cancellationToken)
+    public Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, ExecutionContext executionContext, CancellationToken cancellationToken)
         => DoWork(
             current,
             newCurrent => _stateComparer.TryCheckEquality(newCurrent.State, desired),
-            (newCurrent, token) => _embedding.TryCompare(newCurrent, desired, token),
+            (newCurrent, token) => _embedding.TryCompare(newCurrent, desired, executionContext, token),
             cancellationToken);
 
     /// <inheritdoc/>
-    public Task<Try<UncommittedAggregateEvents>> TryDelete(EmbeddingCurrentState current, CancellationToken cancellationToken)
+    public Task<Try<UncommittedAggregateEvents>> TryDelete(EmbeddingCurrentState current, ExecutionContext executionContext, CancellationToken cancellationToken)
         => DoWork(
             current,
             newCurrent => Try<bool>.Do(() => newCurrent.Type is EmbeddingCurrentStateType.Deleted),
-            (newCurrent, token) => _embedding.TryDelete(newCurrent, token),
+            (newCurrent, token) => _embedding.TryDelete(newCurrent, executionContext, token),
             cancellationToken);
 
     async Task<Try<UncommittedAggregateEvents>> DoWork(
