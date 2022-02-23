@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
@@ -25,7 +23,7 @@ public abstract class AbstractScopedStreamProcessor
     readonly IEventProcessor _processor;
     readonly ICanFetchEventsFromStream _eventsFetcher;
     readonly ExecutionContext _executionContext;
-    readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _fetchEventToProcessPolicy;
+    readonly IEventFetcherPolicies _eventFetcherPolicies;
     readonly IStreamEventWatcher _eventWaiter;
     readonly object _setPositionLock = new();
     CancellationTokenSource _resetStreamProcessor;
@@ -45,7 +43,7 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
     /// <param name="eventsFetcher">The <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
-    /// <param name="fetchEventsToProcessPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+    /// <param name="eventFetcherPolicies">The policies to use while fetching events.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" /> to wait for events to be available in stream.</param>
     /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
     protected AbstractScopedStreamProcessor(
@@ -56,7 +54,7 @@ public abstract class AbstractScopedStreamProcessor
         IEventProcessor processor,
         ICanFetchEventsFromStream eventsFetcher,
         ExecutionContext executionContext,
-        IAsyncPolicyFor<ICanFetchEventsFromStream> fetchEventsToProcessPolicy,
+        IEventFetcherPolicies eventFetcherPolicies,
         IStreamEventWatcher streamWatcher,
         ILogger logger)
     {
@@ -68,7 +66,7 @@ public abstract class AbstractScopedStreamProcessor
         _processor = processor;
         _eventsFetcher = eventsFetcher;
         _executionContext = executionContext;
-        _fetchEventToProcessPolicy = fetchEventsToProcessPolicy;
+        _eventFetcherPolicies = eventFetcherPolicies;
         _eventWaiter = streamWatcher;
     }
 
@@ -213,8 +211,9 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="StreamEvent" />.</returns>
-    protected Task<Try<StreamEvent>> FetchNextEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
-        _fetchEventToProcessPolicy.Execute(cancellationToken => _eventsFetcher.Fetch(currentState.Position, cancellationToken), cancellationToken);
+    protected Task<Try<StreamEvent>> FetchNextEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken)
+        => _eventFetcherPolicies.Fetching.ExecuteAsync(_ => _eventsFetcher.Fetch(currentState.Position, _), cancellationToken);
+    // TODO: Shouldn't this policy rather be used in the actual fetcher?
 
     /// <summary>
     /// Gets the <see cref="TimeSpan" /> for when to retry processing again.

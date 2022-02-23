@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
@@ -35,7 +34,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
     /// <param name="failingPartitionsFactory">The factory to use to create the <see cref="IFailingPartitions" />.</param>
-    /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+    /// <param name="eventFetcherPolicies">The policies to use while fetching events.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
     /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
     /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
@@ -49,11 +48,11 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
         ExecutionContext executionContext,
         Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,
-        IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+        IEventFetcherPolicies eventFetcherPolicies,
         IStreamEventWatcher streamWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventsFetcherPolicy, streamWatcher, logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, streamWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _failingPartitions = failingPartitionsFactory(processor, eventsFromStreamsFetcher, GetExecutionContextForEvent);

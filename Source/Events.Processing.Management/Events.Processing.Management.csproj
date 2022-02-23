@@ -13,6 +13,5 @@
 
     <ItemGroup>
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
-        <ProjectReference Include="../Management/Management.csproj" />
     </ItemGroup>
 </Project>
