@@ -17,17 +17,8 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using System.Linq;
-using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Services.Hosting;
 using static Dolittle.Runtime.Embeddings.Contracts.Embeddings;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
-    Dolittle.Runtime.Embeddings.Contracts.EmbeddingClientToRuntimeMessage,
-    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRuntimeToClientMessage,
-    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRegistrationRequest,
-    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRegistrationResponse,
-    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRequest,
-    Dolittle.Runtime.Embeddings.Contracts.EmbeddingResponse>;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -39,10 +30,12 @@ public class EmbeddingsService : EmbeddingsBase
 {
     readonly IInitiateReverseCallServices _reverseCallServices;
     readonly IEmbeddingsProtocol _protocol;
-    readonly Func<TenantId, EmbeddingId, ReverseCallDispatcherType, ProjectionState, ExecutionContext, IEmbeddingProcessor> _createEmbeddingProcessor;
+    readonly Func<TenantId, IEmbeddingProcessorFactory> _getEmbeddingProcessorFactoryFor;
     readonly IEmbeddingProcessors _embeddingProcessors;
     readonly ICompareEmbeddingDefinitionsForAllTenants _embeddingDefinitionComparer;
     readonly IPersistEmbeddingDefinitionForAllTenants _embeddingDefinitionPersister;
+    readonly IEmbeddingRequestFactory _embeddingRequestFactory;
+    readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
     readonly IHostApplicationLifetime _hostApplicationLifetime;
     readonly ICreateExecutionContexts _executionContextCreator;
@@ -54,7 +47,7 @@ public class EmbeddingsService : EmbeddingsBase
     /// <param name="executionContextCreator"></param>
     /// <param name="reverseCallServices"></param>
     /// <param name="protocol"></param>
-    /// <param name="embeddingProcessorFactory"></param>
+    /// <param name="getEmbeddingProcessorFactoryFor"></param>
     /// <param name="embeddingProcessors"></param>
     /// <param name="embeddingRequestFactory"></param>
     /// <param name="embeddingDefinitionComparer"></param>
@@ -65,21 +58,24 @@ public class EmbeddingsService : EmbeddingsBase
         ICreateExecutionContexts executionContextCreator,
         IInitiateReverseCallServices reverseCallServices,
         IEmbeddingsProtocol protocol,
-        Func<TenantId, EmbeddingId, ReverseCallDispatcherType, ProjectionState, ExecutionContext, IEmbeddingProcessor> createEmbeddingProcessor,
+        Func<TenantId, IEmbeddingProcessorFactory> getEmbeddingProcessorFactoryFor,
         IEmbeddingProcessors embeddingProcessors,
         ICompareEmbeddingDefinitionsForAllTenants embeddingDefinitionComparer,
         IPersistEmbeddingDefinitionForAllTenants embeddingDefinitionPersister,
-        ILogger logger)
+        IEmbeddingRequestFactory embeddingRequestFactory,
+        ILoggerFactory loggerFactory)
     {
         _hostApplicationLifetime = hostApplicationLifetime;
         _executionContextCreator = executionContextCreator;
         _reverseCallServices = reverseCallServices;
         _protocol = protocol;
-        _createEmbeddingProcessor = createEmbeddingProcessor;
+        _getEmbeddingProcessorFactoryFor = getEmbeddingProcessorFactoryFor;
         _embeddingProcessors = embeddingProcessors;
         _embeddingDefinitionComparer = embeddingDefinitionComparer;
         _embeddingDefinitionPersister = embeddingDefinitionPersister;
-        _logger = logger;
+        _embeddingRequestFactory = embeddingRequestFactory;
+        _loggerFactory = loggerFactory;
+        _logger = loggerFactory.CreateLogger<EmbeddingsService>();
     }
 
     /// <inheritdoc/>
@@ -88,6 +84,9 @@ public class EmbeddingsService : EmbeddingsBase
         IServerStreamWriter<EmbeddingRuntimeToClientMessage> clientStream,
         ServerCallContext context)
     {
+        // TODO: It seems like things are not properly unregistered on exceptions?
+        // TODO: I tested this out and while making the DI container work, it kept failing and telling me that the projection was already registered on the second attempt.
+        
         Log.ConnectingEmbeddings(_logger);
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
         var connection = await _reverseCallServices.Connect(runtimeStream, clientStream, context, _protocol, context.CancellationToken).ConfigureAwait(false);
@@ -132,12 +131,16 @@ public class EmbeddingsService : EmbeddingsBase
         var dispatcherTask = dispatcher.Accept(new EmbeddingRegistrationResponse(), cts.Token);
         var processorTask = _embeddingProcessors.TryStartEmbeddingProcessorForAllTenants(
             arguments.Definition.Embedding,
-            tenant => _createEmbeddingProcessor(
-                tenant, 
-                arguments.Definition.Embedding,
-                dispatcher,
-                arguments.Definition.InititalState,
-                executionContext),
+            tenant => _getEmbeddingProcessorFactoryFor(tenant)
+                .Create(
+                    arguments.Definition.Embedding,
+                    new Embedding(
+                        arguments.Definition.Embedding,
+                        dispatcher,
+                        _embeddingRequestFactory,
+                        _loggerFactory.CreateLogger<Embedding>()),
+                    arguments.Definition.InititalState,
+                    executionContext),
             cts.Token);
 
 

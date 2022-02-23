@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 /// <summary>
 /// Represents an implementation of <see cref="IEmbeddingProcessor"/>.
 /// </summary>
-[PerTenant]
+[DisableAutoRegistration]
 public class EmbeddingProcessor : IEmbeddingProcessor
 {
     readonly ConcurrentQueue<Func<bool, Task>> _jobs = new();
@@ -241,7 +241,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
 
     async Task<Try> EnsureAllStatesAreFresh()
     {
-        var result = await _stateUpdater.TryUpdateAll(_cancellationToken).ConfigureAwait(false);
+        var result = await _stateUpdater.TryUpdateAll(_executionContext, _cancellationToken).ConfigureAwait(false);
         if (!result.Success)
         {
             _logger.FailedEnsuringAllStatesAreFresh(_embedding, result.Exception);

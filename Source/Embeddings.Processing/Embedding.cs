@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Processing.Projections;
@@ -30,10 +31,10 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 /// <summary>
 /// Represents an implementation of <see cref="IEmbedding" />.
 /// </summary>
+[DisableAutoRegistration]
 public class Embedding : IEmbedding
 {
     readonly EmbeddingId _embeddingId;
-    readonly ExecutionContext _processorExecutionContext;
     readonly ReverseCallDispatcherType _dispatcher;
     readonly IEmbeddingRequestFactory _requestFactory;
     readonly ILogger _logger;
@@ -42,33 +43,30 @@ public class Embedding : IEmbedding
     /// Initializes an instance of the <see cref="Embedding" /> class.
     /// </summary>
     /// <param name="embeddingId">The identifier for this embedding.</param>
-    /// <param name="processorExecutionContext">The execution context that the embedding processor is running in.</param>
     /// <param name="dispatcher">The reverse call dispatcher to use to dispatch update and delete calls to the client.</param>
     /// <param name="requestFactory">The factory to use to create requests to the client.</param>
     /// <param name="logger">The logger to use for logging.</param>
     public Embedding(
         EmbeddingId embeddingId,
-        ExecutionContext processorExecutionContext,
         ReverseCallDispatcherType dispatcher,
         IEmbeddingRequestFactory requestFactory,
         ILogger logger)
     {
         _embeddingId = embeddingId;
-        _processorExecutionContext = processorExecutionContext;
         _dispatcher = dispatcher;
         _requestFactory = requestFactory;
         _logger = logger;
     }
 
     /// <inheritdoc/> 
-    public async Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken)
+    public async Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         try
         {
             _logger.ProjectEventThroughDispatcher(_embeddingId, state);
             var response = await _dispatcher.Call(
                 _requestFactory.Create(state, @event),
-                _processorExecutionContext,
+                executionContext,
                 cancellationToken).ConfigureAwait(false);
 
             if (IsFailureResponse(response))

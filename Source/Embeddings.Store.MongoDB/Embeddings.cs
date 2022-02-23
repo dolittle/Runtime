@@ -23,7 +23,7 @@ public class Embeddings : EmbeddingsConnection, IEmbeddings
     /// Initializes a new instance of the <see cref="Embeddings"/> class.
     /// </summary>
     /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
-    public Embeddings(DatabaseConnection connection)
+    public Embeddings(IDatabaseConnection connection)
         : base(connection)
     {
         _embeddingDefinitions = Database.GetCollection<Definition.EmbeddingDefinition>(EmbeddingDefinitionCollectionName);

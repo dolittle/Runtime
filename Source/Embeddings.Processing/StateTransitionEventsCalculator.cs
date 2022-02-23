@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
@@ -19,6 +20,7 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 /// <summary>
 /// Represents an implementation of <see cref="ICalculateStateTransitionEvents" />.
 /// </summary>
+[DisableAutoRegistration]
 public class StateTransitionEventsCalculator : ICalculateStateTransitionEvents
 {
     readonly EmbeddingId _embeddingId;
@@ -59,6 +61,7 @@ public class StateTransitionEventsCalculator : ICalculateStateTransitionEvents
             current,
             newCurrent => _stateComparer.TryCheckEquality(newCurrent.State, desired),
             (newCurrent, token) => _embedding.TryCompare(newCurrent, desired, executionContext, token),
+            executionContext,
             cancellationToken);
 
     /// <inheritdoc/>
@@ -67,12 +70,14 @@ public class StateTransitionEventsCalculator : ICalculateStateTransitionEvents
             current,
             newCurrent => Try<bool>.Do(() => newCurrent.Type is EmbeddingCurrentStateType.Deleted),
             (newCurrent, token) => _embedding.TryDelete(newCurrent, executionContext, token),
+            executionContext,
             cancellationToken);
 
     async Task<Try<UncommittedAggregateEvents>> DoWork(
         EmbeddingCurrentState current,
         Func<EmbeddingCurrentState, Try<bool>> isDesiredState,
         Func<EmbeddingCurrentState, CancellationToken, Task<Try<UncommittedEvents>>> getTransitionEvents,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
         try
@@ -120,7 +125,7 @@ public class StateTransitionEventsCalculator : ICalculateStateTransitionEvents
                     return addNewTransitionEvents.Exception;
                 }
 
-                var projectIntermediateState = await TryProjectNewState(current, addNewTransitionEvents, previousStates, cancellationToken).ConfigureAwait(false);
+                var projectIntermediateState = await TryProjectNewState(current, addNewTransitionEvents, previousStates, executionContext, cancellationToken).ConfigureAwait(false);
                 if (!projectIntermediateState.Success)
                 {
                     _logger.CalculatingStateTransitionEventsFailedProjectingNewState(
@@ -184,9 +189,10 @@ public class StateTransitionEventsCalculator : ICalculateStateTransitionEvents
         EmbeddingCurrentState current,
         Try<UncommittedEvents> newTransitionEvents,
         IEnumerable<ProjectionState> previousStates,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
-        var intermediateState = await _projector.TryProject(current, newTransitionEvents.Result, cancellationToken).ConfigureAwait(false);
+        var intermediateState = await _projector.TryProject(current, newTransitionEvents.Result, executionContext, cancellationToken).ConfigureAwait(false);
         if (!intermediateState.Success)
         {
             return intermediateState.IsPartialResult

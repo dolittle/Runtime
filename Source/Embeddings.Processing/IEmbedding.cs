@@ -41,7 +41,8 @@ public interface IEmbedding
     /// </summary>
     /// <param name="state">The <see cref="ProjectionCurrentState"/> to update.</param>
     /// <param name="event">The <see cref="UncommittedEvent"/> to use to update the state.</param>
+    /// <param name="executionContext">The execution context to execute the projection operation in.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns an <see cref="IProjectionResult" />.</returns>
-    Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken);
+    Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, ExecutionContext executionContext, CancellationToken cancellationToken);
 }
