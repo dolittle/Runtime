@@ -75,7 +75,7 @@ public class EventProcessor : IEventProcessor
             return new FailedProcessing(tryGetCurrentState.Exception.Message);
         }
 
-        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, cancellationToken).ConfigureAwait(false);
+        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, executionContext, cancellationToken).ConfigureAwait(false);
 
         return await HandleResult(tryGetCurrentState.Result.Key, result, cancellationToken).ConfigureAwait(false);
     }
@@ -96,7 +96,7 @@ public class EventProcessor : IEventProcessor
             return new FailedProcessing(tryGetCurrentState.Exception.Message);
         }
 
-        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
+        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, failureReason, retryCount, executionContext, cancellationToken).ConfigureAwait(false);
 
         return await HandleResult(tryGetCurrentState.Result.Key, result, cancellationToken).ConfigureAwait(false);
     }

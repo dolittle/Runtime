@@ -4,8 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.DependencyInversion.Lifecycle;
-using Dolittle.Runtime.DependencyInversion.Scoping;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB;
@@ -13,14 +11,14 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB;
 /// <summary>
 /// Represents a connection to the MongoDB Projections database.
 /// </summary>
-[Singleton, PerTenant]
+[DisableAutoRegistration]
 public class ProjectionsConnection : IProjectionsConnection
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="EventStoreConnection"/> class with default scoped collections.
+    /// Initializes a new instance of the <see cref="ProjectionsConnection"/> class with default scoped collections.
     /// </summary>
     /// <param name="connection">A connection to the MongoDB database.</param>
-    protected ProjectionsConnection(DatabaseConnection connection)
+    protected ProjectionsConnection(IDatabaseConnection connection)
     {
         MongoClient = connection.MongoClient;
         Database = connection.Database;

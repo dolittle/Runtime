@@ -4,8 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.DependencyInversion.Lifecycle;
-using Dolittle.Runtime.DependencyInversion.Scoping;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB;
@@ -13,14 +11,14 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB;
 /// <summary>
 /// Represents a connection to the MongoDB Embeddings database.
 /// </summary>
-[Singleton, PerTenant]
+[DisableAutoRegistration]
 public class EmbeddingsConnection : IEmbeddingsConnection
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="EventStoreConnection"/> class with default collections.
+    /// Initializes a new instance of the <see cref="EmbeddingsConnection"/> class with default collections.
     /// </summary>
     /// <param name="connection">A connection to the MongoDB database.</param>
-    protected EmbeddingsConnection(DatabaseConnection connection)
+    protected EmbeddingsConnection(IDatabaseConnection connection)
     {
         MongoClient = connection.MongoClient;
         Database = connection.Database;

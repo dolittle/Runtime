@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Options;
@@ -12,10 +11,10 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB;
 
 /// <summary>
-/// Represents a connection to the MongoDB database.
+/// Represents an implementation of <see cref="IDatabaseConnection"/>.
 /// </summary>
 [Singleton, PerTenant]
-public class DatabaseConnection
+public class DatabaseConnection : IDatabaseConnection
 {
 
     /// <summary>
@@ -36,13 +35,9 @@ public class DatabaseConnection
         Database = MongoClient.GetDatabase(config.Database);
     }
 
-    /// <summary>
-    /// Gets the configured <see cref="IMongoClient"/> for the MongoDB database.
-    /// </summary>
+    /// <inheritdoc />
     public IMongoClient MongoClient { get; }
 
-    /// <summary>
-    /// Gets the configured <see cref="IMongoDatabase"/> for the MongoDB database.
-    /// </summary>
+    /// <inheritdoc />
     public IMongoDatabase Database { get; }
 }
