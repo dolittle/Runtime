@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 /// <summary>
 /// Represents an implementation of <see cref="IWriteEventsToStreams" /> and <see cref="IWriteEventsToStreamCollection" />..
 /// </summary>
+[DisableAutoRegistration]
 public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEventsToStreams
 {
     readonly FilterDefinitionBuilder<Events.StreamEvent> _streamFilter = Builders<Events.StreamEvent>.Filter;

@@ -11,6 +11,8 @@ public class Services : ICanAddServices
 {
     public void AddTo(IServiceCollection services)
     {
+        // TODO: WÆT, shouldn't these have to be registered in the tenant containers? It seems like it works somehow.
+        // TODO: If they have tenant-specific dependencies, than this should really be failing.
         services.AddTransient<EventProcessor>();
         services.AddTransient<ProjectionProcessor>();
     }
