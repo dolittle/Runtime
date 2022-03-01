@@ -7,33 +7,40 @@ using System.Reflection;
 
 namespace Dolittle.Runtime.DependencyInversion.Types;
 
+/// <summary>
+/// Extensions on <see cref="Type"/> for getting information about generic types.
+/// </summary>
 public static class GenericTypeExtensions
 {
-    public static bool TypeImplementsGenericInterface(this Type type, Type genericInterface)
+    /// <summary>
+    /// Tries to get the generic type of an implemented generic interface.
+    /// </summary>
+    /// <param name="type">The <see cref="Type"/> to get the implemented generic interface type from.</param>
+    /// <param name="openGenericInterface">The open generic interface.</param>
+    /// <returns>The generic type of an implemented generic interface.</returns>
+    public static Type GetImplementedGenericInterfaceGenericType(this Type type, Type openGenericInterface)
     {
-        if (!genericInterface.IsGenericTypeDefinition)
-        {
-            
-        }
-
-        return type
+        var implementedInterfaces = type
             .GetTypeInfo()
             .ImplementedInterfaces
-            .Any(IsGenericInterface(genericInterface));
-    }
-    
-    public static Type GetImplementedGenericInterfaceType(this Type type, Type genericInterface)
-    {
-        if (!TypeImplementsGenericInterface(type, genericInterface))
+            .Where(IsGenericInterface(openGenericInterface)).ToArray();
+
+        switch (implementedInterfaces.Length)
         {
-            
+            case 0:
+                throw new TypeDoesNotImplementGenericInterface(type, openGenericInterface);
+            case > 1:
+                throw new TypeImplementsGenericInterfaceMultipleTimes(type, openGenericInterface);
         }
 
-        return type
-            .GetTypeInfo()
-            .ImplementedInterfaces
-            .Single(IsGenericInterface(genericInterface))
-            .GetGenericArguments()[0];
+        var implementedInterface = implementedInterfaces[0];
+        var implementedInterfaceGenericArguments = implementedInterface.GetGenericArguments();
+        if (implementedInterfaceGenericArguments.Length > 1)
+        {
+            throw new OpenGenericInterfaceShouldHaveOnlyOneGenericParameter(type, implementedInterface);
+        }
+
+        return implementedInterfaceGenericArguments[0];
     }
 
     static Func<Type, bool> IsGenericInterface(Type genericInterface)
