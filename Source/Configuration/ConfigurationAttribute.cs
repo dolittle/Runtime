@@ -11,7 +11,6 @@ namespace Dolittle.Runtime.Configuration;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class ConfigurationAttribute : Attribute
 {
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigurationAttribute"/> class.
     /// </summary>

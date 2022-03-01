@@ -14,6 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.DependencyInversion.Building;
 
+/// <summary>
+/// Represents an implementation of <see cref="IServiceProviderFactory{TContainerBuilder}"/> for the Autofac <see cref="ContainerBuilder"/> that sets up the Dolittle Runtime Service Provider using Autofac.
+/// </summary>
 public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
 {
     readonly AutofacServiceProviderFactory _factory = new();

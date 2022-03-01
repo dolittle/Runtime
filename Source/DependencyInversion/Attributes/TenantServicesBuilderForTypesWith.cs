@@ -9,6 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.DependencyInversion.Attributes;
 
+/// <summary>
+/// Represents an implementation of <see cref="ICanAddTenantServices"/> for tenant services.
+/// </summary>
+/// <typeparam name="TAttribute">The <see cref="Type"/> of the attribute.</typeparam>
 [DisableAutoRegistration]
 public class TenantServicesBuilderForTypesWith<TAttribute> : ICanAddTenantServices
     where TAttribute : Attribute
@@ -16,6 +20,11 @@ public class TenantServicesBuilderForTypesWith<TAttribute> : ICanAddTenantServic
     readonly ICanAddTenantServicesForTypesWith<TAttribute> _builder;
     readonly Dictionary<Type, TAttribute> _typesWithAttribute = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TenantServicesBuilderForTypesWith{TAttribute}"/> class.
+    /// </summary>
+    /// <param name="builder">The <see cref="ICanAddTenantServicesForTypesWith{TAttribute}"/>.</param>
+    /// <param name="discoveredClasses">The discovered classes.</param>
     public TenantServicesBuilderForTypesWith(ICanAddTenantServicesForTypesWith<TAttribute> builder, IEnumerable<Type> discoveredClasses)
     {
         _builder = builder;
