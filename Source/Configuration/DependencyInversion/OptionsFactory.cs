@@ -56,22 +56,32 @@ public class OptionsFactory<TOptions> : Microsoft.Extensions.Options.OptionsFact
         var section = _configuration.GetSection(GetConfigurationSection(definition));
         if (!_parser.TryParseFrom<TOptions>(section, out var instance))
         {
-            throw new Exception("Cannot Parse configuration");
+            throw new CannotParseConfiguration(typeof(TOptions), section.Path);
         }
 
         return instance;
     }
 
+    /// <summary>
+    /// Gets the configuration section of an <see cref="IConfiguration"/> for a Dolittle configuration.
+    /// </summary>
+    /// <param name="definition">The <see cref="ConfigurationObjectDefinition{TOptions}"/> of the Dolittle configuration to get the configuration section for.</param>
+    /// <returns>The configuration section string.</returns>
     protected virtual string GetConfigurationSection(ConfigurationObjectDefinition<TOptions> definition)
     {
         if (definition.IsPerTenant)
         {
-            throw new Exception("Cannot create tenant-specific configuration from the root container");
+            throw new CannotCreateTenantSpecificConfigurationFromRootContainer();
         }
 
         return GetConfigurationSectionWithPrefix(definition.Section);
     }
 
+    /// <summary>
+    /// Gets the section string prefixed correctly.
+    /// </summary>
+    /// <param name="section">The configuration section to prefix.</param>
+    /// <returns>The correctly prefixed configuration section string.</returns>
     protected string GetConfigurationSectionWithPrefix(string section)
         => $"dolittle:runtime:{section}";
 }

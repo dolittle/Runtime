@@ -13,6 +13,7 @@ namespace Dolittle.Runtime.Configuration.DependencyInversion;
 /// </summary>
 public class ConfigurationObjects : ICanAddServicesForTypesWith<ConfigurationAttribute>
 {
+    /// <inheritdoc />
     public void AddServiceFor(Type type, ConfigurationAttribute attribute, IServiceCollection services)
     {
         var definitionType = typeof(ConfigurationObjectDefinition<>).MakeGenericType(type);

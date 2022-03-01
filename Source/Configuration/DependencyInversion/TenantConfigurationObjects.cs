@@ -11,7 +11,6 @@ namespace Dolittle.Runtime.Configuration.DependencyInversion;
 /// Represents an implementation of <see cref="ICanAddServicesForTypesWith{TAttribute}"/> for adding <see cref="ConfigurationObjectDefinition{TOptions}"/> to the IoC
 /// container for each type with the <see cref="TenantConfigurationAttribute"/> attribute.
 /// </summary>
-//TODO: This should be ICanAddTenantServicesForTypesWith?
 public class TenantConfigurationObjects : ICanAddServicesForTypesWith<TenantConfigurationAttribute>
 {
     /// <inheritdoc />
