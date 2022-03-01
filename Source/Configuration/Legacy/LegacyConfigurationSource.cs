@@ -7,8 +7,12 @@ using Microsoft.Extensions.FileProviders;
 
 namespace Dolittle.Runtime.Configuration.Legacy;
 
+/// <summary>
+/// Represents an implementation of <see cref="IConfigurationSource"/> for the legacy Dolittle microservice configuration files under the .dolittle folder.
+/// </summary>
 public class LegacyConfigurationSource : IConfigurationSource
 {
+    /// <inheritdoc /> 
     public IConfigurationProvider Build(IConfigurationBuilder builder)
         => new LegacyConfigurationProvider(new PhysicalFileProvider(Path.GetFullPath(".dolittle")));
 }

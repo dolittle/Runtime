@@ -7,8 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Configuration.DependencyInversion;
 
+/// <summary>
+/// Represents an implementation of <see cref="ICanAddServicesForTypesWith{TAttribute}"/> for adding <see cref="ConfigurationObjectDefinition{TOptions}"/> to the IoC
+/// container for each type with the <see cref="TenantConfigurationAttribute"/> attribute.
+/// </summary>
 public class TenantConfigurationObjects : ICanAddServicesForTypesWith<TenantConfigurationAttribute>
 {
+    /// <inheritdoc />
     public void AddServiceFor(Type type, TenantConfigurationAttribute attribute, IServiceCollection services)
     {
         var definitionType = typeof(ConfigurationObjectDefinition<>).MakeGenericType(type);

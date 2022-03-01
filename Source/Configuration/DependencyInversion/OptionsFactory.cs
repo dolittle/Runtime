@@ -10,6 +10,10 @@ using Microsoft.Extensions.Options;
 
 namespace Dolittle.Runtime.Configuration.DependencyInversion;
 
+/// <summary>
+/// Represents an implementation of <see cref="Microsoft.Extensions.Options.OptionsFactory{TOptions}"/> specific for Dolittle configuration.
+/// </summary>
+/// <typeparam name="TOptions">The <see cref="Type"/> of the Dolittle configuration.</typeparam>
 public class OptionsFactory<TOptions> : Microsoft.Extensions.Options.OptionsFactory<TOptions>
     where TOptions : class
 {
@@ -17,6 +21,15 @@ public class OptionsFactory<TOptions> : Microsoft.Extensions.Options.OptionsFact
     readonly IEnumerable<ConfigurationObjectDefinition<TOptions>> _definitions;
     readonly IParseConfigurationObjects _parser;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OptionsFactory{TOptions}"/> class.
+    /// </summary>
+    /// <param name="configuration">The <see cref="IConfiguration."/></param>
+    /// <param name="definitions">The <see cref="IEnumerable{T}"/> of <see cref="ConfigurationObjectDefinition{TOptions}"/>.</param>
+    /// <param name="parser">The <see cref="IParseConfigurationObjects"/>.</param>
+    /// <param name="setups">The <see cref="IEnumerable{T}"/> of <see cref="IConfigureOptions{TOptions}"/>.</param>
+    /// <param name="postConfigures">The <see cref="IEnumerable{T}"/> of <see cref="IPostConfigureOptions{TOptions}"/>.</param>
+    /// <param name="validations">The <see cref="IEnumerable{T}"/> of <see cref="IValidateOptions{TOptions}"/>.</param>
     public OptionsFactory(
         IConfiguration configuration,
         IEnumerable<ConfigurationObjectDefinition<TOptions>> definitions,
