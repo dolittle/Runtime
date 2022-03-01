@@ -25,6 +25,12 @@
         "customerID": "ca900ec9-bae8-462e-b262-fa3efc825ca8",
         "environment": "Development"
     },
+    "microservices": {
+        "<microservice-id>": {
+            "host": "some-host",
+            "port": 50052
+        }
+    },
     "tenants": {
         "<tenant-id>": {
             "resources": {
@@ -57,8 +63,6 @@
             },
             "eventHorizons": {
                 "<microservice-id>": {
-                    "host": "some-host",
-                    "port": 50052,
                     "consents": {
                         "<consumer-tenant-id>": {
                             "stream": "<stream-id>",
@@ -70,7 +74,7 @@
                         "<producer-tenant-id>": {
                             "stream": "<stream-id>",
                             "partition": "<partition>",
-                            "scope": "<scope-id>",
+                            "scope": "<scope-id>"
                         }
                     }
                 }
