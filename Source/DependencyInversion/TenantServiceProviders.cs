@@ -23,7 +23,13 @@ public class TenantServiceProviders : ITenantServiceProviders
     readonly IEnumerable<ICanAddTenantServices> _serviceAdders;
     readonly ClassesByLifecycle _perTenantClasses;
     readonly ConcurrentDictionary<TenantId, AutofacServiceProvider> _providers = new();
-
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TenantServiceProviders"/> class.
+    /// </summary>
+    /// <param name="globalContainer">The <see cref="ILifetimeScope"/> root container that the tenant specific IoC containers are created from.</param>
+    /// <param name="serviceAdders">The <see cref="IEnumerable{T}"/> of <see cref="ICanAddTenantServices"/>.</param>
+    /// <param name="perTenantClasses">The <see cref="ClassesByLifecycle"/>.</param>
     public TenantServiceProviders(ILifetimeScope globalContainer, IEnumerable<ICanAddTenantServices> serviceAdders, ClassesByLifecycle perTenantClasses)
     {
         _globalContainer = globalContainer;

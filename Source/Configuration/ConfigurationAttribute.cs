@@ -11,14 +11,13 @@ namespace Dolittle.Runtime.Configuration;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class ConfigurationAttribute : Attribute
 {
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigurationAttribute"/> class.
     /// </summary>
     /// <param name="section">The configuration section to parse the object from, excluding the "dolittle:runtime" prefix</param>
-    public ConfigurationAttribute(string section)
+    public ConfigurationAttribute(params string[] section)
     {
-        Section = section;
+        Section = string.Join(':', section);
     }
     
     /// <summary>

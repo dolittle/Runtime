@@ -2,13 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
 namespace Dolittle.Runtime.Configuration.Legacy;
 
+/// <summary>
+/// Represents an implementation of <see cref="ConfigurationProvider"/> that provides Dolittle configurations
+/// from the legacy .dolittle folder configuration files.
+/// </summary>
 public class LegacyConfigurationProvider : ConfigurationProvider
 {
     static string _delimiter = ConfigurationPath.KeyDelimiter;
@@ -16,11 +19,17 @@ public class LegacyConfigurationProvider : ConfigurationProvider
 
     readonly IFileProvider _fileProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LegacyConfigurationProvider"/> class.
+    /// </summary>
+    /// <param name="fileProvider"></param>
     public LegacyConfigurationProvider(IFileProvider fileProvider)
     {
         _fileProvider = fileProvider;
     }
 
+
+    /// <inheritdoc />
     public override void Load()
     {
         foreach (var file in _fileProvider.GetDirectoryContents("/"))
@@ -48,20 +57,16 @@ public class LegacyConfigurationProvider : ConfigurationProvider
             case "tenants.json":
                 MapIntoRoot("tenants", config);
                 break;
+            case "microservices.json":
+                MapIntoRoot("microservices", config);
+                break;
             case "resources.json":
                 MapResources(config);
                 break;
-            case "microservices.json":
-                MapMicroservices(config);
-                break;
-            case "event-horizon-consents":
+            case "event-horizon-consents.json":
                 MapEventHorizonConsents(config);
                 break;
         }
-        // foreach (var kvp in GetData($"dolittle{_delimiter}runtime{_delimiter}{Path.GetFileNameWithoutExtension(file)}", config))
-        // {
-        //     Data.Add(kvp);
-        // }
     }
 
     void MapIntoRoot(string sectionRoot, IConfiguration config)
@@ -85,27 +90,22 @@ public class LegacyConfigurationProvider : ConfigurationProvider
         }
     }
 
-    void MapMicroservices(IConfiguration config)
-    {
-        foreach (var microservicesForTenant in config.GetChildren())
-        {
-            foreach (var kvp in GetData(
-                         $"{_dolittleConfigSectionRoot}{_delimiter}tenants{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons",
-                         microservicesForTenant))
-            {
-                Data.Add(kvp);
-            }
-        }
-    }
     void MapEventHorizonConsents(IConfiguration config)
     {
         foreach (var microservicesForTenant in config.GetChildren())
         {
-            foreach (var kvp in GetData(
-                         $"{_dolittleConfigSectionRoot}{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons",
-                         microservicesForTenant))
+            var sectionPrefix = $"{_dolittleConfigSectionRoot}{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons";
+            Data.Add(sectionPrefix, null);
+            foreach (var consent in microservicesForTenant.GetChildren())
             {
-                Data.Add(kvp);
+                var eventHorizonMicroservicePrefix = $"{sectionPrefix}{_delimiter}{consent["microservice"]}"; 
+                Data.Add(eventHorizonMicroservicePrefix, null);
+                var consentSectionPrefix = $"{eventHorizonMicroservicePrefix}{_delimiter}consents";
+                Data.Add(consentSectionPrefix, null);
+                var consentForConsumerSectionPrefix = $"{consentSectionPrefix}{_delimiter}{consent["tenant"]}";
+                Data.Add($"{consentForConsumerSectionPrefix}{_delimiter}stream", consent["stream"]);
+                Data.Add($"{consentForConsumerSectionPrefix}{_delimiter}partition", consent["partition"]);
+                Data.Add($"{consentForConsumerSectionPrefix}{_delimiter}consent", consent["consent"]);
             }
         }
     }
@@ -124,9 +124,5 @@ public class LegacyConfigurationProvider : ConfigurationProvider
             }
         }
         return data;
-    }    
-    // => config.AsEnumerable()
-        //     .Select(_ => config.GetSection(_.Key))
-        //     .Where(_ => _.Value != null || !_.GetChildren().Any())
-        //     .Select(_ => new KeyValuePair<string,string>($"{rootPath}{_delimiter}{_.Key}", _.Value));
+    }
 }

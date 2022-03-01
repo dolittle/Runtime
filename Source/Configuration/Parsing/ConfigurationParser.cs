@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,19 +14,16 @@ namespace Dolittle.Runtime.Configuration.Parsing;
 /// </summary>
 public class ConfigurationParser : IParseConfigurationObjects
 {
+    /// <inheritdoc />
     public bool TryParseFrom<TOptions>(IConfigurationSection configuration, out TOptions parsed)
         where TOptions : class
     {
-        Console.WriteLine($"Parsing configuration from {configuration} to {typeof(TOptions)}");
-        
         var stream = new MemoryStream();
         var writer = new StreamWriter(stream);
         WriteSectionToStream(configuration, writer);
         writer.Flush();
 
         stream.Seek(0, SeekOrigin.Begin);
-        var allStuff = new StreamReader(stream).ReadToEnd();
-        Console.WriteLine(allStuff);
 
         stream.Seek(0, SeekOrigin.Begin);
         var reader = new JsonTextReader(new StreamReader(stream));
