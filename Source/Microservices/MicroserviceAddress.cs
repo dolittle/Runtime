@@ -8,4 +8,4 @@ namespace Microservices;
 /// </summary>
 /// <param name="Host">The host of a microservice.</param>
 /// <param name="Port">The host of a microservice.</param>
-public record MicroserviceAddress(string Host, int Port);
+public record MicroserviceAddress(MicroserviceHost Host, MicroservicePort Port);
