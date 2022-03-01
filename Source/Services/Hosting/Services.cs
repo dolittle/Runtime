@@ -15,7 +15,6 @@ public class Services : ICanAddServicesForTypesWith<ServiceAttribute>
     /// <inheritdoc />
     public void AddServiceFor(Type type, ServiceAttribute attribute, IServiceCollection services)
     {
-        Console.WriteLine($"Registering gRPC service from {type}");
         services.AddSingleton(new ServiceDefinition(attribute.Visibility, type));
         services.AddSingleton(type);
     }

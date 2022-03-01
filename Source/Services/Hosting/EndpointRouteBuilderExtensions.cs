@@ -28,7 +28,6 @@ public static class EndpointRouteBuilderExtensions
     static GrpcServiceEndpointConventionBuilder MapDynamicGrpcService(this IEndpointRouteBuilder builder, Type service)
     {
         // TODO: Cleanup with some null checking
-        Console.WriteLine($"Mapping grpc endpoint for {service}");
         var method = typeof(GrpcEndpointRouteBuilderExtensions).GetMethod(nameof(GrpcEndpointRouteBuilderExtensions.MapGrpcService));
         var methodForServiceType = method.MakeGenericMethod(service);
         return methodForServiceType.Invoke(null, new object[] { builder }) as GrpcServiceEndpointConventionBuilder;
