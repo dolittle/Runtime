@@ -90,8 +90,6 @@ public class EventHandler : IDisposable
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
 
-        
-        
     /// <summary>
     /// Gets the <see cref="StreamId">target stream</see> for the <see cref="EventHandler"/>.
     /// </summary>
