@@ -54,9 +54,9 @@ public class OptionsFactory<TOptions> : Microsoft.Extensions.Options.OptionsFact
         }
 
         var section = _configuration.GetSection(GetConfigurationSection(definition));
-        if (!_parser.TryParseFrom<TOptions>(section, out var instance))
+        if (!_parser.TryParseFrom<TOptions>(section, out var instance, out var error))
         {
-            throw new CannotParseConfiguration(typeof(TOptions), section.Path);
+            throw new CannotParseConfiguration(error, typeof(TOptions), section.Path);
         }
 
         return instance;
