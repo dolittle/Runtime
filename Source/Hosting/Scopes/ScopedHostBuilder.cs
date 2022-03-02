@@ -76,7 +76,7 @@ public class ScopedHostBuilder : IHostBuilder
     {
         var scopedServices = CreateScopedHostServiceCollection(context);
         
-        // TODO: Can we do this in a nicer way?
+        // TODO: Can we do this in a nicer way? This code forces our IOptionsFactory into the host builder
         new Services().AddTo(scopedServices);
 
         var scopedHost = new ScopedHostDefinition(scopedServices);
