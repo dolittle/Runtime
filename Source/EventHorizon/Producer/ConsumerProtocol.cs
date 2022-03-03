@@ -29,7 +29,14 @@ public class ConsumerProtocol : IConsumerProtocol
 
     /// <inheritdoc/>
     public SubscriptionResponse CreateFailedConnectResponse(FailureReason failureMessage)
-        => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingSubscriptionArguments.Value.ToProtobuf(), Reason = failureMessage } };
+        => new()
+        {
+            Failure = new Dolittle.Protobuf.Contracts.Failure
+            {
+                Id = SubscriptionFailures.MissingSubscriptionArguments.Value.ToProtobuf(), 
+                Reason = failureMessage
+            }
+        };
 
     /// <inheritdoc/>
     public ReverseCallArgumentsContext GetArgumentsContext(ConsumerSubscriptionRequest message)

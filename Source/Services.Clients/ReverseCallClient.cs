@@ -38,12 +38,11 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
     /// <summary>
     /// The amount of ping intervals to wait until it times out. 
     /// </summary>
-    public static readonly int PingThreshold = 3;
+    public const int PingThreshold = 3;
 
     readonly IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _protocol;
     readonly TClient _client;
     readonly TimeSpan _pingInterval;
-    readonly ICreateExecutionContexts _executionContextCreator;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
     readonly SemaphoreSlim _writeLock = new(1);
@@ -62,14 +61,12 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
     /// <param name="protocol">The protocol for this reverse call.</param>
     /// <param name="client">The client to use to start the reverse call.</param>
     /// <param name="pingInterval">The interval to request and expect pings to keep the connection alive.</param>
-    /// <param name="executionContextCreator">The execution context creator to use for validating incoming execution contexts.</param>
     /// <param name="metrics">The metrics to use for reporting metrics.</param>
     /// <param name="logger">The logger to use for logging.</param>
     public ReverseCallClient(
         IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> protocol,
         TClient client,
         TimeSpan pingInterval,
-        ICreateExecutionContexts executionContextCreator,
         IMetricsCollector metrics,
         ILogger logger)
     {
@@ -77,7 +74,6 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
         _protocol = protocol;
         _client = client;
         _pingInterval = pingInterval;
-        _executionContextCreator = executionContextCreator;
         _metrics = metrics;
         _logger = logger;
     }
@@ -343,15 +339,8 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
             {
                 _logger.HandlingRequest(typeof(TRequest), callId);
                 var stopwatch = Stopwatch.StartNew();
-
-                // TODO: Is this even going to work? This should mainly be used for the Event Horizon, not sure what microservice and tenant is set in there?
-                var createExecutionContext = _executionContextCreator.TryCreateUsing(requestContext.ExecutionContext);
-                if (!createExecutionContext.Success)
-                {
-                    throw createExecutionContext.Exception;
-                }
                 
-                var response = await _callback(request, createExecutionContext.Result, cancellationToken).ConfigureAwait(false);
+                var response = await _callback(request, requestContext.ExecutionContext.ToExecutionContext(), cancellationToken).ConfigureAwait(false);
 
                 stopwatch.Stop();
                 _metrics.AddToTotalRequestHandlingTime(stopwatch.Elapsed);

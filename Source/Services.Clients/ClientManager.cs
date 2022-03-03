@@ -13,32 +13,32 @@ namespace Dolittle.Runtime.Services.Clients;
 /// </summary>
 public class ClientManager : IClientManager
 {
-    readonly ICallInvokerManager _callInvokerManager;
+    readonly IChannels _channels;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ClientManager"/> class.
     /// </summary>
-    /// <param name="callInvokerManager"><see cref="ICallInvokerManager"/> to get <see cref="CallInvoker"/> from.</param>
-    public ClientManager(ICallInvokerManager callInvokerManager)
+    /// <param name="channels"><see cref="IChannels"/> to get <see cref="CallInvoker"/> from.</param>
+    public ClientManager(IChannels channels)
     {
-        _callInvokerManager = callInvokerManager;
+        _channels = channels;
     }
 
     /// <inheritdoc/>
-    public ClientBase Get(Type type, string host = default, int port = default)
+    public ClientBase Get(Type type, string host, int port)
     {
         ThrowIfTypeDoesNotImplementClientBase(type);
-        var constructor = type.GetConstructor(new[] { typeof(CallInvoker) });
+        var constructor = type.GetConstructor(new[] { typeof(ChannelBase) });
         ThrowIfMissingExpectedConstructorClientType(type, constructor);
 
-        return constructor.Invoke(new[] { _callInvokerManager.GetFor(type, host, port) }) as ClientBase;
+        return constructor.Invoke(new[] { _channels.GetFor(host, port) }) as ClientBase;
     }
 
     /// <inheritdoc/>
-    public TClient Get<TClient>(string host = default, int port = default)
+    public TClient Get<TClient>(string host, int port)
         where TClient : ClientBase => Get(typeof(TClient), host, port) as TClient;
 
-    void ThrowIfTypeDoesNotImplementClientBase(Type type)
+    static void ThrowIfTypeDoesNotImplementClientBase(Type type)
     {
         if (!type.Implements(typeof(ClientBase)))
         {
@@ -46,7 +46,7 @@ public class ClientManager : IClientManager
         }
     }
 
-    void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
+    static void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
     {
         if (constructor == null)
         {

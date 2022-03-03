@@ -13,8 +13,8 @@ public class CannotParseConfiguration : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="CannotParseConfiguration"/> class.
     /// </summary>
-    public CannotParseConfiguration(Type configuration, string section)
-        : base($"Cannot parse {configuration} from section {section}")
+    public CannotParseConfiguration(Exception error, Type configuration, string section)
+        : base($"Cannot parse {configuration} from section {section}", error)
     {
     }
 }

@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ClientManager.given;
 
 public class all_dependencies
 {
-    protected static Mock<ICallInvokerManager> call_invoker_manager;
+    protected static Mock<IChannels> call_invoker_manager;
 
-    Establish context = () => call_invoker_manager = new Mock<ICallInvokerManager>();
+    Establish context = () => call_invoker_manager = new Mock<IChannels>();
 }

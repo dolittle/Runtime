@@ -18,7 +18,7 @@ public interface IClientManager
     /// <param name="host">The host the client should connect to. If default value it uses the 'clients' configuration.</param>
     /// <param name="port">The port the client should connect on. If default value it uses the 'clients' configuration.</param>
     /// <returns><see cref="ClientBase"/> instance.</returns>
-    ClientBase Get(Type type, string host = default, int port = default);
+    ClientBase Get(Type type, string host, int port);
 
     /// <summary>
     /// /// Get a specific type of <see cref="ClientBase"/>.
@@ -27,6 +27,6 @@ public interface IClientManager
     /// <param name="port">The port the client should connect on. If default value it uses the 'clients' configuration.</param>
     /// <typeparam name="TClient">The type of client.</typeparam>
     /// <returns>The <see cref="ClientBase" /> instance.</returns>
-    TClient Get<TClient>(string host = default, int port = default)
+    TClient Get<TClient>(string host, int port)
         where TClient : ClientBase;
 }

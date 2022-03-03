@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,21 +16,31 @@ namespace Dolittle.Runtime.Configuration.Parsing;
 public class ConfigurationParser : IParseConfigurationObjects
 {
     /// <inheritdoc />
-    public bool TryParseFrom<TOptions>(IConfigurationSection configuration, out TOptions parsed)
+    public bool TryParseFrom<TOptions>(IConfigurationSection configuration, out TOptions parsed, out Exception error)
         where TOptions : class
     {
-        var stream = new MemoryStream();
-        var writer = new StreamWriter(stream);
-        WriteSectionToStream(configuration, writer);
-        writer.Flush();
+        parsed = default;
+        error = default;
+        try
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            WriteSectionToStream(configuration, writer);
+            writer.Flush();
 
-        stream.Seek(0, SeekOrigin.Begin);
+            stream.Seek(0, SeekOrigin.Begin);
 
-        stream.Seek(0, SeekOrigin.Begin);
-        var reader = new JsonTextReader(new StreamReader(stream));
-        var serializer = JsonSerializer.Create();
-        parsed = serializer.Deserialize<TOptions>(reader);
-        return true;
+            stream.Seek(0, SeekOrigin.Begin);
+            var reader = new JsonTextReader(new StreamReader(stream));
+            var serializer = JsonSerializer.Create();
+            parsed = serializer.Deserialize<TOptions>(reader);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            error = ex;
+            return false;
+        }
     }
 
     static void WriteSectionToStream(IConfigurationSection section, TextWriter stream)

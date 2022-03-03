@@ -11,8 +11,11 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 
 static partial class Log
 {
+    [LoggerMessage(0, LogLevel.Information, "Incoming event horizon subscription")]
+    internal static partial void IncomingEventHorizonSubscription(ILogger logger);
+
     [LoggerMessage(0, LogLevel.Debug, "Incoming event horizon subscription from microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}")]
-    internal static partial void IncomingEventHorizonSubscription(
+    internal static partial void IncomingEventHorizonSubscriptionWithArguments(
         ILogger logger,
         MicroserviceId consumerMicroservice,
         TenantId consumerTenant,
@@ -49,6 +52,14 @@ static partial class Log
         TenantId producerTenant,
         PartitionId partition,
         StreamId publicStream);
+    [LoggerMessage(0, LogLevel.Warning, "Event horizon already registered for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}")]
+    internal static partial void EventHorizonAlreadyRegistered(
+        ILogger logger,
+        MicroserviceId consumerMicroservice,
+        TenantId consumerTenant,
+        TenantId producerTenant,
+        PartitionId partition,
+        StreamId publicStream);
 
     [LoggerMessage(0, LogLevel.Warning, "Disconnecting Event Horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}")]
     internal static partial void EventHorizonDisconnecting(
@@ -71,6 +82,9 @@ static partial class Log
     
     [LoggerMessage(0, LogLevel.Debug, "There are no consents configured for Producer Tenant {ProducerTenant}")]
     internal static partial void NoConsentsConfiguredForProducerTenant(ILogger logger, TenantId producerTenant);
+    
+    [LoggerMessage(0, LogLevel.Debug, "Producer Tenant {ProducerTenant} is not a configured tenant")]
+    internal static partial void ProducerTenantIsNotConfigured(ILogger logger, TenantId producerTenant);
     
     [LoggerMessage(0, LogLevel.Debug, "There are no consent configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}")]
     internal static partial void NoConsentsConfiguredForConsumer(

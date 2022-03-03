@@ -94,7 +94,7 @@ public class LegacyConfigurationProvider : ConfigurationProvider
     {
         foreach (var microservicesForTenant in config.GetChildren())
         {
-            var sectionPrefix = $"{_dolittleConfigSectionRoot}{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons";
+            var sectionPrefix = $"{_dolittleConfigSectionRoot}{_delimiter}tenants{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons";
             Data.Add(sectionPrefix, null);
             foreach (var consent in microservicesForTenant.GetChildren())
             {

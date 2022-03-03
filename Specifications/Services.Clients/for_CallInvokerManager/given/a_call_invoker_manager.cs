@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager.given;
 
 public class a_call_invoker_manager
 {
-    protected static CallInvokerManager manager;
+    protected static Channels manager;
     protected static ClientEndpointsConfiguration configuration;
     protected static Mock<IKnownClients> known_clients;
     protected static Mock<IMetadataProviders> metadata_providers;
@@ -24,6 +24,6 @@ public class a_call_invoker_manager
             { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", 1) },
             { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", 1) }
         });
-        manager = new CallInvokerManager(known_clients.Object, configuration, metadata_providers.Object);
+        manager = new Channels(known_clients.Object, configuration, metadata_providers.Object);
     };
 }

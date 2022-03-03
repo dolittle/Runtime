@@ -74,7 +74,7 @@ public class SubscriptionsService : SubscriptionsBase
             _metrics.IncrementTotalSubscriptionsInitiatedFromHead();
             _logger.IncomingSubscripton(subscription);
 
-            var subscriptionResponse = await _getSubscriptionsFor(executionContext.Tenant).Subscribe(subscription).ConfigureAwait(false);
+            var subscriptionResponse = await _getSubscriptionsFor(executionContext.Tenant).Subscribe(subscription, executionContext).ConfigureAwait(false);
 
             return subscriptionResponse switch
             {
