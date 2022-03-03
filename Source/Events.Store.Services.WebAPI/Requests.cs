@@ -6,17 +6,17 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Security;
-
+using Dolittle.Runtime.Execution;
 using RuntimeExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using RuntimeArtifact = Dolittle.Runtime.Artifacts.Artifact;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Events.Store.Services.WebAPI;
 
 public record ExecutionContext(
     Guid Microservice,
     Guid Tenant,
-    Versioning.Version Version,
+    Version Version,
     string Environment,
     Guid CorrelationId,
     Claim[] Claims)

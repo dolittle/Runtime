@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Machine.Specifications;
 using Moq;
-using Services.Clients;
 
 namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager.given;
 

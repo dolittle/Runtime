@@ -13,7 +13,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Versioning/Versioning.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
         <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />

@@ -7,7 +7,6 @@ using Moq;
 using Dolittle.Runtime.Events.Processing.Streams;
 using System.Threading;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
 using Microsoft.Extensions.Logging.Abstractions;

@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store;

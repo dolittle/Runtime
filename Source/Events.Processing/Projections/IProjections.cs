@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;

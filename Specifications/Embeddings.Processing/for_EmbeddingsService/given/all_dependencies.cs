@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
@@ -25,6 +24,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given;
@@ -61,7 +61,7 @@ public class all_dependencies
         execution_context = new ExecutionContext(
             "f3b5157e-6f27-4a5e-92ea-f2768e68d9ed",
             "4875bdd1-4866-4d2f-a2d0-967fe7a4872e",
-            Versioning.Version.NotSet,
+            Version.NotSet,
             "Environment",
             "14d2ce96-ada9-4446-8abb-6e12a49afd39",
             Security.Claims.Empty,

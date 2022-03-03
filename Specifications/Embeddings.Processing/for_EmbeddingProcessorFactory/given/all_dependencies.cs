@@ -2,16 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using It = Moq.It;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using Dolittle.Runtime.ApplicationModel;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessorFactory.given;
 
@@ -31,7 +31,7 @@ public class all_dependencies
         execution_context = new ExecutionContext(
             "bc0ca6f8-09a3-4292-b3f7-42168c34732d",
             "6a3b2a79-bf9b-4b56-aeda-554d2b15f325",
-            Versioning.Version.NotSet,
+            Version.NotSet,
             "env",
             "cf203a09-30eb-4e71-be2f-810ef3529152",
             Security.Claims.Empty,

@@ -1,13 +1,12 @@
-using System.Linq;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using Machine.Specifications;
 using System.Collections.Generic;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using System;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.EventHorizonConsents;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.for_EventHorizonConsentsConfiguration;
 

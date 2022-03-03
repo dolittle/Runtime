@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management.Contracts;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Hosting;

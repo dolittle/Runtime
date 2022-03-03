@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Versioning;
+using Dolittle.Runtime.Domain.Platform;
 using VersionContract = Dolittle.Versioning.Contracts.Version;
 
 namespace Dolittle.Runtime.Protobuf;

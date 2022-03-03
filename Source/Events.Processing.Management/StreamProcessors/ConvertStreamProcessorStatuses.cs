@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.WellKnownTypes;

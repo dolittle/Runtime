@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;

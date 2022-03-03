@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Projections.Store.Definition;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.

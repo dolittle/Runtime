@@ -3,7 +3,6 @@
 
 using System;
 using System.Reflection;
-using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Services.Clients;
@@ -40,7 +39,7 @@ public class ClientManager : IClientManager
 
     static void ThrowIfTypeDoesNotImplementClientBase(Type type)
     {
-        if (!type.Implements(typeof(ClientBase)))
+        if (!typeof(ClientBase).IsAssignableFrom(type))
         {
             throw new TypeDoesNotImplementClientBase(type);
         }

@@ -4,12 +4,11 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Security;
 using Machine.Specifications;
-using Environment = Dolittle.Runtime.Execution.Environment;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Environment = Dolittle.Runtime.Domain.Platform.Environment;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_updating;
 

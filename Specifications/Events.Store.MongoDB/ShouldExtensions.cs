@@ -19,7 +19,7 @@ public static class ShouldExtensions
         storedExecutionContext.Version.ShouldBeTheSameAs(executionContext.Version);
     }
 
-    public static void ShouldBeTheSameAs(this Version storedVersion, Versioning.Version version)
+    public static void ShouldBeTheSameAs(this Version storedVersion, Domain.Platform.Version version)
     {
         storedVersion.Major.ShouldEqual(version.Major);
         storedVersion.Minor.ShouldEqual(version.Minor);
@@ -50,7 +50,7 @@ public static class ShouldExtensions
         executionContext.Claims.ShouldBeTheSameAs(storedExecutionContext.Claims);
     }
 
-    public static void ShouldBeTheSameAs(this Versioning.Version version, Version storedVersion)
+    public static void ShouldBeTheSameAs(this Domain.Platform.Version version, Version storedVersion)
     {
         version.Major.ShouldEqual(storedVersion.Major);
         version.Minor.ShouldEqual(storedVersion.Minor);

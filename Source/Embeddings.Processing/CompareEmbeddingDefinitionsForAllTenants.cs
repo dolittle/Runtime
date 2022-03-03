@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
 

@@ -4,7 +4,6 @@
 using System;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Moq;

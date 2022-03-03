@@ -4,7 +4,4 @@
     <AssemblyName>Dolittle.Runtime.Rudimentary</AssemblyName>
     <RootNamespace>Dolittle.Runtime.Rudimentary</RootNamespace>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="../Reflection/Reflection.csproj" />
-  </ItemGroup>
 </Project>

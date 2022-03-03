@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;

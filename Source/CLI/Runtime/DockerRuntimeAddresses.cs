@@ -7,8 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Domain.Platform;
 
 namespace Dolittle.Runtime.CLI.Runtime;
 

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Domain</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Domain</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+    </ItemGroup>
+</Project>

@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;

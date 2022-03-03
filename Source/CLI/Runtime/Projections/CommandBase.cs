@@ -3,7 +3,6 @@
 
 using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.Serialization.Json;
 
 namespace Dolittle.Runtime.CLI.Runtime.Projections;
 

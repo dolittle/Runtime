@@ -13,6 +13,7 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Dolittle.Artifacts.Contracts;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.when_starting_receiving_events_into.given;
 
@@ -51,7 +52,7 @@ public class all_dependencies : for_EventHorizonConnection.given.all_dependencie
             CorrelationId = Guid.Parse("11f3f1c1-340b-4d08-8a3a-9dae16cb2dbb").ToProtobuf(),
             TenantId = Guid.Parse("0dfdd63a-570c-4d17-b9c0-db34f1cb5bbc").ToProtobuf(),
             Environment = "env",
-            Version = Versioning.Version.NotSet.ToProtobuf(),
+            Version = Version.NotSet.ToProtobuf(),
         };
         execution_context.Claims.AddRange(Security.Claims.Empty.ToProtobuf());
         return new ConsumerRequest

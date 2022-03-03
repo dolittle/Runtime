@@ -4,7 +4,6 @@
 using System;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing;

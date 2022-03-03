@@ -5,8 +5,8 @@ using System;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Security;
 using ExecutionContracts = Dolittle.Execution.Contracts;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 
@@ -16,7 +16,7 @@ public static class execution_contexts
         new(
             Guid.NewGuid(),
             Guid.NewGuid(),
-            Versioning.Version.NotSet,
+            Version.NotSet,
             "",
             Guid.NewGuid(),
             Claims.Empty,

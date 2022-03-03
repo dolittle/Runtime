@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj"/>
         <ProjectReference Include="../Artifacts/Artifacts.csproj"/>
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
         <ProjectReference Include="../Events.Store/Events.Store.csproj"/>

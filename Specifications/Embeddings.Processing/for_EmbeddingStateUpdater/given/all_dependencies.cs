@@ -8,13 +8,13 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store.State;
-using Dolittle.Runtime.Security;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given;
 

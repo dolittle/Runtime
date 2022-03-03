@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.CLI.Configuration.Files;
-using Dolittle.Runtime.Resources;
 using Microsoft.Extensions.FileProviders;
 
 namespace Dolittle.Runtime.CLI.Configuration.Runtime;

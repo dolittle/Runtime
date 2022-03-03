@@ -13,7 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
         <ProjectReference Include="../Execution/Execution.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />

@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../Configuration/Configuration.csproj" />
         <ProjectReference Include="../Execution/Execution.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />

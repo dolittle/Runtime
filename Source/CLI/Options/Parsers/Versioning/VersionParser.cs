@@ -3,9 +3,9 @@
 
 using System;
 using System.Globalization;
-using Dolittle.Runtime.Versioning;
+using Dolittle.Runtime.Domain.Platform;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace CLI.Options.Parsers.Versioning;
 

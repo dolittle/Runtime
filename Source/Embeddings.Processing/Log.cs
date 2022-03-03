@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Events.Store;

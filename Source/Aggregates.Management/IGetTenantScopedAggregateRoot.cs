@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 
 namespace Dolittle.Runtime.Aggregates.Management;
 

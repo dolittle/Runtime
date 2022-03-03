@@ -3,8 +3,8 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.EventHorizon.Configuration;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store.EventHorizon;

@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration.Parsing;
+using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 

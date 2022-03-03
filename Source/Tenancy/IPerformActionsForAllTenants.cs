@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Tenancy;

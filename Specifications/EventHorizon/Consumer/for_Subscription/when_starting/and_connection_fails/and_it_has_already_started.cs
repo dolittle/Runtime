@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;

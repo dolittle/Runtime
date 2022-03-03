@@ -4,9 +4,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
 using Microservices;
