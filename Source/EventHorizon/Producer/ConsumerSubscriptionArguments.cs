@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 /// <param name="ExecutionContext">The execution context.</param>
 public record ConsumerSubscriptionArguments(
     ExecutionContext ExecutionContext,
-    MicroserviceId ConsumerMicroserviceId,
+    MicroserviceId ConsumerMicroservice,
     TenantId ConsumerTenant,
     TenantId ProducerTenant,
     StreamId PublicStream,
