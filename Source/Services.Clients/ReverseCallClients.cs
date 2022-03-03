@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.Services.Clients;
 public class ReverseCallClients : IReverseCallClients
 {
     readonly IClientManager _clientManager;
-    readonly ICreateExecutionContexts _executionContextCreator;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
     readonly TimeSpan _defaultPingInterval = TimeSpan.FromSeconds(5);
@@ -24,17 +23,14 @@ public class ReverseCallClients : IReverseCallClients
     /// Initializes a new instance of the <see cref="ReverseCallClients"/> class.
     /// </summary>
     /// <param name="clientManager">The client manager to use for creating gRPC clients.</param>
-    /// <param name="executionContextCreator">The execution context creator to use for validating incoming execution contexts.</param>
     /// <param name="metrics">The metrics collector to use for collecting metrics for reverse call clients.</param>
     /// <param name="loggerFactory">The logger factory to use for creating loggers.</param>
     public ReverseCallClients(
         IClientManager clientManager,
-        ICreateExecutionContexts executionContextCreator,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
     {
         _clientManager = clientManager;
-        _executionContextCreator = executionContextCreator;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
     }
@@ -59,7 +55,6 @@ public class ReverseCallClients : IReverseCallClients
             protocol,
             client,
             pingInterval == default ? _defaultPingInterval : pingInterval,
-            _executionContextCreator,
             _metrics,
             _loggerFactory.CreateLogger<ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
     }

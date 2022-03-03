@@ -17,6 +17,6 @@
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
-        <PackageReference Include="Grpc" Version="$(GrpcVersion)" />
+        <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" />
     </ItemGroup>
 </Project>
