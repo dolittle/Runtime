@@ -8,7 +8,6 @@
 
     <ItemGroup>
         <ProjectReference Include="../Artifacts/Artifacts.csproj"/>
-        <ProjectReference Include="../Collections/Collections.csproj"/>
         <ProjectReference Include="../Execution/Execution.csproj"/>
         <ProjectReference Include="../Protobuf/Protobuf.csproj"/>
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>

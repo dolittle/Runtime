@@ -6,8 +6,5 @@
     <AssemblyName>Dolittle.Runtime.Collections.Specs</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../../Source/Collections/Collections.csproj" />
-  </ItemGroup>
 
 </Project>

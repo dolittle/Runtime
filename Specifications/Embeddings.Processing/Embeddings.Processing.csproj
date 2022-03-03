@@ -3,7 +3,7 @@
   <Import Project="../../specs.props"/>
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Collections.Specs</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Embeddings.Processing.Specs</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
