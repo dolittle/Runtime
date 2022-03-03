@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
-using Dolittle.Runtime.Events.Store.EventHorizon;
-using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.EventHorizon.Configuration;
 
