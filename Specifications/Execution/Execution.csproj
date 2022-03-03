@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../../specs.props"/>
+  <Import Project="../../specs.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Execution.Specs</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Execution</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

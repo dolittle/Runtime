@@ -4,12 +4,12 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Versioning.for_VersionConverter;
+namespace Dolittle.Runtime.Domain.Platform.for_VersionConverter;
 
 public class when_converting_invalid_string : given.a_version_converter
 {
     static Exception result;
-    Because of = () => result = Catch.Exception(() => version_converter.FromString("Blah"));
+    Because of = () => result = Catch.Exception((Action) (() => version_converter.FromString("Blah")));
 
     It should_throw_invalid_version_string = () => result.ShouldBeOfExactType(typeof(InvalidVersionString));
 }

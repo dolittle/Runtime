@@ -3,7 +3,7 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.for_ClaimsPrincipalExtensions.when_converting_to_claims;
+namespace Dolittle.Runtime.Execution.for_ClaimsPrincipalExtensions.when_converting_to_claims;
 
 [Subject(typeof(ClaimsPrincipalExtensions), nameof(ClaimsPrincipalExtensions.ToClaims))]
 public class from_a_simple_claims_principal : given.a_claims_principal

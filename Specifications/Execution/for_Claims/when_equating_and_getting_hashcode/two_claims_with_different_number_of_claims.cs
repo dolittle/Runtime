@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Security.Claims;
+using System.Linq;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.for_Claims.when_equating_and_getting_hashcode;
+namespace Dolittle.Runtime.Execution.for_Claims.when_equating_and_getting_hashcode;
 
 [Subject(typeof(Claims), nameof(Equals))]
-public class two_claims_with_different_claims
+public class two_claims_with_different_number_of_claims
 {
     static Claims first;
     static Claims second;
@@ -20,18 +20,15 @@ public class two_claims_with_different_claims
 
     Establish context = () =>
     {
-        var list_one = new List<Claim>
+        var list = new List<System.Security.Claims.Claim>
         {
             new("4", "4", "4"),
-            new("1", "1", "1")
-        };
-        var list_two = new List<Claim>
-        {
+            new("1", "1", "1"),
             new("2", "2", "2"),
             new("3", "3", "3")
         };
-        first = new Claims(list_one.ToArray());
-        second = new Claims(list_two.ToArray());
+        first = new Claims(list.ToArray());
+        second = new Claims(list.Take(2).ToArray());
     };
 
     Because of = () =>

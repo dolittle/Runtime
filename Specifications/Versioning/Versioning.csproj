@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <Import Project="../../specs.props"/>
-
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Versioning.Specs</AssemblyName>
-  </PropertyGroup>
-
-</Project>

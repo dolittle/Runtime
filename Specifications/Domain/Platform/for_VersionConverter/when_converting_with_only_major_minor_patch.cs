@@ -1,14 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Versioning.for_VersionConverter;
+namespace Dolittle.Runtime.Domain.Platform.for_VersionConverter;
 
 public class when_converting_with_only_major_minor_patch : given.a_version_converter
 {
-    static Version version;
+    static System.Version version;
 
     Because of = () => version = version_converter.FromString("1.2.3");
 

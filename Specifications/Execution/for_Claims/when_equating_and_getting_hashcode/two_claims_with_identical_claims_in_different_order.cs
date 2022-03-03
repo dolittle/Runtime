@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Security.Claims;
+using System.Linq;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.for_Claims.when_equating_and_getting_hashcode;
+namespace Dolittle.Runtime.Execution.for_Claims.when_equating_and_getting_hashcode;
 
 [Subject(typeof(Claims), nameof(Equals))]
-public class two_claims_with_identical_claims_in_the_same_order
+public class two_claims_with_identical_claims_in_different_order
 {
     static Claims first;
     static Claims second;
@@ -20,7 +20,7 @@ public class two_claims_with_identical_claims_in_the_same_order
 
     Establish context = () =>
     {
-        var list = new List<Claim>
+        var list = new List<System.Security.Claims.Claim>
         {
             new("4", "4", "4"),
             new("1", "1", "1"),
@@ -28,7 +28,7 @@ public class two_claims_with_identical_claims_in_the_same_order
             new("3", "3", "3")
         };
         first = new Claims(list.ToArray());
-        second = new Claims(list.ToArray());
+        second = new Claims(list.OrderBy(_ => _.Name).ToArray());
     };
 
     Because of = () =>

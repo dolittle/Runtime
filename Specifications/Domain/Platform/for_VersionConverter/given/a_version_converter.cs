@@ -3,7 +3,7 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Versioning.for_VersionConverter.given;
+namespace Dolittle.Runtime.Domain.Platform.for_VersionConverter.given;
 
 public class a_version_converter
 {

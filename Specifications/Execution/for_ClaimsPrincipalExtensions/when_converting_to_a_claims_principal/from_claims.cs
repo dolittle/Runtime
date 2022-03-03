@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.for_ClaimsPrincipalExtensions.when_converting_to_claims;
+namespace Dolittle.Runtime.Execution.for_ClaimsPrincipalExtensions.when_converting_to_a_claims_principal;
 
 [Subject(typeof(ClaimsPrincipalExtensions), nameof(ClaimsPrincipalExtensions.ToClaims))]
 public class from_claims : given.a_claims_principal

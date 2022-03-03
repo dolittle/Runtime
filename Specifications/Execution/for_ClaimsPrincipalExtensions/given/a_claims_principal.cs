@@ -2,15 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.for_ClaimsPrincipalExtensions.given;
+namespace Dolittle.Runtime.Execution.for_ClaimsPrincipalExtensions.given;
 
 public class a_claims_principal
 {
-    public static IEnumerable<Claim> dolittle_claims;
+    public static IEnumerable<System.Security.Claims.Claim> dolittle_claims;
     public static IEnumerable<System.Security.Claims.Claim> dotnet_claims;
     public static ClaimsPrincipal instance;
 
@@ -26,7 +25,7 @@ public class a_claims_principal
             new(ClaimTypes.Role, "Coffee Maker")
         };
 
-        dolittle_claims = dotnet_claims.Select(Claim.FromDotnetClaim);
+        dolittle_claims = dotnet_claims.Select(System.Security.Claims.Claim.FromDotnetClaim);
 
         instance = new ClaimsPrincipal(new ClaimsIdentity(dotnet_claims));
     };
