@@ -3,7 +3,6 @@
 
 using System;
 using System.Reflection;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Services.Clients;
 using Grpc.Core;
 using Grpc.Core.Interceptors;

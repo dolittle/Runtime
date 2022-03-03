@@ -3,7 +3,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Microservices;
 

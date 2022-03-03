@@ -4,9 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
-using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Domain.Platform;
 using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime;

@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using Dolittle.Runtime.Serialization.Json;
 using Microsoft.Extensions.FileProviders;
 using IContentSerializer = Dolittle.Runtime.Serialization.Json.ISerializer;
 

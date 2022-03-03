@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.CLI.Options;
-using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 using ConsoleTables;
 using Dolittle.Runtime.CLI.Configuration.Files;

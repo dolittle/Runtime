@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;

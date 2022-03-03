@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
+using Dolittle.Runtime.Domain.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy;
 

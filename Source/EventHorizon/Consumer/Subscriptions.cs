@@ -3,9 +3,9 @@
 
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
 using Microservices;

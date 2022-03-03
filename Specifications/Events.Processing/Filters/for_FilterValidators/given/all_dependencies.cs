@@ -13,12 +13,11 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Security;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given;
 

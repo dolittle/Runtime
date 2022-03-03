@@ -4,7 +4,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Dolittle.Runtime.Versioning;
+namespace Dolittle.Runtime.Domain.Platform;
 
 /// <summary>
 /// Represents an implementation of <see cref="IVersionConverter"/>.

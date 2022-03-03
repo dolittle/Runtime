@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
-using Environment = Dolittle.Runtime.Execution.Environment;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Environment = Dolittle.Runtime.Domain.Platform.Environment;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Platform.Handshake;
 

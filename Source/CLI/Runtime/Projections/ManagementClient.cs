@@ -4,9 +4,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;

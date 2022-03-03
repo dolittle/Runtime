@@ -5,11 +5,10 @@ using System;
 using Machine.Specifications;
 using Moq;
 using System.Collections.Generic;
-using Dolittle.Runtime.ApplicationModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
+using Dolittle.Runtime.Domain.Platform;
 using Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscriptions.given;

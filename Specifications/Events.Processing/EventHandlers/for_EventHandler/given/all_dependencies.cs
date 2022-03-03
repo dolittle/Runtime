@@ -4,19 +4,19 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Security;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Environment = Dolittle.Runtime.Execution.Environment;
+using Environment = Dolittle.Runtime.Domain.Platform.Environment;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
@@ -25,7 +25,7 @@ using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatch
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
                                     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 using static Moq.It;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Microsoft.Extensions.Logging.Abstractions;

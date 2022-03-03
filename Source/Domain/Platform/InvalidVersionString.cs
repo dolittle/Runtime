@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Versioning;
+namespace Dolittle.Runtime.Domain.Platform;
 
 /// <summary>
 /// Exception that gets thrown when a version string is invalid.

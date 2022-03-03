@@ -3,7 +3,7 @@
 
 using System;
 using Autofac;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 
 namespace Dolittle.Runtime.DependencyInversion.Tenancy;
 

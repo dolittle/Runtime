@@ -3,7 +3,6 @@
 
 using System.Linq;
 using System.Security.Claims;
-using Dolittle.Runtime.Collections;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Security.for_ClaimsPrincipalExtensions.when_converting_to_claims;

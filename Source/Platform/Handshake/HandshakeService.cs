@@ -9,7 +9,7 @@ using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Handshake.Contracts.Handshake;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 using Failure = Dolittle.Protobuf.Contracts.Failure;
 
 namespace Dolittle.Runtime.Platform.Handshake;

@@ -3,7 +3,6 @@
 
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 
 

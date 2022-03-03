@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Globalization;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Security;
-using Dolittle.Runtime.Versioning;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 
 namespace Dolittle.Runtime.Execution;
 

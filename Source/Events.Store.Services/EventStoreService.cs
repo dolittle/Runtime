@@ -4,9 +4,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;

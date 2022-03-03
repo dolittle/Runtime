@@ -5,11 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.Serialization.Json;
+using Dolittle.Runtime.Domain.Tenancy;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.Projections.List;

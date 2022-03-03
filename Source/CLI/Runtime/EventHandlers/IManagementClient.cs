@@ -3,8 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Configuration.ConfigurationObjects.Microservices;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;

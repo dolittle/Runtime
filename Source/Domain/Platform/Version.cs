@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Versioning;
+namespace Dolittle.Runtime.Domain.Platform;
 
 /// <summary>
 /// Represents a version number adhering to the SemVer 2.0 standard.

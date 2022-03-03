@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 
 using Dolittle.Runtime.Tenancy;

@@ -14,7 +14,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />

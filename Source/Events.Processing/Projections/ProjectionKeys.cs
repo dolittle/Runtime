@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;

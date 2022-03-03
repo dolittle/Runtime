@@ -4,14 +4,13 @@
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Security;
-using Dolittle.Runtime.Versioning;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;

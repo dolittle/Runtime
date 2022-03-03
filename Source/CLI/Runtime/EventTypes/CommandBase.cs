@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.CLI.Configuration.Files;
-using Dolittle.Runtime.Serialization.Json;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventTypes;
 

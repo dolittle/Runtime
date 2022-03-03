@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Execution;
+namespace Dolittle.Runtime.Domain.Platform;
 
 /// <summary>
 /// Represents the concept of a runtime environment - e.g. Testing, Development, Staging, Production.

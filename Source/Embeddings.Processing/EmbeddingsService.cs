@@ -13,10 +13,10 @@ using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Protobuf;
 using System.Threading;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using System.Linq;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Services.Hosting;
 using static Dolittle.Runtime.Embeddings.Contracts.Embeddings;
 

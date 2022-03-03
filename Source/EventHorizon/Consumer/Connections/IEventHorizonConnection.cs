@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
 

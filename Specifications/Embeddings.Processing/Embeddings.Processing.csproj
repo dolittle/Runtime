@@ -10,7 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Source/ApplicationModel/ApplicationModel.csproj" />
     <ProjectReference Include="../../Source/Embeddings.Processing/Embeddings.Processing.csproj" />
     <ProjectReference Include="../../Source/Embeddings.Store/Embeddings.Store.csproj" />
     <ProjectReference Include="../../Source/Tenancy/Tenancy.csproj" />

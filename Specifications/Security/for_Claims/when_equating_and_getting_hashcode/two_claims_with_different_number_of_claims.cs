@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Security.for_Claims.when_equating_and_getting_hashcode;

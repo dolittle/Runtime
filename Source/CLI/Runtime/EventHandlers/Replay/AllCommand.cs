@@ -4,7 +4,6 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay;

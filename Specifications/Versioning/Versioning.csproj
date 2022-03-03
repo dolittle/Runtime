@@ -5,9 +5,5 @@
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Versioning.Specs</AssemblyName>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="../../Source/Versioning/Versioning.csproj" />
-  </ItemGroup>
 
 </Project>

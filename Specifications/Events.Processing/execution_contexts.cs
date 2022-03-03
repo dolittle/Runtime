@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Security;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Events.Processing;
 
@@ -14,7 +14,7 @@ public static class execution_contexts
         new(
             Guid.NewGuid(),
             Guid.NewGuid(),
-            Versioning.Version.NotSet,
+            Version.NotSet,
             "",
             Guid.NewGuid(),
             Claims.Empty,

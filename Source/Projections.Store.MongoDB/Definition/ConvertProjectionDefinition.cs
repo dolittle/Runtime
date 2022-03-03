@@ -6,7 +6,6 @@ using Dolittle.Runtime.Events.Store;
 
 using MongoDB.Bson;
 using System.Collections.Generic;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 

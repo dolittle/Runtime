@@ -11,6 +11,7 @@ using Grpc.Core.Testing;
 using Machine.Specifications;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpcService.given;
 
@@ -32,7 +33,7 @@ public class the_service
         execution_context = new ExecutionContext(
             "25bf2bca-bef9-4c25-99bb-8371c81eb9fa",
             "7134aeb9-2d15-486b-a9a4-e3b3509b3c18",
-            Versioning.Version.NotSet,
+            Version.NotSet,
             "some env",
             "f6d7d582-81f1-4f37-acc8-f21324280c9a",
             Security.Claims.Empty,

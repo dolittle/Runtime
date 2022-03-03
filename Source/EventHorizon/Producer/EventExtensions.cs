@@ -3,8 +3,8 @@
 
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Security;
 
 namespace Dolittle.Runtime.EventHorizon.Producer;
 

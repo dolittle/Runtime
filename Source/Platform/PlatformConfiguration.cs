@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
+using Dolittle.Runtime.Domain.Platform;
 
-namespace Dolittle.Runtime.Execution;
+namespace Dolittle.Runtime.Platform;
 
 /// <summary>
 /// Represents the configuration of the Runtime context from the Platform.

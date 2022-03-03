@@ -9,7 +9,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.DependencyInversion.Tenancy;

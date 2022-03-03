@@ -1,8 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;

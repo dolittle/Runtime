@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Globalization;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Security;
-using Dolittle.Runtime.Versioning;
 using Microsoft.Extensions.Options;
 
-namespace Dolittle.Runtime.Execution;
+namespace Dolittle.Runtime.Platform;
 
 /// <summary>
 /// Represents an implementation of <see cref="ICreateExecutionContexts"/>.

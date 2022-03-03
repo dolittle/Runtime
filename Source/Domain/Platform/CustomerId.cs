@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.ApplicationModel;
+namespace Dolittle.Runtime.Domain.Platform;
 
 /// <summary>
 /// Represents the concept of a customer.

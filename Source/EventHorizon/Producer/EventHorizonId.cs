@@ -1,4 +1,5 @@
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.EventHorizon.Producer;
