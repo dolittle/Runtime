@@ -3,9 +3,9 @@
 
 using System;
 using Dolittle.Runtime.CLI.Configuration.Files;
-using Dolittle.Runtime.CLI.Configuration.Runtime;
 using Dolittle.Runtime.CLI.Options.Parsers;
 using Dolittle.Runtime.CLI.Runtime;
+using Dolittle.Runtime.CLI.Serialization;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -50,7 +50,7 @@ class Program
         services.AddSerializers();
             
         services.AddConfigurationFiles();
-        services.AddRuntimeConfiguration();
+        // services.AddRuntimeConfiguration();
         services.AddRuntimeServices();
     }
 

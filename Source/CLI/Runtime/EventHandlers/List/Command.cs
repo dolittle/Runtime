@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.CLI.Configuration.Files;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;

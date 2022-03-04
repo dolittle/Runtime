@@ -18,7 +18,7 @@ public interface ISerializer
     /// <param name="file">The <see cref="IFileInfo"/> describing the file to deserialize.</param>
     /// <param name="options">Options for the serializer.</param>.
     /// <returns>A deserialized instance of the specified type.</returns>
-    T FromJsonFile<T>(IFileInfo file, ISerializationOptions options = null);
+    T FromJsonFile<T>(IFileInfo file);
         
     /// <summary>
     /// Deserialize Json to a specific type from the contents of a file.
@@ -27,5 +27,5 @@ public interface ISerializer
     /// <param name="file">The <see cref="IFileInfo"/> describing the file to deserialize.</param>
     /// <param name="options">Options for the serializer.</param>.
     /// <returns>A deserialized instance.</returns>
-    object FromJsonFile(Type type, IFileInfo file, ISerializationOptions options = null);
+    object FromJsonFile(Type type, IFileInfo file);
 }
