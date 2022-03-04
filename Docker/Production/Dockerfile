@@ -18,6 +18,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 ARG CONFIGURATION=Release
 ARG VERSION
 
+ENV LOGGING__CONSOLE__FormatterName=""
+
 RUN echo Configuration = ${CONFIGURATION}
 RUN echo Version = ${VERSION}
 
