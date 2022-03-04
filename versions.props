@@ -4,7 +4,7 @@
         <AutofacExtensionsVersion>7.2.0</AutofacExtensionsVersion>
         <BaselineTypeDiscoveryVersion>1.1.2</BaselineTypeDiscoveryVersion>
         <ConsoleTablesVersion>2.4.2</ConsoleTablesVersion>
-        <ContractsVersion>6.8.0</ContractsVersion>
+        <ContractsVersion>6.8.1</ContractsVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
