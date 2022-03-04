@@ -28,7 +28,6 @@
 
     <ItemGroup>
         <PackageReference Include="ConsoleTables" Version="$(ConsoleTablesVersion)" />
-        <PackageReference Include="Contrib.Grpc.Core.M1" Version="$(GrpcVersion)" />
         <PackageReference Include="Docker.DotNet" Version="$(DockerDotNetVersion)" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMasterVersion)" />
