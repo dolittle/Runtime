@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Tenancy;
 /// </summary>
 public class TenantActionPerformer : IPerformActionsForAllTenants
 {
-    readonly TenantId[] _allTenants;
+    readonly ITenants _allTenants;
     readonly ITenantServiceProviders _serviceProviders;
 
     /// <summary>
@@ -25,14 +25,14 @@ public class TenantActionPerformer : IPerformActionsForAllTenants
     /// <param name="serviceProviders">The <see cref="ITenantServiceProviders"/> to use to get the <see cref="IServiceProvider"/> for each tenant.</param>
     public TenantActionPerformer(ITenants tenants, ITenantServiceProviders serviceProviders)
     {
-        _allTenants = tenants.All.ToArray();
+        _allTenants = tenants;
         _serviceProviders = serviceProviders;
     }
 
     /// <inheritdoc />
     public void Perform(Action<TenantId, IServiceProvider> callback)
     {
-        foreach (var tenant in _allTenants)
+        foreach (var tenant in _allTenants.All.ToArray())
         {
             callback(tenant, _serviceProviders.ForTenant(tenant));
         }
@@ -41,7 +41,7 @@ public class TenantActionPerformer : IPerformActionsForAllTenants
     /// <inheritdoc />
     public Try TryPerform(Func<TenantId, IServiceProvider, Try> callback)
     {
-        foreach (var tenant in _allTenants)
+        foreach (var tenant in _allTenants.All.ToArray())
         {
             var result = callback(tenant, _serviceProviders.ForTenant(tenant));
             if (!result.Success)
@@ -56,7 +56,7 @@ public class TenantActionPerformer : IPerformActionsForAllTenants
     /// <inheritdoc />
     public async Task PerformAsync(Func<TenantId, IServiceProvider, Task> callback)
     {
-        foreach (var tenant in _allTenants)
+        foreach (var tenant in _allTenants.All.ToArray())
         {
             await callback(tenant, _serviceProviders.ForTenant(tenant)).ConfigureAwait(false);
         }
@@ -65,7 +65,7 @@ public class TenantActionPerformer : IPerformActionsForAllTenants
     /// <inheritdoc />
     public async Task<Try> TryPerformAsync(Func<TenantId, IServiceProvider, Task<Try>> callback)
     {
-        foreach (var tenant in _allTenants)
+        foreach (var tenant in _allTenants.All.ToArray())
         {
             var result = await callback(tenant, _serviceProviders.ForTenant(tenant)).ConfigureAwait(false);
             if (!result.Success)

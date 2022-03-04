@@ -26,10 +26,11 @@ public class and_it_has_already_started : given.all_dependencies
         Task.Delay(300).GetAwaiter().GetResult();
     };
 
-    It should_create_connection_once = () => event_horizon_connection_factory.Verify(_ => _.Create(Moq.It.IsAny<MicroserviceAddress>()), Moq.Times.Once);
+    It should_create_connection_once = () => event_horizon_connection_factory.Verify(_ => _.Create(Moq.It.IsAny<MicroserviceAddress>(), execution_context), Moq.Times.Once);
     It should_create_stream_processor_once = () => stream_processor_factory.Verify(_ => _.Create(
         Moq.It.IsAny<ConsentId>(),
         Moq.It.IsAny<SubscriptionId>(),
+        execution_context,
         Moq.It.IsAny<EventsFromEventHorizonFetcher>()), Moq.Times.Once);
 
     It should_connect_once = () => event_horizon_connection.Verify(_ => _.Connect(

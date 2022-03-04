@@ -29,7 +29,7 @@ public class and_everything_works : given.all_dependencies
                     _ => Task.Delay(Timeout.Infinite)
                 };
             });
-        state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+        state_updater.Setup(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
     };
 
     Because of = () =>
@@ -39,6 +39,6 @@ public class and_everything_works : given.all_dependencies
     };
 
     It should_be_running = () => result.Status.ShouldEqual(TaskStatus.WaitingForActivation);
-    It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
+    It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
     It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
 }

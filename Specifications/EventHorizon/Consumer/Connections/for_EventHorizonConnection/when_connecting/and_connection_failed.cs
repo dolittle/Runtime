@@ -11,7 +11,7 @@ public class and_connection_failed : given.all_dependencies
     Establish context = () =>
     {
         reverse_call_client
-            .Setup(_ => _.Connect(Moq.It.IsAny<ConsumerSubscriptionRequest>(), cancellation_token))
+            .Setup(_ => _.Connect(Moq.It.IsAny<ConsumerSubscriptionRequest>(), execution_context, cancellation_token))
             .Returns(Task.FromResult(false));
     };
     static SubscriptionResponse result;
@@ -20,5 +20,6 @@ public class and_connection_failed : given.all_dependencies
     It should_return_failed_response_with_correct_failure_id = () => result.Failure.Id.ShouldEqual(SubscriptionFailures.CouldNotConnectToProducerRuntime);
     It should_call_connect_on_reverse_call_client = () => reverse_call_client.Verify(_ => _.Connect(
         Moq.It.IsAny<ConsumerSubscriptionRequest>(),
+        execution_context,
         cancellation_token), Moq.Times.Once);
 }

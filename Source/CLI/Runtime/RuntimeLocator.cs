@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Services.Configuration;
 using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime;
@@ -38,7 +39,7 @@ public class RuntimeLocator : ICanLocateRuntimes
         var address = new NamedRuntimeAddress(
             MicroserviceName.NotSet,
             string.IsNullOrWhiteSpace(argument.Host) ? DefaultRuntimeHost : argument.Host,
-            argument.Port == 0 ? EndpointsConfigurationDefaultProvider.DefaultManagementPort : argument.Port);
+            argument.Port == 0 ? new EndpointsConfiguration().Management.Port : argument.Port);
                 
         return new[] {address};
     }

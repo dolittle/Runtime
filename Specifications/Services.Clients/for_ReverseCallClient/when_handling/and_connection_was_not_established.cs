@@ -17,12 +17,11 @@ public class and_connection_was_not_established : given.a_reverse_call_client
     Establish context = () =>
     {
         execution_context = given.execution_contexts.create();
-        execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
         server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
-        reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
+        reverse_call_client.Connect(new MyConnectArguments(), execution_context, CancellationToken.None).GetAwaiter().GetResult();
     };
 
-    Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
+    Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, _, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
 
     It should_fail_because_no_connection_was_established = () => exception.ShouldBeOfExactType<ReverseCallClientNotConnected>();
 }

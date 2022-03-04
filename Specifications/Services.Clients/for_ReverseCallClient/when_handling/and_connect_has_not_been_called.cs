@@ -17,11 +17,10 @@ public class and_connect_has_not_been_called : given.a_reverse_call_client
     Establish context = () =>
     {
         execution_context = given.execution_contexts.create();
-        execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
         server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
     };
 
-    Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
+    Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, _, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
 
     It should_fail_because_no_connection_was_established = () => exception.ShouldBeOfExactType<ReverseCallClientNotConnected>();
 }

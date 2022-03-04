@@ -22,24 +22,24 @@ public class and_desired_state_is_reached_after_one_compare : given.all_dependen
         desired_current_embedding_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Deleted, "", "");
         events = new UncommittedEvents(Array.Empty<UncommittedEvent>());
         embedding
-            .Setup(_ => _.TryDelete(current_state, cancellation))
+            .Setup(_ => _.TryDelete(current_state, execution_context, cancellation))
             .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(events)));
         loop_detector
             .Setup(_ => _.TryCheckForProjectionStateLoop(desired_current_embedding_state.State, new[] { current_state.State }))
             .Returns(false);
         project_many_events
-            .Setup(_ => _.TryProject(current_state, events, cancellation))
+            .Setup(_ => _.TryProject(current_state, events, execution_context, cancellation))
             .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(
                 desired_current_embedding_state)));
     };
 
     static Try<UncommittedAggregateEvents> result;
-    Because of = () => result = calculator.TryDelete(current_state, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = calculator.TryDelete(current_state, execution_context, cancellation).GetAwaiter().GetResult();
 
     It should_not_return_a_failure = () => result.Success.ShouldBeTrue();
-    It should_only_delete_once = () => embedding.Verify(_ => _.TryDelete(current_state, cancellation), Moq.Times.Once);
+    It should_only_delete_once = () => embedding.Verify(_ => _.TryDelete(current_state, execution_context, cancellation), Moq.Times.Once);
     It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();
-    It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, cancellation), Moq.Times.Once);
+    It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, execution_context, cancellation), Moq.Times.Once);
     It should_not_project_anything_else = () => project_many_events.VerifyNoOtherCalls();
     It should_return_the_same_events = () => result.Result.ShouldContainOnly(events);
     It should_return_uncommitted_events_with_correct_aggregate_root_id = () => result.Result.AggregateRoot.Id.Value.ShouldEqual(identifier.Value);

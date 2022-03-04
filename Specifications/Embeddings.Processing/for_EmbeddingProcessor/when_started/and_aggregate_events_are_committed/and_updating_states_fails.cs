@@ -19,12 +19,12 @@ public class and_updating_states_fails : given.all_dependencies
     Establish context = () =>
     {
         event_waiter.Setup(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, Moq.It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed(new Exception())));
+        state_updater.Setup(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed(new Exception())));
     };
 
     Because of = () => result = embedding_processor.Start(cancellation_token);
 
     It should_return_a_failure = () => result.Result.Success.ShouldBeFalse();
-    It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>()), Times.Exactly(1));
+    It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>()), Times.Exactly(1));
     It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, Moq.It.IsAny<CancellationToken>()), Times.Exactly(0));
 }

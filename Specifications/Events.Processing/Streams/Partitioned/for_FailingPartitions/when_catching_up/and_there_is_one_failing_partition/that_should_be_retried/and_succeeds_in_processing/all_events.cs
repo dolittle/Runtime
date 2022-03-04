@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions.when_catching_up.and_there_is_one_failing_partition.that_should_be_retried.and_succeeds_in_processing;
 
@@ -15,7 +16,7 @@ public class all_events : given.all_dependencies
 
     Establish context = () =>
         event_processor
-            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
@@ -28,6 +29,7 @@ public class all_events : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
     It should_have_retried_processing_three_times = () => event_processor.Verify(
@@ -36,6 +38,7 @@ public class all_events : given.all_dependencies
             Moq.It.IsAny<PartitionId>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
 
     It should_have_retried_processing_first_event_once = () => event_processor.Verify(
@@ -44,6 +47,7 @@ public class all_events : given.all_dependencies
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
 
     It should_have_retried_processing_second_event_once = () => event_processor.Verify(
@@ -52,6 +56,7 @@ public class all_events : given.all_dependencies
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
 
     It should_have_retried_processing_third_event_once = () => event_processor.Verify(
@@ -60,5 +65,6 @@ public class all_events : given.all_dependencies
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
 }

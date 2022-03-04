@@ -3,7 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Dolittle.Runtime.CLI.Configuration.Files;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions.when_catching_up.and_there_are_multiple_failing_partitions.that_should_be_retried;
 
@@ -20,8 +21,14 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
     Establish context = () =>
     {
         event_processor
-            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns<CommittedEvent, PartitionId, string, uint, CancellationToken>((@event, partition, reason, retryCount, _) =>
+            .Setup(_ => _.Process(
+                Moq.It.IsAny<CommittedEvent>(),
+                Moq.It.IsAny<PartitionId>(),
+                Moq.It.IsAny<string>(),
+                Moq.It.IsAny<uint>(),
+                Moq.It.IsAny<ExecutionContext>(),
+                Moq.It.IsAny<CancellationToken>()))
+            .Returns<CommittedEvent, PartitionId, string, uint, ExecutionContext, CancellationToken>((@event, partition, reason, retryCount, _, _) =>
                 Task.FromResult<IProcessingResult>(retryCount >= 1 ? new FailedProcessing(last_failure_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
     };
 
@@ -42,6 +49,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
             first_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
 
     It should_have_retried_processing_second_failing_partition_twice = () => event_processor.Verify(
@@ -50,6 +58,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
             second_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
 
     It should_never_retry_processing_first_failing_partition = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);

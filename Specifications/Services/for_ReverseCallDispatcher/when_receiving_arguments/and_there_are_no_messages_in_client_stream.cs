@@ -20,12 +20,4 @@ public class and_there_are_no_messages_in_client_stream : given.a_dispatcher
 
     It should_return_false = () => result.ShouldBeFalse();
     It should_not_set_arguments = () => dispatcher.Arguments.ShouldBeNull();
-
-    It should_not_change_execution_context = () => execution_context_manager
-        .Verify(
-            _ => _.CurrentFor(
-                Moq.It.IsAny<Execution.ExecutionContext>(),
-                Moq.It.IsAny<string>(),
-                Moq.It.IsAny<int>(),
-                Moq.It.IsAny<string>()), Moq.Times.Never);
 }

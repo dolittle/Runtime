@@ -41,7 +41,7 @@ public class all_dependencies
     protected static Mock<IWriteEventsToStreams> stream_writer;
     protected static EventHandlerRegistrationArguments arguments;
     protected static ILoggerFactory logger_factory;
-    protected static Func<IWriteEventsToStreams> factory_for_stream_writer;
+    protected static Func<TenantId, IWriteEventsToStreams> factory_for_stream_writer;
     protected static CancellationToken cancellation_token;
     protected static ExecutionContext execution_context;
     protected static EventProcessorId event_handler_id = Guid.Parse("6afafdf6-33e8-4135-b271-2f7634b70a7f");
@@ -85,6 +85,6 @@ public class all_dependencies
             scope,
             "alias");
 
-        factory_for_stream_writer = () => stream_writer.Object;
+        factory_for_stream_writer = (tenant_id) => stream_writer.Object;
     };
 }

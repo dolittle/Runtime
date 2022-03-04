@@ -7,7 +7,7 @@ using Moq;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given;
 
-public class all_dependencies : a_serializer
+public class all_dependencies
 {
     protected static ProjectionKeys projection_keys;
     Establish context = () =>

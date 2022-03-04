@@ -30,6 +30,7 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
             arguments,
             factory_for_stream_writer,
             logger_factory,
+            execution_context,
             cancellation_token
         );
     };

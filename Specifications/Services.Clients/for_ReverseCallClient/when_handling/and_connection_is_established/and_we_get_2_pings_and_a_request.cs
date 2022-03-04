@@ -28,9 +28,6 @@ public class and_we_get_2_pings_and_a_request : given.a_reverse_call_client
     {
         cts = new CancellationTokenSource();
         execution_context = given.execution_contexts.create();
-        execution_context_manager
-            .SetupGet(_ => _.Current)
-            .Returns(execution_context);
 
         server_to_client_stream
             .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
@@ -56,7 +53,7 @@ public class and_we_get_2_pings_and_a_request : given.a_reverse_call_client
 
         response = new MyResponse();
 
-        callback = (request, token) =>
+        callback = (request, execution_context, token) =>
         {
             callback_was_called = true;
             callback_argument = request;
@@ -74,13 +71,16 @@ public class and_we_get_2_pings_and_a_request : given.a_reverse_call_client
                 }
             });
 
-        var connect_response = reverse_call_client.Connect(new MyConnectArguments
-        {
-            Context = new Dolittle.Services.Contracts.ReverseCallArgumentsContext
+        var connect_response = reverse_call_client.Connect(
+            new MyConnectArguments
             {
-                ExecutionContext = execution_context.ToProtobuf()
-            }
-        }, CancellationToken.None).GetAwaiter().GetResult();
+                Context = new Dolittle.Services.Contracts.ReverseCallArgumentsContext
+                {
+                    ExecutionContext = execution_context.ToProtobuf()
+                }
+            },
+            execution_context,
+            CancellationToken.None).GetAwaiter().GetResult();
 
         var ping_message = new MyServerMessage
         {

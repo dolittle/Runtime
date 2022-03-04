@@ -30,7 +30,7 @@ public class when_getting_all_states : given.the_service
 
     Because of = () => result = service.TryGetAll(embedding, execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_set_the_execution_context = () => execution_context_manager.Verify(_ => _.CurrentFor(execution_context, IsAny<string>(), IsAny<int>(), IsAny<string>()));
+    It should_create_the_execution_context = () => execution_context_creator.Verify(_ => _.TryCreateUsing(execution_context));
     It should_call_the_embedding_store = () => embedding_store.Verify(_ => _.TryGetAll(embedding, cancellation_token), Once);
     It should_return_successfull_result = () => result.Success.ShouldBeTrue();
     It should_return_the_current_state = () => result.Result.ShouldContainOnly(stored_states);

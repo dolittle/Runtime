@@ -28,14 +28,14 @@ public static class ShouldExtensions
         storedVersion.PreRelease.ShouldEqual(version.PreReleaseString);
     }
 
-    public static void ShouldBeTheSameAs(this Claim storedClaim, Security.Claim claim)
+    public static void ShouldBeTheSameAs(this Claim storedClaim, Execution.Claim claim)
     {
         storedClaim.Name.ShouldEqual(claim.Name);
         storedClaim.Value.ShouldEqual(claim.Value);
         storedClaim.ValueType.ShouldEqual(claim.ValueType);
     }
 
-    public static void ShouldBeTheSameAs(this IEnumerable<Claim> storedClaims, Security.Claims claims)
+    public static void ShouldBeTheSameAs(this IEnumerable<Claim> storedClaims, Execution.Claims claims)
     {
         storedClaims.ShouldContainOnly(claims.Select(_ => _.ToStoreRepresentation()));
     }
@@ -59,14 +59,14 @@ public static class ShouldExtensions
         version.PreReleaseString.ShouldEqual(storedVersion.PreRelease);
     }
 
-    public static void ShouldBeTheSameAs(this Security.Claim claim, Claim storedClaim)
+    public static void ShouldBeTheSameAs(this Execution.Claim claim, Claim storedClaim)
     {
         claim.Name.ShouldEqual(storedClaim.Name);
         claim.Value.ShouldEqual(storedClaim.Value);
         claim.ValueType.ShouldEqual(storedClaim.ValueType);
     }
 
-    public static void ShouldBeTheSameAs(this Security.Claims claims, IEnumerable<Claim> storedClaims)
+    public static void ShouldBeTheSameAs(this Execution.Claims claims, IEnumerable<Claim> storedClaims)
     {
         claims.ShouldContainOnly(storedClaims.Select(_ => _.ToClaim()));
     }

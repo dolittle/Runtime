@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management;
-using Dolittle.Runtime.CLI.Configuration.Files;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Domain.Tenancy;

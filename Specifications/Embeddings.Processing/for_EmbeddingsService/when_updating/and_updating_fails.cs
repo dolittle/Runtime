@@ -42,7 +42,7 @@ public class and_updating_fails : given.all_dependencies
             }));
 
         embedding_processor
-            .Setup(_ => _.Update(key, state, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Update(key, state, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<ProjectionState>.Failed(new System.Exception())));
     };
 

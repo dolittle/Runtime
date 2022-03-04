@@ -13,6 +13,7 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Dolittle.Artifacts.Contracts;
+using Dolittle.Runtime.Execution;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.when_starting_receiving_events_into.given;
@@ -37,7 +38,7 @@ public class all_dependencies : for_EventHorizonConnection.given.all_dependencie
                 {
                     if (i < requests.Length)
                     {
-                        await callback(requests[i], token).ConfigureAwait(false);
+                        await callback(requests[i], execution_context, token).ConfigureAwait(false);
                     }
                     await Task.Delay(10).ConfigureAwait(false);
                     i++;
@@ -54,7 +55,7 @@ public class all_dependencies : for_EventHorizonConnection.given.all_dependencie
             Environment = "env",
             Version = Version.NotSet.ToProtobuf(),
         };
-        execution_context.Claims.AddRange(Security.Claims.Empty.ToProtobuf());
+        execution_context.Claims.AddRange(Claims.Empty.ToProtobuf());
         return new ConsumerRequest
         {
             Event = new EventHorizonEvent

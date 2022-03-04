@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Dolittle.Services.Contracts;
 using Machine.Specifications;
@@ -18,7 +19,6 @@ public class and_the_server_stream_sends_2_pings_and_a_response : given.a_revers
     Establish context = () =>
     {
         execution_context = given.execution_contexts.create();
-        execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
         server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
 
         connect_response = new MyConnectResponse();
@@ -42,7 +42,7 @@ public class and_the_server_stream_sends_2_pings_and_a_response : given.a_revers
             });
     };
 
-    Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
+    Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), execution_context, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_return_true = () => result.ShouldBeTrue();
     It should_respond_with_a_pong_twice = () => client_to_server_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyClientMessage>(_ => _.Pong != default)), Moq.Times.Exactly(2));

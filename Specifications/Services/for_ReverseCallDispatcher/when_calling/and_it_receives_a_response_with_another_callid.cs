@@ -48,7 +48,7 @@ public class and_it_receives_a_response_with_another_callid : given.a_dispatcher
     static Task<MyResponse> response;
     Because of = () =>
     {
-        response = dispatcher.Call(request, CancellationToken.None);
+        response = dispatcher.Call(request, execution_context, CancellationToken.None);
         Thread.Sleep(5);
     };
 

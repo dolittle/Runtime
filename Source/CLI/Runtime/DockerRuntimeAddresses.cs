@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Services.Configuration;
 
 namespace Dolittle.Runtime.CLI.Runtime;
 
@@ -74,5 +75,5 @@ public class DockerRuntimeAddresses : ICanDiscoverRuntimeAddresses
     }
 
     static bool IsManagementPort(Port port)
-        => port.Type == "tcp" && port.PrivatePort == EndpointsConfigurationDefaultProvider.DefaultManagementPort;
+        => port.Type == "tcp" && port.PrivatePort == new EndpointsConfiguration().Management.Port;
 }

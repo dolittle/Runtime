@@ -19,12 +19,12 @@ public class two_claims_with_different_claims
 
     Establish context = () =>
     {
-        var list_one = new List<System.Security.Claims.Claim>
+        var list_one = new List<Claim>
         {
             new("4", "4", "4"),
             new("1", "1", "1")
         };
-        var list_two = new List<System.Security.Claims.Claim>
+        var list_two = new List<Claim>
         {
             new("2", "2", "2"),
             new("3", "3", "3")

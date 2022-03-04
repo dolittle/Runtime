@@ -7,15 +7,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
 
 public class and_there_is_no_filter_validator_for_the_definition_type : given.all_dependencies
 {
-    Establish context = () =>
-    {
-        // type_finder
-        //     .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
-        //     .Returns(Array.Empty<Type>());
-    };
 
     static FilterValidationResult result;
-    Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = filter_validators_with_services(_ => {}).Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
     It should_fail_validation = () => result.Success.ShouldBeFalse();
 }

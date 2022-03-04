@@ -28,20 +28,20 @@ public class and_committing_events_fails : given.all_dependencies_and_a_desired_
             .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
         transition_calculator
-            .Setup(_ => _.TryConverge(current_state, desired_state, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.TryConverge(current_state, desired_state, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
         event_store
-            .Setup(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.CommitAggregateEvents(uncommitted_events, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromException<CommittedAggregateEvents>(exception));
     };
 
     static Try<ProjectionState> result;
 
-    Because of = () => result = embedding_processor.Update(key, desired_state, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = embedding_processor.Update(key, desired_state, execution_context, cancellation_token).GetAwaiter().GetResult();
 
     It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
-    It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryConverge(current_state, desired_state, Moq.It.IsAny<CancellationToken>()));
-    It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>()));
+    It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryConverge(current_state, desired_state, execution_context, Moq.It.IsAny<CancellationToken>()));
+    It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, execution_context, Moq.It.IsAny<CancellationToken>()));
     It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
 }

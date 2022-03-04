@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating;
@@ -16,7 +17,7 @@ public class and_old_and_new_filter_includes_the_same_events_in_different_partit
         add_event_to_event_log(1);
         add_event_to_filtered_stream(1, "partition");
         filter_processor
-            .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), event_processor_id, cancellation_token))
+            .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), event_processor_id, Moq.It.IsAny<ExecutionContext>(), cancellation_token))
             .Returns(Task.FromResult<IFilterResult>(new SuccessfulFiltering(true, "a partition")));
     };
 

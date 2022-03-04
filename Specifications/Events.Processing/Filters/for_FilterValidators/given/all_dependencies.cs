@@ -6,14 +6,20 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
+using Autofac.Core;
+using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Tenancy.Contracts;
 using Machine.Specifications;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -24,6 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given;
 public class all_dependencies
 {
     protected static Type filter_validator_type;
+    protected static TenantId tenant_id;
     protected static ScopeId scope_id;
     protected static StreamId filter_source_stream;
     protected static StreamId filter_target_stream;
@@ -38,11 +45,11 @@ public class all_dependencies
     protected static Mock<IStreamProcessorStateRepository> stream_processor_state_repository;
     protected static Mock<IFilterDefinitions> filter_definitions;
     protected static Mock<ICompareFilterDefinitions> definition_comparer;
-    protected static Func<FilterValidators> filter_validators;
     protected static CancellationToken cancellation_token;
 
     Establish context = () =>
     {
+        tenant_id = "b079237c-487d-4614-b20c-c64e95646bc4";
         var mocks = new MockRepository(MockBehavior.Strict);
 
         filter_validator_type = typeof(all_dependencies);
@@ -72,19 +79,6 @@ public class all_dependencies
 
         stream_processor_state = new StreamProcessorState(10, DateTimeOffset.Now);
 
-        // type_finder = mocks.Create<ITypeFinder>();
-        // type_finder
-        //     .Setup(_ => _.FindMultiple<IFilterDefinition>())
-        //     .Returns(new[] { typeof(FilterDefinition) });
-        // type_finder
-        //     .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
-        //     .Returns(new[] { filter_validator_type });
-
-        // container = mocks.Create<IContainer>();
-        // container
-        //     .Setup(_ => _.Get(filter_validator_type))
-        //     .Returns(filter_validator.Object);
-
         stream_processor_state_repository = mocks.Create<IStreamProcessorStateRepository>();
         stream_processor_state_repository
             .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
@@ -100,27 +94,19 @@ public class all_dependencies
             .Setup(_ => _.DefinitionsAreEqual(filter_definition, filter_definition))
             .Returns(FilterValidationResult.Succeeded());
 
-        var execution_context_manager = mocks.Create<IExecutionContextManager>();
-        execution_context_manager
-            .SetupGet(_ => _.Current)
-            .Returns(new ExecutionContext(
-                Guid.Parse("c46727a1-fe79-4ac5-87d3-b70bd78c850d"),
-                Guid.Parse("776d700a-0b5a-415e-804f-b3fcff38fbef"),
-                new Version(1, 2, 3),
-                "environment",
-                Guid.Parse("e6a3777b-f7f1-4a0b-8944-2766c98f45c3"),
-                Claims.Empty,
-                CultureInfo.InvariantCulture));
-
-        filter_validators = () => new FilterValidators(
-            // type_finder.Object,
-            // container.Object,
-            () => stream_processor_state_repository.Object,
-            () => filter_definitions.Object,
-            execution_context_manager.Object,
-            definition_comparer.Object,
-            Mock.Of<ILogger>());
-
         cancellation_token = CancellationToken.None;
     };
+
+    static protected FilterValidators filter_validators_with_services(Action<ContainerBuilder> callback)
+    {
+        var containerBuilder = new ContainerBuilder();
+        callback(containerBuilder);
+        return new FilterValidators(
+            tenant_id,
+            stream_processor_state_repository.Object,
+            filter_definitions.Object,
+            definition_comparer.Object,
+            new AutofacServiceProvider(containerBuilder.Build()),
+            Mock.Of<ILogger>());
+    }
 }

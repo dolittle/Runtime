@@ -17,7 +17,7 @@ public class and_producer_responds_with_consent : given.all_dependencies
     {
         consent = Guid.Parse("0bb478f4-b9f1-41e3-808a-aee0c74e5938");
         reverse_call_client
-            .Setup(_ => _.Connect(Moq.It.IsAny<ConsumerSubscriptionRequest>(), cancellation_token))
+            .Setup(_ => _.Connect(Moq.It.IsAny<ConsumerSubscriptionRequest>(), execution_context, cancellation_token))
             .Returns(Task.FromResult(true));
         reverse_call_client
             .SetupGet(_ => _.ConnectResponse)
@@ -34,5 +34,6 @@ public class and_producer_responds_with_consent : given.all_dependencies
     It should_return_the_consent = () => result.ConsentId.ShouldEqual(consent);
     It should_call_connect_on_reverse_call_client = () => reverse_call_client.Verify(_ => _.Connect(
         Moq.It.IsAny<ConsumerSubscriptionRequest>(),
+        execution_context, 
         cancellation_token), Moq.Times.Once);
 }

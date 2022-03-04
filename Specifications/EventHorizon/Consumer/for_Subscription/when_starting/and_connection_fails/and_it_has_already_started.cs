@@ -33,10 +33,11 @@ public class and_it_has_already_started : given.all_dependencies
         Task.Delay(100).GetAwaiter().GetResult();
     };
 
-    It should_create_connection_at_least_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(Moq.It.IsAny<MicroserviceAddress>()), Moq.Times.AtLeast(2));
+    It should_create_connection_at_least_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(Moq.It.IsAny<MicroserviceAddress>(), execution_context), Moq.Times.AtLeast(2));
     It should_not_create_stream_processor = () => stream_processor_factory.Verify(_ => _.Create(
         Moq.It.IsAny<ConsentId>(),
         Moq.It.IsAny<SubscriptionId>(),
+        execution_context,
         Moq.It.IsAny<EventsFromEventHorizonFetcher>()), Moq.Times.Never);
 
     It should_connect_at_least_twice = () => event_horizon_connection.Verify(_ => _.Connect(

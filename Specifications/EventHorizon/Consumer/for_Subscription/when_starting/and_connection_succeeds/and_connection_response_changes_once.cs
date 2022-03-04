@@ -58,15 +58,17 @@ public class and_connection_response_changes_once : given.all_dependencies
         Task.Delay(300).GetAwaiter().GetResult();
     };
 
-    It should_create_connection_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address), Moq.Times.Exactly(2));
+    It should_create_connection_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address, execution_context), Moq.Times.Exactly(2));
     It should_create_stream_processor_once_with_first_consent = () => stream_processor_factory.Verify(_ => _.Create(
         first_consent,
         subscription_id,
+        execution_context,
         Moq.It.IsAny<EventsFromEventHorizonFetcher>()), Moq.Times.Once);
 
     It should_create_stream_processor_once_with_second_consent = () => stream_processor_factory.Verify(_ => _.Create(
         second_consent,
         subscription_id,
+        execution_context,
         Moq.It.IsAny<EventsFromEventHorizonFetcher>()), Moq.Times.Once);
 
     It should_connect_twice = () => event_horizon_connection.Verify(_ => _.Connect(

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterProcessor.when_filtering_public_event;
 
@@ -22,12 +23,12 @@ public class and_filtered_successfully : given.a_public_event_filter
         is_included = true;
         partition_id = "partition";
         filter_response = new PartitionedFilterResponse { IsIncluded = is_included, PartitionId = partition_id.Value };
-        dispatcher.Setup(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(filter_response));
+        dispatcher.Setup(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(filter_response));
     };
 
-    Because of = () => result = filter.Filter(a_public_event, "a partition", Guid.NewGuid(), default).GetAwaiter().GetResult();
+    Because of = () => result = filter.Filter(a_public_event, "a partition", Guid.NewGuid(), a_public_event.ExecutionContext, default).GetAwaiter().GetResult();
 
-    It should_call_the_remote_filter = () => dispatcher.Verify(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+    It should_call_the_remote_filter = () => dispatcher.Verify(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_filter_successfully = () => result.Succeeded.ShouldBeTrue();
     It should_not_have_failure_reason = () => result.FailureReason.ShouldBeEmpty();
     It should_not_retry = () => result.Retry.ShouldBeFalse();

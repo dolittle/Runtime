@@ -26,15 +26,16 @@ public class a_projection_delete_response : given.all_dependencies
         dispatcher
             .Setup(_ => _.Call(
                 embedding_request,
+                execution_context,
                 cancellation))
             .Returns(Task.FromResult(embedding_response));
     };
 
     static IProjectionResult result;
 
-    Because of = () => result = embedding.Project(current_state, @event, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = embedding.Project(current_state, @event, execution_context, cancellation).GetAwaiter().GetResult();
 
-    It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);
+    It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_return_a_projection_delete_result = () => result.ShouldBeOfExactType<ProjectionDeleteResult>();
     It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.Create(current_state, @event));

@@ -20,7 +20,7 @@ public class two_claims_with_identical_claims_in_different_order
 
     Establish context = () =>
     {
-        var list = new List<System.Security.Claims.Claim>
+        var list = new List<Claim>
         {
             new("4", "4", "4"),
             new("1", "1", "1"),
