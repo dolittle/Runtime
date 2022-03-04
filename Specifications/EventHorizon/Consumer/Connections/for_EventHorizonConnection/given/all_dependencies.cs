@@ -11,6 +11,7 @@ using ReverseCallClient = Dolittle.Runtime.Services.Clients.IReverseCallClient<
                             Dolittle.Runtime.EventHorizon.Contracts.ConsumerRequest,
                             Dolittle.Runtime.EventHorizon.Contracts.ConsumerResponse>;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.given;
 
@@ -20,9 +21,11 @@ public class all_dependencies
     protected static SubscriptionId subscription;
     protected static CancellationToken cancellation_token;
     protected static EventHorizonConnection connection;
+    protected static ExecutionContext execution_context;
 
     Establish context = () =>
     {
+        execution_context = execution_contexts.create();
         reverse_call_client = new Mock<ReverseCallClient>();
         subscription = new SubscriptionId(
             "aa6403de-6dee-4db8-80a0-366bb9532b3a",
@@ -36,6 +39,7 @@ public class all_dependencies
         cancellation_token = CancellationToken.None;
 
         connection = new EventHorizonConnection(
+            execution_context,
             reverse_call_client.Object,
             Mock.Of<IMetricsCollector>(),
             Mock.Of<ILogger>());

@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using Autofac;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Machine.Specifications;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating;
 
@@ -29,7 +31,7 @@ public class and_definition_has_changed_but_filter_has_not_processed_any_events 
     };
 
     static FilterValidationResult result;
-    Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = filter_validators_with_services(_ => _.RegisterInstance(filter_validator.Object)).Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
     It should_not_fail_validation = () => result.Success.ShouldBeTrue();
 }

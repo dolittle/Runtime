@@ -11,14 +11,15 @@ public class and_it_is_a_new_subscription : given.all_dependencies
     static Task<SubscriptionResponse> result;
     Because of = () =>
     {
-        result = subscriptions.Subscribe(subscription_id);
+        result = subscriptions.Subscribe(subscription_id, execution_context);
         Task.Delay(50).GetAwaiter().GetResult();
     };
 
     It should_return_the_correct_task = () => result.ShouldEqual(connection_response_completion_source.Task);
     It should_create_the_subscription = () => subscription_factory.Verify(_ => _.Create(
         subscription_id,
-        configured_microservice.Address), Moq.Times.Once);
+        configured_microservice.Address,
+        execution_context), Moq.Times.Once);
 
     It should_start_subscription_once = () => subscription.Verify(_ => _.Start(), Moq.Times.Once);
 

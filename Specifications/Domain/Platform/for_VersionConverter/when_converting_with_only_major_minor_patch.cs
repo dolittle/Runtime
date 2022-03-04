@@ -7,7 +7,7 @@ namespace Dolittle.Runtime.Domain.Platform.for_VersionConverter;
 
 public class when_converting_with_only_major_minor_patch : given.a_version_converter
 {
-    static System.Version version;
+    static Version version;
 
     Because of = () => version = version_converter.FromString("1.2.3");
 

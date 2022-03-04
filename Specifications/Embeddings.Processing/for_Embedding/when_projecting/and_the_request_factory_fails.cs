@@ -23,7 +23,7 @@ public class and_the_request_factory_fails : given.all_dependencies
 
     static IProjectionResult result;
 
-    Because of = () => result = embedding.Project(current_state, @event, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = embedding.Project(current_state, @event, execution_context, cancellation).GetAwaiter().GetResult();
 
     It should_have_called_the_request_factory = ()
         => request_factory.Verify(_ => _.Create(current_state, @event));

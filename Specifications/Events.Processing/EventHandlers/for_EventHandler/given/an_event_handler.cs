@@ -19,6 +19,7 @@ public class an_event_handler : all_dependencies
             arguments,
             factory_for_stream_writer,
             logger_factory,
+            execution_context,
             cancellation_token
         );
     };

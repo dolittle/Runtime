@@ -35,7 +35,6 @@ public class all_dependencies
     Establish context = () =>
     {
         cancellation_token_source = new CancellationTokenSource();
-        var events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
         var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
         event_processor_id = Guid.NewGuid();
         scope_id = Guid.NewGuid();
@@ -58,7 +57,8 @@ public class all_dependencies
             event_processor.Object,
             stream_processor_state_repository,
             events_fetcher.Object,
-            events_fetcher_policy,
+            execution_contexts.create(),
+            new EventFetcherPolicies(Mock.Of<ILogger>()),
             event_waiter,
             new TimeToRetryForUnpartitionedStreamProcessor(),
             Mock.Of<ILogger<ScopedStreamProcessor>>());

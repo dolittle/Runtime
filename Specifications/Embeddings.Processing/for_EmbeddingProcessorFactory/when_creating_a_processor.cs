@@ -26,11 +26,7 @@ public class when_starting_two_processors : given.all_dependencies
     };
 
     static IEmbeddingProcessor result;
-    Because of = () => result = factory.Create(tenant, embedding_id, embedding, initial_state);
+    Because of = () => result = factory.Create(embedding_id, embedding, initial_state, execution_context);
 
     It should_create_an_embedding_processor = () => result.ShouldNotBeNull();
-    It should_set_the_correct_tenant = () => execution_context_manager.Verify(_ => _.CurrentFor(tenant, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()), Times.Once);
-    It should_revert_the_execution_context = () => execution_context_manager.Verify(_ => _.CurrentFor(execution_context, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()), Times.Once);
-    It should_get_the_execution_context = () => execution_context_manager.Verify(_ => _.Current, Times.Once);
-    It should_not_do_anything_else_with_execution_context = () => execution_context_manager.VerifyNoOtherCalls();
 }

@@ -7,7 +7,7 @@ namespace Dolittle.Runtime.Domain.Platform.for_VersionConverter;
 
 public class when_converting_pre_release_string : given.a_version_converter
 {
-    static System.Version version;
+    static Version version;
 
     Because of = () => version = version_converter.FromString("1.2.3-alpha1.4");
 

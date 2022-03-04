@@ -6,12 +6,14 @@ using Dolittle.Runtime.Embeddings.Store;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalculator.given;
 
 public class all_dependencies
 {
     protected static EmbeddingId identifier;
+    protected static ExecutionContext execution_context;
     protected static Mock<IEmbedding> embedding;
     protected static Mock<IProjectManyEvents> project_many_events;
     protected static Mock<ICompareStates> state_comparer;
@@ -22,6 +24,7 @@ public class all_dependencies
     Establish context = () =>
     {
         identifier = "b368df07-e5a3-4669-95f1-19e209a7af30";
+        execution_context = execution_contexts.create();
         embedding = new Mock<IEmbedding>(MockBehavior.Strict);
         project_many_events = new Mock<IProjectManyEvents>(MockBehavior.Strict);
         state_comparer = new Mock<ICompareStates>(MockBehavior.Strict);

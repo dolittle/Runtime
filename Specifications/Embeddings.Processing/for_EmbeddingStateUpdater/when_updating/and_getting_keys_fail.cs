@@ -22,7 +22,7 @@ public class and_getting_keys_fail : given.all_dependencies
     };
 
     static Try result;
-    Because of = () => result = state_updater.TryUpdateAll(cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = state_updater.TryUpdateAll(execution_context, cancellation_token).GetAwaiter().GetResult();
 
     It should_fail = () => result.Success.ShouldBeFalse();
     It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);

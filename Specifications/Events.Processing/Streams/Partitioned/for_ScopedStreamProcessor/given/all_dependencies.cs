@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using It = Moq.It;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStreamProcessor.given;
@@ -32,11 +33,12 @@ public class all_dependencies
     protected static Mock<IEventProcessor> event_processor;
     protected static CancellationTokenSource cancellation_token_source;
     protected static Mock<Func<TenantId, CancellationToken, Task<Try>>> action_to_perform_before_reprocessing;
+    protected static ExecutionContext execution_context;
 
     Establish context = () =>
     {
+        execution_context = execution_contexts.create();
         cancellation_token_source = new CancellationTokenSource();
-        var events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
         var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
         event_processor_id = Guid.NewGuid();
         scope_id = Guid.NewGuid();
@@ -53,7 +55,10 @@ public class all_dependencies
             stream_processor_state_repository,
             event_processor.Object,
             events_fetcher.Object,
-            events_fetcher_policy);
+            stream_event => stream_event.Event.ExecutionContext,
+            new EventFetcherPolicies(Mock.Of<ILogger>()));
+        
+        
             
         event_waiter = new StreamEventWatcher(Mock.Of<ILogger>());
         stream_processor = new ScopedStreamProcessor(
@@ -64,8 +69,9 @@ public class all_dependencies
             event_processor.Object,
             stream_processor_state_repository,
             events_fetcher.Object,
-            failing_partitiones,
-            events_fetcher_policy,
+            execution_context,
+            (processor, stream, arg3) => failing_partitiones,
+            new EventFetcherPolicies(Mock.Of<ILogger>()),
             event_waiter,
             new TimeToRetryForPartitionedStreamProcessor(),
             Mock.Of<ILogger<ScopedStreamProcessor>>());

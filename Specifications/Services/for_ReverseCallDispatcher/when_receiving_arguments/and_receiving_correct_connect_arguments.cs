@@ -40,11 +40,4 @@ public class and_receiving_correct_connect_arguments : given.a_dispatcher
 
     It should_return_true = () => result.ShouldBeTrue();
     It should_have_the_correct_arguments = () => dispatcher.Arguments.ShouldEqual(arguments);
-    It should_change_execution_context = () => execution_context_manager
-        .Verify(
-            _ => _.CurrentFor(
-                execution_context,
-                Moq.It.IsAny<string>(),
-                Moq.It.IsAny<int>(),
-                Moq.It.IsAny<string>()), Moq.Times.Once);
 }

@@ -3,12 +3,14 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 using static Moq.It;
 using static Moq.Times;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler;
 
@@ -22,7 +24,8 @@ public class and_it_fails_registering_event_processor : given.an_event_handler
                 event_handler.Scope,
                 event_handler.EventProcessor,
                 IsAny<EventLogStreamDefinition>(),
-                IsAny<Func<IEventProcessor>>(),
+                IsAny<Func<TenantId, IEventProcessor>>(),
+                IsAny<ExecutionContext>(),
                 IsAny<CancellationToken>()
             )).Returns(stream_processor);
 
@@ -32,7 +35,8 @@ public class and_it_fails_registering_event_processor : given.an_event_handler
                     event_handler.Scope,
                     event_handler.EventProcessor,
                     event_handler.FilteredStreamDefinition,
-                    IsAny<Func<IEventProcessor>>(),
+                    IsAny<Func<TenantId, IEventProcessor>>(),
+                    IsAny<ExecutionContext>(),
                     IsAny<CancellationToken>()))
             .Returns(new Exception());
     };
@@ -51,6 +55,7 @@ public class and_it_fails_registering_event_processor : given.an_event_handler
             event_handler.Scope,
             event_handler.EventProcessor,
             IsAny<EventLogStreamDefinition>(),
-            IsAny<Func<IEventProcessor>>(),
+            IsAny<Func<TenantId, IEventProcessor>>(),
+            IsAny<ExecutionContext>(),
             IsAny<CancellationToken>()), Once());
 }

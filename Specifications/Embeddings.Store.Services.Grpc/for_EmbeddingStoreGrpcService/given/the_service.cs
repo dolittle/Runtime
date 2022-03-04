@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store;
 using Grpc.Core;
 using Grpc.Core.Testing;
@@ -36,7 +37,7 @@ public class the_service
             Version.NotSet,
             "some env",
             "f6d7d582-81f1-4f37-acc8-f21324280c9a",
-            Security.Claims.Empty,
+            Claims.Empty,
             CultureInfo.InvariantCulture);
         cancellation_token = CancellationToken.None;
         a_current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "some state", "some key");

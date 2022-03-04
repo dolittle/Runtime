@@ -23,7 +23,7 @@ public class and_the_request_factory_fails : given.all_dependencies
 
     static Try<UncommittedEvents> result;
 
-    Because of = () => result = embedding.TryCompare(current_state, desired_state, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = embedding.TryCompare(current_state, desired_state, execution_context, cancellation).GetAwaiter().GetResult();
 
     It should_have_called_the_request_factory = ()
         => request_factory.Verify(_ => _.TryCreate(current_state, desired_state));

@@ -29,7 +29,7 @@ public class and_event_type_is_included_in_definition : given.all_dependencies
             Moq.Mock.Of<ILogger<TypeFilterWithEventSourcePartition>>());
     };
 
-    Because of = () => result = filter.Filter(given.committed_events.single_with_artifact(partition.Value, artifact), "some partition", Guid.NewGuid(), default).GetAwaiter().GetResult();
+    Because of = () => result = filter.Filter(given.committed_events.single_with_artifact(partition.Value, artifact), "some partition", Guid.NewGuid(), execution_contexts.create(), default).GetAwaiter().GetResult();
 
     It should_have_the_correct_partition = () => result.Partition.ShouldEqual(partition);
     It should_be_successful = () => result.Succeeded.ShouldBeTrue();

@@ -38,7 +38,7 @@ public class and_everything_works : given.all_dependencies
             }));
 
         embedding_processor
-            .Setup(_ => _.Delete(key, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Delete(key, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try.Succeeded()));
     };
 
@@ -49,7 +49,7 @@ public class and_everything_works : given.all_dependencies
         result = embedding_service.Delete(request, call_context).GetAwaiter().GetResult();
     };
 
-    It should_delete_once = () => embedding_processor.Verify(_ => _.Delete(key, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+    It should_delete_once = () => embedding_processor.Verify(_ => _.Delete(key, execution_context, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_not_do_anything_else_with_processor = () => embedding_processor.VerifyNoOtherCalls();
     It should_not_have_a_failure = () => result.Failure.ShouldBeNull();
 }

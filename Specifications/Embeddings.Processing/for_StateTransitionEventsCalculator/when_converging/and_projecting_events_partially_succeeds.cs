@@ -26,22 +26,22 @@ public class and_projecting_events_partially_succeeds : given.all_dependencies
             .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
             .Returns(Try<bool>.Succeeded(false));
         embedding
-            .Setup(_ => _.TryCompare(current_state, desired_state, cancellation))
+            .Setup(_ => _.TryCompare(current_state, desired_state, execution_context, cancellation))
             .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(events)));
         project_many_events
-            .Setup(_ => _.TryProject(current_state, events, cancellation))
+            .Setup(_ => _.TryProject(current_state, events, execution_context, cancellation))
             .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.PartialSuccess(
                 new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "new state", ""),
                 new Exception())));
     };
 
     static Try<UncommittedAggregateEvents> result;
-    Because of = () => result = calculator.TryConverge(current_state, desired_state, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = calculator.TryConverge(current_state, desired_state, execution_context, cancellation).GetAwaiter().GetResult();
 
     It should_return_a_failure = () => result.Success.ShouldBeFalse();
     It should_fail_because_detecting_loop_failed = () => result.Exception.ShouldBeOfExactType<CouldNotProjectAllEvents>();
-    It should_only_compare_once = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, cancellation), Moq.Times.Once);
+    It should_only_compare_once = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, execution_context, cancellation), Moq.Times.Once);
     It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();
-    It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, cancellation), Moq.Times.Once);
+    It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, execution_context, cancellation), Moq.Times.Once);
     It should_not_project_anything_else = () => project_many_events.VerifyNoOtherCalls();
 }

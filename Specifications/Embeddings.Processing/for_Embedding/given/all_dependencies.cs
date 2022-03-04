@@ -8,6 +8,7 @@ using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.given;
 
@@ -18,10 +19,12 @@ public class all_dependencies
     protected static EmbeddingId embedding_id;
     protected static CancellationToken cancellation;
     protected static Mock<IEmbeddingRequestFactory> request_factory;
+    protected static ExecutionContext execution_context;
     protected static EmbeddingRequest embedding_request;
 
     Establish context = () =>
     {
+        execution_context = execution_contexts.create();
         cancellation = CancellationToken.None;
         dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>(MockBehavior.Strict);
         request_factory = new Mock<IEmbeddingRequestFactory>(MockBehavior.Strict);

@@ -36,16 +36,16 @@ public class and_it_fails_on_first_event : given.all_dependencies
         result_after_one = new ProjectionFailedResult(exception);
 
         embedding
-            .Setup(_ => _.Project(current_state, event_one, cancellation_token))
+            .Setup(_ => _.Project(current_state, event_one, execution_context, cancellation_token))
             .Returns(Task.FromResult<IProjectionResult>(result_after_one));
     };
 
     static Partial<EmbeddingCurrentState> result;
-    Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, execution_context, cancellation_token).GetAwaiter().GetResult();
 
     It should_fail = () => result.Success.ShouldBeFalse();
     It should_not_be_a_partial_success = () => result.IsPartialResult.ShouldBeFalse();
     It should_fail_with_the_correct_error = () => result.Exception.ShouldEqual(exception);
-    It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, event_one, cancellation_token));
+    It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, event_one, execution_context, cancellation_token));
     It should_only_project_the_first_event = () => embedding.VerifyNoOtherCalls();
 }

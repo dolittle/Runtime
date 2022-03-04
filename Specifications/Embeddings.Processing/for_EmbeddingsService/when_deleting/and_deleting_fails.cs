@@ -38,7 +38,7 @@ public class and_deleting_fails : given.all_dependencies
             }));
 
         embedding_processor
-            .Setup(_ => _.Delete(key, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Delete(key, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try.Failed(new System.Exception())));
     };
 

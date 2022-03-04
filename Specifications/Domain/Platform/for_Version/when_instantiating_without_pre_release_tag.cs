@@ -7,7 +7,7 @@ namespace Dolittle.Runtime.Domain.Platform.for_Version;
 
 public class when_instantiating_without_pre_release_tag
 {
-    static System.Version result;
-    Because of = () => result = new System.Version(1, 2, 3, 4);
+    static Version result;
+    Because of = () => result = new Version(1, 2, 3, 4);
     It should_not_be_considered_a_pre_release = () => result.IsPreRelease.ShouldBeFalse();
 }
