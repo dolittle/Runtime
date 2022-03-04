@@ -21,7 +21,7 @@ public class ClientFactory : ICanCreateClients
     {
         var constructor = typeof(T).GetConstructor(new[] {typeof(ChannelBase)});
         ThrowIfMissingExpectedConstructorClientType(typeof(T), constructor);
-        return constructor!.Invoke(new object[] {GrpcChannel.ForAddress($"http://{address.Host}{address.Port}")}) as T;
+        return constructor!.Invoke(new object[] {GrpcChannel.ForAddress($"http://{address.Host}:{address.Port}")}) as T;
     }
 
     static void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
