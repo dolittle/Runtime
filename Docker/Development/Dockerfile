@@ -16,7 +16,10 @@ RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 ARG CONFIGURATION=Release
+ARG TARGETARCH
 ARG VERSION
+
+ENV LOGGING__CONSOLE__FormatterName=""
 
 RUN echo Configuration = ${CONFIGURATION}
 RUN echo Version = ${VERSION}
@@ -45,7 +48,7 @@ RUN ln -s /bin/true /bin/systemctl
 
 # Install MongoDB
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - \
-    && echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list \
+    && echo "deb [ arch=$TARGETARCH ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         mongodb-org-server \
@@ -62,7 +65,7 @@ RUN mkdir -p /data/db /data/configdb \
 VOLUME /data/db /data/configdb
 
 # Add Tini to get a real init process
-ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini /usr/bin/tini
+ADD "https://github.com/krallin/tini/releases/download/v0.19.0/tini-$TARGETARCH" /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 
 # Create entrypoint that runs both MongoDB and Runtime
