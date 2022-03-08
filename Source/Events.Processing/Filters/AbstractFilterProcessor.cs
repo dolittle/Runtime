@@ -62,9 +62,7 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
         _logger.FilteringEvent(Identifier, Scope, @event.Type.Id, partitionId);
         var result = await Filter(@event, partitionId, Identifier, executionContext, cancellationToken).ConfigureAwait(false);
 
-        await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
-
-        return result;
+        return await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -73,27 +71,33 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
         _logger.FilteringEventAgain(Identifier, Scope, @event.Type.Id, partitionId, retryCount, failureReason);
         var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, executionContext, cancellationToken).ConfigureAwait(false);
 
-        await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
-
-        return result;
+        return await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
     }
 
-    Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
+    async Task<IProcessingResult> HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
     {
         _logger.HandleFilterResult(Identifier, Scope, @event.Type.Id, partitionId);
 
         if (!result.Succeeded)
         {
             _logger.FailedToFilterEvent(Identifier, Scope, @event.Type.Id);
-            return Task.CompletedTask;
-        }
-        
-        if (result.Succeeded && result.IsIncluded)
-        {
-            _logger.FilteredEventIsIncluded(Identifier, Scope, @event.Type.Id, partitionId, Definition.TargetStream);
-            return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
+            return result;
         }
 
-        return Task.CompletedTask;
+        if (!result.IsIncluded)
+        {
+            return result;
+        }
+
+        _logger.FilteredEventIsIncluded(Identifier, Scope, @event.Type.Id, partitionId, Definition.TargetStream);
+        try
+        {
+            await _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken).ConfigureAwait(false);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return new FailedFiltering($"Failed to write filtered event to stream {ex}", true, TimeSpan.FromSeconds(10));
+        }
     }
 }
