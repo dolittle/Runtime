@@ -81,13 +81,18 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
     {
         _logger.HandleFilterResult(Identifier, Scope, @event.Type.Id, partitionId);
+
+        if (!result.Succeeded)
+        {
+            _logger.FailedToFilterEvent(Identifier, Scope, @event.Type.Id);
+            return Task.CompletedTask;
+        }
+        
         if (result.Succeeded && result.IsIncluded)
         {
             _logger.FilteredEventIsIncluded(Identifier, Scope, @event.Type.Id, partitionId, Definition.TargetStream);
             return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
         }
-        
-        // TODO: Shouldn't we be throwing here if not successful!?
 
         return Task.CompletedTask;
     }
