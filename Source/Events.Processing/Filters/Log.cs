@@ -28,6 +28,9 @@ static partial class Log
 
     [LoggerMessage(0, LogLevel.Debug, "Filter: {Filter} in scope: {Scope} is writing event type: {EventType} to partition: {Partition} in stream: {Stream}")]
     internal static partial void FilteredEventIsIncluded(this ILogger logger, EventProcessorId filter, ScopeId scope, ArtifactId eventType, PartitionId partition, StreamId stream);
+    
+    [LoggerMessage(0, LogLevel.Warning, "Filter: {Filter} in scope: {Scope} failed filtering event type: {EventType}")]
+    internal static partial void FailedToFilterEvent(this ILogger logger, EventProcessorId filter, ScopeId scope, ArtifactId eventType);
 
     [LoggerMessage(0, LogLevel.Trace, "Finding validator for filter: {Filter}")]
     internal static partial void FindingFilterValidator(this ILogger logger, EventProcessorId filter);
