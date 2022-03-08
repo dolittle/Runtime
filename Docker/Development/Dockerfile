@@ -1,6 +1,5 @@
 # DotNet Build
 FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dotnet-build
-ARG CONFIGURATION=Release
 ARG VERSION
 
 COPY default.props /app/
@@ -11,20 +10,13 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
-ARG CONFIGURATION=Release
 ARG TARGETARCH
-ARG VERSION
 
 ENV LOGGING__CONSOLE__FormatterName=""
-
-RUN echo Configuration = ${CONFIGURATION}
-RUN echo Version = ${VERSION}
-
-RUN apt-get update && apt-get install -y libc-dev
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
@@ -33,8 +25,8 @@ COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
 # Install MongoDB dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        wget \
-        gnupg \
+    wget \
+    gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Hack to get MongoDB to install even without systemctl
@@ -51,8 +43,8 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
     && echo "deb [ arch=$TARGETARCH ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        mongodb-org-server \
-        mongodb-org-shell \
+    mongodb-org-server \
+    mongodb-org-shell \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup MongoDB as single-node replicaset
@@ -72,7 +64,7 @@ RUN chmod +x /usr/bin/tini
 COPY Docker/Development/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
-# Expose all the ports that are usefull
+# Expose the ports
 EXPOSE 9700 50052 50053 51052 27017
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/bin/docker-entrypoint.sh"]

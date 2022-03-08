@@ -46,6 +46,7 @@ jobs:
           file: ./Docker/Production/Dockerfile
           build-args: |
             VERSION=0.0.0
+          platforms: linux/amd64,linux/arm64
 
   build-dev-docker-image:
     name: Build Development Docker Image
@@ -69,3 +70,4 @@ jobs:
           file: ./Docker/Development/Dockerfile
           build-args: |
             VERSION=0.0.0
+          platforms: linux/amd64,linux/arm64
