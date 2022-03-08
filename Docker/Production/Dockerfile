@@ -1,5 +1,6 @@
 # DotNet Build
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS dotnet-build
+SHELL ["/bin/bash", "-c"]
 ARG VERSION
 ARG TARGETARCH
 
@@ -15,6 +16,7 @@ RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linu
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
+SHELL ["/bin/bash", "-c"]
 
 ENV LOGGING__CONSOLE__FormatterName=""
 
