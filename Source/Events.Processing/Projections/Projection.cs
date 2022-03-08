@@ -76,7 +76,7 @@ public class Projection : IProjection
         {
             { Failure: null, ResponseCase: ProjectionResponse.ResponseOneofCase.Replace } => new ProjectionReplaceResult(response.Replace.State),
             { Failure: null, ResponseCase: ProjectionResponse.ResponseOneofCase.Delete } => new ProjectionDeleteResult(),
-            _ => new ProjectionFailedResult(response.Failure.Reason),
+            _ => new ProjectionFailedResult(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan() )
         };
     }
 }
