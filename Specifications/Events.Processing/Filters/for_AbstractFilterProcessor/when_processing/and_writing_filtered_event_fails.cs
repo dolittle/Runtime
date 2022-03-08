@@ -20,16 +20,16 @@ public class and_writing_filtered_event_fails : given.all_dependencies
 
     Establish context = () =>
     {
-        ReturnsExtensions.ThrowsAsync(events_to_streams_writer
-                .Setup(_ => _.Write(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>())), new Exception("some error"));
+        events_to_streams_writer
+            .Setup(_ => _.Write(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>())).ThrowsAsync(new Exception("some error"));
         partition = "   weird partition   ";
-        ReturnsExtensions.ReturnsAsync(filter_processor
-                .Setup(_ => _.Filter(
-                    Moq.It.IsAny<CommittedEvent>(),
-                    Moq.It.IsAny<PartitionId>(),
-                    Moq.It.IsAny<EventProcessorId>(),
-                    Moq.It.IsAny<ExecutionContext>(),
-                    Moq.It.IsAny<CancellationToken>())), new SuccessfulFiltering(true));
+        filter_processor
+            .Setup(_ => _.Filter(
+                Moq.It.IsAny<CommittedEvent>(),
+                Moq.It.IsAny<PartitionId>(),
+                Moq.It.IsAny<EventProcessorId>(),
+                Moq.It.IsAny<ExecutionContext>(),
+                Moq.It.IsAny<CancellationToken>())).ReturnsAsync(new SuccessfulFiltering(true));
     };
 
     Because of = () => result = filter_processor.Object.Process(committed_event, partition, committed_event.ExecutionContext, CancellationToken.None).GetAwaiter().GetResult();
