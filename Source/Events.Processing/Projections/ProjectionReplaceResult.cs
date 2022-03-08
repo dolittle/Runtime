@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// <summary>
 /// Represents a the result of a projection operation that resulted in a replace.
 /// </summary>
-public class ProjectionReplaceResult : IProjectionResult
+public class ProjectionReplaceResult : SuccessfulProjectionResult
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectionReplaceResult"/> class.

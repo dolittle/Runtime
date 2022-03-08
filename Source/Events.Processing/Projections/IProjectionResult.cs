@@ -6,6 +6,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// <summary>
 /// Defines the result of a projection operation.
 /// </summary>
-public interface IProjectionResult
+public interface IProjectionResult : IProcessingResult
 {
 }

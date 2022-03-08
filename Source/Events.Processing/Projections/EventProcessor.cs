@@ -115,28 +115,18 @@ public class EventProcessor : IEventProcessor
     }
 
     async Task<IProcessingResult> HandleResult(ProjectionKey key, IProjectionResult result, CancellationToken token)
-    {
-        if (result is ProjectionReplaceResult replace)
+        => result switch
         {
-            return await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, token).ConfigureAwait(false) switch
+            ProjectionReplaceResult replace => await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, token).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to replace state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
-            };
-        }
-        else if (result is ProjectionDeleteResult)
-        {
-            return await _projectionPersister.TryRemove(_projectionDefinition, key, token).ConfigureAwait(false) switch
+            },
+            ProjectionDeleteResult => await _projectionPersister.TryRemove(_projectionDefinition, key, token).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to remove state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
-            };
-        }
-        else if (result is ProjectionFailedResult failed)
-        {
-            return new FailedProcessing(failed.Exception.Message);
-        }
-
-        return new FailedProcessing($"Unknown projection result {result.GetType().Name}");
-    }
+            },
+            _ => result
+        };
 }
