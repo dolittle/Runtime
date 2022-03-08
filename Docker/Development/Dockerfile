@@ -1,6 +1,7 @@
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dotnet-build
 ARG VERSION
+ARG TARGETARCH
 
 COPY default.props /app/
 COPY versions.props /app/
@@ -10,7 +11,7 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c "Release" -p:Version=${VERSION} -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-$TARGETARCH" -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
