@@ -63,6 +63,7 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
             return (dispatcher, connectArguments);
         }
         Log.ReceivedInvalidConnectionArguments(_logger);
+        await dispatcher.Reject(protocol.CreateFailedConnectResponse(validationResult.FailureReason), cancellationToken).ConfigureAwait(false);
         return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
 
     }

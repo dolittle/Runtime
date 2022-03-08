@@ -24,6 +24,7 @@ public class ProjectionsProtocol : IProjectionsProtocol
     /// Initializes a new instance of the <see cref="ProjectionsProtocol"/> class.
     /// </summary>
     /// <param name="converter">The converter to use to convert projection definition fields.</param>
+    /// <param name="occurredFormatValidator">The <see cref="IValidateOccurredFormat"/>.</param>
     public ProjectionsProtocol(IConvertProjectionDefinitions converter, IValidateOccurredFormat occurredFormatValidator)
     {
         _converter = converter;
