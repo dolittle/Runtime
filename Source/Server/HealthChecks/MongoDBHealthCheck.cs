@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -19,10 +19,10 @@ using EventStoreConnection = Dolittle.Runtime.Events.Store.MongoDB.IDatabaseConn
 using ProjectionsConnection = Dolittle.Runtime.Projections.Store.MongoDB.IDatabaseConnection;
 using EmbeddingsConnection = Dolittle.Runtime.Embeddings.Store.MongoDB.IDatabaseConnection;
 
-namespace Server.HealthChecks;
+namespace Dolittle.Runtime.Server.HealthChecks;
 
 [Singleton]
-public class HealthCheck : IHealthCheck
+public class MongoDBHealthCheck : IHealthCheck
 {
     readonly IPerformActionsForAllTenants _forAllTenants;
     readonly ITenants _tenants;
@@ -31,7 +31,7 @@ public class HealthCheck : IHealthCheck
     readonly Func<TenantId, EmbeddingsConnection> _embeddingsConnectionForTenant;
     readonly Func<TenantId, IKnowTheConnectionString> _readModelsConnectionStringForTenant;
 
-    public HealthCheck(
+    public MongoDBHealthCheck(
         IPerformActionsForAllTenants forAllTenants,
         ITenants tenants,
         Func<TenantId, EventStoreConnection> eventStoreConnectionForTenant,
@@ -59,8 +59,8 @@ public class HealthCheck : IHealthCheck
         return HealthCheckResult.Unhealthy(string.Join('\n', errors.Select(tenantAndErrors =>
         {
             var (tenant, errors) = tenantAndErrors;
-            return string.Join('\n', errors.Select(error => $"For tenant {tenant} {error}"));
-        })));
+            return $"\n{string.Join('\n', errors.Select(error => $"For tenant {tenant} {error}"))}";
+        })), data: new ReadOnlyDictionary<string, object>(errors.ToDictionary(_ => _.Key.Value.ToString(), _ => (object)_.Value)));
     }
 
     static void AddError(ConcurrentDictionary<TenantId, List<string>> errors, TenantId tenantId, string error)
@@ -100,8 +100,8 @@ public class HealthCheck : IHealthCheck
                 cancellationToken),
             CheckReadModelsConnection(errors, tenantId, cancellationToken)
         );
-    
-    async Task CheckConnectionFor<TConnection>(
+
+    static async Task CheckConnectionFor<TConnection>(
         ConcurrentDictionary<TenantId, List<string>> errors,
         string storeName,
         TenantId tenantId,
@@ -115,16 +115,16 @@ public class HealthCheck : IHealthCheck
             var database = getDatabase(connection);
             try
             {
-                await database.RunCommandAsync((Command<BsonDocument>) "{ping:1}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                await PingDatabase(database, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception)
             {
-                AddError(errors, tenantId, $"failed to establish connection to event store on address {database.Client.Settings.Server}");
+                AddError(errors, tenantId, $"failed to establish connection to {storeName} to database {database.DatabaseNamespace} on address {database.Client.Settings.Server}");
             }
         }
         catch (Exception)
         {
-            AddError(errors, tenantId, $"failed to get {storeName} connection. Maybe {storeName} resource is not configured for tenant or the configuration is wrongly formatted");
+            AddError(errors, tenantId, $"failed to get {storeName} connection configuration. Maybe {storeName} resource is not configured for tenant or the configuration is wrongly formatted");
         }
     }
     async Task CheckReadModelsConnection(
@@ -140,16 +140,23 @@ public class HealthCheck : IHealthCheck
                 var clientSettings = MongoClientSettings.FromUrl(connectionString);
                 var client = new MongoClient(clientSettings.Freeze());
                 var database = client.GetDatabase(connectionString.DatabaseName);
-                await database.RunCommandAsync((Command<BsonDocument>) "{ping:1}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                await PingDatabase(database, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception)
             {
-                AddError(errors, tenantId, $"failed to establish connection to event store on address {connectionString}");
+                AddError(errors, tenantId, $"failed to establish connection to read models with connection string {connectionString}");
             }
         }
         catch (Exception)
         {
-            AddError(errors, tenantId, "failed to get read models connection string. Maybe read models resource is not configured for tenant or the configuration is wrongly formatted");
+            AddError(errors, tenantId, "failed to get read models connection configuration. Maybe read models resource is not configured for tenant or the configuration is wrongly formatted");
         }
+    }
+
+    static async Task PingDatabase(IMongoDatabase database, CancellationToken cancellationToken)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(TimeSpan.FromSeconds(2));
+        await database.RunCommandAsync((Command<BsonDocument>) "{ping:1}", cancellationToken: cts.Token).ConfigureAwait(false);
     }
 }

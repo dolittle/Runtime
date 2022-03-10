@@ -4,6 +4,7 @@
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Metrics.Hosting;
+using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,7 @@ var host = Host.CreateDefaultBuilder(args)
         configuration.AddLegacyDolittleFiles();
     })
     .AddMetrics()
+    .AddWebHost()
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)
     .AddGrpcHost(EndpointVisibility.Management)

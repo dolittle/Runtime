@@ -62,6 +62,11 @@ public class ConfigurationParser : IParseConfigurationObjects
         }
 
         var children = section.GetChildren().ToList();
+        if (!children.Any())
+        {
+            stream.Write("{}");
+            return;
+        }
 
         var isArray = children.Select(_ => _.Key).All(_ => int.TryParse(_, NumberStyles.None, CultureInfo.InvariantCulture, out var _));
 
@@ -74,15 +79,18 @@ public class ConfigurationParser : IParseConfigurationObjects
         {
             stream.Write('{');
         }
-
-        for (var i = 0; i < children.Count; i++)
+        var first = true;
+        foreach (var child in children)
         {
-            if (i > 0)
+            if (!first)
             {
                 stream.Write(',');
             }
 
-            var child = children[i];
+            if (child.Value == default && !child.GetChildren().Any())
+            {
+                continue;
+            }
 
             if (!isArray)
             {
@@ -93,6 +101,7 @@ public class ConfigurationParser : IParseConfigurationObjects
             }
             
             WriteSectionToStream(child, stream);
+            first = false;
         }
 
         if (isArray)

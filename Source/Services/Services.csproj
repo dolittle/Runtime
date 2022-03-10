@@ -20,6 +20,8 @@
         <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
         <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
         <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="$(GrpcVersion)" />
+        <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="$(GrpcVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+        
     </ItemGroup>
 </Project>

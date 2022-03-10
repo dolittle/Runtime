@@ -12,8 +12,8 @@
         "metrics": {
             "port": 9700
         },
-        "http": {
-            "port": 50001
+        "web": {
+            "port": 8001
         }
     },
     "platform": {
