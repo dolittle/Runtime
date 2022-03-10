@@ -25,8 +25,10 @@ public static class HostBuilderExtensions
             {
                 services.AddKestrelConfigurationFor(visibility);
                 services.AddGrpc();
-                services.AddGrpcHealthChecks()
-                    .AddCheck($"{Enum.GetName(typeof(EndpointVisibility), visibility)}HealthCheck", () => HealthCheckResult.Healthy());
+                // TODO: It seems like these checks use the internal IHealthChecks - so they call themselves somehow.
+                // TODO: That is probably not how we want it to happen.
+                //services.AddGrpcHealthChecks()
+                //  .AddCheck($"{Enum.GetName(typeof(EndpointVisibility), visibility)}HealthCheck", () => HealthCheckResult.Healthy());
                 services.AddGrpcReflection();
             });
 
