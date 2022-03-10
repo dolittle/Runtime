@@ -34,8 +34,7 @@ public static class HostBuilderExtensions
                 {
                     services.AddKestrelConfiguration();
                     services.AddControllers();
-                    services.AddHealthChecks()
-                        .AddCheck<MongoDBHealthCheck>("RuntimeMongoDBHealthCheck");
+                    services.AddHealthChecks();
                     services.AddRouting();
                 });
                 webHost.Configure(app =>
