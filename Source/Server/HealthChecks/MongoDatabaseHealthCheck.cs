@@ -17,6 +17,8 @@ namespace Dolittle.Runtime.Server.HealthChecks;
 /// </summary>
 public abstract class MongoDatabaseHealthCheck : ForAllTenantsHealthCheck
 {
+    const uint MongoDBConnectionTimeoutSeconds = 2;
+    
     /// <summary>
     /// Initializes a new instance of the <see cref="MongoDatabaseHealthCheck"/> class.
     /// </summary>
@@ -58,7 +60,7 @@ public abstract class MongoDatabaseHealthCheck : ForAllTenantsHealthCheck
     static async Task PingDatabase(IMongoDatabase database, CancellationToken cancellationToken)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(TimeSpan.FromSeconds(2));
-        await database.RunCommandAsync((Command<BsonDocument>) "{ping: 1}", cancellationToken: cts.Token).ConfigureAwait(false);
+        cts.CancelAfter(TimeSpan.FromSeconds(MongoDBConnectionTimeoutSeconds));
+        await database.RunCommandAsync<BsonDocument>(new BsonDocument("ping", 1), cancellationToken: cts.Token).ConfigureAwait(false);
     }
 }
