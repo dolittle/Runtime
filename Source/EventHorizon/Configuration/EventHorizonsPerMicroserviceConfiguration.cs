@@ -8,7 +8,7 @@ using Dolittle.Runtime.Configuration;
 namespace Dolittle.Runtime.EventHorizon.Configuration;
 
 /// <summary>
-/// Represents the consent for an event horizon.
+/// Represents the event horizons configuration for a tenant.
 /// </summary>
 [TenantConfiguration("eventHorizons")]
 public class EventHorizonsPerMicroserviceConfiguration : Dictionary<Guid, EventHorizonConfiguration>

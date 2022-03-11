@@ -62,7 +62,7 @@ public class ProjectionKeys : IProjectionKeys
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get projection key for event occurred key selector type with occurred format {OccurredFormat}", occurredFormat);
+            Log.FailedToGetProjectionKeyFromOccurredKeySelector(_logger, ex, occurredFormat);
             key = null;
             return false;
         }

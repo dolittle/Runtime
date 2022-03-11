@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
@@ -7,15 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Artifacts/Artifacts.csproj"/>
-        <ProjectReference Include="../Execution/Execution.csproj"/>
-        <ProjectReference Include="../Protobuf/Protobuf.csproj"/>
-        <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
-        <ProjectReference Include="../Services/Services.csproj"/>
-        <ProjectReference Include="../Tenancy/Tenancy.csproj"/>
+        <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)"/>
+        <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
     </ItemGroup>
 </Project>
