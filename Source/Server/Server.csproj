@@ -3,6 +3,7 @@
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Server</RootNamespace>
         <OutputType>Exe</OutputType>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
@@ -15,7 +16,7 @@
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
     </ItemGroup>
 
 </Project>
