@@ -7,6 +7,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Projections.Store.Definition;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -36,6 +37,9 @@ static partial class Log
     
     [LoggerMessage(0, LogLevel.Warning, "Failed to register stream processor for projection {Projection} in scope {Scope} is already registered")]
     internal static partial void FailedToRegisterProjectionStreamProcessor(ILogger logger, ScopeId scope, ProjectionId projection, Exception exception);
+    
+    [LoggerMessage(0, LogLevel.Warning, "Failed to get projection key for event occurred key selector type with occurred format {OccurredFormat}")]
+    internal static partial void FailedToGetProjectionKeyFromOccurredKeySelector(ILogger logger, Exception exception, OccurredFormat occurredFormat);
     
     [LoggerMessage(0, LogLevel.Information, "Resetting projection {Projection} in scope {Scope} for tenant {Tenant} because: {Reason}" )]
     internal static partial void ResettingProjection(ILogger logger, ScopeId scope, ProjectionId projection, TenantId tenant, FailedProjectionDefinitionComparisonReason reason);

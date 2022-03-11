@@ -14,8 +14,8 @@ namespace Dolittle.Runtime.Configuration.Legacy;
 /// </summary>
 public class LegacyConfigurationProvider : ConfigurationProvider
 {
-    static string _delimiter = ConfigurationPath.KeyDelimiter;
-    static string _dolittleConfigSectionRoot = $"dolittle{_delimiter}runtime";
+    static readonly string _delimiter = ConfigurationPath.KeyDelimiter;
+    static readonly string _dolittleConfigSectionRoot = $"dolittle{_delimiter}runtime";
 
     readonly IFileProvider _fileProvider;
 

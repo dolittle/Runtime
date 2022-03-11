@@ -15,9 +15,6 @@
     <ItemGroup>
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
-        <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
-        <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
-        <ProjectReference Include="../Types/Types.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
         <ProjectReference Include="../Aggregates.Management/Aggregates.Management.csproj" />
         <ProjectReference Include="../Events.Management/Events.Management.csproj" />

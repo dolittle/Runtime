@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../specs.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Metrics.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../specs.props"></Import>
-
   <ItemGroup>
     <ProjectReference Include="../../Source/Metrics/Metrics.csproj" />
-    <ProjectReference Include="../../Source/Types.Testing/Types.Testing.csproj" />
   </ItemGroup>
 
 </Project>

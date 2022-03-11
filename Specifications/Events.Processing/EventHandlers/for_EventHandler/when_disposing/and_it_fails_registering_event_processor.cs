@@ -19,6 +19,7 @@ public class and_it_fails_registering_event_processor : given.an_event_handler
     static StreamProcessor stream_processor;
     Establish context = () =>
     {
+        stream_processor = null;
         stream_processors.Setup(_ => _
             .TryCreateAndRegister(
                 event_handler.Scope,
