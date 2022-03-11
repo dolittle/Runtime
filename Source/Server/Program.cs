@@ -18,11 +18,11 @@ var host = Host.CreateDefaultBuilder(args)
         configuration.AddLegacyDolittleFiles();
     })
     .AddMetrics()
-    .AddWebHost()
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)
     .AddGrpcHost(EndpointVisibility.Management)
     .AddMetricsHost()
+    .AddWebHost()
     .Build();
 
 host.Run();

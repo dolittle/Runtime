@@ -25,10 +25,20 @@ public static class HostBuilderExtensions
                     services.AddControllers();
                     services.AddHealthChecks();
                     services.AddRouting();
+                    services.AddEndpointsApiExplorer();
+                    services.AddSwaggerGen(options =>
+                    {
+                        // TODO: Fix JSON serializer so that Web APIs don't need copies of types
+                        options.SchemaGeneratorOptions.SchemaIdSelector = _ => _.FullName;
+                    });
                 });
                 webHost.Configure(app =>
                 {
                     app.UseHealthChecks("/healthz");
+                    
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
+                   
                     app.UseRouting();
                     app.UseEndpoints(endpoints =>
                     {

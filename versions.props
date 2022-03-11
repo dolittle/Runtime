@@ -23,6 +23,7 @@
         <ProtobufVersion>3.18.1</ProtobufVersion>
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>5.0.2</PrometheusVersion>
+        <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
         <SystemLinqAsyncVersion>5.1.0</SystemLinqAsyncVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>

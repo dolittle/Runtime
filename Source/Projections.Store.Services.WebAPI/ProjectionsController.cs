@@ -11,11 +11,11 @@ namespace Dolittle.Runtime.Projections.Store.Services.WebAPI;
 
 [Route("api/projections")]
 [ApiController]
-public class EventStoreController : ControllerBase
+public class ProjectionsController : ControllerBase
 {
     readonly IProjectionsService _projectionsService;
 
-    public EventStoreController(IProjectionsService projectionsService)
+    public ProjectionsController(IProjectionsService projectionsService)
     {
         _projectionsService = projectionsService;
     }
