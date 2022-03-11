@@ -16,28 +16,29 @@ namespace Dolittle.Runtime.Services.Hosting;
 public static class HostBuilderExtensions
 {
     public static IHostBuilder AddGrpcHost(this IHostBuilder builder, EndpointVisibility visibility)
-        => builder.AddScopedHost(_ => _.ConfigureWebHost(grpcHost =>
-        {
-            grpcHost.UseKestrel();
-
-            grpcHost.ConfigureServices(services =>
+        => builder
+            .AddGrpcEndpointHealthCheck(visibility)
+            .AddScopedHost(_ => _.ConfigureWebHost(grpcHost =>
             {
-                services.AddKestrelConfigurationFor(visibility);
-                services.AddGrpc();
-                services.AddGrpcReflection();
-            });
+                grpcHost.UseKestrel();
 
-            grpcHost.Configure(app =>
-            {
-                app.UseRouting();
-
-                app.UseEndpoints(endpoints =>
+                grpcHost.ConfigureServices(services =>
                 {
-                    endpoints.MapDiscoveredGrpcServicesOf(visibility); // TODO: Make this a little nicer with some logs to show the endpoints
-                    endpoints.MapGrpcReflectionService();
-                    endpoints.MapGrpcService<HealthService>();
+                    services.AddKestrelConfigurationFor(visibility);
+                    services.AddGrpc();
+                    services.AddGrpcReflection();
                 });
-            });
-        }));
 
+                grpcHost.Configure(app =>
+                {
+                    app.UseRouting();
+
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapDiscoveredGrpcServicesOf(visibility); // TODO: Make this a little nicer with some logs to show the endpoints
+                        endpoints.MapGrpcReflectionService();
+                        endpoints.MapGrpcService<HealthService>();
+                    });
+                });
+            }));
 }
