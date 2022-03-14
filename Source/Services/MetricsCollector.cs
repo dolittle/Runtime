@@ -21,15 +21,15 @@ public class MetricsCollector : IMetricsCollector
     public MetricsCollector(IMetricFactory metricFactory)
     {
         _totalRequests = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_requests_total",
+            "dolittle_system_runtime_services_reverse_call_requests_total",
             "ReverseCallDispatcher total requests");
         
         _totalFailedRequests = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_requests_total",
+            "dolittle_system_runtime_services_reverse_call_failed_requests_total",
             "ReverseCallDispatcher total failed requests");
 
         _totalRequestTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_request_seconds_total",
+            "dolittle_system_runtime_services_reverse_call_requests_seconds_total",
             "ReverseCallDispatcher total time spent writing request and waiting for response");
     }
 
