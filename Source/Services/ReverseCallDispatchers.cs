@@ -16,6 +16,7 @@ public class ReverseCallDispatchers : IReverseCallDispatchers
 {
     readonly IIdentifyRequests _requestIdentifier;
     readonly ICreateExecutionContexts _executionContextCreator;
+    readonly IMetricsCollector _metricsCollector;
     readonly ILoggerFactory _loggerFactory;
     readonly IKeepConnectionsAlive _pingedConnectionFactory;
 
@@ -24,16 +25,19 @@ public class ReverseCallDispatchers : IReverseCallDispatchers
     /// </summary>
     /// <param name="requestIdentifier">The <see cref="IIdentifyRequests"/> for identifying requests.</param>
     /// <param name="executionContextCreator">The <see cref="ICreateExecutionContexts"/> to use.</param>
+    /// <param name="metricsCollector">The <see cref="IMetricsCollector"/>.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
     /// <param name="pingedConnectionFactory">The <see cref="IKeepConnectionsAlive"/> for creating pinged connections.</param>
     public ReverseCallDispatchers(
         IIdentifyRequests requestIdentifier,
         ICreateExecutionContexts executionContextCreator,
+        IMetricsCollector metricsCollector,
         ILoggerFactory loggerFactory,
         IKeepConnectionsAlive pingedConnectionFactory)
     {
         _requestIdentifier = requestIdentifier;
         _executionContextCreator = executionContextCreator;
+        _metricsCollector = metricsCollector;
         _loggerFactory = loggerFactory;
         _pingedConnectionFactory = pingedConnectionFactory;
     }
@@ -54,5 +58,6 @@ public class ReverseCallDispatchers : IReverseCallDispatchers
             _pingedConnectionFactory.CreatePingedReverseCallConnection(_requestIdentifier.GetRequestIdFor(context), clientStream, serverStream, context, messageConverter),
             messageConverter,
             _executionContextCreator,
+            _metricsCollector,
             _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
 }

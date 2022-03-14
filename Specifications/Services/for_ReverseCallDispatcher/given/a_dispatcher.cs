@@ -38,6 +38,7 @@ public class a_dispatcher
             pinged_connection.Object,
             new MyProtocol(),
             execution_context_creator.Object,
+            Mock.Of<IMetricsCollector>(),
             Mock.Of<ILogger>());
 
         execution_context = execution_contexts.create();

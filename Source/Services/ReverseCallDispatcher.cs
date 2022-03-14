@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
@@ -38,6 +39,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     readonly IPingedConnection<TClientMessage, TServerMessage> _reverseCallConnection;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
     readonly ICreateExecutionContexts _executionContextFactory;
+    readonly IMetricsCollector _metricsCollector;
     readonly ILogger _logger;
 
     readonly object _receiveArgumentsLock = new();
@@ -55,16 +57,19 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     /// <param name="reverseCallConnection">The <see cref="IPingedConnection{TClientMessage, TServerMessage}"/></param>
     /// <param name="messageConverter">The <see cref="IConvertReverseCallMessages{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
     /// <param name="executionContextFactory">The <see cref="ICreateExecutionContexts"/> to use.</param>
+    /// <param name="metricsCollector">The <see cref="IMetricsCollector"/>.</param>
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     public ReverseCallDispatcher(
         IPingedConnection<TClientMessage, TServerMessage> reverseCallConnection,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
         ICreateExecutionContexts executionContextFactory,
+        IMetricsCollector metricsCollector,
         ILogger logger)
     {
         _reverseCallConnection = reverseCallConnection;
         _messageConverter = messageConverter;
         _executionContextFactory = executionContextFactory;
+        _metricsCollector = metricsCollector;
         _logger = logger;
     }
 
@@ -176,12 +181,18 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
             var message = new TServerMessage();
             _messageConverter.SetRequest(request, message);
             _logger.WritingRequest(callId);
+            _metricsCollector.AddRequest();
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
             await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
-
-            return await completionSource.Task.ConfigureAwait(false);
+            var response = await completionSource.Task.ConfigureAwait(false);
+            stopWatch.Stop();
+            _metricsCollector.AddToTotalRequestTime(stopWatch.Elapsed);
+            return response;
         }
         catch (Exception ex)
         {
+            _metricsCollector.AddFailedRequest();
             _logger.CallFailed(ex);
             _calls.TryRemove(callId, out _);
             throw;
