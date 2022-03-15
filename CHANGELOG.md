@@ -161,6 +161,14 @@ This is considered a breaking change because it only works with SDKs using the v
 
 - `EventSourceId.NotSet` is removed, as the value should always be set to something. We had some hacks internally where we used this value since we knew it would be thrown away, but now those values are set to something more sensible just to be sure.
 
+# [6.2.0] - 2022-3-15
+## Summary
+
+Back porting of readiness health checks to v6 Runtime
+
+### Added
+
+- Back ported Health Checks for validating resources configuration, MongoDB database connections and grpc endpoints connections
 
 # [6.1.0] - 2021-6-29 [PR: #550](https://github.com/dolittle/Runtime/pull/550)
 ## Summary
