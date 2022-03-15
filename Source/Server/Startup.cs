@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Server
                         .AllowAnyHeader()
                         .WithExposedHeaders("Grpc-Status", "Grpc-Message");
             }));
-
+            services.AddHealthChecks();
             services.AddControllers();
             services.AddMvc();
             services.AddSwaggerGen();
@@ -44,6 +44,7 @@ namespace Dolittle.Runtime.Server
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseHealthChecks("/healthz");
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
