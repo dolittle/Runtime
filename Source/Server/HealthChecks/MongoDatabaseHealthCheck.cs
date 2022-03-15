@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -24,8 +25,8 @@ namespace Dolittle.Runtime.Server.HealthChecks
         /// Initializes a new instance of the <see cref="MongoDatabaseHealthCheck"/> class.
         /// </summary>
         /// <param name="forAllTenants">The performer to use to perform the health check for each tenant.</param>
-        protected MongoDatabaseHealthCheck(IPerformActionOnAllTenants forAllTenants)
-            : base(forAllTenants)
+        protected MongoDatabaseHealthCheck(FactoryFor<TenantsConfiguration> getTenants, IExecutionContextManager executionContextManager)
+            : base(getTenants, executionContextManager)
         {
         }
 

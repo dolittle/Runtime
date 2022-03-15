@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
+using Dolittle.Runtime.Services.HealthChecks;
+using Grpc.Health.V1;
+using Grpc.HealthCheck;
 using Microsoft.Extensions.Logging;
 using grpc = Grpc.Core;
 
@@ -73,6 +76,8 @@ namespace Dolittle.Runtime.Services
                     _logger.ExposingService(_.Descriptor.FullName);
                     _server.Services.Add(_.ServerDefinition);
                 });
+                var healthService = new HealthService();
+                _server.Services.Add(Health.BindService(healthService));
 
                 _server.Start();
             }

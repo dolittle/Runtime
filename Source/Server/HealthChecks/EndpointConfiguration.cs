@@ -29,7 +29,8 @@ namespace Dolittle.Runtime.Server.HealthChecks
                 WriteIndented = true,
                 Converters =
                 {
-                    new JsonStringEnumConverter()
+                    new JsonStringEnumConverter(),
+                    new JsonTimeSpanConverter()
                 }
             });
     }

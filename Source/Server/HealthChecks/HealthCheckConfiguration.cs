@@ -1,7 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Services.HealthChecks;
 using Dolittle.Runtime.Types;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
@@ -15,6 +19,7 @@ namespace Dolittle.Runtime.Server.HealthChecks
     public class HealthCheckConfiguration : IConfigureOptions<HealthCheckServiceOptions>
     {
         readonly IEnumerable<IHealthCheck> _healthChecks;
+        readonly IEndpoints _endpoints;
         readonly ILogger _logger;
 
         /// <summary>
@@ -22,9 +27,10 @@ namespace Dolittle.Runtime.Server.HealthChecks
         /// </summary>
         /// <param name="healthChecks">The instances that implement <see cref="IHealthCheck"/> to add as registrations in the configuration.</param>
         /// <param name="logger">The logger to use for logging.</param>
-        public HealthCheckConfiguration(IInstancesOf<IHealthCheck> healthChecks, ILogger logger)
+        public HealthCheckConfiguration(IInstancesOf<IHealthCheck> healthChecks, IEndpoints endpoints, ILogger logger)
         {
-            _healthChecks = healthChecks;
+            _healthChecks = healthChecks.Where(_ => _.GetType() != typeof(EndpointHealthCheck));
+            _endpoints = endpoints;
             _logger = logger;
         }
 
@@ -33,10 +39,16 @@ namespace Dolittle.Runtime.Server.HealthChecks
         {
             foreach (var healthCheck in _healthChecks)
             {
-                // TODO: This
-                // _logger.AddingHealthCheckRegistrationFor(healthCheck.GetType());
                 var registration = new HealthCheckRegistration(healthCheck.GetType().Name, healthCheck, null, null);
                 options.Registrations.Add(registration);
+            }
+            foreach (var endpoint in _endpoints.GetEndpoints())
+            {
+                options.Registrations.Add(new HealthCheckRegistration(
+                    $"{nameof(EndpointHealthCheck)}[{Enum.GetName(typeof(EndpointVisibility), endpoint.Visibility)}]",
+                    new EndpointHealthCheck(endpoint.Configuration),
+                    null,
+                    null));
             }
         }
     }

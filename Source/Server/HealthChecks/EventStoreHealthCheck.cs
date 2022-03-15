@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.Server.HealthChecks
         /// </summary>
         /// <param name="forAllTenants">The performer to use to perform the health check for all tenants.</param>
         /// <param name="getConnectionForTenant">The factory to use to get the Event Store connection for a tenant.</param>
-        public EventStoreHealthCheck(IPerformActionOnAllTenants forAllTenants, FactoryFor<DatabaseConnection> getConnectionForTenant)
-            : base(forAllTenants)
+        public EventStoreHealthCheck(FactoryFor<TenantsConfiguration> getTenants, IExecutionContextManager executionContextManager, FactoryFor<DatabaseConnection> getConnectionForTenant)
+            : base(getTenants, executionContextManager)
         {
             _getConnectionForTenant = getConnectionForTenant;
         }

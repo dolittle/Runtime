@@ -54,6 +54,7 @@ namespace Dolittle.Runtime.Services
             _container = container;
             _logger = logger;
             _boundServices = boundServices;
+            _configuration.ForEach(_ => _endpointInfos.Add(new EndpointInfo(_.Key, _.Value)));
         }
 
         /// <inheritdoc/>
