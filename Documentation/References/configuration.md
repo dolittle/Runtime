@@ -39,7 +39,13 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
 ```
 
 ## `resources.json`
-**Required.** Configurations for the [Event Store]({{< ref "docs/concepts/event_store" >}}), [Projections]({{< ref "docs/concepts/projections" >}}) and [Embeddings]({{< ref "docs/concepts/embeddings" >}}) per [Tenant]({{< ref "docs/concepts/tenants" >}}). The `"database"` has to be unique for each store.
+**Required.** Configurations for the resources available per [Tenant]({{< ref "docs/concepts/tenants" >}}):
+- `eventStore`: MongoDB configuration for the [Event Store]({{< ref "docs/concepts/event_store" >}})
+- `projections`: MongoDB configuration for the storage of [Projections]({{< ref "docs/concepts/projections" >}})
+- `embeddings`: MongoDB configuration for the storage of [Embeddings]({{< ref "docs/concepts/embeddings" >}})
+- `readModels`: MongoDB configuration for a database that can be used for any storage and accessed through the SDKs directly. This database should only be used to store data that can be rebuilt from replaying events.
+
+The `database` name must be unique for all resources and tenants, reusing the same name will cause undefined behaviour in the Runtime and potential dataloss.
 ```json
 {
     <tenant-id>: {
@@ -48,7 +54,6 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
                 <MongoDB connection URI>
             ],
             "database": <MongoDB database name>,
-            // defaults to 1000. MongoDB max connection amount
             "maxConnectionPoolSize": 1000
         },
         "projections": {
@@ -56,7 +61,6 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
                 <MongoDB connection URI>
             ],
             "database": <MongoDB database name>,
-            // defaults to 1000. MongoDB max connection amount
             "maxConnectionPoolSize": 1000
         },
         "embeddings": {
@@ -64,9 +68,13 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
                 <MongoDB connection URI>
             ],
             "database": <MongoDB database name>,
-            // defaults to 1000. MongoDB max connection amount
             "maxConnectionPoolSize": 1000
         },
+        "readModels": {
+            "host": <MongoDB connection string>,
+            "database": <MongoDB database name>,
+            "useSSL": false
+        }
     }
 }
 ```
