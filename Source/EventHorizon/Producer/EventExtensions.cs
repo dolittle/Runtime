@@ -18,7 +18,7 @@ public static class EventExtensions
     /// </summary>
     /// <param name="event">The <see cref="CommittedEvent" />.</param>
     /// <returns>The <see cref="Events.Contracts.CommittedEvent" />.</returns>
-    public static Events.Contracts.CommittedEvent ToCommittedEventHorizonEvent(this CommittedEvent @event)
+    public static Contracts.CommittedEvent ToCommittedEventHorizonEvent(this CommittedEvent @event)
     {
         var committedEvent = @event.ToProtobuf();
         committedEvent.ExecutionContext.Claims.Clear();
