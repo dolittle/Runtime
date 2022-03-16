@@ -19,6 +19,7 @@
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
         <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcAspNetCoreVersion)" />
         <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcAspNetCoreVersion)" />
+        <PackageReference Include="Contrib.Grpc.Core.M1" Version="$(GrpcVersion)" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     </ItemGroup>
 
