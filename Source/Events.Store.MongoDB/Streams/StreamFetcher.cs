@@ -11,6 +11,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 using System.Linq;
+using Dolittle.Runtime.MongoDB.Serialization;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 
@@ -163,7 +164,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     {
         ThrowIfNotConstructedWithPartitionIdExpression();
         return await FetchTypesWithFilter(
-            _filter.Eq(_partitionIdExpression, partitionId.Value)
+            _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
             & _filter.Gte(_sequenceNumberExpression, range.From.Value)
             & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length),
             cancellationToken).ConfigureAwait(false);
@@ -186,7 +187,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         }
     }
 
-    ISet<Artifact> ExpandToArtifacts(IEnumerable<ArtifactWithGenerations> artifactsWithGenerations)
+    static ISet<Artifact> ExpandToArtifacts(IEnumerable<ArtifactWithGenerations> artifactsWithGenerations)
     {
         var set = new HashSet<Artifact>();
         foreach (var artifactWithGenerations in artifactsWithGenerations)

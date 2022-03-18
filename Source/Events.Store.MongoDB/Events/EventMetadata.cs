@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.MongoDB.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -44,6 +45,7 @@ public class EventMetadata
     /// <summary>
     /// Gets or sets the event source id.
     /// </summary>
+    [BsonSerializer(typeof(StringOrGuidSerializer))]
     public string EventSource { get; set; }
 
     /// <summary>

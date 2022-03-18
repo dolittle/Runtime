@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.MongoDB.Serialization;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
@@ -72,7 +73,7 @@ public class AggregateRoots : IAggregateRoots
         CancellationToken cancellationToken)
     {
         _logger.FetchingVersionFor(aggregateRoot, eventSource);
-        var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
+        var eqFilter = _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
             & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
         var aggregateDocuments = await _aggregates.Aggregates.Find(
             transaction,
@@ -151,7 +152,7 @@ public class AggregateRoots : IAggregateRoots
         CancellationToken cancellationToken)
     {
         var aggregateRootFilter =
-            _filter.Eq(_ => _.EventSource, eventSource.Value)
+            _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
             & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value)
             & _filter.Eq(_ => _.Version, expectedVersion.Value);
 
@@ -185,7 +186,7 @@ public class AggregateRoots : IAggregateRoots
         ArtifactId aggregateRoot,
         CancellationToken cancellationToken)
     {
-        var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
+        var eqFilter = _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
             & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
         var aggregateDocuments = await _aggregates.Aggregates.Find(eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
 

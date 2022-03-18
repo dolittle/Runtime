@@ -3,6 +3,7 @@
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.MongoDB</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.MongoDB</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

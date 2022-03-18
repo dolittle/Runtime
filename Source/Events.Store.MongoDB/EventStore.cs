@@ -12,6 +12,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.MongoDB.Serialization;
 using MongoDB.Driver;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -141,7 +142,7 @@ public class EventStore : IEventStore
             if (version > AggregateRootVersion.Initial)
             {
                 var defaultFilter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
-                    & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
+                    & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
                     & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
                     & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
 

@@ -12,6 +12,7 @@ using MongoDB.Driver;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using MongoSubscriptionState = Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon.SubscriptionState;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.MongoDB.Serialization;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 
@@ -189,5 +190,5 @@ public class StreamProcessorStateRepository : IStreamProcessorStateRepository
         _subscriptionFilter.Eq(_ => _.Microservice, id.ProducerMicroserviceId.Value)
         & _subscriptionFilter.Eq(_ => _.Tenant, id.ProducerTenantId.Value)
         & _subscriptionFilter.Eq(_ => _.Stream, id.StreamId.Value)
-        & _subscriptionFilter.Eq(_ => _.Partition, id.PartitionId.Value);
+        & _subscriptionFilter.EqStringOrGuid(_ => _.Partition, id.PartitionId.Value);
 }
