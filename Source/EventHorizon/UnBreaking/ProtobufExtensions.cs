@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Protobuf.Contracts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
@@ -12,7 +12,7 @@ using Google.Protobuf.WellKnownTypes;
 namespace Dolittle.Runtime.EventHorizon.UnBreaking;
 
 /// <summary>
-/// Extension methods for protobufd messages .
+/// Extension methods for protobuf messages for un breaking event horizon change.
 /// </summary>
 public static class ProtobufExtensions
 {
@@ -20,10 +20,10 @@ public static class ProtobufExtensions
         => req.PartitionId != default ? req.PartitionId.ToGuid().ToString() : req.PartitionIdString;
 
     /// <summary>
-    /// Converts the <see cref="CommittedEvent" /> to <see cref="Events.Contracts.CommittedEvent" />.
+    /// Converts the <see cref="CommittedEvent" /> to <see cref="Contracts.EventHorizonCommittedEvent" />.
     /// </summary>
     /// <param name="event">The <see cref="CommittedEvent" />.</param>
-    /// <returns>The <see cref="Events.Contracts.CommittedEvent" />.</returns>
+    /// <returns>The <see cref="Contracts.EventHorizonCommittedEvent" />.</returns>
     public static Contracts.EventHorizonCommittedEvent ToEventHorizonCommittedEvent(this CommittedEvent @event)
     {
         var committedEvent = new Contracts.EventHorizonCommittedEvent
@@ -48,4 +48,18 @@ public static class ProtobufExtensions
         committedEvent.ExecutionContext.Claims.AddRange(Claims.Empty.ToProtobuf());
         return committedEvent;
     }
+    /// <summary>
+    /// Convert to from <see cref="Contracts.EventHorizonCommittedEvent"/> to <see cref="CommittedEvent"/>.
+    /// </summary>
+    /// <param name="event"><see cref="Contracts.EventHorizonCommittedEvent"/> to convert from.</param>
+    /// <returns>Converted <see cref="CommittedEvent"/>.</returns>
+    public static CommittedEvent ToCommittedEvent(this Contracts.EventHorizonCommittedEvent @event) =>
+        new(
+            @event.EventLogSequenceNumber,
+            @event.Occurred.ToDateTimeOffset(),
+            @event.EventSourceId != default ? @event.EventSourceId.ToGuid().ToString() : @event.EventSourceIdString,
+            @event.ExecutionContext.ToExecutionContext(),
+            new Artifact(@event.EventType.Id.ToGuid(), @event.EventType.Generation),
+            @event.Public,
+            @event.Content);
 }
