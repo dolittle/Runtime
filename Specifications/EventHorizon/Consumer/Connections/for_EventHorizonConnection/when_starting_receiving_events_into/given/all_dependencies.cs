@@ -61,7 +61,7 @@ public class all_dependencies : for_EventHorizonConnection.given.all_dependencie
             Event = new EventHorizonEvent
             {
                 StreamSequenceNumber = 1,
-                Event = new CommittedEvent
+                Event = new EventHorizonCommittedEvent()
                 {
                     Content = "content",
                     EventLogSequenceNumber = 4,
@@ -76,7 +76,8 @@ public class all_dependencies : for_EventHorizonConnection.given.all_dependencie
                     {
                         Generation = 4,
                         Id = Guid.Parse("19ced99f-376e-413c-b368-05edfc2f1067").ToProtobuf()
-                    }
+                    },
+                    EventSourceIdLegacy = Guid.Parse("c84b4055-a084-4eae-a7b3-3124b462c880").ToProtobuf()
                 },
             }
         };

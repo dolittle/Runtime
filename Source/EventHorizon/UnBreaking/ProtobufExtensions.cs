@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.EventHorizon.UnBreaking;
 public static class ProtobufExtensions
 {
     public static PartitionId GetPartitionId(this Contracts.ConsumerSubscriptionRequest req)
-        => req.PartitionId != default ? req.PartitionId.ToGuid().ToString() : req.PartitionIdString;
+        => req.PartitionIdLegacy != default ? req.PartitionIdLegacy.ToGuid().ToString() : req.PartitionId;
 
     /// <summary>
     /// Converts the <see cref="CommittedEvent" /> to <see cref="Contracts.EventHorizonCommittedEvent" />.
@@ -30,7 +30,7 @@ public static class ProtobufExtensions
         {
             EventLogSequenceNumber = @event.EventLogSequenceNumber,
             Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-            EventSourceIdString = @event.EventSource.Value,
+            EventSourceId = @event.EventSource.Value,
             ExecutionContext = @event.ExecutionContext.ToProtobuf(),
             EventType = new Dolittle.Artifacts.Contracts.Artifact
             {
@@ -42,7 +42,7 @@ public static class ProtobufExtensions
         };
         if (Guid.TryParse(@event.EventSource, out var eventSourceGuid))
         {
-            committedEvent.EventSourceId = eventSourceGuid.ToProtobuf();
+            committedEvent.EventSourceIdLegacy = eventSourceGuid.ToProtobuf();
         }
         committedEvent.ExecutionContext.Claims.Clear();
         committedEvent.ExecutionContext.Claims.AddRange(Claims.Empty.ToProtobuf());
@@ -57,7 +57,7 @@ public static class ProtobufExtensions
         new(
             @event.EventLogSequenceNumber,
             @event.Occurred.ToDateTimeOffset(),
-            @event.EventSourceId != default ? @event.EventSourceId.ToGuid().ToString() : @event.EventSourceIdString,
+            @event.EventSourceId != default ? @event.EventSourceIdLegacy.ToGuid().ToString() : @event.EventSourceId,
             @event.ExecutionContext.ToExecutionContext(),
             new Artifact(@event.EventType.Id.ToGuid(), @event.EventType.Generation),
             @event.Public,

@@ -137,14 +137,14 @@ public class EventHorizonConnection : IEventHorizonConnection
     {
         var request = new ConsumerSubscriptionRequest
         {
-            PartitionIdString = subscription.PartitionId.Value,
+            PartitionId = subscription.PartitionId.Value,
             StreamId = subscription.StreamId.ToProtobuf(),
             StreamPosition = publicEventsPosition.Value,
             TenantId = subscription.ProducerTenantId.ToProtobuf()
         };
         if (Guid.TryParse(subscription.PartitionId, out var partitionGuid))
         {
-            request.PartitionId = partitionGuid.ToProtobuf();
+            request.PartitionIdLegacy = partitionGuid.ToProtobuf();
         }
         return request;
     }
