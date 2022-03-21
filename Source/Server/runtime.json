@@ -1,0 +1,30 @@
+{
+    "endpoints": {
+        "public": {
+            "port": 50052
+        },
+        "private": {
+            "port": 50053
+        },
+        "management": {
+            "port": 51052
+        },
+        "metrics": {
+            "port": 9700
+        },
+        "web": {
+            "port": 8001
+        }
+    },
+    "platform": {
+        "applicationName": "[Not Set]",
+        "applicationID": "4fe9492c-1d19-4e6b-be72-03208789906e",
+        "microserviceName": "[Not Set]",
+        "microserviceID": "4a5d2bc3-543f-459a-ab0b-e8e924093260",
+        "customerName": "[Not Set]",
+        "customerID": "ca900ec9-bae8-462e-b262-fa3efc825ca8",
+        "environment": "Development"
+    },
+    "microservices": {},
+    "tenants": {}
+}
