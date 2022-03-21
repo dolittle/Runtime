@@ -16,8 +16,25 @@ namespace Dolittle.Runtime.EventHorizon.UnBreaking;
 /// </summary>
 public static class ProtobufExtensions
 {
+    /// <summary>
+    /// Gets the <see cref="PartitionId"/> from a <see cref="Contracts.ConsumerSubscriptionRequest"/>.
+    /// </summary>
+    /// <param name="req">The <see cref="Contracts.ConsumerSubscriptionRequest"/> to get the.</param>
+    /// <returns>The <see cref="PartitionId"/> from the request.</returns>
     public static PartitionId GetPartitionId(this Contracts.ConsumerSubscriptionRequest req)
-        => req.PartitionIdLegacy != default ? req.PartitionIdLegacy.ToGuid().ToString() : req.PartitionId;
+        => req.PartitionId ?? req.PartitionIdLegacy.ToGuid().ToString();
+    
+    /// <summary>
+    /// Tries to set the legacy partition id guid field on the <see cref="Contracts.ConsumerSubscriptionRequest"/> if the partition id is a guid.
+    /// </summary>
+    /// <param name="req">The <see cref="Contracts.ConsumerSubscriptionRequest"/>.</param>
+    public static void TrySetPartitionIdLegacy(this Contracts.ConsumerSubscriptionRequest req)
+    {
+        if (Guid.TryParse(req.PartitionId, out var partitionGuid))
+        {
+            req.PartitionIdLegacy = partitionGuid.ToProtobuf();
+        }
+    }
 
     /// <summary>
     /// Converts the <see cref="CommittedEvent" /> to <see cref="Contracts.EventHorizonCommittedEvent" />.
@@ -57,7 +74,7 @@ public static class ProtobufExtensions
         new(
             @event.EventLogSequenceNumber,
             @event.Occurred.ToDateTimeOffset(),
-            @event.EventSourceId != default ? @event.EventSourceIdLegacy.ToGuid().ToString() : @event.EventSourceId,
+            @event.EventSourceId ?? @event.EventSourceIdLegacy.ToGuid().ToString(),
             @event.ExecutionContext.ToExecutionContext(),
             new Artifact(@event.EventType.Id.ToGuid(), @event.EventType.Generation),
             @event.Public,
