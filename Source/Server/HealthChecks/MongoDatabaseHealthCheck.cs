@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Bson;
@@ -44,9 +45,9 @@ public abstract class MongoDatabaseHealthCheck : ForAllTenantsHealthCheck
                 return HealthCheckResult.Unhealthy($"Failed to connect to database {database.DatabaseNamespace} on address {database.Client.Settings.Server}");
             }
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            return HealthCheckResult.Unhealthy($"Failed to get database. Maybe the resource is not configured correctly.");
+            return HealthCheckResult.Unhealthy($"Failed to get database. Maybe the resource is not configured correctly. Failure: {exception.GetInnerMostException().Message}");
         }
     }
 
