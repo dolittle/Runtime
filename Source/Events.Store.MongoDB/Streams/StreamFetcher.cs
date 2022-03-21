@@ -115,7 +115,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         try
         {
             var @event = await _collection.Find(
-                    _filter.Eq(_partitionIdExpression, partitionId.Value)
+                    _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
                     & _filter.Gte(_sequenceNumberExpression, streamPosition.Value))
                 .Limit(1)
                 .Project(_eventToStreamEvent)

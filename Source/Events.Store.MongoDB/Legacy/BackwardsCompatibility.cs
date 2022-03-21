@@ -18,6 +18,10 @@ public class BackwardsCompatibility : IConfigureBackwardsCompatibility
     static readonly object _configurationLock = new();
     static bool _serializersConfigured;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BackwardsCompatibility"/> class.
+    /// </summary>
+    /// <param name="configuration">The <see cref="IOptions{TOptions}"/> for <see cref="EventStoreBackwardsCompatibilityConfiguration"/>.</param>
     public BackwardsCompatibility(IOptions<EventStoreBackwardsCompatibilityConfiguration> configuration)
     {
         var serializer = new EventSourceAndPartitionSerializer(configuration.Value.Version);
