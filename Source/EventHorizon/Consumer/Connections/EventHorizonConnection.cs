@@ -142,10 +142,7 @@ public class EventHorizonConnection : IEventHorizonConnection
             StreamPosition = publicEventsPosition.Value,
             TenantId = subscription.ProducerTenantId.ToProtobuf()
         };
-        if (Guid.TryParse(subscription.PartitionId, out var partitionGuid))
-        {
-            request.PartitionIdLegacy = partitionGuid.ToProtobuf();
-        }
+        request.TrySetPartitionIdLegacy();
         return request;
     }
 
