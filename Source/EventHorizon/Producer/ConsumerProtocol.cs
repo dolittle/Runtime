@@ -1,9 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Dolittle.Runtime.EventHorizon.Contracts;
+using Dolittle.Runtime.EventHorizon.UnBreaking;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.EventHorizon.Producer;
@@ -23,7 +25,7 @@ public class ConsumerProtocol : IConsumerProtocol
             executionContext.Tenant,
             arguments.TenantId.ToGuid(),
             arguments.StreamId.ToGuid(),
-            arguments.PartitionId,
+            arguments.GetPartitionId(),
             arguments.StreamPosition);
     }
 

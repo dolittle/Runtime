@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.EventHorizon.UnBreaking;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
@@ -34,7 +35,7 @@ public static class EventExtensions
     public static Contracts.EventHorizonEvent ToEventHorizonEvent(this StreamEvent @event) =>
         new()
         {
-            Event = @event.Event.ToCommittedEventHorizonEvent(),
+            Event = @event.Event.ToEventHorizonCommittedEvent(),
             StreamSequenceNumber = @event.Position
         };
 }
