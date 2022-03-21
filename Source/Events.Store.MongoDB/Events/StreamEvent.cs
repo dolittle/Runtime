@@ -1,8 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.MongoDB.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -51,7 +51,7 @@ public class StreamEvent
     /// <summary>
     /// Gets or sets the partition id.
     /// </summary>
-    [BsonSerializer(typeof(StringOrGuidSerializer))]
+    [BsonSerializer(typeof(EventSourceAndPartitionSerializer))]
     public string Partition { get; set; }
 
     /// <summary>

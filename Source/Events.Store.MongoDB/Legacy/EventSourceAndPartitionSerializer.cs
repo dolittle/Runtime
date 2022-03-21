@@ -6,12 +6,15 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 
-namespace Dolittle.Runtime.MongoDB.Serialization;
+namespace Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 
 /// <summary>
-/// Represents an implementation of <see cref="SerializerBase{TValue}"/> for serializing strings that are guids or string.
+/// Represents an implementation of <see cref="SerializerBase{TValue}"/> that can read either a GUID or a String, and writes as GUID if the value is convertible to a GUID.
 /// </summary>
-public class StringOrGuidSerializer : SerializerBase<string>
+/// <remarks>
+/// This serializer was introduced to enable backwards-compatibility in the persisted Event Store from v8 to v6 and v7.
+/// </remarks>
+public class EventSourceAndPartitionSerializer : SerializerBase<string>
 {
     /// <inheritdoc />
     public override string Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)

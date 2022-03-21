@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.MongoDB.Serialization;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -70,7 +70,7 @@ public class SubscriptionState
     /// <summary>
     /// Gets or sets the <see cref="Store.Streams.PartitionId" /> in the public stream.
     /// </summary>
-    [BsonSerializer(typeof(StringOrGuidSerializer))]
+    [BsonSerializer(typeof(EventSourceAndPartitionSerializer))]
     public string Partition { get; set; }
 
     /// <summary>

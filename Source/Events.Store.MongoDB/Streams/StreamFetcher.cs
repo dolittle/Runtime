@@ -11,7 +11,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 using System.Linq;
-using Dolittle.Runtime.MongoDB.Serialization;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 

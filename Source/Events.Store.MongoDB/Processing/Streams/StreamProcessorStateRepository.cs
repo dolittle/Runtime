@@ -10,9 +10,9 @@ using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using MongoSubscriptionState = Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon.SubscriptionState;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.MongoDB.Serialization;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 

@@ -10,9 +10,9 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.MongoDB.Serialization;
 using MongoDB.Driver;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 

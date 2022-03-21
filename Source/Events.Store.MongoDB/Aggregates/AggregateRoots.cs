@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.MongoDB.Serialization;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 

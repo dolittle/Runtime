@@ -5,14 +5,14 @@ using System;
 using System.Linq.Expressions;
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.MongoDB.Serialization;
+namespace Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 
 /// <summary>
 /// Extension methods for <see cref="FilterDefinitionBuilder{TDocument}"/>.
 /// </summary>
 public static class FilterDefinitionBuilderExtensions
 {
-    /// <summary>Creates an equality filter for guid or string values.</summary>
+    /// <summary>Creates an equality filter that considers a GUID to be equal to its string representation.</summary>
     /// <param name="_">The <see cref="FilterDefinitionBuilder{TDocument}"/>.</param>
     /// <param name="field">The field.</param>
     /// <param name="value">The value.</param>
@@ -21,5 +21,5 @@ public static class FilterDefinitionBuilderExtensions
         this FilterDefinitionBuilder<TDocument> _,
         Expression<Func<TDocument, string>> field,
         string value)
-        => new StringOrGuidEq<TDocument>(new ExpressionFieldDefinition<TDocument, string>(field), value);
+        => new StringOrGuidFilterDefinition<TDocument>(new ExpressionFieldDefinition<TDocument, string>(field), value);
 }
