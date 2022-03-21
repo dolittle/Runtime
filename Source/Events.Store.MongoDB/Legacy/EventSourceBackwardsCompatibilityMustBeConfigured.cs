@@ -14,8 +14,7 @@ public class EventSourceBackwardsCompatibilityMustBeConfigured : Exception
     /// Initializes a new instance of the <see cref="EventSourceBackwardsCompatibilityMustBeConfigured"/> class.
     /// </summary>
     public EventSourceBackwardsCompatibilityMustBeConfigured()
-        : base("Event Store backwards compatibility is not configured, it must be configured to match the previous version of the Runtime you have used. If you don't need backwards compatibility - set it to V7")
-    //TODO: Add description for how to set it.
+        : base("Event Store backwards compatibility is not configured. You must set the environmental variable \"DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION\" to either \"V6\" or \"V7\". If you are not migrating from a previous version of the Runtime, set it to \"V7\".")
     {
     }
 }
