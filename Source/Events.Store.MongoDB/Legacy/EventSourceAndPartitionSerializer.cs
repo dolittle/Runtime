@@ -16,6 +16,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 /// </remarks>
 public class EventSourceAndPartitionSerializer : SerializerBase<string>
 {
+    readonly EventStoreBackwardsCompatibleVersion _backwardsCompatibleVersion;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventSourceAndPartitionSerializer"/> class.
+    /// </summary>
+    /// <param name="backwardsCompatibleVersion">The version to be backwards compatible with.</param>
+    public EventSourceAndPartitionSerializer(EventStoreBackwardsCompatibleVersion backwardsCompatibleVersion)
+    {
+        ThrowIfBackwardsCompatibleVersionNotSet(backwardsCompatibleVersion);
+        _backwardsCompatibleVersion = backwardsCompatibleVersion;
+    }
+
     /// <inheritdoc />
     public override string Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
     {
@@ -31,13 +43,21 @@ public class EventSourceAndPartitionSerializer : SerializerBase<string>
     /// <inheritdoc />
     public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, string value)
     {
-        if (Guid.TryParse(value, out var guid))
+        if (_backwardsCompatibleVersion == EventStoreBackwardsCompatibleVersion.V6 && Guid.TryParse(value, out var guid))
         {
             context.Writer.WriteBinaryData(new BsonBinaryData(guid, GuidRepresentation.Standard));
         }
         else
         {
             context.Writer.WriteString(value);
+        }
+    }
+
+    static void ThrowIfBackwardsCompatibleVersionNotSet(EventStoreBackwardsCompatibleVersion backwardsCompatibleVersion)
+    {
+        if (backwardsCompatibleVersion == EventStoreBackwardsCompatibleVersion.NotSet)
+        {
+            throw new EventSourceBackwardsCompatibilityMustBeConfigured();
         }
     }
 }

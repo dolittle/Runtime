@@ -4,6 +4,7 @@
 using System.Linq;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
 
@@ -33,7 +34,8 @@ public class DatabaseConnection : IDatabaseConnection
     /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
     /// </summary>
     /// <param name="configuration">A <see cref="IOptions{TOptions}"/> with database connection parameters.</param>
-    public DatabaseConnection(IOptions<EventStoreConfiguration> configuration)
+    /// <param name="backwardsCompatibility">The <see cref="IConfigureBackwardsCompatibility"/> that sets up the MongoDB serializers for backwards compatibility.</param>
+    public DatabaseConnection(IOptions<EventStoreConfiguration> configuration, IConfigureBackwardsCompatibility backwardsCompatibility)
     {
         var config = configuration.Value;
         var settings = new MongoClientSettings
@@ -45,6 +47,8 @@ public class DatabaseConnection : IDatabaseConnection
 
         MongoClient = new MongoClient(settings.Freeze());
         Database = MongoClient.GetDatabase(config.Database);
+        
+        backwardsCompatibility.ConfigureSerializers();
     }
 
     /// <inheritdoc />
