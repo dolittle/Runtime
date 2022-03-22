@@ -16,7 +16,6 @@
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
         <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
         <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="$(GrpcVersion)" />

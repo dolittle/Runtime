@@ -13,6 +13,6 @@
 
     <ItemGroup>
         <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
 </Project>
