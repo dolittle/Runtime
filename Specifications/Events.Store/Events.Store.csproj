@@ -7,7 +7,7 @@
     <Import Project="../../specs.props"/>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)"  />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)"  />
     </ItemGroup>
 
     <ItemGroup>
