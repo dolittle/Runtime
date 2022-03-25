@@ -25,7 +25,7 @@ public class FailedFiltering : FailedProcessing, IFilterResult
     /// </summary>
     /// <param name="reason">The reason for failure.</param>
     /// <param name="retry">Whether to retry processing.</param>
-    /// <param name="retryTimeout">The retry timout <see cref="TimeSpan" />.</param>
+    /// <param name="retryTimeout">The retry timeout <see cref="TimeSpan" />.</param>
     public FailedFiltering(string reason, bool retry, TimeSpan retryTimeout)
         : base(reason, retry, retryTimeout)
     {

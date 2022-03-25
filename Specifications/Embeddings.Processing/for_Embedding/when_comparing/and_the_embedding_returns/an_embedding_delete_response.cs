@@ -44,15 +44,16 @@ public class an_embedding_delete_response : given.all_dependencies
         dispatcher
             .Setup(_ => _.Call(
                 embedding_request,
+                execution_context,
                 cancellation))
             .Returns(Task.FromResult(embedding_response));
     };
 
     static Try<UncommittedEvents> result;
 
-    Because of = () => result = embedding.TryCompare(current_state, desired_state, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = embedding.TryCompare(current_state, desired_state, execution_context,cancellation).GetAwaiter().GetResult();
 
-    It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);
+    It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_return_a_failure_result = () => result.Success.ShouldBeFalse();
     It should_fail_because_unexpected_response_case = () => result.Exception.ShouldBeOfExactType<UnexpectedEmbeddingResponse>();

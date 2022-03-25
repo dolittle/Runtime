@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Dolittle.Runtime.Configuration;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB;
@@ -9,6 +10,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB;
 /// <summary>
 /// Represents a resource configuration for a MongoDB Embedding implementation.
 /// </summary>
+[TenantConfiguration("resources:embeddings")]
 public class EmbeddingsConfiguration
 {
     /// <summary>

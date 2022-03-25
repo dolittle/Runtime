@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Dolittle.Runtime.EventHorizon.Contracts;
@@ -30,7 +29,14 @@ public class ConsumerProtocol : IConsumerProtocol
 
     /// <inheritdoc/>
     public SubscriptionResponse CreateFailedConnectResponse(FailureReason failureMessage)
-        => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingSubscriptionArguments.Value.ToProtobuf(), Reason = failureMessage } };
+        => new()
+        {
+            Failure = new Dolittle.Protobuf.Contracts.Failure
+            {
+                Id = SubscriptionFailures.MissingSubscriptionArguments.Value.ToProtobuf(), 
+                Reason = failureMessage
+            }
+        };
 
     /// <inheritdoc/>
     public ReverseCallArgumentsContext GetArgumentsContext(ConsumerSubscriptionRequest message)

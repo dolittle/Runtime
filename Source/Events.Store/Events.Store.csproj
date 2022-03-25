@@ -1,24 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props" />
+    <Import Project="../../default.props" />
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
-    <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../Artifacts/Artifacts.csproj" />
-    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
-    <ProjectReference Include="../Execution/Execution.csproj" />
-    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
-    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
-    <ProjectReference Include="../Services/Services.csproj" />
-    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-  </ItemGroup>
-
+    <ItemGroup>
+        <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
+    </ItemGroup>
 </Project>

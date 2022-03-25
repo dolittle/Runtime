@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventTypes;
 
@@ -12,6 +13,7 @@ namespace Dolittle.Runtime.Events;
 /// <summary>
 /// Represents the implementation of <see cref="EventTypesBase"/>.
 /// </summary>
+[PrivateService]
 public class EventTypesService : EventTypesBase
 {
     readonly IEventTypes _eventTypes;

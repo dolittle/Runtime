@@ -6,15 +6,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
@@ -24,32 +23,22 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 [Singleton]
 public class StreamProcessors : IStreamProcessors
 {
-    readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
-    readonly IPerformActionOnAllTenants _onAllTenants;
-    readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
-    readonly IExecutionContextManager _executionContextManager;
-    readonly ILoggerFactory _loggerFactory;
+    readonly Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> _createStreamProcessor;
+    readonly ICreateExecutionContexts _executionContextCreator;
     readonly ILogger _logger;
+    readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
     /// </summary>
-    /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-    /// <param name="getScopedStreamProcessorsCreator">The <see cref="FactoryFor{T}" /> <see cref="ICreateScopedStreamProcessors" />.</param>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public StreamProcessors(
-        IPerformActionOnAllTenants onAllTenants,
-        FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
-        IExecutionContextManager executionContextManager,
-        ILoggerFactory loggerFactory)
+        Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> createStreamProcessor,
+        ICreateExecutionContexts executionContextCreator,
+        ILogger logger)
     {
-        _onAllTenants = onAllTenants;
-        _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
-        _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
-        _executionContextManager = executionContextManager;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<StreamProcessors>();
+        _createStreamProcessor = createStreamProcessor;
+        _executionContextCreator = executionContextCreator;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -57,28 +46,34 @@ public class StreamProcessors : IStreamProcessors
         ScopeId scopeId,
         EventProcessorId eventProcessorId,
         IStreamDefinition sourceStreamDefinition,
-        FactoryFor<IEventProcessor> getEventProcessor,
+        Func<TenantId, IEventProcessor> getEventProcessor,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
         try
         {
+            var createExecutionContext = _executionContextCreator.TryCreateUsing(executionContext);
+            if (!createExecutionContext.Success)
+            {
+                // TODO: Logging
+                return createExecutionContext.Exception;
+            }
+            
             var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
                 Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
                 return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
-
-            var streamProcessor = new StreamProcessor(
+            
+            var streamProcessor = _createStreamProcessor(
                 streamProcessorId,
-                _onAllTenants,
                 sourceStreamDefinition,
-                getEventProcessor,
                 () => Unregister(streamProcessorId),
-                _getScopedStreamProcessorsCreator,
-                _executionContextManager,
-                _loggerFactory.CreateLogger<StreamProcessor>(),
+                getEventProcessor,
+                createExecutionContext.Result,
                 cancellationToken);
+            
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
                 Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);

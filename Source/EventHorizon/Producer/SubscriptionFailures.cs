@@ -19,4 +19,9 @@ public static class SubscriptionFailures
     /// Gets the <see cref="FailureId" /> that represents the 'MissingSubscriptionArguments' failure type.
     /// </summary>
     public static FailureId MissingSubscriptionArguments => FailureId.Create("3f88dfb6-93d6-40d3-9d28-8be149f9e02d");
+    
+    /// <summary>
+    /// Gets the <see cref="FailureId" /> that represents the 'EventHorizonAlreadyRegistered' failure type.
+    /// </summary>
+    public static FailureId EventHorizonAlreadyRegistered => FailureId.Create("8ba0c1a1-3a42-444b-9206-70903392de17");
 }

@@ -10,6 +10,7 @@ using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
 
@@ -38,7 +39,7 @@ public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinit
     }
 
     /// <inheritdoc/>
-    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
+    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         if (!@event.Public)
         {
@@ -50,11 +51,11 @@ public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinit
             ScopeId = Scope.ToProtobuf()
         };
 
-        return Filter(request, cancellationToken);
+        return Filter(request, executionContext, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         if (!@event.Public)
         {
@@ -67,12 +68,12 @@ public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinit
             RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
         };
 
-        return Filter(request, cancellationToken);
+        return Filter(request, executionContext, cancellationToken);
     }
 
-    async Task<IFilterResult> Filter(FilterEventRequest request, CancellationToken cancellationToken)
+    async Task<IFilterResult> Filter(FilterEventRequest request, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
+        var response = await _dispatcher.Call(request, executionContext, cancellationToken).ConfigureAwait(false);
 
         return response switch
         {

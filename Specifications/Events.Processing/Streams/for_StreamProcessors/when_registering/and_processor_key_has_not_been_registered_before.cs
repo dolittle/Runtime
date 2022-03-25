@@ -3,11 +3,15 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Moq;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_registering;
 
@@ -30,8 +34,14 @@ public class and_processor_key_has_not_been_registered_before : given.all_depend
     };
 
     static Try<StreamProcessor> result;
-    Because of = () => result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None);
+    Because of = () => result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, tenant_id => event_processor.Object, execution_contexts.create(), CancellationToken.None);
 
     It should_register_stream_processor = () => result.Success.ShouldBeTrue();
-    It should_return_the_registered_stream_processor = () => result.Result.ShouldNotBeNull();
+    It should_create_the_stream_processor = () => create_stream_processor.Verify(_ => _.Invoke(
+        Moq.It.IsAny<StreamProcessorId>(),
+        Moq.It.IsAny<IStreamDefinition>(),
+        Moq.It.IsAny<Action>(),
+        Moq.It.IsAny<Func<TenantId, IEventProcessor>>(),
+        Moq.It.IsAny<ExecutionContext>(),
+        Moq.It.IsAny<CancellationToken>()), Times.Once);
 }

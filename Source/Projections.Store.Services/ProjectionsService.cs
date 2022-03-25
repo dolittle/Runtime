@@ -1,16 +1,17 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
-using DolittleExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using IExecutionContextManager = Dolittle.Runtime.Execution.IExecutionContextManager;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Projections.Store.Services;
 
@@ -20,34 +21,33 @@ namespace Dolittle.Runtime.Projections.Store.Services;
 [Singleton]
 public class ProjectionsService : IProjectionsService
 {
-    readonly FactoryFor<IProjectionStore> _getProjectionStore;
-    readonly IExecutionContextManager _executionContextManager;
+    readonly ICreateExecutionContexts _executionContextCreator;
+    readonly Func<TenantId, IProjectionStore> _getProjectionStoreFor;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EventStoreService"/> class.
+    /// Initializes a new instance of the <see cref="ProjectionsService"/> class.
     /// </summary>
-    /// <param name="getProjectionStore"><see cref="FactoryFor{T}"/><see cref="IProjectionStore" />.</param>
-    /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
+    /// <param name="executionContextCreator">The execution context creator to use to validate execution contexts.</param>
+    /// <param name="getProjectionStoreFor">The factory to use to create projection stores per tenant.</param>
     public ProjectionsService(
-        FactoryFor<IProjectionStore> getProjectionStore,
-        IExecutionContextManager executionContextManager
-    )
+        ICreateExecutionContexts executionContextCreator,
+        Func<TenantId, IProjectionStore> getProjectionStoreFor)
     {
-        _getProjectionStore = getProjectionStore;
-        _executionContextManager = executionContextManager;
+        _executionContextCreator = executionContextCreator;
+        _getProjectionStoreFor = getProjectionStoreFor;
     }
 
     /// <inheritdoc/>
-    public Task<Try<ProjectionCurrentState>> TryGetOne(ProjectionId projection, ScopeId scope, ProjectionKey key, DolittleExecutionContext context, CancellationToken token)
-    {
-        _executionContextManager.CurrentFor(context);
-        return _getProjectionStore().TryGet(projection, scope, key, token);
-    }
+    public Task<Try<ProjectionCurrentState>> TryGetOne(ProjectionId projection, ScopeId scope, ProjectionKey key, ExecutionContext context, CancellationToken token)
+        => _executionContextCreator
+            .TryCreateUsing(context)
+            .Then(_ => _getProjectionStoreFor(_.Tenant))
+            .Then(_ => _.TryGet(projection, scope, key, token));
 
     /// <inheritdoc/>
-    public Task<Try<IAsyncEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, DolittleExecutionContext context, CancellationToken token)
-    {
-        _executionContextManager.CurrentFor(context);
-        return _getProjectionStore().TryGetAll(projection, scope, token);
-    }
+    public Task<Try<IAsyncEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, ExecutionContext context, CancellationToken token)
+        => _executionContextCreator
+            .TryCreateUsing(context)
+            .Then(_ => _getProjectionStoreFor(_.Tenant))
+            .Then(_ => _.TryGetAll(projection, scope, token));
 }

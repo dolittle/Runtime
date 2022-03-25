@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Machine.Specifications;
 
@@ -16,11 +17,10 @@ public class and_server_stream_is_empty : given.a_reverse_call_client
     Establish context = () =>
     {
         execution_context = given.execution_contexts.create();
-        execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
         server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
     };
 
-    Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
+    Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), execution_context, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_return_false = () => result.ShouldBeFalse();
     It should_write_to_server_once = () => client_to_server_stream.Verify(_ => _.WriteAsync(Moq.It.IsAny<MyClientMessage>()), Moq.Times.Once);

@@ -3,8 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Store.Streams;
@@ -15,21 +14,18 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 [Singleton]
 public class StreamDefinitions : IStreamDefinitions
 {
-    readonly IPerformActionOnAllTenants _onAllTenants;
-    readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitions;
+    readonly IPerformActionsForAllTenants _performer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamDefinitions"/> class.
     /// </summary>
-    /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-    /// <param name="getStreamDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
-    public StreamDefinitions(IPerformActionOnAllTenants onAllTenants, FactoryFor<IStreamDefinitionRepository> getStreamDefinitions)
+    /// <param name="performer">The <see cref="IPerformActionsForAllTenants"/> to resolve the dependencies for all tenants.</param>
+    public StreamDefinitions(IPerformActionsForAllTenants performer)
     {
-        _onAllTenants = onAllTenants;
-        _getStreamDefinitions = getStreamDefinitions;
+        _performer = performer;
     }
 
     /// <inheritdoc/>
-    public Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken) =>
-        _onAllTenants.PerformAsync(_ => _getStreamDefinitions().Persist(scope, streamDefinition, cancellationToken));
+    public Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
+        => _performer.PerformAsyncOn<IStreamDefinitionRepository>(_ => _.Persist(scope, streamDefinition, cancellationToken));
 }

@@ -6,6 +6,7 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions.when_catching_up.and_there_are_multiple_failing_partitions;
 
@@ -46,6 +47,7 @@ public class that_should_never_be_retried : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
     It should_not_retry_processing_process_any_events = () => event_processor.Verify(
@@ -54,6 +56,7 @@ public class that_should_never_be_retried : given.all_dependencies
             Moq.It.IsAny<PartitionId>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
     static FailingPartitionState failing_partition(PartitionId partition_id) => result.FailingPartitions[partition_id];

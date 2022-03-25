@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Services.Clients;
 
@@ -28,9 +29,10 @@ public interface IReverseCallClient<TConnectArguments, TConnectResponse, TReques
     /// Connect to server.
     /// </summary>
     /// <param name="connectArguments">The connection arguments.</param>
+    /// <param name="executionContext">The base execution context of this reverse call.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns whether a connection response was received.</returns>
-    Task<bool> Connect(TConnectArguments connectArguments, CancellationToken token);
+    Task<bool> Connect(TConnectArguments connectArguments, ExecutionContext executionContext, CancellationToken token);
 
     /// <summary>
     /// Handle a call.

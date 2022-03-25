@@ -19,6 +19,7 @@ public interface IInitiateReverseCallServices
     /// <param name="context">The server call context.</param>
     /// <param name="protocol">The protocol for converting reverse call messages.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="notValidateExecutionContext">Optional bool whether not to validate execution context. HACK USED ONLY FOR EVENT HORIZON</param>
     /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the client to the server.</typeparam>
     /// <typeparam name="TServerMessage">Type of the <see cref="IMessage">messages</see> that is sent from the server to the client.</typeparam>
     /// <typeparam name="TConnectArguments">Type of the arguments that are sent along with the initial Connect call.</typeparam>
@@ -32,7 +33,8 @@ public interface IInitiateReverseCallServices
         IServerStreamWriter<TServerMessage> clientStream,
         ServerCallContext context,
         IReverseCallServiceProtocol<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse, TRuntimeConnectArguments> protocol,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool notValidateExecutionContext = false)
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
         where TConnectArguments : class

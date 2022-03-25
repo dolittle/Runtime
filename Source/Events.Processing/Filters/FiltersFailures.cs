@@ -16,6 +16,11 @@ public static class FiltersFailures
     public static readonly FailureId NoFilterRegistrationReceived = FailureId.Create("d6060ba0-39bd-4815-8b0e-6b43b5f87bc5");
 
     /// <summary>
+    /// Gets the <see cref="FailureId" /> that represents the 'ExecutionContextIsInvalid' failure type.
+    /// </summary>
+    public static readonly FailureId ExecutionContextIsInvalid = FailureId.Create("92b7d18e-0a8a-44b9-bbee-abee206701c5");
+
+    /// <summary>
     /// Gets the <see cref="FailureId" /> that represents the 'CannotRegisterFilterOnNonWriteableStream' failure type.
     /// </summary>
     public static readonly FailureId CannotRegisterFilterOnNonWriteableStream = FailureId.Create("2cdb6143-4f3d-49cb-bd58-68fd1376dab1");

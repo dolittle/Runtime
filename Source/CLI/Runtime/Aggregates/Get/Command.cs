@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.Serialization.Json;
+using Dolittle.Runtime.Domain.Tenancy;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Get;

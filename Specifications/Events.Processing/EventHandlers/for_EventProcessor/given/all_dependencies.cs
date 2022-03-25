@@ -16,13 +16,13 @@ public class all_dependencies
     protected static ScopeId scope;
     protected static EventProcessorId event_processor_id;
     protected static Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>> dispatcher;
-    protected static Mock<IExecutionContextManager> execution_context_manager;
+    protected static ExecutionContext execution_context;
 
     Establish context = () =>
     {
+        execution_context = execution_contexts.create();
         scope = Guid.NewGuid();
         event_processor_id = Guid.NewGuid();
         dispatcher = new Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>>();
-        execution_context_manager = new Mock<IExecutionContextManager>();
     };
 }

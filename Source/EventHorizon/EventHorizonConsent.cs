@@ -1,8 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 
@@ -37,19 +37,4 @@ public record EventHorizonConsent
     /// Gets or sets the <see cref="ConsentId" /> for the tenant in microservice.
     /// </summary>
     public ConsentId Consent { get; init; }
-}
-/// <summary>
-/// Represents the consent configuration for an event horizon.
-/// </summary>
-public record EventHorizonConsentConfiguration(Guid Microservice, Guid Tenant, Guid Stream, string Partition, Guid Consent)
-{
-    public static implicit operator EventHorizonConsent(EventHorizonConsentConfiguration config)
-        => new()
-        {
-            Microservice = config.Microservice,
-            Tenant = config.Tenant,
-            Stream = config.Stream,
-            Partition = config.Partition,
-            Consent = config.Consent
-        };
 }

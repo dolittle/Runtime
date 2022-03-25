@@ -7,13 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+        <ProjectReference Include="../Aggregates/Aggregates.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Aggregates/Aggregates.csproj" />
-        <ProjectReference Include="../Management/Management.csproj" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 </Project>

@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading;
-using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
-using System;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.given;
 

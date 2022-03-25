@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Microsoft.Extensions.Options;
+
 
 namespace Dolittle.Runtime.Platform.Handshake;
 
@@ -14,9 +16,9 @@ public class ResolvePlatformEnvironment : IResolvePlatformEnvironment
 {
     readonly PlatformConfiguration _platformConfig;
 
-    public ResolvePlatformEnvironment(PlatformConfiguration platformConfig)
+    public ResolvePlatformEnvironment(IOptions<PlatformConfiguration> platformConfig)
     {
-        _platformConfig = platformConfig;
+        _platformConfig = platformConfig.Value;
     }
 
     /// <inheritdoc />

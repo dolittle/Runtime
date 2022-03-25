@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Resources.Contracts;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using static Dolittle.Runtime.Resources.Contracts.Resources;
 
@@ -12,6 +13,7 @@ namespace Dolittle.Runtime.Resources;
 /// <summary>
 /// Represents an implementation of <see cref="ResourcesBase"/>.
 /// </summary>
+[PrivateService]
 public class ResourcesService : ResourcesBase
 {
     readonly MongoDB.ICanGetResourceForTenant _mongodb;

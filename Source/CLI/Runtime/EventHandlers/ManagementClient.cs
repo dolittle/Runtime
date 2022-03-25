@@ -4,18 +4,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 using ManagementContracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
-using TenantScopedStreamProcessorStatus = Dolittle.Runtime.CLI.Runtime.Events.Processing.TenantScopedStreamProcessorStatus;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
 

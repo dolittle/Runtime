@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Security;
+using Dolittle.Runtime.Execution;
 using ClaimContracts = Dolittle.Security.Contracts.Claim;
 
 namespace Dolittle.Runtime.Protobuf;

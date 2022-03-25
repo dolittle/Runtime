@@ -3,9 +3,9 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.Microservices;
-using Dolittle.Runtime.Serialization.Json;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.Aggregates;
 

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Tenancy;
 
@@ -23,6 +23,6 @@ public interface IValidateFilterForAllTenants
     /// <param name="getFilterProcessor">A <see cref="Func{TResult}" /> that returns <see cref="IFilterProcessor{TDefinition}" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns an <see cref="IDictionary{TKey, TValue}" /> of <see cref="TenantId" /> and <see cref="FilterValidationResult" />.</returns>
-    Task<IDictionary<TenantId, FilterValidationResult>> Validate<TDefinition>(Func<IFilterProcessor<TDefinition>> getFilterProcessor, CancellationToken cancellationToken)
+    Task<IDictionary<TenantId, FilterValidationResult>> Validate<TDefinition>(Func<TenantId, IFilterProcessor<TDefinition>> getFilterProcessor, CancellationToken cancellationToken)
         where TDefinition : IFilterDefinition;
 }

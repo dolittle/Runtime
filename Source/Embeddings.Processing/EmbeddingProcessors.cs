@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
-using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;
@@ -61,11 +61,12 @@ public class EmbeddingProcessors : IEmbeddingProcessors
     /// <inheritdoc/>
     public bool TryGetEmbeddingProcessorFor(TenantId tenant, EmbeddingId embedding, out IEmbeddingProcessor processor)
     {
-        processor = null;
         if (_processors.TryGetValue(embedding, out var processorsByTenant))
         {
             return processorsByTenant.TryGetValue(tenant, out processor);
         }
+        
+        processor = null;
         return false;
     }
 

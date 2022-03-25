@@ -7,22 +7,23 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using MongoDB.Driver;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB;
 
 /// <summary>
 /// Represents the MongoDB implementation of <see cref="IEventStore"/>.
 /// </summary>
+[PerTenant] //TODO: Singleton?
 public class EventStore : IEventStore
 {
     readonly FilterDefinitionBuilder<Events.Event> _eventFilter = Builders<Events.Event>.Filter;
-    readonly IExecutionContextManager _executionContextManager;
     readonly IStreams _streams;
     readonly IEventCommitter _eventCommitter;
     readonly IEventConverter _eventConverter;
@@ -32,21 +33,18 @@ public class EventStore : IEventStore
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStore"/> class.
     /// </summary>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="eventCommitter">The <see cref="IEventCommitter" />.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
     public EventStore(
-        IExecutionContextManager executionContextManager,
         IStreams streams,
         IEventCommitter eventCommitter,
         IEventConverter eventConverter,
         IAggregateRoots aggregateRoots,
         IStreamEventWatcher streamWatcher)
     {
-        _executionContextManager = executionContextManager;
         _streams = streams;
         _eventCommitter = eventCommitter;
         _eventConverter = eventConverter;
@@ -55,7 +53,7 @@ public class EventStore : IEventStore
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken)
+    public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         ThrowIfNoEventsToCommit(events);
         return await DoCommit<CommittedEvents, CommittedEvent>(async (transaction, cancel) =>
@@ -71,7 +69,7 @@ public class EventStore : IEventStore
                     transaction,
                     eventLogSequenceNumber,
                     DateTimeOffset.UtcNow,
-                    _executionContextManager.Current,
+                    executionContext,
                     @event,
                     cancel).ConfigureAwait(false);
                 committedEvents.Add(committedEvent);
@@ -82,7 +80,7 @@ public class EventStore : IEventStore
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken)
+    public async Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         ThrowIfNoEventsToCommit(events);
         return await DoCommit<CommittedAggregateEvents, CommittedAggregateEvent>(async (transaction, cancel) =>
@@ -104,7 +102,7 @@ public class EventStore : IEventStore
                     eventLogSequenceNumber,
                     DateTimeOffset.UtcNow,
                     events.EventSource,
-                    _executionContextManager.Current,
+                    executionContext,
                     @event,
                     cancel).ConfigureAwait(false);
                 committedEvents.Add(committedEvent);

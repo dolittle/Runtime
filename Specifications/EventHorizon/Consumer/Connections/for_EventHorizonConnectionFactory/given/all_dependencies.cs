@@ -5,7 +5,7 @@ using Machine.Specifications;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
 using Dolittle.Runtime.Services.Clients;
-using Dolittle.Runtime.Microservices;
+using Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnectionFactory.given;
 

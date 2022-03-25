@@ -4,7 +4,7 @@
 namespace Dolittle.Runtime.Services;
 
 /// <summary>
-/// Represents the visibility for an <see cref="IEndpoint"/>.
+/// Represents the visibility for a gRPC service endpoint.
 /// </summary>
 public enum EndpointVisibility
 {

@@ -22,12 +22,4 @@ public class and_registration_arguments_does_not_have_call_context : given.a_dis
 
     It should_return_false = () => result.ShouldBeFalse();
     It should_not_set_arguments = () => dispatcher.Arguments.ShouldBeNull();
-
-    It should_not_change_execution_context = () => execution_context_manager
-        .Verify(
-            _ => _.CurrentFor(
-                Moq.It.IsAny<Execution.ExecutionContext>(),
-                Moq.It.IsAny<string>(),
-                Moq.It.IsAny<int>(),
-                Moq.It.IsAny<string>()), Moq.Times.Never);
 }

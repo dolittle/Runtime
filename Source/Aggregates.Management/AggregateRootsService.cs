@@ -3,14 +3,12 @@
 
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management.Contracts;
-using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Aggregates.Management.Contracts.AggregateRoots;
@@ -20,22 +18,20 @@ namespace Dolittle.Runtime.Aggregates.Management;
 /// <summary>
 /// Represents an implementation of <see cref="AggregateRootsBase"/>.
 /// </summary>
+[ManagementService]
 public class AggregateRootsService : AggregateRootsBase
 {
     readonly IGetTenantScopedAggregateRoot _tenantScopedAggregateRoot;
-    readonly FactoryFor<IEventStore> _getEventStore;
-    readonly IExecutionContextManager _executionContextManager;
+    readonly Func<TenantId, IEventStore> _getEventStoreFor;
     readonly ILogger _logger;
         
     public AggregateRootsService(
         IGetTenantScopedAggregateRoot tenantScopedAggregateRoot,
-        FactoryFor<IEventStore> getEventStore,
-        IExecutionContextManager executionContextManager,
+        Func<TenantId, IEventStore> getEventStoreFor,
         ILogger logger)
     {
         _tenantScopedAggregateRoot = tenantScopedAggregateRoot;
-        _getEventStore = getEventStore;
-        _executionContextManager = executionContextManager;
+        _getEventStoreFor = getEventStoreFor;
         _logger = logger;
     }
 
@@ -86,9 +82,14 @@ public class AggregateRootsService : AggregateRootsBase
     {
         try
         {
-            _logger.GetEvents(request.Aggregate.AggregateRootId.ToGuid(), request.Aggregate.EventSourceId);
-            _executionContextManager.CurrentFor(request.TenantId.ToGuid());
-            var events = await _getEventStore().FetchForAggregate(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken).ConfigureAwait(false);
+            var aggregateRootId = request.Aggregate.AggregateRootId.ToGuid();
+            var eventSourceId = request.Aggregate.EventSourceId;
+            var tenant = request.TenantId.ToGuid();
+            
+            _logger.GetEvents(aggregateRootId, eventSourceId);
+            
+            var events = await _getEventStoreFor(tenant).FetchForAggregate(eventSourceId, aggregateRootId, context.CancellationToken).ConfigureAwait(false);
+            
             return new GetEventsResponse { Events = events.ToProtobuf() };
         }
         catch (Exception ex)

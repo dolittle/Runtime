@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
@@ -46,18 +45,18 @@ public class and_it_fails_on_third_event : given.all_dependencies
         exception = new Exception();
         result_after_three = new ProjectionFailedResult(exception);
         embedding
-            .Setup(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token))
+            .Setup(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), execution_context, cancellation_token))
             .Returns(Task.FromResult<IProjectionResult>(result_after_one));
         embedding
-            .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), cancellation_token))
+            .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), execution_context, cancellation_token))
             .Returns(Task.FromResult<IProjectionResult>(result_after_two));
         embedding
-            .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token))
+            .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), execution_context, cancellation_token))
             .Returns(Task.FromResult<IProjectionResult>(result_after_three));
     };
 
     static Partial<EmbeddingCurrentState> result;
-    Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, execution_context, cancellation_token).GetAwaiter().GetResult();
 
     It should_fail = () => result.Success.ShouldBeFalse();
     It should_be_a_partial_success = () => result.IsPartialResult.ShouldBeTrue();
@@ -66,7 +65,7 @@ public class and_it_fails_on_third_event : given.all_dependencies
     It should_return_a_persisted_result = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
     It should_return_the_same_key = () => result.Result.Key.ShouldEqual(projection_key);
     It should_return_the_correct_aggregate_root_version = () => result.Result.Version.Value.ShouldEqual(current_state.Version.Value + 2);
-    It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token));
-    It should_project_the_second_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), cancellation_token));
-    It should_project_the_third_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token));
+    It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), execution_context, cancellation_token));
+    It should_project_the_second_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), execution_context, cancellation_token));
+    It should_project_the_third_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), execution_context, cancellation_token));
 }

@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
-using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.ResourceTypes.Configuration;
+
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
@@ -14,10 +16,10 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB;
 
 /// <summary>
-/// Represents a connection to the MongoDB database.
+/// Represents an implementation of <see cref="IDatabaseConnection"/>.
 /// </summary>
-[SingletonPerTenant]
-public class DatabaseConnection
+[Singleton, PerTenant]
+public class DatabaseConnection : IDatabaseConnection
 {
     /// <summary>
     /// Initializes static members of the <see cref="DatabaseConnection"/> class.
@@ -30,10 +32,10 @@ public class DatabaseConnection
     /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
     /// </summary>
-    /// <param name="configuration">A <see cref="IConfigurationFor{EventStoreConfiguration}"/> with database connection parameters.</param>
-    public DatabaseConnection(IConfigurationFor<EventStoreConfiguration> configuration)
+    /// <param name="configuration">A <see cref="IOptions{TOptions}"/> with database connection parameters.</param>
+    public DatabaseConnection(IOptions<EventStoreConfiguration> configuration)
     {
-        var config = configuration.Instance;
+        var config = configuration.Value;
         var settings = new MongoClientSettings
         {
             Servers = config.Servers.Select(MongoServerAddress.Parse),
@@ -45,14 +47,10 @@ public class DatabaseConnection
         Database = MongoClient.GetDatabase(config.Database);
     }
 
-    /// <summary>
-    /// Gets the configured <see cref="IMongoClient"/> for the MongoDB database.
-    /// </summary>
+    /// <inheritdoc />
     public IMongoClient MongoClient { get; }
 
-    /// <summary>
-    /// Gets the configured <see cref="IMongoDatabase"/> for the MongoDB database.
-    /// </summary>
+    /// <inheritdoc />
     public IMongoDatabase Database { get; }
 
     /// <summary>

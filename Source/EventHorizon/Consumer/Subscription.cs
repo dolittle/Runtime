@@ -8,12 +8,12 @@ using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer;
 
@@ -25,7 +25,8 @@ public class Subscription : ISubscription
     readonly object _startLock = new();
     readonly object _responseLock = new();
     readonly MicroserviceAddress _connectionAddress;
-    readonly IAsyncPolicyFor<Subscription> _policy;
+    readonly ExecutionContext _executionContext;
+    readonly ISubscriptionPolicies _policies;
     readonly IEventHorizonConnectionFactory _connectionFactory;
     readonly IStreamProcessorFactory _streamProcessorFactory;
     readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
@@ -39,16 +40,19 @@ public class Subscription : ISubscription
     /// </summary>
     /// <param name="identifier">The identifier of the subscription.</param>
     /// <param name="connectionAddress">The address of the producer Runtime to connect to.</param>
-    /// <param name="policy">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/>.</param>
+    /// <param name="policies">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
     /// <param name="connectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
     /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
     /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
+    /// <param name="processingMetrics">Thh <see cref="Processing.IMetricsCollector"/>.</param>
     /// <param name="logger">The system for logging messages.</param>
     public Subscription(
         SubscriptionId identifier,
         MicroserviceAddress connectionAddress,
-        IAsyncPolicyFor<Subscription> policy,
+        ExecutionContext executionContext,
+        ISubscriptionPolicies policies,
         IEventHorizonConnectionFactory connectionFactory,
         IStreamProcessorFactory streamProcessorFactory,
         IGetNextEventToReceiveForSubscription subscriptionPositions,
@@ -58,7 +62,8 @@ public class Subscription : ISubscription
     {
         Identifier = identifier;
         _connectionAddress = connectionAddress;
-        _policy = policy;
+        _executionContext = executionContext;
+        _policies = policies;
         _connectionFactory = connectionFactory;
         _streamProcessorFactory = streamProcessorFactory;
         _subscriptionPositions = subscriptionPositions;
@@ -120,7 +125,7 @@ public class Subscription : ISubscription
         }
 
         _logger.SubscriptionStarting(Identifier);
-        return _policy.Execute(SubscribeLoop, CancellationToken.None);
+        return _policies.Connecting.ExecuteAsync(SubscribeLoop, CancellationToken.None);
     }
 
     async Task SubscribeLoop(CancellationToken cancellationToken)
@@ -154,7 +159,7 @@ public class Subscription : ISubscription
         {
             State = SubscriptionState.Connecting;
 
-            var connection = _connectionFactory.Create(_connectionAddress);
+            var connection = _connectionFactory.Create(_connectionAddress, _executionContext);
             var nextEventToReceive = await _subscriptionPositions.GetNextEventToReceiveFor(Identifier, cancellationToken);
             var response = await connection.Connect(Identifier, nextEventToReceive, cancellationToken).ConfigureAwait(false);
             SetConnectionResponse(response);
@@ -179,7 +184,7 @@ public class Subscription : ISubscription
 
             var connectionToStreamProcessorQueue = new AsyncProducerConsumerQueue<StreamEvent>();
 
-            var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue, _processingMetrics));
+            var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, _executionContext, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue, _processingMetrics));
 
             var tasks = new TaskGroup(
                 writeEventsStreamProcessor.StartAndWait(

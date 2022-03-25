@@ -4,12 +4,14 @@
 using System;
 using Machine.Specifications;
 using Moq;
-using Dolittle.Runtime.Microservices;
 using System.Collections.Generic;
-using Dolittle.Runtime.ApplicationModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Execution;
+using Microservices;
+using Microsoft.Extensions.Options;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscriptions.given;
 
@@ -22,6 +24,7 @@ public class all_dependencies
     protected static Mock<ISubscriptionFactory> subscription_factory;
     protected static Mock<ISubscription> subscription;
     protected static MicroservicesConfiguration microservices_configuration;
+    protected static ExecutionContext execution_context;
     protected static Subscriptions subscriptions;
 
     Establish context = () =>
@@ -34,12 +37,13 @@ public class all_dependencies
             Guid.Parse("cd2433d3-4aad-41ac-87bc-f37240736444"),
             "064749fc-8d13-4b12-a3c4-584e34596b99"
         );
+        execution_context = execution_contexts.create();
         configured_microservice = new MicroservicesEntry(subscription_id.ProducerMicroserviceId, new MicroserviceAddress("host", 3));
 
         subscription_factory = new Mock<ISubscriptionFactory>();
         subscription = new Mock<ISubscription>();
         subscription_factory
-            .Setup(_ => _.Create(subscription_id, configured_microservice.Address))
+            .Setup(_ => _.Create(subscription_id, configured_microservice.Address, execution_context))
             .Returns(subscription.Object);
         subscription.SetupGet(_ => _.State).Returns(SubscriptionState.Created);
         subscription
@@ -50,19 +54,15 @@ public class all_dependencies
         subscription
             .SetupGet(_ => _.ConnectionResponse)
             .Returns(connection_response_completion_source.Task);
-        microservices_configuration = new MicroservicesConfiguration(
-            new Dictionary<Guid, MicroserviceAddressConfiguration>
+        microservices_configuration = new MicroservicesConfiguration
+        {
             {
-                {
-                    configured_microservice.Id,
-                    new MicroserviceAddressConfiguration(
-                        configured_microservice.Address.Host,
-                        configured_microservice.Address.Port)
-                }
-            });
+                configured_microservice.Id, new MicroserviceConfiguration(configured_microservice.Address.Host, configured_microservice.Address.Port)
+            }
+        };
 
         subscriptions = new Subscriptions(
-            microservices_configuration,
+            new OptionsWrapper<MicroservicesConfiguration>(microservices_configuration),
             subscription_factory.Object,
             Mock.Of<IMetricsCollector>(),
             Mock.Of<ILogger>());
@@ -72,8 +72,5 @@ public class all_dependencies
         => microservices_configuration
             .Keys
             .Select(microservice => microservices_configuration.Remove(microservice, out var _));
-
-    protected static void AddMicroservice(MicroserviceId microserviceId, string host, int port)
-        => microservices_configuration.TryAdd(microserviceId, new MicroserviceAddressConfiguration(host, port));
 
 }

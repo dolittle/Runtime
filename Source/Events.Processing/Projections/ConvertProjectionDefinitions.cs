@@ -81,14 +81,15 @@ public class ConvertProjectionDefinitions : IConvertProjectionDefinitions
     {
         var converted = new Contracts.ProjectionCopies();
 
-        if (copies.MongoDB.ShouldCopyToMongoDB)
+        if (!copies.MongoDB.ShouldCopyToMongoDB)
         {
-            converted.MongoDB = new Contracts.ProjectionCopyToMongoDB
-            {
-                Collection = copies.MongoDB.Collection,
-            };
-            converted.MongoDB.Conversions.AddRange(ToContractsPropertyConversions(copies.MongoDB.Conversions));
+            return converted;
         }
+        converted.MongoDB = new Contracts.ProjectionCopyToMongoDB
+        {
+            Collection = copies.MongoDB.Collection,
+        };
+        converted.MongoDB.Conversions.AddRange(ToContractsPropertyConversions(copies.MongoDB.Conversions));
 
         return converted;
     }

@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../Configuration/Configuration.csproj" />
+        <ProjectReference Include="../Domain/Domain.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
     </ItemGroup>
 </Project>

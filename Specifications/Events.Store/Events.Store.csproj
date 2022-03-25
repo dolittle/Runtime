@@ -12,7 +12,6 @@
 
     <ItemGroup>
         <ProjectReference Include="../../Source/Events.Store/Events.Store.csproj" />
-        <ProjectReference Include="../../Source/Security/Security.csproj" />
     </ItemGroup>
 
 </Project>

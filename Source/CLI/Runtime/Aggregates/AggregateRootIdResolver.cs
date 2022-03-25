@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Aggregates.Management;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Microservices;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.Aggregates;
 

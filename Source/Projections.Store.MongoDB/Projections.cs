@@ -3,8 +3,10 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB;
@@ -12,7 +14,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB;
 /// <summary>
 /// Represents a <see cref="IProjections" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class Projections : ProjectionsConnection, IProjections
 {
     const string ProjectionDefinitionCollectionName = "projection-definitions";
@@ -23,7 +25,7 @@ public class Projections : ProjectionsConnection, IProjections
     /// Initializes a new instance of the <see cref="Projections"/> class.
     /// </summary>
     /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
-    public Projections(DatabaseConnection connection)
+    public Projections(IDatabaseConnection connection)
         : base(connection)
     {
         _projectionDefinitions = Database.GetCollection<Definition.ProjectionDefinition>(ProjectionDefinitionCollectionName);

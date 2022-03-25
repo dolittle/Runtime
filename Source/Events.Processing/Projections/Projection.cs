@@ -10,6 +10,7 @@ using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -46,20 +47,20 @@ public class Projection : IProjection
     public bool HasAlias { get; }
 
     /// <inheritdoc/>
-    public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
-        => Process(state, @event, partitionId, new ProjectionRequest(), cancellationToken);
+    public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
+        => Process(state, @event, partitionId, new ProjectionRequest(), executionContext, cancellationToken);
 
     /// <inheritdoc/>
-    public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var request = new ProjectionRequest
         {
             RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
         };
-        return Process(state, @event, partitionId, request, cancellationToken);
+        return Process(state, @event, partitionId, request, executionContext, cancellationToken);
     }
 
-    async Task<IProjectionResult> Process(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, ProjectionRequest request, CancellationToken token)
+    async Task<IProjectionResult> Process(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, ProjectionRequest request, ExecutionContext executionContext, CancellationToken token)
     {
         request.Event = new Contracts.StreamEvent
         {
@@ -69,13 +70,13 @@ public class Projection : IProjection
         };
         request.CurrentState = state.ToProtobuf();
 
-        var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
+        var response = await _dispatcher.Call(request, executionContext, token).ConfigureAwait(false);
 
         return response switch
         {
             { Failure: null, ResponseCase: ProjectionResponse.ResponseOneofCase.Replace } => new ProjectionReplaceResult(response.Replace.State),
             { Failure: null, ResponseCase: ProjectionResponse.ResponseOneofCase.Delete } => new ProjectionDeleteResult(),
-            _ => new ProjectionFailedResult(response.Failure.Reason),
+            _ => new ProjectionFailedResult(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan() )
         };
     }
 }

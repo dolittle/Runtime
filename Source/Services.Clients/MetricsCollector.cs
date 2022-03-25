@@ -2,141 +2,115 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
-using IMetricFactory = Dolittle.Runtime.Metrics.IMetricFactory;
 
 namespace Dolittle.Runtime.Services.Clients;
 
 /// <summary>
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
-[Singleton]
-public class MetricsCollector : ICanProvideMetrics, IMetricsCollector
+[Metrics, Singleton]
+public class MetricsCollector : IMetricsCollector
 {
-    Counter _totalStartedConnections;
-    Gauge _pendingWrites;
-    Counter _totalWriteWaitTime;
-    Counter _totalWriteTime;
-    Counter _totalWrites;
-    Counter _totalWriteBytes;
-    Counter _totalWaitForConnectResponseTime;
-    Counter _totalCancelledConnections;
-    Counter _totalReceivedMessages;
-    Counter _totalReceivedBytes;
-    Counter _totalPingsReceived;
-    Counter _totalPongsSent;
-    Counter _totalReceivedRequests;
-    Counter _totalEmptyMessagesReceived;
-    Counter _totalPingTimeouts;
-    Counter _totalFailedRequestHandlers;
-    Counter _totalFailedRequestCallbacks;
-    Counter _totalFailedResponseWrites;
-    Counter _totalRequestHandlingTime;
+    readonly Counter _totalStartedConnections;
+    readonly Gauge _pendingWrites;
+    readonly Counter _totalWriteWaitTime;
+    readonly Counter _totalWriteTime;
+    readonly Counter _totalWrites;
+    readonly Counter _totalWriteBytes;
+    readonly Counter _totalWaitForConnectResponseTime;
+    readonly Counter _totalCancelledConnections;
+    readonly Counter _totalReceivedMessages;
+    readonly Counter _totalReceivedBytes;
+    readonly Counter _totalPingsReceived;
+    readonly Counter _totalPongsSent;
+    readonly Counter _totalReceivedRequests;
+    readonly Counter _totalEmptyMessagesReceived;
+    readonly Counter _totalPingTimeouts;
+    readonly Counter _totalFailedRequestHandlers;
+    readonly Counter _totalFailedRequestCallbacks;
+    readonly Counter _totalFailedResponseWrites;
+    readonly Counter _totalRequestHandlingTime;
 
-    /// <inheritdoc/>
-    public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
+    public MetricsCollector(IMetricFactory metricFactory)
     {
-        _totalStartedConnections = metricFactory.Counter(
+        _totalStartedConnections = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_connections_started_total",
             "ReverseCall total number of connections that have been started");
 
-        _pendingWrites = metricFactory.Gauge(
+        _pendingWrites = metricFactory.CreateGauge(
             "dolittle_system_runtime_services_clients_reversecalls_pending_writes",
             "ReverseCall current pending stream writes waiting");
 
-        _totalWriteWaitTime = metricFactory.Counter(
+        _totalWriteWaitTime = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_stream_write_wait_seconds_total",
             "ReverseCall total time spent waiting to write to streams");
 
-        _totalWriteTime = metricFactory.Counter(
+        _totalWriteTime = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_stream_write_seconds_total",
             "ReverseCall total time spent writing to streams");
 
-        _totalWrites = metricFactory.Counter(
+        _totalWrites = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_stream_writes_total",
             "ReverseCall total number of writes to streams");
 
-        _totalWriteBytes = metricFactory.Counter(
+        _totalWriteBytes = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_stream_write_bytes_total",
             "ReverseCall total number of bytes written to streams");
 
-        _totalWaitForConnectResponseTime = metricFactory.Counter(
+        _totalWaitForConnectResponseTime = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_connect_response_wait_seconds_total",
             "ReverseCall total time spent waiting for connect response");
 
-        _totalCancelledConnections = metricFactory.Counter(
+        _totalCancelledConnections = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_connections_cancelled_total",
             "ReverseCall total number of connections that have been cancelled");
 
-        _totalReceivedMessages = metricFactory.Counter(
+        _totalReceivedMessages = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_messages_received_total",
             "ReverseCall total number of messages that have been received");
 
-        _totalReceivedBytes = metricFactory.Counter(
+        _totalReceivedBytes = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_stream_read_bytes_total",
             "ReverseCall total number of bytes read from streams");
 
-        _totalPingsReceived = metricFactory.Counter(
+        _totalPingsReceived = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_pings_received_total",
             "ReverseCall total number of pings received");
 
-        _totalPongsSent = metricFactory.Counter(
+        _totalPongsSent = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_pongs_sent_total",
             "ReverseCall total number of pongs sent");
 
-        _totalReceivedRequests = metricFactory.Counter(
+        _totalReceivedRequests = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_requests_received_total",
             "ReverseCall total number of requests that have been received");
 
-        _totalEmptyMessagesReceived = metricFactory.Counter(
+        _totalEmptyMessagesReceived = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_empty_messages_received_total",
             "ReverseCall total number of empty messages that have been received");
 
-        _totalPingTimeouts = metricFactory.Counter(
+        _totalPingTimeouts = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_keepalive_timeouts_total",
             "ReverseCall total number of times ping keepalive has timed out");
 
-        _totalFailedRequestHandlers = metricFactory.Counter(
+        _totalFailedRequestHandlers = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_requests_failed_handlers_total",
             "ReverseCall total number of failed request handlers");
 
-        _totalFailedRequestCallbacks = metricFactory.Counter(
+        _totalFailedRequestCallbacks = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_requests_failed_callbacks_total",
             "ReverseCall total number of failed request callbacks");
 
-        _totalFailedResponseWrites = metricFactory.Counter(
+        _totalFailedResponseWrites = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_failed_response_writes_total",
             "ReverseCall total number of failed response writes");
 
-        _totalRequestHandlingTime = metricFactory.Counter(
+        _totalRequestHandlingTime = metricFactory.CreateCounter(
             "dolittle_system_runtime_services_clients_reversecalls_request_handling_seconds_total",
             "ReverseCall total time spent handling requests");
-
-        return new Collector[]
-        {
-            _totalStartedConnections,
-            _pendingWrites,
-            _totalWriteWaitTime,
-            _totalWriteTime,
-            _totalWrites,
-            _totalWriteBytes,
-            _totalWaitForConnectResponseTime,
-            _totalCancelledConnections,
-            _totalReceivedMessages,
-            _totalReceivedBytes,
-            _totalPingsReceived,
-            _totalPongsSent,
-            _totalReceivedRequests,
-            _totalEmptyMessagesReceived,
-            _totalPingTimeouts,
-            _totalFailedRequestHandlers,
-            _totalFailedRequestCallbacks,
-            _totalFailedResponseWrites,
-            _totalRequestHandlingTime,
-        };
     }
 
     /// <inheritdoc/>

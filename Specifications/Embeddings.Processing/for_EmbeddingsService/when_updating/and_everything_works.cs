@@ -4,14 +4,13 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Services;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_updating;
@@ -43,7 +42,7 @@ public class and_everything_works : given.all_dependencies
             }));
 
         embedding_processor
-            .Setup(_ => _.Update(key, state, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Update(key, state, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<ProjectionState>.Succeeded(state)));
     };
 
@@ -53,7 +52,7 @@ public class and_everything_works : given.all_dependencies
     {
         result = embedding_service.Update(request, call_context).GetAwaiter().GetResult();
     };
-    It should_update_once = () => embedding_processor.Verify(_ => _.Update(key, state, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+    It should_update_once = () => embedding_processor.Verify(_ => _.Update(key, state, execution_context, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_not_do_anything_else_with_processor = () => embedding_processor.VerifyNoOtherCalls();
     It should_not_have_a_failure = () => result.Failure.ShouldBeNull();
     It should_have_the_correct_state = () => result.State.State.ShouldEqual(state.Value);

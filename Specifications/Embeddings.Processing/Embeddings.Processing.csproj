@@ -1,16 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../../specs.props"/>
+  <Import Project="../../specs.props" />
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Collections.Specs</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Embeddings.Processing.Specs</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Source/ApplicationModel/ApplicationModel.csproj" />
     <ProjectReference Include="../../Source/Embeddings.Processing/Embeddings.Processing.csproj" />
     <ProjectReference Include="../../Source/Embeddings.Store/Embeddings.Store.csproj" />
     <ProjectReference Include="../../Source/Tenancy/Tenancy.csproj" />

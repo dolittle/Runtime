@@ -7,8 +7,8 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -23,29 +23,53 @@ using Dolittle.Runtime.Services;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
-using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
 using Dolittle.Runtime.Events.Processing.Filters.Unpartitioned;
 using Dolittle.Runtime.Events.Processing.Filters.Partitioned;
+using Dolittle.Runtime.Services.Hosting;
+using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using UnpartitionedFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
+    Dolittle.Runtime.Events.Processing.Contracts.FilterClientToRuntimeMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRuntimeToClientMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationResponse,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterEventRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterResponse>;
+using PartitionedFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
+    Dolittle.Runtime.Events.Processing.Contracts.PartitionedFilterClientToRuntimeMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRuntimeToClientMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.PartitionedFilterRegistrationRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationResponse,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterEventRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.PartitionedFilterResponse>;
+using PublicFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
+    Dolittle.Runtime.Events.Processing.Contracts.PublicFilterClientToRuntimeMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRuntimeToClientMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.PublicFilterRegistrationRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationResponse,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterEventRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.PartitionedFilterResponse>;
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
 /// <summary>
 /// Represents the implementation of <see creF="FiltersBase"/>.
 /// </summary>
+[PrivateService]
 public class FiltersService : FiltersBase
 {
     readonly IHostApplicationLifetime _hostApplicationLifetime;
     readonly IStreamProcessors _streamProcessors;
     readonly IValidateFilterForAllTenants _filterForAllTenants;
-    readonly IExecutionContextManager _executionContextManager;
-    readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-    readonly FactoryFor<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
+    readonly ICreateExecutionContexts _executionContextCreator;
     readonly IInitiateReverseCallServices _reverseCallServices;
     readonly IUnpartitionedFiltersProtocol _unpartitionedFiltersProtocol;
     readonly IPartitionedFiltersProtocol _partitionedFiltersProtocol;
     readonly IPublicFiltersProtocol _publicFiltersProtocol;
+    readonly Func<TenantId, ScopeId, FilterDefinition, UnpartitionedFilterDispatcher, Unpartitioned.FilterProcessor> _createUnpartitionedFilterProcessorFor;
+    readonly Func<TenantId, ScopeId, FilterDefinition, PartitionedFilterDispatcher, Partitioned.FilterProcessor> _createPartitionedFilterProcessorFor;
+    readonly Func<TenantId, PublicFilterDefinition, PublicFilterDispatcher, PublicFilterProcessor> _createPublicFilterProcessorFor;
     readonly IStreamDefinitions _streamDefinitions;
-    readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
 
     /// <summary>
@@ -54,42 +78,44 @@ public class FiltersService : FiltersBase
     /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
     /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
-    /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
+    /// <param name="executionContextCreator">The <see cref="ICreateExecutionContexts" />.</param>
     /// <param name="streamDefinitions">The <see cref="IFilterDefinitions" />.</param>
-    /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
-    /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
     /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
     /// <param name="unpartitionedFiltersProtocol">The <see cref="IUnpartitionedFiltersProtocol" />.</param>
     /// <param name="partitionedFiltersProtocol">The <see cref="IPartitionedFiltersProtocol" />.</param>
     /// <param name="publicFiltersProtocol">The <see cref="IPublicFiltersProtocol" />.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+    /// <param name="createUnpartitionedFilterProcessorFor">The factory to use to create unpartitioned filter processors.</param>
+    /// <param name="createPartitionedFilterProcessorFor">The factory to use to create partitioned filter processors.</param>
+    /// <param name="createPublicFilterProcessorFor">The factory to use to create public filter processors.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public FiltersService(
         IHostApplicationLifetime hostApplicationLifetime,
         IStreamProcessors streamProcessors,
         IValidateFilterForAllTenants filterForAllTenants,
-        IExecutionContextManager executionContextManager,
+        ICreateExecutionContexts executionContextCreator,
         IStreamDefinitions streamDefinitions,
-        FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-        FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
         IInitiateReverseCallServices reverseCallServices,
         IUnpartitionedFiltersProtocol unpartitionedFiltersProtocol,
         IPartitionedFiltersProtocol partitionedFiltersProtocol,
         IPublicFiltersProtocol publicFiltersProtocol,
-        ILoggerFactory loggerFactory)
+        Func<TenantId, ScopeId, FilterDefinition, UnpartitionedFilterDispatcher, Unpartitioned.FilterProcessor> createUnpartitionedFilterProcessorFor,
+        Func<TenantId, ScopeId, FilterDefinition, PartitionedFilterDispatcher, Partitioned.FilterProcessor> createPartitionedFilterProcessorFor,
+        Func<TenantId, PublicFilterDefinition, PublicFilterDispatcher, PublicFilterProcessor> createPublicFilterProcessorFor,
+        ILogger logger)
     {
         _hostApplicationLifetime = hostApplicationLifetime;
         _streamProcessors = streamProcessors;
         _filterForAllTenants = filterForAllTenants;
-        _executionContextManager = executionContextManager;
+        _executionContextCreator = executionContextCreator;
         _streamDefinitions = streamDefinitions;
-        _getEventsToStreamsWriter = getEventsToStreamsWriter;
-        _getEventsToPublicStreamsWriter = getEventsToPublicStreamsWriter;
         _reverseCallServices = reverseCallServices;
         _unpartitionedFiltersProtocol = unpartitionedFiltersProtocol;
         _partitionedFiltersProtocol = partitionedFiltersProtocol;
         _publicFiltersProtocol = publicFiltersProtocol;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<FiltersService>();
+        _createUnpartitionedFilterProcessorFor = createUnpartitionedFilterProcessorFor;
+        _createPartitionedFilterProcessorFor = createPartitionedFilterProcessorFor;
+        _createPublicFilterProcessorFor = createPublicFilterProcessorFor;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -112,9 +138,13 @@ public class FiltersService : FiltersBase
             return;
         }
         var (dispatcher, arguments) = tryConnect.Result;
+        var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
+        if (!createExecutionContext.Success)
+        {
+            return;
+        }
 
-        _logger.SettingExecutionContext(arguments.ExecutionContext);
-        _executionContextManager.CurrentFor(arguments.ExecutionContext);
+        var executionContext = createExecutionContext.Result;
 
         if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false))
         {
@@ -126,12 +156,12 @@ public class FiltersService : FiltersBase
             dispatcher,
             arguments.Scope,
             filterDefinition,
-            () => new Unpartitioned.FilterProcessor(
+            tenant => _createUnpartitionedFilterProcessorFor(
+                tenant,
                 arguments.Scope,
                 filterDefinition,
-                dispatcher,
-                _getEventsToStreamsWriter(),
-                _loggerFactory.CreateLogger<Unpartitioned.FilterProcessor>()),
+                dispatcher),
+            executionContext,
             cts.Token).ConfigureAwait(false);
     }
 
@@ -155,9 +185,14 @@ public class FiltersService : FiltersBase
             return;
         }
         var (dispatcher, arguments) = tryConnect.Result;
+        var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
+        if (!createExecutionContext.Success)
+        {
+            return;
+        }
 
-        _logger.SettingExecutionContext(arguments.ExecutionContext);
-        _executionContextManager.CurrentFor(arguments.ExecutionContext);
+        var executionContext = createExecutionContext.Result;
+
         if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false))
         {
             return;
@@ -168,13 +203,13 @@ public class FiltersService : FiltersBase
         await RegisterFilter(
             dispatcher,
             arguments.Scope,
-            filterDefinition,
-            () => new Partitioned.FilterProcessor(
+            filterDefinition, 
+            tenant => _createPartitionedFilterProcessorFor(
+                tenant,
                 arguments.Scope,
                 filterDefinition,
-                dispatcher,
-                _getEventsToStreamsWriter(),
-                _loggerFactory.CreateLogger<Partitioned.FilterProcessor>()),
+                dispatcher),
+            executionContext,
             cts.Token).ConfigureAwait(false);
     }
 
@@ -198,9 +233,13 @@ public class FiltersService : FiltersBase
             return;
         }
         var (dispatcher, arguments) = tryConnect.Result;
+        var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
+        if (!createExecutionContext.Success)
+        {
+            return;
+        }
 
-        _logger.SettingExecutionContext(arguments.ExecutionContext);
-        _executionContextManager.CurrentFor(arguments.ExecutionContext);
+        var executionContext = createExecutionContext.Result;
 
         if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false))
         {
@@ -212,13 +251,30 @@ public class FiltersService : FiltersBase
             dispatcher,
             ScopeId.Default,
             filterDefinition,
-            () => new PublicFilterProcessor(
-                filterDefinition,
-                dispatcher,
-                _getEventsToPublicStreamsWriter(),
-                _loggerFactory.CreateLogger<PublicFilterProcessor>()),
+            tenant => _createPublicFilterProcessorFor(
+                    tenant,
+                    filterDefinition,
+                    dispatcher),
+            executionContext,
             cts.Token).ConfigureAwait(false);
     }
+
+    Task<Try<ExecutionContext>> CreateExecutionContextOrReject<TClientMessage, TConnectRequest, TResponse>(
+        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+        ExecutionContext requestExecutionContext,
+        CancellationToken cancellationToken)
+        where TClientMessage : IMessage, new()
+        where TConnectRequest : class
+        where TResponse : class
+        => _executionContextCreator
+            .TryCreateUsing(requestExecutionContext)
+            .Catch(async exception =>
+            {
+                _logger.ExecutionContextIsNotValid(exception);
+                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Execution context is invalid: {exception.Message}");
+                await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
+            });
+        
 
     async Task<bool> RejectIfInvalidFilterId<TClientMessage, TConnectRequest, TResponse>(
         IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
@@ -244,7 +300,8 @@ public class FiltersService : FiltersBase
         IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
         ScopeId scopeId,
         TFilterDefinition filterDefinition,
-        Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+        Func<TenantId, IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+        ExecutionContext executionContext,
         CancellationToken externalCancellationToken)
         where TFilterDefinition : IFilterDefinition
         where TClientMessage : IMessage, new()
@@ -257,7 +314,7 @@ public class FiltersService : FiltersBase
 
         _logger.ConnectingFilter(filterDefinition.TargetStream);
 
-        var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, cancellationToken);
+        var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, executionContext, cancellationToken);
         if (!tryRegisterFilter.Success)
         {
             linkedTokenSource.Cancel();
@@ -308,7 +365,7 @@ public class FiltersService : FiltersBase
         StreamProcessor streamProcessor,
         ScopeId scopeId,
         TFilterDefinition filterDefinition,
-        Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+        Func<TenantId, IFilterProcessor<TFilterDefinition>> getFilterProcessor,
         CancellationToken cancellationToken)
         where TClientMessage : IMessage, new()
         where TConnectRequest : class
@@ -341,7 +398,8 @@ public class FiltersService : FiltersBase
     Try<StreamProcessor> TryRegisterStreamProcessor<TFilterDefinition>(
         ScopeId scopeId,
         TFilterDefinition filterDefinition,
-        Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+        Func<TenantId, IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
         where TFilterDefinition : IFilterDefinition
     {
@@ -352,7 +410,8 @@ public class FiltersService : FiltersBase
                 scopeId,
                 filterDefinition.TargetStream.Value,
                 new EventLogStreamDefinition(),
-                () => getFilterProcessor(),
+                getFilterProcessor,
+                executionContext,
                 cancellationToken);
         }
         catch (Exception ex)
@@ -369,7 +428,7 @@ public class FiltersService : FiltersBase
     async Task ValidateFilter<TFilterDefinition>(
         ScopeId scopeId,
         TFilterDefinition filterDefinition,
-        Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+        Func<TenantId, IFilterProcessor<TFilterDefinition>> getFilterProcessor,
         CancellationToken cancellationToken)
         where TFilterDefinition : IFilterDefinition
     {

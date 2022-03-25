@@ -3,11 +3,11 @@
 
 using System;
 using System.Globalization;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Security;
 using Machine.Specifications;
+using Environment = Dolittle.Runtime.Domain.Platform.Environment;
 using ExecutionContextContract = Dolittle.Execution.Contracts.ExecutionContext;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Protobuf.for_Extensions;
 
@@ -15,16 +15,16 @@ public class when_converting_execution_context_to_protobuf
 {
     static ExecutionContext execution_context;
     static ExecutionContextContract result;
-    static Versioning.Version version;
+    static Version version;
 
     Establish context = () =>
     {
-        version = new Versioning.Version(1, 2, 3, 1, "test");
+        version = new Version(1, 2, 3, 1, "test");
         execution_context = new ExecutionContext(
             Guid.NewGuid(),
             Guid.NewGuid(),
             version,
-            Execution.Environment.Development,
+            Environment.Development,
             Guid.NewGuid(),
             new Claims(new[]
             {

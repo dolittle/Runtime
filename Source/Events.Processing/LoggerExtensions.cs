@@ -4,7 +4,6 @@
 using System;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing;
@@ -14,12 +13,6 @@ namespace Dolittle.Runtime.Events.Processing;
 /// </summary>
 static class LoggerExtensions
 {
-    static readonly Action<ILogger, ExecutionContext, Exception> _settingExecutionContext = LoggerMessage
-        .Define<ExecutionContext>(
-            LogLevel.Trace,
-            new EventId(41545433, nameof(SettingExecutionContext)),
-            "Setting execution context\n{ExecutionContext}");
-
     static readonly Action<ILogger, Guid, Exception> _validatingFilter = LoggerMessage
         .Define<Guid>(
             LogLevel.Trace,
@@ -37,9 +30,6 @@ static class LoggerExtensions
             LogLevel.Debug,
             new EventId(421949468, nameof(PersistingStreamDefinition)),
             "Persisting definition for stream: {Stream}");
-
-    internal static void SettingExecutionContext(this ILogger logger, ExecutionContext context)
-        => _settingExecutionContext(logger, context, null);
 
     internal static void ValidatingFilter(this ILogger logger, EventProcessorId filter)
         => _validatingFilter(logger, filter, null);

@@ -6,6 +6,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 /// <summary>
 /// Represents a the result of a projection operation that resulted in a delete.
 /// </summary>
-public class ProjectionDeleteResult : IProjectionResult
+public class ProjectionDeleteResult : SuccessfulProjectionResult
 {
 }

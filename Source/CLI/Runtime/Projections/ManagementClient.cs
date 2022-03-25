@@ -4,15 +4,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ManagementContracts = Dolittle.Runtime.Events.Processing.Management.Contracts;

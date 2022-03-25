@@ -49,7 +49,7 @@ public class and_it_receives_a_response_with_the_correct_callid : given.a_dispat
     };
 
     static MyResponse response;
-    Because of = () => response = dispatcher.Call(request, CancellationToken.None).GetAwaiter().GetResult();
+    Because of = () => response = dispatcher.Call(request, execution_context, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_write_a_message_with_the_request = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.Request == request)), Moq.Times.Once);
     It should_set_the_current_execution_context_in_the_request = () => execution_context_in_request.ShouldEqual(execution_context);

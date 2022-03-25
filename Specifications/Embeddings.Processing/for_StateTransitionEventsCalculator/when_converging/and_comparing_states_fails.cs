@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
@@ -28,7 +27,7 @@ public class and_comparing_states_fails : given.all_dependencies
     };
 
     static Try<UncommittedAggregateEvents> result;
-    Because of = () => result = calculator.TryConverge(current_state, desired_state, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = calculator.TryConverge(current_state, desired_state, execution_context, cancellation).GetAwaiter().GetResult();
 
     It should_return_a_failure = () => result.Success.ShouldBeFalse();
     It should_fail_because_comparing_states_failed = () => result.Exception.ShouldEqual(exception);

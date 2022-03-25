@@ -3,8 +3,10 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Lifecycle;
+
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
@@ -13,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 /// <summary>
 /// Represents a <see cref="IStreams" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class Streams : EventStoreConnection, IStreams
 {
     const string EventLogCollectionName = "event-log";
@@ -25,9 +27,9 @@ public class Streams : EventStoreConnection, IStreams
     /// <summary>
     /// Initializes a new instance of the <see cref="Streams"/> class.
     /// </summary>
-    /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
+    /// <param name="connection">The <see cref="IDatabaseConnection" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
-    public Streams(DatabaseConnection connection, ILogger logger)
+    public Streams(IDatabaseConnection connection, ILogger logger)
         : base(connection)
     {
         _logger = logger;

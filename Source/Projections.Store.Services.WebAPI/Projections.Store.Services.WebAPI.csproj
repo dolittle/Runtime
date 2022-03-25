@@ -5,6 +5,7 @@
     <AssemblyName>Dolittle.Runtime.Projections.Store.Services.WebAPI</AssemblyName>
     <RootNamespace>Dolittle.Runtime.Projections.Store.Services.WebAPI</RootNamespace>
   </PropertyGroup>
+    
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

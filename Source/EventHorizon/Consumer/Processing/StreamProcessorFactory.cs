@@ -1,25 +1,27 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Lifecycle;
+
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 
 /// <summary>
 /// Represents an implementation <see cref="IStreamProcessorFactory" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class StreamProcessorFactory : IStreamProcessorFactory
 {
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
     readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
-    readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-    readonly IAsyncPolicyFor<EventProcessor> _eventProcessorPolicy;
+    readonly IEventFetcherPolicies _eventsFetcherPolicy;
+    readonly IEventProcessorPolicies _eventProcessorPolicy;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
 
@@ -35,8 +37,8 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     public StreamProcessorFactory(
         IResilientStreamProcessorStateRepository streamProcessorStates,
         IWriteEventHorizonEvents eventHorizonEventsWriter,
-        IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-        IAsyncPolicyFor<EventProcessor> eventProcessorPolicy,
+        IEventFetcherPolicies eventsFetcherPolicy,
+        IEventProcessorPolicies eventProcessorPolicy,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory
     )
@@ -53,9 +55,11 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     public IStreamProcessor Create(
         ConsentId consent,
         SubscriptionId subscription,
+        ExecutionContext executionContext,
         EventsFromEventHorizonFetcher eventsFromEventHorizonFetcher)
         => new StreamProcessor(
             subscription,
+            executionContext,
             new EventProcessor(
                 consent,
                 subscription,

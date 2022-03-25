@@ -3,14 +3,17 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services.ReverseCalls;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Services;
 
@@ -35,7 +38,8 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
     readonly IPingedConnection<TClientMessage, TServerMessage> _reverseCallConnection;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
-    readonly IExecutionContextManager _executionContextManager;
+    readonly ICreateExecutionContexts _executionContextFactory;
+    readonly IMetricsCollector _metricsCollector;
     readonly ILogger _logger;
 
     readonly object _receiveArgumentsLock = new();
@@ -52,25 +56,31 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     /// </summary>
     /// <param name="reverseCallConnection">The <see cref="IPingedConnection{TClientMessage, TServerMessage}"/></param>
     /// <param name="messageConverter">The <see cref="IConvertReverseCallMessages{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
+    /// <param name="executionContextFactory">The <see cref="ICreateExecutionContexts"/> to use.</param>
+    /// <param name="metricsCollector">The <see cref="IMetricsCollector"/>.</param>
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     public ReverseCallDispatcher(
         IPingedConnection<TClientMessage, TServerMessage> reverseCallConnection,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
-        IExecutionContextManager executionContextManager,
+        ICreateExecutionContexts executionContextFactory,
+        IMetricsCollector metricsCollector,
         ILogger logger)
     {
         _reverseCallConnection = reverseCallConnection;
         _messageConverter = messageConverter;
-        _executionContextManager = executionContextManager;
+        _executionContextFactory = executionContextFactory;
+        _metricsCollector = metricsCollector;
         _logger = logger;
     }
 
     /// <inheritdoc/>
     public TConnectArguments Arguments { get; private set; }
 
+    /// <inheritdoc />
+    public ExecutionContext ExecutionContext { get; private set; }
+
     /// <inheritdoc/>
-    public async Task<bool> ReceiveArguments(CancellationToken cancellationToken)
+    public async Task<bool> ReceiveArguments(CancellationToken cancellationToken, bool notValidateExecutionContext = false)
     {
         ThrowIfReceivingArguments();
         lock (_receiveArgumentsLock)
@@ -80,33 +90,39 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
         }
 
         var clientToRuntimeStream = _reverseCallConnection.RuntimeStream;
-        if (await clientToRuntimeStream.MoveNext(cancellationToken).ConfigureAwait(false))
+        if (!await clientToRuntimeStream.MoveNext(cancellationToken).ConfigureAwait(false))
         {
-            var arguments = _messageConverter.GetConnectArguments(clientToRuntimeStream.Current);
-            if (arguments != null)
-            {
-                var callContext = _messageConverter.GetArgumentsContext(arguments);
-                if (callContext?.PingInterval == null)
-                {
-                    Log.ReceivedArgumentsButPingIntervalNotSet(_logger);
-                    return false;
-                }
-
-                if (callContext?.ExecutionContext != null)
-                {
-                    _executionContextManager.CurrentFor(callContext.ExecutionContext.ToExecutionContext());
-                    Arguments = arguments;
-                    return true;
-                }
-
-                Log.ReceivedArgumentsButCallExecutionContextNotSet(_logger);
-            }
-            else
-            {
-                Log.ReceivedInitialMessageByArgumentsNotSet(_logger);
-            }
+            return false;
         }
 
+        var arguments = _messageConverter.GetConnectArguments(clientToRuntimeStream.Current);
+        if (arguments != null)
+        {
+            var callContext = _messageConverter.GetArgumentsContext(arguments);
+            if (callContext?.PingInterval == null)
+            {
+                Log.ReceivedArgumentsButPingIntervalNotSet(_logger);
+                return false;
+            }
+
+            if (callContext?.ExecutionContext == null)
+            {
+                Log.ReceivedArgumentsButCallExecutionContextNotSet(_logger);
+                return false;
+            }
+
+            var createExecutionContext = notValidateExecutionContext? Try<ExecutionContext>.Succeeded(callContext.ExecutionContext.ToExecutionContext()) : _executionContextFactory.TryCreateUsing(callContext.ExecutionContext);
+            if (!createExecutionContext.Success)
+            {
+                Log.ReceivedInvalidExecutionContext(_logger, createExecutionContext.Exception);
+                return false;
+            }
+
+            Arguments = arguments;
+            ExecutionContext = createExecutionContext.Result;
+            return true;
+        }
+        Log.ReceivedInitialMessageByArgumentsNotSet(_logger);
         return false;
     }
 
@@ -142,7 +158,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Call(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> Call(TRequest request, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         ThrowIfCompletedCall();
 
@@ -158,19 +174,25 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
             var callContext = new ReverseCallRequestContext
             {
                 CallId = callId.ToProtobuf(),
-                ExecutionContext = _executionContextManager.Current.ToProtobuf(),
+                ExecutionContext = executionContext.ToProtobuf(),
             };
             _messageConverter.SetRequestContext(callContext, request);
 
             var message = new TServerMessage();
             _messageConverter.SetRequest(request, message);
             _logger.WritingRequest(callId);
+            _metricsCollector.AddRequest();
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
             await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
-
-            return await completionSource.Task.ConfigureAwait(false);
+            var response = await completionSource.Task.ConfigureAwait(false);
+            stopWatch.Stop();
+            _metricsCollector.AddToTotalRequestTime(stopWatch.Elapsed);
+            return response;
         }
         catch (Exception ex)
         {
+            _metricsCollector.AddFailedRequest();
             _logger.CallFailed(ex);
             _calls.TryRemove(callId, out _);
             throw;
@@ -190,15 +212,16 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     /// <param name="disposing">Whether to dispose managed resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposed)
+        if (_disposed)
         {
-            if (disposing)
-            {
-                _reverseCallConnection.Dispose();
-            }
-
-            _disposed = true;
+            return;
         }
+        if (disposing)
+        {
+            _reverseCallConnection.Dispose();
+        }
+
+        _disposed = true;
     }
 
     async Task HandleClientMessages(CancellationToken cancellationToken)
@@ -275,7 +298,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
         {
             throw new ReverseCallDispatcherAlreadyAccepted();
         }
-        else if (_rejected)
+        if (_rejected)
         {
             throw new ReverseCallDispatcherAlreadyRejected();
         }

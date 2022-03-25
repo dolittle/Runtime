@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Protobuf.Contracts;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
 using Dolittle.Runtime.Events.Processing.Projections;
@@ -14,6 +14,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.Projections;
@@ -23,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.Projections;
 /// <summary>
 /// Represents an implementation of <see cref="ProjectionsBase"/>.
 /// </summary>
+[ManagementService]
 public class ProjectionsService : ProjectionsBase
 {
     readonly IProjections _projections;

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Projections.Contracts.Projections;
@@ -16,6 +17,7 @@ namespace Dolittle.Runtime.Projections.Store.Services.Grpc;
 /// <summary>
 /// Represents the implementation of.
 /// </summary>
+[PrivateService]
 public class ProjectionsGrpcService : ProjectionsBase
 {
     const uint MaxBatchMessageSize = 2097152; // 2 MB

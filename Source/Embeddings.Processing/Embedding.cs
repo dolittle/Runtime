@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Processing.Projections;
@@ -15,30 +16,39 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Services;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingClientToRuntimeMessage,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRuntimeToClientMessage,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRegistrationRequest,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRegistrationResponse,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingRequest,
+    Dolittle.Runtime.Embeddings.Contracts.EmbeddingResponse>;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
 /// <summary>
 /// Represents an implementation of <see cref="IEmbedding" />.
 /// </summary>
+[DisableAutoRegistration]
 public class Embedding : IEmbedding
 {
     readonly EmbeddingId _embeddingId;
-    readonly IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> _dispatcher;
+    readonly ReverseCallDispatcherType _dispatcher;
     readonly IEmbeddingRequestFactory _requestFactory;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes an instance of the <see cref="Embedding" /> class.
     /// </summary>
-    /// <param name="embeddingId">The <see cref="EmbeddingId" />.</param>
-    /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
-    /// <param name="requestFactory">The <see cref="IEmbeddingRequestFactory" />.</param>
+    /// <param name="embeddingId">The identifier for this embedding.</param>
+    /// <param name="dispatcher">The reverse call dispatcher to use to dispatch update and delete calls to the client.</param>
+    /// <param name="requestFactory">The factory to use to create requests to the client.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public Embedding(
         EmbeddingId embeddingId,
-        IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> dispatcher,
+        ReverseCallDispatcherType dispatcher,
         IEmbeddingRequestFactory requestFactory,
         ILogger logger)
     {
@@ -49,13 +59,14 @@ public class Embedding : IEmbedding
     }
 
     /// <inheritdoc/> 
-    public async Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken)
+    public async Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         try
         {
             _logger.ProjectEventThroughDispatcher(_embeddingId, state);
             var response = await _dispatcher.Call(
                 _requestFactory.Create(state, @event),
+                executionContext,
                 cancellationToken).ConfigureAwait(false);
 
             if (IsFailureResponse(response))
@@ -80,7 +91,7 @@ public class Embedding : IEmbedding
     }
 
     /// <inheritdoc/> 
-    public async Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
+    public async Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.CompareStatesForEmbedding(_embeddingId, currentState, desiredState);
         var request = _requestFactory.TryCreate(currentState, desiredState);
@@ -94,11 +105,12 @@ public class Embedding : IEmbedding
             EmbeddingResponse.ResponseOneofCase.Compare,
             response => response.Compare.Events,
             (embedding, failureReason) => new EmbeddingRemoteCompareCallFailed(embedding, failureReason),
+            executionContext,
             cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/> 
-    public async Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, CancellationToken cancellationToken)
+    public async Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.DeletingStateForEmbedding(_embeddingId, currentState);
         var request = _requestFactory.TryCreate(currentState);
@@ -112,6 +124,7 @@ public class Embedding : IEmbedding
             EmbeddingResponse.ResponseOneofCase.Delete,
             response => response.Delete.Events,
             (embedding, failureReason) => new EmbeddingRemoteDeleteCallFailed(embedding, failureReason),
+            executionContext,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -121,11 +134,12 @@ public class Embedding : IEmbedding
         EmbeddingResponse.ResponseOneofCase expectedResponse,
         Func<EmbeddingResponse, IEnumerable<Events.Contracts.UncommittedEvent>> getEvents,
         Func<EmbeddingId, string, Exception> createFailedException,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
+            var response = await _dispatcher.Call(request, executionContext, cancellationToken).ConfigureAwait(false);
             if (IsFailureResponse(response))
             {
                 return createFailedException(_embeddingId, GetFailureReason(response));

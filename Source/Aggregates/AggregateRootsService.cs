@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Contracts;
-using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using static Dolittle.Runtime.Aggregates.Contracts.AggregateRoots;
 
@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Aggregates;
 /// <summary>
 /// Represents the implementation of <see cref="AggregateRootsBase"/>.
 /// </summary>
+[PrivateService]
 public class AggregateRootsService : AggregateRootsBase
 {
     readonly IAggregateRoots _aggregateRoots;

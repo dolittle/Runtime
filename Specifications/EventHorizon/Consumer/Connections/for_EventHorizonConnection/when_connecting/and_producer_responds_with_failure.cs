@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 
 using System;
 using Machine.Specifications;
-using System.Threading;
-using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Protobuf;
 
@@ -22,7 +20,7 @@ public class and_producer_responds_with_failure : given.all_dependencies
             Reason = "some reason"
         };
         reverse_call_client
-            .Setup(_ => _.Connect(Moq.It.IsAny<ConsumerSubscriptionRequest>(), cancellation_token))
+            .Setup(_ => _.Connect(Moq.It.IsAny<ConsumerSubscriptionRequest>(), execution_context, cancellation_token))
             .Returns(Task.FromResult(true));
         reverse_call_client
             .SetupGet(_ => _.ConnectResponse)
@@ -40,5 +38,6 @@ public class and_producer_responds_with_failure : given.all_dependencies
     It should_return_failed_response_with_correct_failure_reason = () => result.Failure.Reason.Value.ShouldEqual(failure.Reason);
     It should_call_connect_on_reverse_call_client = () => reverse_call_client.Verify(_ => _.Connect(
         Moq.It.IsAny<ConsumerSubscriptionRequest>(),
+        execution_context,
         cancellation_token), Moq.Times.Once);
 }

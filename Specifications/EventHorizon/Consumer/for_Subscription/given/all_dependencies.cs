@@ -4,8 +4,6 @@
 using System;
 using Machine.Specifications;
 using Moq;
-using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Microservices;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
@@ -13,7 +11,11 @@ using System.Threading.Tasks;
 using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
+using Microservices;
+using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
+using Polly;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.given;
 
@@ -21,13 +23,13 @@ public class all_dependencies
 {
     protected static SubscriptionId subscription_id;
     protected static MicroserviceAddress producer_microservice_address;
+    protected static ExecutionContext execution_context;
     protected static Mock<IEventHorizonConnectionFactory> event_horizon_connection_factory;
     protected static Mock<IStreamProcessorFactory> stream_processor_factory;
     protected static Mock<IGetNextEventToReceiveForSubscription> get_next_event;
-    protected static Mock<IAsyncPolicyFor<Subscription>> policy;
     protected static Mock<IEventHorizonConnection> event_horizon_connection;
     protected static Mock<IStreamProcessor> stream_processor;
-
+    protected static Mock<ISubscriptionPolicies> subscription_policies;
     protected static CancellationTokenSource policy_cts;
     protected static CancellationTokenSource stream_processor_cts;
     protected static CancellationTokenSource event_horizon_connection_cts;
@@ -37,6 +39,7 @@ public class all_dependencies
 
     Establish context = () =>
     {
+        subscription_policies = new Mock<ISubscriptionPolicies>();
         subscription_stream_position = 5;
         policy_cts = new CancellationTokenSource();
         stream_processor_cts = new CancellationTokenSource();
@@ -53,14 +56,14 @@ public class all_dependencies
         event_horizon_connection_factory = new Mock<IEventHorizonConnectionFactory>();
         stream_processor_factory = new Mock<IStreamProcessorFactory>();
         get_next_event = new Mock<IGetNextEventToReceiveForSubscription>();
-        policy = new Mock<IAsyncPolicyFor<Subscription>>();
-
+        execution_context = execution_contexts.create();
         EstablishInitialMockSetups();
 
         subscription = new Subscription(
             subscription_id,
             producer_microservice_address,
-            policy.Object,
+            execution_context,
+            subscription_policies.Object,
             event_horizon_connection_factory.Object,
             stream_processor_factory.Object,
             get_next_event.Object,
@@ -81,24 +84,31 @@ public class all_dependencies
 
     static void EstablishInitialMockSetups()
     {
-        policy
-            .Setup(_ => _.Execute(Moq.It.IsAny<Func<CancellationToken, Task>>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns<Func<CancellationToken, Task>, CancellationToken>((callback, cancellationToken) => Task.Run(async () =>
+        subscription_policies
+            .SetupGet(_ => _.Connecting)
+            .Returns(() =>
             {
-                while (!policy_cts.Token.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-                {
-                    try
+                var policy = new Mock<IAsyncPolicy>();
+                policy.Setup(_ => _.ExecuteAsync(Moq.It.IsAny<Func<CancellationToken, Task>>(), Moq.It.IsAny<CancellationToken>()))
+                    .Returns<Func<CancellationToken, Task>, CancellationToken>((callback, cancellationToken) => Task.Run(async () =>
                     {
-                        await callback(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch
-                    { }
-                    await Task.Delay(10).ConfigureAwait(false);
-                }
-            }));
+                        while (!policy_cts.Token.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                        {
+                            try
+                            {
+                                await callback(cancellationToken).ConfigureAwait(false);
+                            }
+                            catch
+                            { }
+                            await Task.Delay(10).ConfigureAwait(false);
+                        }
+                    }));
+                return policy.Object;
+            });
+            
         event_horizon_connection = new Mock<IEventHorizonConnection>();
         event_horizon_connection_factory
-            .Setup(_ => _.Create(producer_microservice_address))
+            .Setup(_ => _.Create(producer_microservice_address, execution_context))
             .Returns(event_horizon_connection.Object);
         event_horizon_connection
             .Setup(_ => _.Connect(subscription_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
@@ -110,7 +120,7 @@ public class all_dependencies
 
         stream_processor = new Mock<IStreamProcessor>();
         stream_processor_factory
-            .Setup(_ => _.Create(Moq.It.IsAny<ConsentId>(), subscription_id, Moq.It.IsAny<EventsFromEventHorizonFetcher>()))
+            .Setup(_ => _.Create(Moq.It.IsAny<ConsentId>(), subscription_id, execution_context, Moq.It.IsAny<EventsFromEventHorizonFetcher>()))
             .Returns(stream_processor.Object);
 
         stream_processor

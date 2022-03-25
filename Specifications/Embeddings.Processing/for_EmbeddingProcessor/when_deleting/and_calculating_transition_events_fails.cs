@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
@@ -26,13 +25,13 @@ public class and_calculating_transition_events_fails : given.all_dependencies_an
             .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
         transition_calculator
-            .Setup(_ => _.TryDelete(current_state, Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.TryDelete(current_state, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Failed(exception)));
     };
 
     static Try result;
 
-    Because of = () => result = embedding_processor.Delete(key, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = embedding_processor.Delete(key, execution_context, cancellation_token).GetAwaiter().GetResult();
 
     It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));

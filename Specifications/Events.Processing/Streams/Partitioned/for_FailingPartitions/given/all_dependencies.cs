@@ -3,8 +3,8 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
 using Machine.Specifications;
 using Moq;
 
@@ -13,17 +13,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 public class all_dependencies
 {
     protected static StreamId stream_id;
-    protected static IAsyncPolicyFor<ICanFetchEventsFromStream> events_fetcher_policy;
     protected static Mock<IResilientStreamProcessorStateRepository> stream_processor_state_repository;
     protected static Mock<IEventProcessor> event_processor;
     protected static Mock<ICanFetchEventsFromPartitionedStream> events_fetcher;
+    protected static Func<StreamEvent, ExecutionContext> create_execution_context;
 
     Establish context = () =>
     {
-        events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
         stream_id = Guid.NewGuid();
         event_processor = new Mock<IEventProcessor>();
         stream_processor_state_repository = new Mock<IResilientStreamProcessorStateRepository>();
         events_fetcher = new Mock<ICanFetchEventsFromPartitionedStream>();
+        create_execution_context = stream_event => stream_event.Event.ExecutionContext;
+
     };
 }

@@ -24,7 +24,8 @@ public class and_reverse_call_connection_fails : given.all_dependencies
                 client_stream.Object,
                 call_context,
                 protocol,
-                IsAny<CancellationToken>()
+                IsAny<CancellationToken>(),
+                false
             ))
             .Returns(Task.FromResult<Try<(IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>, EmbeddingRegistrationArguments)>>(new Exception()));
     };
@@ -44,7 +45,8 @@ public class and_reverse_call_connection_fails : given.all_dependencies
             client_stream.Object,
             call_context,
             protocol,
-            IsAny<CancellationToken>()),
+            IsAny<CancellationToken>(),
+            false),
         Once);
 
     It should_not_persist_definition = () => embedding_definition_persister.Verify(_ => _.TryPersist(embedding_definition, IsAny<CancellationToken>()), Never);

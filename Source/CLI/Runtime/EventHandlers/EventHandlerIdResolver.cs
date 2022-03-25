@@ -4,7 +4,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Microservices;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
 

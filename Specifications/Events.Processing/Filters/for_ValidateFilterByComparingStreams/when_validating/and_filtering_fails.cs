@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating;
@@ -15,7 +16,7 @@ public class and_filtering_fails : given.all_dependencies
         var @event = committed_events.single(0);
         add_event_to_event_log(@event);
         filter_processor
-            .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), event_processor_id, cancellation_token))
+            .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), event_processor_id, Moq.It.IsAny<ExecutionContext>(), cancellation_token))
             .Returns(Task.FromResult<IFilterResult>(new FailedFiltering("something went wrong")));
     };
 

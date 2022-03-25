@@ -2,15 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using CLI.Options.Parsers.Versioning;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options.Parsers.Aggregates;
 using Dolittle.Runtime.CLI.Options.Parsers.Concepts;
 using Dolittle.Runtime.CLI.Options.Parsers.EventHandlers;
 using Dolittle.Runtime.CLI.Options.Parsers.Microservices;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Projections.Store.State;
 
 namespace Dolittle.Runtime.Projections.Store;
 

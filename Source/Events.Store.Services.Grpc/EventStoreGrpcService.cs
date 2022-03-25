@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventStore;
 
@@ -14,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc;
 /// <summary>
 /// Represents the implementation of.
 /// </summary>
+[PrivateService]
 public class EventStoreGrpcService : EventStoreBase
 {
     readonly IEventStoreService _eventStoreService;
@@ -22,8 +24,7 @@ public class EventStoreGrpcService : EventStoreBase
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStoreService"><see cref="IEventStoreService"/>.</param>
-    public EventStoreGrpcService(
-        IEventStoreService eventStoreService)
+    public EventStoreGrpcService(IEventStoreService eventStoreService)
     {
         _eventStoreService = eventStoreService;
     }

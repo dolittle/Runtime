@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Services.Clients;
 /// <typeparam name="TClient">Type of the client to use for calls to the server.</typeparam>
 /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the client to the server.</typeparam>
 /// <typeparam name="TServerMessage">Type of the <see cref="IMessage">messages</see> that is sent from the server to the client.</typeparam>
-public interface ICanCallADuplexStreamingMethod<TClient, TClientMessage, TServerMessage>
+public interface ICanCallADuplexStreamingMethod<in TClient, TClientMessage, TServerMessage>
     where TClient : ClientBase<TClient>
     where TClientMessage : IMessage
     where TServerMessage : IMessage

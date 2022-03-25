@@ -9,7 +9,6 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
-using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;

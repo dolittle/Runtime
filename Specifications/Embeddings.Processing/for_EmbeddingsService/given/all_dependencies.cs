@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
@@ -25,6 +25,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given;
@@ -33,10 +34,10 @@ delegate bool TryGetEmbeddingProcessorForReturns(TenantId tenant, EmbeddingId em
 public class all_dependencies
 {
     protected static Mock<IHostApplicationLifetime> application_lifetime;
-    protected static Mock<IExecutionContextManager> execution_context_manager;
     protected static Mock<IInitiateReverseCallServices> reverse_call_services;
-    protected static Mock<IEmbeddingProcessorFactory> embedding_processor_factory;
+    protected static Mock<Func<TenantId, IEmbeddingProcessorFactory>> get_embedding_processor_factory;
     protected static Mock<IEmbeddingProcessors> embedding_processors;
+    protected static Mock<ICreateExecutionContexts> execution_context_creator;
     protected static Mock<IEmbeddingProcessor> embedding_processor;
     protected static IEmbeddingRequestFactory embedding_request_factory;
     protected static Mock<ICompareEmbeddingDefinitionsForAllTenants> embedding_definition_comparer;
@@ -61,11 +62,16 @@ public class all_dependencies
         execution_context = new ExecutionContext(
             "f3b5157e-6f27-4a5e-92ea-f2768e68d9ed",
             "4875bdd1-4866-4d2f-a2d0-967fe7a4872e",
-            Versioning.Version.NotSet,
+            Version.NotSet,
             "Environment",
             "14d2ce96-ada9-4446-8abb-6e12a49afd39",
-            Security.Claims.Empty,
+            Execution.Claims.Empty,
             CultureInfo.InvariantCulture);
+        execution_context_creator = new Mock<ICreateExecutionContexts>();
+        execution_context_creator
+            .Setup(_ => _.TryCreateUsing(Moq.It.IsAny<ExecutionContext>()))
+            .Returns<ExecutionContext>(_ => _);
+        
         call_request_context = new CallRequestContext
         {
             ExecutionContext = execution_context.ToProtobuf()
@@ -80,16 +86,9 @@ public class all_dependencies
         application_lifetime
             .SetupGet(_ => _.ApplicationStopping)
             .Returns(CancellationToken.None);
-        execution_context_manager = new Mock<IExecutionContextManager>();
-        execution_context_manager
-            .Setup(_ => _.CurrentFor(Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()))
-            .Returns<ExecutionContext, string, int, string>((old_context, file_path, line_number, member) => old_context);
-        execution_context_manager
-            .SetupGet(_ => _.Current)
-            .Returns(execution_context);
         reverse_call_services = new Mock<IInitiateReverseCallServices>();
         logger_factory = NullLoggerFactory.Instance;
-        embedding_processor_factory = new Mock<IEmbeddingProcessorFactory>();
+        get_embedding_processor_factory = new Mock<Func<TenantId, IEmbeddingProcessorFactory>>();
         embedding_processors = new Mock<IEmbeddingProcessors>();
         embedding_processor = new Mock<IEmbeddingProcessor>();
         protocol = new EmbeddingsProtocol();
@@ -104,14 +103,13 @@ public class all_dependencies
             .Returns(Task.FromResult(Try.Succeeded()));
         embedding_service = new EmbeddingsService(
             application_lifetime.Object,
-            execution_context_manager.Object,
+            execution_context_creator.Object,
             reverse_call_services.Object, protocol,
-            embedding_processor_factory.Object,
+            get_embedding_processor_factory.Object,
             embedding_processors.Object,
-            embedding_request_factory,
             embedding_definition_comparer.Object,
             embedding_definition_persister.Object,
-            Mock.Of<ILogger<EmbeddingsService>>(),
+            embedding_request_factory,
             NullLoggerFactory.Instance);
         dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>();
         runtime_stream = new Mock<IAsyncStreamReader<EmbeddingClientToRuntimeMessage>>();

@@ -7,9 +7,8 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -19,6 +18,7 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
@@ -47,8 +47,9 @@ public class EventHandler : IDisposable
     readonly IStreamDefinitions _streamDefinitions;
     readonly ReverseCallDispatcherType _dispatcher;
     readonly EventHandlerRegistrationArguments _arguments;
-    readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
+    readonly Func<TenantId, IWriteEventsToStreams> _getEventsToStreamsWriter;
     readonly ILoggerFactory _loggerFactory;
+    readonly ExecutionContext _executionContext;
     readonly ILogger _logger;
     readonly CancellationTokenSource _cancellationTokenSource;
 
@@ -64,6 +65,7 @@ public class EventHandler : IDisposable
     /// <param name="arguments">Connecting arguments.</param>
     /// <param name="getEventsToStreamsWriter">Factory for getting <see cref="IWriteEventsToStreams"/>.</param>
     /// <param name="loggerFactory">Logger factory for logging.</param>
+    /// <param name="executionContext">The execution context for the event handler.</param>
     /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
     public EventHandler(
         IStreamProcessors streamProcessors,
@@ -71,8 +73,9 @@ public class EventHandler : IDisposable
         IStreamDefinitions streamDefinitions,
         ReverseCallDispatcherType dispatcher,
         EventHandlerRegistrationArguments arguments,
-        FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
+        Func<TenantId, IWriteEventsToStreams> getEventsToStreamsWriter,
         ILoggerFactory loggerFactory,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
         _logger = loggerFactory.CreateLogger<EventHandler>();
@@ -83,11 +86,10 @@ public class EventHandler : IDisposable
         _arguments = arguments;
         _getEventsToStreamsWriter = getEventsToStreamsWriter;
         _loggerFactory = loggerFactory;
+        _executionContext = executionContext;
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
 
-        
-        
     /// <summary>
     /// Gets the <see cref="StreamId">target stream</see> for the <see cref="EventHandler"/>.
     /// </summary>
@@ -301,7 +303,7 @@ public class EventHandler : IDisposable
 
     async Task<bool> RegisterStreamProcessor(
         IStreamDefinition streamDefinition,
-        FactoryFor<IEventProcessor> getProcessor,
+        Func<TenantId, IEventProcessor> getProcessor,
         Func<Exception, Failure> onException,
         Action<StreamProcessor> onStreamProcessor)
     {
@@ -310,6 +312,7 @@ public class EventHandler : IDisposable
             EventProcessor,
             streamDefinition,
             getProcessor,
+            _executionContext,
             _cancellationTokenSource.Token);
 
         onStreamProcessor(streamProcessor);
@@ -366,14 +369,14 @@ public class EventHandler : IDisposable
         await _streamDefinitions.Persist(Scope, filteredStreamDefinition, _cancellationTokenSource.Token).ConfigureAwait(false);
     }
 
-    IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> GetFilterProcessor()
+    IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> GetFilterProcessor(TenantId tenant)
         => new TypeFilterWithEventSourcePartition(
             Scope,
             FilterDefinition,
-            _getEventsToStreamsWriter(),
+            _getEventsToStreamsWriter(tenant),
             _loggerFactory.CreateLogger<TypeFilterWithEventSourcePartition>());
 
-    IEventProcessor GetEventProcessor()
+    IEventProcessor GetEventProcessor(TenantId tenant)
         => new EventProcessor(
             Scope,
             EventProcessor,

@@ -5,18 +5,18 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Services.Clients;
 
 /// <summary>
-/// Represents an implementation of <see cref="IReverseCallClient{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/>.
+/// Represents an implementation of <see cref="IReverseCallClient{TConnectArguments, TConnectResponse, TRequest, TResponse}"/>.
 /// </summary>
 /// <typeparam name="TClient">Type of the client to use for calls to the server.</typeparam>
 /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the client to the server.</typeparam>
@@ -37,12 +37,11 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
     /// <summary>
     /// The amount of ping intervals to wait until it times out. 
     /// </summary>
-    public static readonly int PingThreshold = 3;
+    public const int PingThreshold = 3;
 
     readonly IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _protocol;
     readonly TClient _client;
     readonly TimeSpan _pingInterval;
-    readonly IExecutionContextManager _executionContextManager;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
     readonly SemaphoreSlim _writeLock = new(1);
@@ -56,17 +55,17 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
     bool _disposed;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReverseCallClient{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
+    /// Initializes a new instance of the <see cref="ReverseCallClient{TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
     /// </summary>
     /// <param name="protocol">The protocol for this reverse call.</param>
+    /// <param name="client">The client to use to start the reverse call.</param>
     /// <param name="pingInterval">The interval to request and expect pings to keep the connection alive.</param>
-    /// <param name="executionContextManager">The execution context manager to use for setting the execution context for each request.</param>
-    /// <param name="logger">The logger to use.</param>
+    /// <param name="metrics">The metrics to use for reporting metrics.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public ReverseCallClient(
         IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> protocol,
         TClient client,
         TimeSpan pingInterval,
-        IExecutionContextManager executionContextManager,
         IMetricsCollector metrics,
         ILogger logger)
     {
@@ -74,7 +73,6 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
         _protocol = protocol;
         _client = client;
         _pingInterval = pingInterval;
-        _executionContextManager = executionContextManager;
         _metrics = metrics;
         _logger = logger;
     }
@@ -83,13 +81,13 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
     public TConnectResponse ConnectResponse { get; private set; }
 
     /// <inheritdoc/>
-    public async Task<bool> Connect(TConnectArguments connectArguments, CancellationToken cancellationToken)
+    public async Task<bool> Connect(TConnectArguments connectArguments, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         EnsureOnlyConnectingOnce();
 
         StartConnection(cancellationToken);
 
-        await SendConnectArguments(connectArguments, cancellationToken).ConfigureAwait(false);
+        await SendConnectArguments(connectArguments, executionContext, cancellationToken).ConfigureAwait(false);
 
         return await ReceiveConnectResponse(cancellationToken).ConfigureAwait(false);
     }
@@ -182,13 +180,13 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
         _serverToClient = connection.ResponseStream;
     }
 
-    Task SendConnectArguments(TConnectArguments connectArguments, CancellationToken cancellationToken)
+    Task SendConnectArguments(TConnectArguments connectArguments, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.SendingConnectArguments(typeof(TConnectArguments), _pingInterval);
 
         var callContext = new ReverseCallArgumentsContext
         {
-            ExecutionContext = _executionContextManager.Current.ToProtobuf(),
+            ExecutionContext = executionContext.ToProtobuf(),
             PingInterval = Duration.FromTimeSpan(_pingInterval)
         };
         _protocol.SetConnectArgumentsContext(callContext, connectArguments);
@@ -340,9 +338,8 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
             {
                 _logger.HandlingRequest(typeof(TRequest), callId);
                 var stopwatch = Stopwatch.StartNew();
-
-                _executionContextManager.CurrentFor(requestContext.ExecutionContext.ToExecutionContext());
-                var response = await _callback(request, cancellationToken).ConfigureAwait(false);
+                
+                var response = await _callback(request, requestContext.ExecutionContext.ToExecutionContext(), cancellationToken).ConfigureAwait(false);
 
                 stopwatch.Stop();
                 _metrics.AddToTotalRequestHandlingTime(stopwatch.Elapsed);

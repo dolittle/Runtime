@@ -18,6 +18,6 @@ public class once : given.all_dependencies
     Because of = () => result = embedding_processor.Start(cancellation_token);
 
     It should_be_running = () => result.Status.ShouldEqual(TaskStatus.WaitingForActivation);
-    It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>()));
+    It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>()));
     It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, Moq.It.IsAny<CancellationToken>()));
 }

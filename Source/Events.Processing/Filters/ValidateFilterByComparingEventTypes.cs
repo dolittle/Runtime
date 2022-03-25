@@ -7,17 +7,19 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Lifecycle;
+
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
 /// <summary>
-/// Represents an implementation of <see cref="IValidateFilterByComparingEventTypes"/>.
+/// Represents an implementation of <see cref="ICanValidateFilterFor{TDefinition}"/> for filters defined with <see cref="TypeFilterWithEventSourcePartitionDefinition"/>.
 /// </summary>
-[SingletonPerTenant]
-public class ValidateFilterByComparingEventTypes : IValidateFilterByComparingEventTypes
+[Singleton, PerTenant]
+public class ValidateFilterByComparingEventTypes : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
 {
     readonly IEventFetchers _eventFetchers;
 

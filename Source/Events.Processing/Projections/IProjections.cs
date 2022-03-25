@@ -4,11 +4,12 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -34,9 +35,10 @@ public interface IProjections
     /// Registers a Projection for all tenants.
     /// </summary>
     /// <param name="projection">The <see cref="IProjection"/> to start.</param>
+    /// <param name="executionContext">The execution context to use for the projection processor.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns a <see cref="Try"/> of the registered <see cref="ProjectionProcessor"/>.</returns>
-    Task<Try<ProjectionProcessor>> Register(IProjection projection, CancellationToken cancellationToken);
+    Task<Try<ProjectionProcessor>> Register(IProjection projection, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Rebuilds Projection all read models for a specified Projection by dropping the old states and reprocessing all the events for a specific tenant.

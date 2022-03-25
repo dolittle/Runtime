@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -23,29 +23,24 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 [Singleton]
 public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefinitionsForAllTenants
 {
-    readonly IPerformActionOnAllTenants _onTenants;
-    readonly FactoryFor<IProjectionDefinitions> _getDefinitions;
+    readonly IPerformActionsForAllTenants _performer;
 
     /// <summary>
     /// Initializes an instance of the <see cref="CompareProjectionDefinitionsForAllTenants" /> class.
     /// </summary>
-    /// <param name="onTenants">The tool for performing an action on all tenants.</param>
-    /// <param name="getDefinitions">The factory for getting projection definitions.</param>
-    public CompareProjectionDefinitionsForAllTenants(
-        IPerformActionOnAllTenants onTenants,
-        FactoryFor<IProjectionDefinitions> getDefinitions)
+    /// <param name="performer">The tool for performing an action on all tenants.</param>
+    public CompareProjectionDefinitionsForAllTenants(IPerformActionsForAllTenants performer)
     {
-        _onTenants = onTenants;
-        _getDefinitions = getDefinitions;
+        _performer = performer;
     }
 
     /// <inheritdoc/>
     public async Task<IDictionary<TenantId, ProjectionDefinitionComparisonResult>> DiffersFromPersisted(ProjectionDefinition definition, CancellationToken token)
     {
         var results = new Dictionary<TenantId, ProjectionDefinitionComparisonResult>();
-        await _onTenants.PerformAsync(async tenant =>
+        await _performer.PerformAsync(async (tenant, services) =>
         {
-            var definitions = _getDefinitions();
+            var definitions = services.GetRequiredService<IProjectionDefinitions>();
             var tryGetDefinition = await definitions.TryGet(definition.Projection, definition.Scope, token).ConfigureAwait(false);
             var comparisonResult = tryGetDefinition.Success switch
             {

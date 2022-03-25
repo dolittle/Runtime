@@ -3,11 +3,11 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
 

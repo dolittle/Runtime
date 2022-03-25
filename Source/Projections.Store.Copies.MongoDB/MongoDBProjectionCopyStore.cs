@@ -3,9 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using MongoDB.Bson;
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB;
 /// <summary>
 /// Represents an implementation of <see cref="IProjectionCopyStore"/> that persists copies in a MongoDB collection.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class MongoDBProjectionCopyStore : IProjectionCopyStore
 {
     const string ProjectionDocumentKeyProperty = "_dolittle_projection_key";

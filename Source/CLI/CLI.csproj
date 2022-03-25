@@ -13,22 +13,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Versioning/Versioning.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
-        <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
-        <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
-        <ProjectReference Include="../Types/Types.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
         <ProjectReference Include="../Aggregates.Management/Aggregates.Management.csproj" />
         <ProjectReference Include="../Events.Management/Events.Management.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="..\Resources\Resources.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="ConsoleTables" Version="$(ConsoleTablesVersion)" />
-        <PackageReference Include="Contrib.Grpc.Core.M1" Version="$(GrpcVersion)" />
         <PackageReference Include="Docker.DotNet" Version="$(DockerDotNetVersion)" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMasterVersion)" />

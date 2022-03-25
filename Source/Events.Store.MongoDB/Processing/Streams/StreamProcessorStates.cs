@@ -3,17 +3,17 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB;
+namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 
 /// <summary>
 /// Represents an implementation of <see cref="IStreamProcessorStates" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class StreamProcessorStates : EventStoreConnection, IStreamProcessorStates
 {
     const string StreamProcessorStateCollectionName = "stream-processor-states";
@@ -24,9 +24,9 @@ public class StreamProcessorStates : EventStoreConnection, IStreamProcessorState
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamProcessorStates"/> class.
     /// </summary>
-    /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
+    /// <param name="connection">The <see cref="IDatabaseConnection" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
-    public StreamProcessorStates(DatabaseConnection connection, ILogger logger)
+    public StreamProcessorStates(IDatabaseConnection connection, ILogger logger)
         : base(connection)
     {
         _logger = logger;

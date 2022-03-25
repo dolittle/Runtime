@@ -4,9 +4,10 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Microsoft.Extensions.Logging;
@@ -61,7 +62,7 @@ public class ProjectionKeys : IProjectionKeys
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get projection key for event occurred key selector type with occurred format {OccurredFormat}", occurredFormat);
+            Log.FailedToGetProjectionKeyFromOccurredKeySelector(_logger, ex, occurredFormat);
             key = null;
             return false;
         }

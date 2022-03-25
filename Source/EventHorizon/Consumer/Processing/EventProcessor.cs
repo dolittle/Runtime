@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 
@@ -20,7 +20,7 @@ public class EventProcessor : IEventProcessor
     readonly ConsentId _consentId;
     readonly SubscriptionId _subscriptionId;
     readonly IWriteEventHorizonEvents _receivedEventsWriter;
-    readonly IAsyncPolicyFor<EventProcessor> _policy;
+    readonly IEventProcessorPolicies _policies;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
 
@@ -30,14 +30,14 @@ public class EventProcessor : IEventProcessor
     /// <param name="consentId">THe <see cref="ConsentId" />.</param>
     /// <param name="subscription">The <see cref="Subscription" />.</param>
     /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
-    /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
+    /// <param name="policies">The <see cref="IEventProcessorPolicies" />.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public EventProcessor(
         ConsentId consentId,
         SubscriptionId subscription,
         IWriteEventHorizonEvents receivedEventsWriter,
-        IAsyncPolicyFor<EventProcessor> policy,
+        IEventProcessorPolicies policies,
         IMetricsCollector metrics,
         ILogger logger)
     {
@@ -46,7 +46,7 @@ public class EventProcessor : IEventProcessor
         Identifier = subscription.ProducerTenantId.Value;
         _subscriptionId = subscription;
         _receivedEventsWriter = receivedEventsWriter;
-        _policy = policy;
+        _policies = policies;
         _metrics = metrics;
         _logger = logger;
     }
@@ -58,10 +58,10 @@ public class EventProcessor : IEventProcessor
     public EventProcessorId Identifier { get; }
 
     /// <inheritdoc/>
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken) => Process(@event, cancellationToken);
+    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken) => Process(@event, cancellationToken);
 
     /// <inheritdoc/>
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         Log.RetryProcessEvent(_logger, _subscriptionId);
         return Process(@event, cancellationToken);
@@ -74,7 +74,7 @@ public class EventProcessor : IEventProcessor
 
         try
         {
-            await _policy.Execute(
+            await _policies.WriteEvent.ExecuteAsync(
                 cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
                 cancellationToken).ConfigureAwait(false);
         }

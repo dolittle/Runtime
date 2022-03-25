@@ -5,17 +5,20 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Projections.Store;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
 /// <summary>
 /// Represents an implementation of <see cref="IUpdateEmbeddingStates"/>.
 /// </summary>
+[DisableAutoRegistration]
 public class EmbeddingStateUpdater : IUpdateEmbeddingStates
 {
     readonly EmbeddingId _embedding;
@@ -46,7 +49,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
     }
 
     /// <inheritdoc/>
-    public async Task<Try> TryUpdateAll(CancellationToken cancellationToken)
+    public async Task<Try> TryUpdateAll(ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.UpdatingAllEmbeddingStates(_embedding);
         var keys = await _embeddingStore.TryGetKeys(_embedding, cancellationToken).ConfigureAwait(false);
@@ -59,7 +62,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
         foreach (var key in keys.Result)
         {
             _logger.UpdatingEmbeddingStateFor(_embedding, key);
-            var updateResult = await TryUpdateEmbedding(key, cancellationToken).ConfigureAwait(false);
+            var updateResult = await TryUpdateEmbedding(key, executionContext, cancellationToken).ConfigureAwait(false);
             if (!updateResult.Success)
             {
                 _logger.FailedUpdatingEmbeddingStateFor(_embedding, key, updateResult.Exception);
@@ -70,7 +73,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
         return result;
     }
 
-    async Task<Try> TryUpdateEmbedding(ProjectionKey key, CancellationToken cancellationToken)
+    async Task<Try> TryUpdateEmbedding(ProjectionKey key, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var currentState = await _embeddingStore.TryGet(_embedding, key, cancellationToken).ConfigureAwait(false);
         if (!currentState.Success)
@@ -87,7 +90,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
             return Try.Succeeded();
         }
 
-        var projectedState = await _projectManyEvents.TryProject(currentState, unprocessedEvents, cancellationToken).ConfigureAwait(false);
+        var projectedState = await _projectManyEvents.TryProject(currentState, unprocessedEvents, executionContext, cancellationToken).ConfigureAwait(false);
         if (projectedState.Success || projectedState.IsPartialResult)
         {
             var updateState = await TryUpdateOrDeleteState(projectedState.Result, cancellationToken).ConfigureAwait(false);

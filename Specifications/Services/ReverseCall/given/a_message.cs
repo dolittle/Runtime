@@ -2,12 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
-using Grpc.Core;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.given;
 

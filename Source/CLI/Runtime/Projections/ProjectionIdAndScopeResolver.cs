@@ -4,8 +4,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.Projections;
 

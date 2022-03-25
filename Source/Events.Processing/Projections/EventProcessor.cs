@@ -11,6 +11,7 @@ using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using System.Linq;
 using Dolittle.Runtime.Rudimentary;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -60,7 +61,7 @@ public class EventProcessor : IEventProcessor
     public EventProcessorId Identifier { get; }
 
     /// <inheritdoc />
-    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
+    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         Log.EventProcessorIsProcessing(_logger, Identifier, @event.Type.Id, partitionId);
         if (!ShouldProcessEvent(@event))
@@ -74,13 +75,13 @@ public class EventProcessor : IEventProcessor
             return new FailedProcessing(tryGetCurrentState.Exception.Message);
         }
 
-        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, cancellationToken).ConfigureAwait(false);
+        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, executionContext, cancellationToken).ConfigureAwait(false);
 
         return await HandleResult(tryGetCurrentState.Result.Key, result, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         Log.EventProcessorIsProcessingAgain(_logger, Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
         if (!ShouldProcessEvent(@event))
@@ -95,7 +96,7 @@ public class EventProcessor : IEventProcessor
             return new FailedProcessing(tryGetCurrentState.Exception.Message);
         }
 
-        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
+        var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, failureReason, retryCount, executionContext, cancellationToken).ConfigureAwait(false);
 
         return await HandleResult(tryGetCurrentState.Result.Key, result, cancellationToken).ConfigureAwait(false);
     }
@@ -114,28 +115,18 @@ public class EventProcessor : IEventProcessor
     }
 
     async Task<IProcessingResult> HandleResult(ProjectionKey key, IProjectionResult result, CancellationToken token)
-    {
-        if (result is ProjectionReplaceResult replace)
+        => result switch
         {
-            return await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, token).ConfigureAwait(false) switch
+            ProjectionReplaceResult replace => await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, token).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to replace state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
-            };
-        }
-        else if (result is ProjectionDeleteResult)
-        {
-            return await _projectionPersister.TryRemove(_projectionDefinition, key, token).ConfigureAwait(false) switch
+            },
+            ProjectionDeleteResult => await _projectionPersister.TryRemove(_projectionDefinition, key, token).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to remove state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
-            };
-        }
-        else if (result is ProjectionFailedResult failed)
-        {
-            return new FailedProcessing(failed.Exception.Message);
-        }
-
-        return new FailedProcessing($"Unknown projection result {result.GetType().Name}");
-    }
+            },
+            _ => result
+        };
 }

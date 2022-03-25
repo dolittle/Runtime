@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
@@ -21,16 +20,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 /// </summary>
 public class StreamProcessor : IDisposable
 {
-    readonly Dictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new();
     readonly StreamProcessorId _identifier;
-    readonly IPerformActionOnAllTenants _onAllTenants;
     readonly IStreamDefinition _streamDefinition;
-    readonly FactoryFor<IEventProcessor> _getEventProcessor;
+    readonly IPerformActionsForAllTenants _forAllTenants;
+    readonly Func<TenantId, IEventProcessor> _createEventProcessorFor;
+    readonly Func<TenantId, ICreateScopedStreamProcessors> _getCreateScopedStreamProcessors;
     readonly Action _unregister;
-    readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
-    readonly IExecutionContextManager _executionContextManager;
-    readonly ILogger<StreamProcessor> _logger;
+    readonly ILogger _logger;
+    readonly ExecutionContext _executionContext;
     readonly CancellationTokenSource _stopAllScopedStreamProcessorsTokenSource;
+    readonly Dictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new();
     bool _initialized;
     bool _started;
     bool _disposed;
@@ -38,34 +37,34 @@ public class StreamProcessor : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
     /// </summary>
-    /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-    /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-    /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
-    /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> that returns an <see cref="IEventProcessor" />.</param>
-    /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
-    /// <param name="getScopedStreamProcessorsCreator">The <see cref="ICreateScopedStreamProcessors" />.</param>
-    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-    /// <param name="logger">The <see cref="ILogger" />.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <param name="streamProcessorId">The identifier of the stream processor.</param>
+    /// <param name="streamDefinition">The definition of the stream the processor should process events from.</param>
+    /// <param name="forAllTenants">The performer to use to create scoped stream processors for all tenants.</param>
+    /// <param name="createEventProcessorFor">The factory to use to create an event processor per tenant.</param>
+    /// <param name="getCreateScopedStreamProcessors">The factory to us to get the scoped stream processor creator per tenant.</param>
+    /// <param name="unregister">The callback to call to unregister the stream processor when it completes or fails.</param>
+    /// <param name="logger">The logger to use for logging.</param>
+    /// <param name="executionContext">The execution context to run the processor in.</param>
+    /// <param name="cancellationToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
     public StreamProcessor(
         StreamProcessorId streamProcessorId,
-        IPerformActionOnAllTenants onAllTenants,
         IStreamDefinition streamDefinition,
-        FactoryFor<IEventProcessor> getEventProcessor,
+        IPerformActionsForAllTenants forAllTenants,
         Action unregister,
-        FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
-        IExecutionContextManager executionContextManager,
-        ILogger<StreamProcessor> logger,
+        Func<TenantId, IEventProcessor> createEventProcessorFor,
+        Func<TenantId, ICreateScopedStreamProcessors> getCreateScopedStreamProcessors,
+        ILogger logger,
+        ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
         _identifier = streamProcessorId;
-        _onAllTenants = onAllTenants;
+        _forAllTenants = forAllTenants;
         _streamDefinition = streamDefinition;
-        _getEventProcessor = getEventProcessor;
+        _createEventProcessorFor = createEventProcessorFor;
+        _getCreateScopedStreamProcessors = getCreateScopedStreamProcessors;
         _unregister = unregister;
-        _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
-        _executionContextManager = executionContextManager;
         _logger = logger;
+        _executionContext = executionContext;
         _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
 
@@ -93,14 +92,18 @@ public class StreamProcessor : IDisposable
         }
         _initialized = true;
 
-        await _onAllTenants.PerformAsync(async tenant =>
+        await _forAllTenants.PerformAsync(async (tenant, _) =>
         {
-            var scopedStreamProcessorsCreators = _getScopedStreamProcessorsCreator();
-            var scopedStreamProcessor = await scopedStreamProcessorsCreators.Create(
+            var eventProcessor = _createEventProcessorFor(tenant);
+            var scopedStreamProcessorsCreator = _getCreateScopedStreamProcessors(tenant);
+            
+            var scopedStreamProcessor = await scopedStreamProcessorsCreator.Create(
                 _streamDefinition,
                 _identifier,
-                _getEventProcessor(),
+                eventProcessor,
+                _executionContext,
                 _stopAllScopedStreamProcessorsTokenSource.Token).ConfigureAwait(false);
+            
             _streamProcessors.Add(tenant, scopedStreamProcessor);
         }).ConfigureAwait(false);
     }
@@ -221,8 +224,7 @@ public class StreamProcessor : IDisposable
     IEnumerable<Task> StartScopedStreamProcessors(CancellationToken cancellationToken) => _streamProcessors.Select(
         _ => Task.Run(async () =>
         {
-            var (tenant, streamProcessor) = _;
-            _executionContextManager.CurrentFor(tenant);
+            var (_, streamProcessor) = _;
             await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
         }, cancellationToken)).ToList();
 }

@@ -7,6 +7,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -20,15 +21,17 @@ public interface ICalculateStateTransitionEvents
     /// </summary>
     /// <param name="current">The <see cref="EmbeddingCurrentState"/> to transition from.</param>
     /// <param name="desired">The <see cref="ProjectionState"/> to transition to.</param>
+    /// <param name="executionContext">The execution context to execute the update operation in.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="UncommittedAggregateEvents" />.</returns>
-    Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, CancellationToken cancellationToken);
+    Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Try to calculate the events necessary to delete the current state.
     /// </summary>
     /// <param name="current">The <see cref="EmbeddingCurrentState"/> to delete.</param>
+    /// <param name="executionContext">The execution context to execute the delete operation in.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="UncommittedAggregateEvents" />.</returns>
-    Task<Try<UncommittedAggregateEvents>> TryDelete(EmbeddingCurrentState current, CancellationToken cancellationToken);
+    Task<Try<UncommittedAggregateEvents>> TryDelete(EmbeddingCurrentState current, ExecutionContext executionContext, CancellationToken cancellationToken);
 }

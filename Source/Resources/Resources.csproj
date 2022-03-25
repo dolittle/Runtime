@@ -1,21 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props" />
+    <Import Project="../../default.props" />
 
-  <PropertyGroup>
-    <RootNamespace>Dolittle.Runtime.Resources</RootNamespace>
-    <AssemblyName>Dolittle.Runtime.Resources</AssemblyName>
-  </PropertyGroup>
-    
+    <PropertyGroup>
+        <RootNamespace>Dolittle.Runtime.Resources</RootNamespace>
+        <AssemblyName>Dolittle.Runtime.Resources</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
-    
-  <ItemGroup>
-    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
-    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
-    <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
-  </ItemGroup>
-
 </Project>

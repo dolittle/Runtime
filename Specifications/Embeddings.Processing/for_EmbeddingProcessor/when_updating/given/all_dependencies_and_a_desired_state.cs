@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
@@ -10,9 +9,8 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
-using Dolittle.Runtime.Security;
 using Machine.Specifications;
-using Version = Dolittle.Runtime.Versioning.Version;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_updating.given;
 

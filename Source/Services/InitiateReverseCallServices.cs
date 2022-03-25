@@ -36,7 +36,8 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
         IServerStreamWriter<TServerMessage> clientStream,
         ServerCallContext context,
         IReverseCallServiceProtocol<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse, TRuntimeConnectArguments> protocol,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool notValidateExecutionContext = false)
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
         where TConnectArguments : class
@@ -47,7 +48,7 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
     {
         var dispatcher = _reverseCallDispatchers.GetFor(runtimeStream, clientStream, context, protocol);
         Log.WaitingForConnectionArguments(_logger);
-        if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
+        if (!await dispatcher.ReceiveArguments(cancellationToken, notValidateExecutionContext).ConfigureAwait(false))
         {
             Log.ConnectionArgumentsNotReceived(_logger);
             await dispatcher.Reject(protocol.CreateFailedConnectResponse(ArgumentsNotReceivedResponse), cancellationToken).ConfigureAwait(false);
@@ -62,6 +63,7 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
             return (dispatcher, connectArguments);
         }
         Log.ReceivedInvalidConnectionArguments(_logger);
+        await dispatcher.Reject(protocol.CreateFailedConnectResponse(validationResult.FailureReason), cancellationToken).ConfigureAwait(false);
         return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
 
     }

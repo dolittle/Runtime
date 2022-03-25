@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.CLI.Options;
-using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 using ConsoleTables;
-using Newtonsoft.Json;
+using Dolittle.Runtime.CLI.Serialization;
 
 namespace Dolittle.Runtime.CLI;
 
@@ -46,11 +45,7 @@ public abstract class CommandBase
         {
             OutputType.Table => ConsoleTable.From(obj).ToMinimalString(),
             OutputType.Json => _jsonSerializer.ToJson(
-                !singular ? obj : obj[0],
-                SerializationOptions.Custom(SerializationOptionsFlags.None, callback: _ =>
-                {
-                    _.Formatting = Formatting.Indented;
-                })),
+                !singular ? obj : obj[0]),
             _ => ""
         };
         output += "\n";

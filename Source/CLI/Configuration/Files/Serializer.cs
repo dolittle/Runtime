@@ -3,9 +3,9 @@
 
 using System;
 using System.IO;
-using Dolittle.Runtime.Serialization.Json;
 using Microsoft.Extensions.FileProviders;
-using IContentSerializer = Dolittle.Runtime.Serialization.Json.ISerializer;
+using Newtonsoft.Json;
+using IContentSerializer = Dolittle.Runtime.CLI.Serialization.ISerializer;
 
 namespace Dolittle.Runtime.CLI.Configuration.Files;
 
@@ -26,16 +26,16 @@ public class Serializer : ISerializer
     }
 
     /// <inheritdoc />
-    public T FromJsonFile<T>(IFileInfo file, ISerializationOptions options = null)
+    public T FromJsonFile<T>(IFileInfo file)
     {
-        return (T) FromJsonFile(typeof(T), file, options);
+        return (T) FromJsonFile(typeof(T), file);
     }
 
     /// <inheritdoc />
-    public object FromJsonFile(Type type, IFileInfo file, ISerializationOptions options = null)
+    public object FromJsonFile(Type type, IFileInfo file)
     {
         using var reader = new StreamReader(file.CreateReadStream());
         var contents = reader.ReadToEnd();
-        return _contentSerializer.FromJson(type, contents, options);
+        return _contentSerializer.FromJson(type, contents);
     }
 }

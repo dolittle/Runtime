@@ -4,11 +4,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime.Aggregates;
 

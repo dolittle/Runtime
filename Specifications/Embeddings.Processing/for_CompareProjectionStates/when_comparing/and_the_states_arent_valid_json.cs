@@ -4,7 +4,6 @@
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
-using Newtonsoft.Json;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing;
 

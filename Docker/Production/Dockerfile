@@ -1,7 +1,8 @@
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dotnet-build
-ARG CONFIGURATION=Release
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS dotnet-build
+SHELL ["/bin/bash", "-c"]
 ARG VERSION
+ARG TARGETARCH
 
 COPY default.props /app/
 COPY versions.props /app/
@@ -11,24 +12,13 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
-ARG CONFIGURATION=Release
-ARG VERSION
+SHELL ["/bin/bash", "-c"]
 
-RUN echo Configuration = ${CONFIGURATION}
-RUN echo Version = ${VERSION}
-
-RUN apt-get update && apt-get install -y libc-dev
-
-RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
-    apt-get install -y --no-install-recommends unzip procps curl && \
-    rm -rf /var/lib/apt/lists/* \
-    ; fi
-
-RUN if [ "$CONFIGURATION" = "Debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
+ENV LOGGING__CONSOLE__FormatterName=""
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./

@@ -5,12 +5,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
-using DolittleExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using IExecutionContextManager = Dolittle.Runtime.Execution.IExecutionContextManager;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Store.Services;
 
@@ -20,77 +20,68 @@ namespace Dolittle.Runtime.Events.Store.Services;
 [Singleton]
 public class EventStoreService : IEventStoreService
 {
-    readonly FactoryFor<IEventStore> _eventStoreFactory;
-    readonly IExecutionContextManager _executionContextManager;
+    readonly ICreateExecutionContexts _executionContextCreator;
+    readonly Func<TenantId, IEventStore> _getEventStore;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreService"/> class.
     /// </summary>
-    /// <param name="eventStoreFactory"><see cref="IEventStore"/>.</param>
-    /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
-    /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+    /// <param name="executionContextCreator">The <see cref="ICreateExecutionContexts"/> to use to validate incoming execution contexts.</param>
+    /// <param name="getEventStore">Factory to use to resolve the <see cref="IEventStore"/> for a specific tenant.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public EventStoreService(
-        FactoryFor<IEventStore> eventStoreFactory,
-        IExecutionContextManager executionContextManager,
+        ICreateExecutionContexts executionContextCreator,
+        Func<TenantId, IEventStore> getEventStore,
         ILogger logger)
     {
-        _eventStoreFactory = eventStoreFactory;
-        _executionContextManager = executionContextManager;
+        _executionContextCreator = executionContextCreator;
+        _getEventStore = getEventStore;
         _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, DolittleExecutionContext context, CancellationToken token)
+    public Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, ExecutionContext context, CancellationToken token)
     {
-        try
-        {
-            _executionContextManager.CurrentFor(context);
-            _logger.EventsReceivedForCommitting(false, events.Count);
-            var committedEvents = await _eventStoreFactory().CommitEvents(events, token).ConfigureAwait(false);
-            Log.EventsSuccessfullyCommitted(_logger);
-            return committedEvents;
-        }
-        catch (Exception ex)
-        {
-            Log.ErrorCommittingEvents(_logger, ex);
-            return ex;
-        }
+        _logger.EventsReceivedForCommitting(false, events.Count);
+
+        return _executionContextCreator
+            .TryCreateUsing(context)
+            .Then(executionContext =>
+                _getEventStore(executionContext.Tenant).CommitEvents(events, executionContext, token))
+            .Then(_ => 
+                Log.EventsSuccessfullyCommitted(_logger))
+            .Catch(exception => 
+                Log.ErrorCommittingEvents(_logger, exception));
     }
 
     /// <inheritdoc/>
-    public async Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, DolittleExecutionContext context, CancellationToken token)
+    public Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, ExecutionContext context, CancellationToken token)
     {
-        try
-        {
-            _executionContextManager.CurrentFor(context);
-            _logger.EventsReceivedForCommitting(true, events.Count);
-            var committedEvents = await _eventStoreFactory().CommitAggregateEvents(events, token).ConfigureAwait(false);
-            Log.AggregateEventsSuccessfullyCommitted(_logger);
-            return committedEvents;
-        }
-        catch (Exception ex)
-        {
-            Log.ErrorCommittingAggregateEvents(_logger, ex);
-            return ex;
-        }
+        _logger.EventsReceivedForCommitting(true, events.Count);
+
+        return _executionContextCreator
+            .TryCreateUsing(context)
+            .Then(executionContext =>
+                _getEventStore(executionContext.Tenant).CommitAggregateEvents(events, executionContext, token))
+            .Then(_ =>
+                Log.AggregateEventsSuccessfullyCommitted(_logger))
+            .Catch(exception =>
+                Log.ErrorCommittingAggregateEvents(_logger, exception));
     }
 
     /// <inheritdoc/>
-    public async Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, DolittleExecutionContext context, CancellationToken token)
+    public Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, ExecutionContext context, CancellationToken token)
     {
-        try
-        {
-            Log.FetchEventsForAggregate(_logger);
-            _executionContextManager.CurrentFor(context);
-            var committedEvents = await _eventStoreFactory().FetchForAggregate(eventSource, aggregateRoot, token).ConfigureAwait(false);
-            Log.SuccessfullyFetchedEventsForAggregate(_logger);
-            return committedEvents;
-        }
-        catch (Exception ex)
-        {
-            Log.ErrorFetchingEventsFromAggregate(_logger, ex);
-            return ex;
-        }
+        Log.FetchEventsForAggregate(_logger);
+
+        return _executionContextCreator
+            .TryCreateUsing(context)
+            .Then(executionContext =>
+                _getEventStore(executionContext.Tenant).FetchForAggregate(eventSource, aggregateRoot, token))
+            .Then(_ =>
+                Log.SuccessfullyFetchedEventsForAggregate(_logger))
+            .Catch(exception =>
+                Log.ErrorFetchingEventsFromAggregate(_logger, exception));
     }
 }

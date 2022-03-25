@@ -7,17 +7,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
@@ -33,13 +35,9 @@ public class Projections : IProjections
     
     readonly IStreamProcessors _streamProcessors;
     readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
-    readonly FactoryFor<IProjectionPersister> _getProjectionPersister;
-    readonly FactoryFor<IProjectionStore> _getProjectionStore;
-    readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
-    readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
-    readonly IProjectionKeys _projectionKeys;
-    readonly IPerformActionOnAllTenants _onAllTenants;
-    readonly ILoggerFactory _loggerFactory;
+    readonly Func<TenantId, ProjectionDefinition, IProjection, EventProcessor> _createEventProcessor;
+    readonly Func<IProjection, StreamProcessor, Action, CancellationToken, ProjectionProcessor> _createProjectionProcessor;
+    readonly IPerformActionsForAllTenants _forAllTenants;
     readonly ILogger _logger;
 
     /// <summary>
@@ -47,34 +45,24 @@ public class Projections : IProjections
     /// </summary>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors"/> to use for registering the Projections stream processors.</param>
     /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants"/> to use to decide if Projections need to be replayed when registered.</param>
-    /// <param name="getProjectionPersister">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IProjectionPersister"/> to use to persist Projection read models.</param>
-    /// <param name="getProjectionStore">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IProjectionStore"/> to use to get the current state while processing events.</param>
-    /// <param name="getProjectionDefinitions">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IProjectionDefinitions"/> to use to persist new definitions.</param>
-    /// <param name="getStreamProcessorStates">A <see cref="FactoryFor{T}"/> to resolve the <see cref="IStreamProcessorStateRepository"/> to use to reset the stream processor if a Projection definition has been changed.</param>
-    /// <param name="projectionKeys">The <see cref="IProjectionKeys"/> to use to resolve the <see cref="ProjectionKey"/> for events.</param>
-    /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants"/> to use to perform actions in the execution context of tenants.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use to create loggers.</param>
+    /// <param name="createEventProcessor">The factor to use to create projection event processors.</param>
+    /// <param name="createProjectionProcessor">The factory to use to create projection processors.</param>
+    /// <param name="forAllTenants">The <see cref="IPerformActionsForAllTenants"/> to use to perform actions in the execution context of tenants.</param>
+    /// <param name="logger">The logger to use for logging.</param>
     public Projections(
         IStreamProcessors streamProcessors,
         ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
-        FactoryFor<IProjectionPersister> getProjectionPersister,
-        FactoryFor<IProjectionStore> getProjectionStore,
-        FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
-        FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-        IProjectionKeys projectionKeys,
-        IPerformActionOnAllTenants onAllTenants,
-        ILoggerFactory loggerFactory)
+        Func<TenantId, ProjectionDefinition, IProjection, EventProcessor> createEventProcessor, // TODO: This should maybe return the interface?
+        Func<IProjection, StreamProcessor, Action, CancellationToken, ProjectionProcessor> createProjectionProcessor,
+        IPerformActionsForAllTenants forAllTenants,
+        ILogger logger)
     {
         _streamProcessors = streamProcessors;
         _projectionDefinitionComparer = projectionDefinitionComparer;
-        _getProjectionPersister = getProjectionPersister;
-        _getProjectionStore = getProjectionStore;
-        _getProjectionDefinitions = getProjectionDefinitions;
-        _getStreamProcessorStates = getStreamProcessorStates;
-        _projectionKeys = projectionKeys;
-        _onAllTenants = onAllTenants;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger<Projections>();
+        _createEventProcessor = createEventProcessor;
+        _createProjectionProcessor = createProjectionProcessor;
+        _forAllTenants = forAllTenants;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -87,7 +75,7 @@ public class Projections : IProjections
             : new ProjectionNotRegistered(scopeId, projectionId);
 
     /// <inheritdoc />
-    public async Task<Try<ProjectionProcessor>> Register(IProjection projection, CancellationToken cancellationToken)
+    public async Task<Try<ProjectionProcessor>> Register(IProjection projection, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var identifier = new ProjectionIdentifier(projection.Definition.Scope, projection.Definition.Projection);
         Log.RegisteringProjection(_logger, identifier.Scope, identifier.Projection);
@@ -104,13 +92,8 @@ public class Projections : IProjections
             projection.Definition.Scope,
             projection.Definition.Projection.Value,
             new EventLogStreamDefinition(),
-            () => new EventProcessor(
-                projection.Definition,
-                _getProjectionPersister(),
-                _getProjectionStore(),
-                _projectionKeys,
-                projection,
-                _loggerFactory.CreateLogger<EventProcessor>()),
+            (tenant) => _createEventProcessor(tenant, projection.Definition, projection),
+            executionContext,
             cancellationToken);
 
         if (!registration.Success)
@@ -118,12 +101,11 @@ public class Projections : IProjections
             Log.FailedToRegisterProjectionStreamProcessor(_logger, identifier.Scope, identifier.Projection, registration.Exception);
             return registration.Exception;
         }
-
-        var processor = new ProjectionProcessor(
+        
+        var processor = _createProjectionProcessor(
             projection,
             registration.Result,
             () => _projections.TryRemove(identifier, out _),
-            _loggerFactory.CreateLogger<ProjectionProcessor>(),
             cancellationToken);
         
         if (!_projections.TryAdd(identifier, processor))
@@ -213,7 +195,7 @@ public class Projections : IProjections
     }
 
     Task<Try> DropStatesAndResetStreamProcessorsFor(IEnumerable<TenantId> tenants, ProjectionDefinition newDefinition, CancellationToken cancellationToken)
-        => _onAllTenants.TryPerformAsync(async (tenant) =>
+        => _forAllTenants.TryPerformAsync(async (tenant, services) =>
         {
             if (!tenants.Contains(tenant))
             {
@@ -222,7 +204,8 @@ public class Projections : IProjections
             
             Log.ResettingStreamProcessorForTenant(_logger, newDefinition.Scope, newDefinition.Projection, tenant);
             
-            var getDefinition = await _getProjectionDefinitions().TryGet(newDefinition.Projection, newDefinition.Scope, cancellationToken).ConfigureAwait(false);
+            var projectionDefinitions = services.GetRequiredService<IProjectionDefinitions>();
+            var getDefinition = await projectionDefinitions.TryGet(newDefinition.Projection, newDefinition.Scope, cancellationToken).ConfigureAwait(false);
             if (!getDefinition.Success)
             {
                 return new CouldNotResetProjectionStates(newDefinition, tenant);
@@ -231,7 +214,8 @@ public class Projections : IProjections
 
             try
             {
-                await _getStreamProcessorStates().Persist(
+                var streamProcessorStates = services.GetRequiredService<IStreamProcessorStateRepository>();
+                await streamProcessorStates.Persist(
                     new StreamProcessorId(definition.Scope, definition.Projection.Value, StreamId.EventLog),
                     StreamProcessorState.New,
                     cancellationToken).ConfigureAwait(false);
@@ -243,7 +227,8 @@ public class Projections : IProjections
             
             Log.DroppingStatesForTenant(_logger, newDefinition.Scope, newDefinition.Projection, tenant);
             
-            if (!await _getProjectionPersister().TryDrop(definition, cancellationToken).ConfigureAwait(false))
+            var projectionPersister = services.GetRequiredService<IProjectionPersister>();
+            if (!await projectionPersister.TryDrop(definition, cancellationToken).ConfigureAwait(false))
             {
                 return new CouldNotResetProjectionStates(newDefinition, tenant);
             }
@@ -252,10 +237,11 @@ public class Projections : IProjections
         });
 
     Task<Try> PersistDefinitionForAllTenants(ProjectionDefinition definition, CancellationToken cancellationToken)
-        => _onAllTenants.TryPerformAsync(async (tenant) =>
+        => _forAllTenants.TryPerformAsync(async (tenant, services) =>
         {
             Log.PersistingProjectionDefinition(_logger, definition.Scope, definition.Projection, tenant);
-            if (!await _getProjectionDefinitions().TryPersist(definition, cancellationToken).ConfigureAwait(false))
+            var projectionDefinitions = services.GetRequiredService<IProjectionDefinitions>();
+            if (!await projectionDefinitions.TryPersist(definition, cancellationToken).ConfigureAwait(false))
             {
                 return new CouldNotPersistProjectionDefinition(definition, tenant);
             }

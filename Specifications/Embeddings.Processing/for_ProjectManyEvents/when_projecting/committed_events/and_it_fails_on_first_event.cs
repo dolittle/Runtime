@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
-using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
@@ -41,16 +39,16 @@ public class and_it_fails_on_first_event : given.all_dependencies
         result_after_one = new ProjectionFailedResult(exception);
 
         embedding
-            .Setup(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token))
+            .Setup(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), execution_context, cancellation_token))
             .Returns(Task.FromResult<IProjectionResult>(result_after_one));
     };
 
     static Partial<EmbeddingCurrentState> result;
-    Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, execution_context, cancellation_token).GetAwaiter().GetResult();
 
     It should_fail = () => result.Success.ShouldBeFalse();
     It should_not_be_a_partial_success = () => result.IsPartialResult.ShouldBeFalse();
     It should_fail_with_the_correct_error = () => result.Exception.ShouldEqual(exception);
-    It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token));
+    It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), execution_context, cancellation_token));
     It should_only_project_the_first_event = () => embedding.VerifyNoOtherCalls();
 }

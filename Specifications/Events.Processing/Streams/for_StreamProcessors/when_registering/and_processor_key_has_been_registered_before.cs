@@ -34,8 +34,8 @@ public class and_processor_key_has_been_registered_before : given.all_dependenci
 
     Because of = () =>
     {
-        first_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None);
-        second_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None);
+        first_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, tenant_id => event_processor.Object, execution_contexts.create(), CancellationToken.None);
+        second_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, tenant_id => event_processor.Object, execution_contexts.create(), CancellationToken.None);
     };
 
     It should_have_registered_the_first_time = () => first_registration_result.Success.ShouldBeTrue();

@@ -2,13 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
-using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using EmbeddingDefinition = Dolittle.Runtime.Embeddings.Store.Definition.EmbeddingDefinition;

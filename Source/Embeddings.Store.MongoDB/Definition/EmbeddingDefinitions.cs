@@ -4,8 +4,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Embeddings.Store.Definition;
-using Dolittle.Runtime.Lifecycle;
+
 using Dolittle.Runtime.Rudimentary;
 using MongoDB.Driver;
 
@@ -14,7 +16,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 /// <summary>
 /// Represents an implementation of <see cref="IEmbeddingDefinitions" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class EmbeddingDefinitions : IEmbeddingDefinitions
 {
     readonly IEmbeddings _embeddings;

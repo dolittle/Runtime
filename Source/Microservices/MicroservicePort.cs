@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Microservices;
+namespace Microservices;
 
 /// <summary>
 /// Represents the port of a <see cref="MicroserviceId" />.

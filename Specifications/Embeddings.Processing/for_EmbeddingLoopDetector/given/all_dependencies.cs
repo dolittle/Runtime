@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Dolittle.Runtime.Projections.Store.State;
-using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
 using Newtonsoft.Json;

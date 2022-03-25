@@ -3,20 +3,20 @@
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Server</RootNamespace>
         <OutputType>Exe</OutputType>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
+        <ProjectReference Include="../**/*.csproj" Exclude="../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
     </ItemGroup>
 
 </Project>

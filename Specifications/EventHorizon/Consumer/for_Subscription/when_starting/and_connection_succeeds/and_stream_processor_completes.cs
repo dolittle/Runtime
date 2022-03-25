@@ -4,9 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
-using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Microservices;
 using Machine.Specifications;
 using Nito.AsyncEx;
 
@@ -24,10 +22,11 @@ public class and_stream_processor_completes : given.all_dependencies
         Task.Delay(300).GetAwaiter().GetResult();
     };
 
-    It should_create_connection_at_least_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address), Moq.Times.AtLeast(2));
+    It should_create_connection_at_least_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address, execution_context), Moq.Times.AtLeast(2));
     It should_create_stream_processor_at_least_twice = () => stream_processor_factory.Verify(_ => _.Create(
         consent,
         subscription_id,
+        execution_context,
         Moq.It.IsAny<EventsFromEventHorizonFetcher>()), Moq.Times.AtLeast(2));
 
     It should_connect_at_least_twice = () => event_horizon_connection.Verify(_ => _.Connect(

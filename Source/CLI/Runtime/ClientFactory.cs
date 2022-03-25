@@ -3,10 +3,10 @@
 
 using System;
 using System.Reflection;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Services.Clients;
 using Grpc.Core;
-using Grpc.Core.Interceptors;
+using Grpc.Net.Client;
+using Microservices;
 
 namespace Dolittle.Runtime.CLI.Runtime;
 
@@ -19,26 +19,9 @@ public class ClientFactory : ICanCreateClients
     public T CreateClientFor<T>(MicroserviceAddress address)
         where T : ClientBase<T>
     {
-        var constructor = typeof(T).GetConstructor(new[] {typeof(CallInvoker)});
+        var constructor = typeof(T).GetConstructor(new[] {typeof(ChannelBase)});
         ThrowIfMissingExpectedConstructorClientType(typeof(T), constructor);
-
-        var callInvoker = CreateCallInvoker(address);
-        return constructor!.Invoke(new object[] {callInvoker}) as T;
-    }
-
-    static CallInvoker CreateCallInvoker(MicroserviceAddress address)
-    {
-        var keepAliveTime = new ChannelOption("grpc.keepalive_time", 1000);
-        var keepAliveTimeout = new ChannelOption("grpc.keepalive_timeout_ms", 500);
-        var keepAliveWithoutCalls = new ChannelOption("grpc.keepalive_permit_without_calls", 1);
-
-        var channel = new Channel(
-            address.Host,
-            address.Port,
-            ChannelCredentials.Insecure,
-            new[] {keepAliveTime, keepAliveTimeout, keepAliveWithoutCalls});
-
-        return channel.Intercept(_ => _);
+        return constructor!.Invoke(new object[] {GrpcChannel.ForAddress($"http://{address.Host}:{address.Port}")}) as T;
     }
 
     static void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)

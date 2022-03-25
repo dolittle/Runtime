@@ -4,7 +4,6 @@
 using Machine.Specifications;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_GetNextEventToReceiveForSubscription.when_getting_event_to_receive;

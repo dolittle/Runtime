@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.CLI.Configuration.Files;
-using Dolittle.Runtime.CLI.Configuration.Runtime;
 using Dolittle.Runtime.CLI.Options.Parsers;
 using Dolittle.Runtime.CLI.Runtime;
 using Dolittle.Runtime.CLI.Serialization;
@@ -51,7 +50,7 @@ class Program
         services.AddSerializers();
             
         services.AddConfigurationFiles();
-        services.AddRuntimeConfiguration();
+        // services.AddRuntimeConfiguration();
         services.AddRuntimeServices();
     }
 

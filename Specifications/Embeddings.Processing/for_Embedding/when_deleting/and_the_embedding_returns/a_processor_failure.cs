@@ -1,13 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading.Tasks;
-using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Embeddings.Contracts;
-using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
@@ -37,19 +33,20 @@ public class a_processor_failure : given.all_dependencies
         dispatcher
             .Setup(_ => _.Call(
                 embedding_request,
+                execution_context,
                 cancellation))
             .Returns(Task.FromResult(embedding_response));
     };
 
     static Try<UncommittedEvents> result;
 
-    Because of = () => result = embedding.TryDelete(current_state, cancellation).GetAwaiter().GetResult();
+    Because of = () => result = embedding.TryDelete(current_state, execution_context, cancellation).GetAwaiter().GetResult();
 
     It should_have_called_the_request_factory = ()
         => request_factory.Verify(_ => _.TryCreate(current_state));
 
     It should_call_the_dispatcher = ()
-        => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);
+        => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
 
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_return_a_failed_result = () => result.Success.ShouldBeFalse();

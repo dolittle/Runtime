@@ -5,7 +5,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.given;
 
-public class all_dependencies : a_serializer
+public class all_dependencies
 {
     protected static ProjectionKeyPropertyExtractor extractor;
     Establish context = () =>

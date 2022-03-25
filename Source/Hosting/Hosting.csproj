@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Hosting</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Hosting</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Configuration/Configuration.csproj" />
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+    </ItemGroup>
+</Project>

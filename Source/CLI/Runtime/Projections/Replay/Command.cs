@@ -3,10 +3,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.Projections.Replay;

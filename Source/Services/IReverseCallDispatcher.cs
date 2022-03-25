@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Services;
 
@@ -29,13 +30,19 @@ public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnect
     /// Gets the <typeparamref name="TConnectArguments"/> received from the initial Connect call from the client.
     /// </summary>
     TConnectArguments Arguments { get; }
+    
+    /// <summary>
+    /// Gets the <see cref="ExecutionContext"/> received from the initial Connect call from the client.
+    /// </summary>
+    ExecutionContext ExecutionContext { get; }
 
     /// <summary>
     /// Waits for the initial Connect call arguments from the client.
     /// </summary>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <param name="notValidateExecutionContext">Optional bool whether not to validate execution context. HACK USED ONLY FOR EVENT HORIZON</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns whether arguments was received from the client.</returns>
-    Task<bool> ReceiveArguments(CancellationToken cancellationToken);
+    Task<bool> ReceiveArguments(CancellationToken cancellationToken, bool notValidateExecutionContext = false );
 
     /// <summary>
     /// Accepts the incoming connection from the client. This sends the <typeparamref name="TConnectResponse"/> back to the client, and starts handling of calls.
@@ -57,7 +64,8 @@ public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnect
     /// Dispatch a call to the client.
     /// </summary>
     /// <param name="request">The <typeparamref name="TRequest"/> to send to the client.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/> of the call.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns the <typeparamref name="TResponse"/> from the client.</returns>
-    Task<TResponse> Call(TRequest request, CancellationToken cancellationToken);
+    Task<TResponse> Call(TRequest request, ExecutionContext executionContext, CancellationToken cancellationToken);
 }

@@ -12,6 +12,7 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
 
@@ -20,6 +21,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
 /// </summary>
 public class EventHorizonConnection : IEventHorizonConnection
 {
+    readonly ExecutionContext _executionContext;
     readonly IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> _reverseCallClient;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
@@ -28,14 +30,17 @@ public class EventHorizonConnection : IEventHorizonConnection
     /// <summary>
     /// Initializes a new instance of the <see cref="EventHorizonConnection" /> class.
     /// </summary>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/>.</param>
     /// <param name="reverseCallClient">The reverse call client.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="logger">The logger.</param>
     public EventHorizonConnection(
+        ExecutionContext executionContext,
         IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
         IMetricsCollector metrics,
         ILogger logger)
     {
+        _executionContext = executionContext;
         _reverseCallClient = reverseCallClient;
         _metrics = metrics;
         _logger = logger;
@@ -50,7 +55,7 @@ public class EventHorizonConnection : IEventHorizonConnection
         _metrics.IncrementTotalConnectionAttempts();
         var watch = new Stopwatch();
         watch.Start();
-        if (await _reverseCallClient.Connect(CreateRequest(subscription, publicEventsPosition), cancellationToken).ConfigureAwait(false))
+        if (await _reverseCallClient.Connect(CreateRequest(subscription, publicEventsPosition), _executionContext, cancellationToken).ConfigureAwait(false))
         {
             watch.Stop();
             _metrics.AddTotalTimeSpentConnecting(watch.Elapsed);
@@ -92,7 +97,7 @@ public class EventHorizonConnection : IEventHorizonConnection
         CancellationToken cancellationToken)
     {
         return _reverseCallClient.Handle(
-            (request, cancellationToken)
+            (request, _, cancellationToken)
                 => HandleEventFromEventHorizon(
                     connectionToStreamProcessorQueue,
                     request.Event,
@@ -129,7 +134,7 @@ public class EventHorizonConnection : IEventHorizonConnection
         }
     }
 
-    ConsumerSubscriptionRequest CreateRequest(SubscriptionId subscription, StreamPosition publicEventsPosition)
+    static ConsumerSubscriptionRequest CreateRequest(SubscriptionId subscription, StreamPosition publicEventsPosition)
         => new()
         {
             PartitionId = subscription.PartitionId.Value,
@@ -138,7 +143,7 @@ public class EventHorizonConnection : IEventHorizonConnection
             TenantId = subscription.ProducerTenantId.ToProtobuf()
         };
 
-    ConsumerResponse CreateSuccessfulResponse() => new();
+    static ConsumerResponse CreateSuccessfulResponse() => new();
 
-    ConsumerResponse CreateFailureResponse(Failure failure) => new() { Failure = failure };
+    static ConsumerResponse CreateFailureResponse(Failure failure) => new() { Failure = failure };
 }

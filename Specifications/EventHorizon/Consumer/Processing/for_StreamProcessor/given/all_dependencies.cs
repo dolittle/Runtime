@@ -7,10 +7,10 @@ using Moq;
 using Dolittle.Runtime.Events.Processing.Streams;
 using System.Threading;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
 using Microsoft.Extensions.Logging.Abstractions;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_StreamProcessor.given;
 
@@ -22,11 +22,12 @@ public class all_dependencies
     protected static EventsFromEventHorizonFetcher event_fetcher;
     protected static AsyncProducerConsumerQueue<StreamEvent> event_queue;
     protected static Mock<IResilientStreamProcessorStateRepository> stream_processor_states;
-    protected static Mock<IAsyncPolicyFor<ICanFetchEventsFromStream>> policy;
     protected static StreamProcessor stream_processor;
+    protected static ExecutionContext execution_context;
 
     Establish context = () =>
     {
+        execution_context = execution_contexts.create();
         subscription_id = new SubscriptionId(
             "aa6403de-6dee-4db8-80a0-366bb9532b3a",
             Guid.Parse("8aef7b88-db5b-4e17-92f7-cfd1cb23a829"),
@@ -40,13 +41,13 @@ public class all_dependencies
         event_queue = new AsyncProducerConsumerQueue<StreamEvent>();
         event_fetcher = new EventsFromEventHorizonFetcher(event_queue, Mock.Of<IMetricsCollector>());
         stream_processor_states = new Mock<IResilientStreamProcessorStateRepository>();
-        policy = new Mock<IAsyncPolicyFor<ICanFetchEventsFromStream>>();
         stream_processor = new StreamProcessor(
             subscription_id,
+            execution_context,
             event_processor.Object,
             event_fetcher,
             stream_processor_states.Object,
-            policy.Object,
+            new EventFetcherPolicies(NullLogger.Instance),
             Mock.Of<IMetricsCollector>(),
             NullLoggerFactory.Instance);
     };

@@ -1,7 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 
@@ -13,7 +14,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 /// <param name="ExecutionContext">The execution context.</param>
 public record ConsumerSubscriptionArguments(
     ExecutionContext ExecutionContext,
-    MicroserviceId ConsumerMicroserviceId,
+    MicroserviceId ConsumerMicroservice,
     TenantId ConsumerTenant,
     TenantId ProducerTenant,
     StreamId PublicStream,

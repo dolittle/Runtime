@@ -1,14 +1,16 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 using static Moq.It;
 using static Moq.Times;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler;
 
@@ -25,6 +27,7 @@ public class and_it_is_given_a_non_writeable_stream : given.an_event_handler_wit
             IsAny<ScopeId>(),
             IsAny<EventProcessorId>(),
             IsAny<IStreamDefinition>(),
-            IsAny<FactoryFor<IEventProcessor>>(),
+            IsAny<Func<TenantId, IEventProcessor>>(),
+            IsAny<ExecutionContext>(),
             IsAny<CancellationToken>()), Moq.Times.Never());
 }

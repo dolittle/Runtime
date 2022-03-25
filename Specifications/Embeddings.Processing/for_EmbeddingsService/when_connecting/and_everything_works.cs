@@ -26,7 +26,8 @@ public class and_everything_works : given.all_dependencies
                 client_stream.Object,
                 call_context,
                 protocol,
-                IsAny<CancellationToken>()
+                IsAny<CancellationToken>(),
+                false
             ))
             .Returns(Task.FromResult<Try<(IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>, EmbeddingRegistrationArguments)>>((dispatcher.Object, new EmbeddingRegistrationArguments(execution_context, embedding_definition))));
         embedding_processors
@@ -55,10 +56,10 @@ public class and_everything_works : given.all_dependencies
             client_stream.Object,
             call_context,
             protocol,
-            IsAny<CancellationToken>()),
+            IsAny<CancellationToken>(),
+            false),
         Once);
-
-    It should_set_the_execution_context = () => execution_context_manager.Verify(_ => _.CurrentFor(execution_context, IsAny<string>(), IsAny<int>(), IsAny<string>()), Once);
+    
     It should_have_registered_the_embedding = () => embedding_processors.Verify(
         _ => _.TryStartEmbeddingProcessorForAllTenants(
             embedding_id,

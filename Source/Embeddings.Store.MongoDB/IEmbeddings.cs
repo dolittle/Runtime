@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Projections.Store;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB;

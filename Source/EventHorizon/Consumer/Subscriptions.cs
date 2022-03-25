@@ -3,18 +3,21 @@
 
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Domain.Platform;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
+using Microservices;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer;
 
 /// <summary>
 /// Represents an implementation of <see cref="ISubscriptions" />.
 /// </summary>
-[SingletonPerTenant]
+[Singleton, PerTenant]
 public class Subscriptions : ISubscriptions
 {
     readonly ConcurrentDictionary<SubscriptionId, ISubscription> _subscriptions = new();
@@ -31,19 +34,19 @@ public class Subscriptions : ISubscriptions
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="logger">The logger.</param>
     public Subscriptions(
-        MicroservicesConfiguration microservicesConfiguration,
+        IOptions<MicroservicesConfiguration> microservicesConfiguration,
         ISubscriptionFactory subscriptionFactory,
         IMetricsCollector metrics,
         ILogger logger)
     {
-        _microservicesConfiguration = microservicesConfiguration;
+        _microservicesConfiguration = microservicesConfiguration.Value;
         _subscriptionFactory = subscriptionFactory;
         _metrics = metrics;
         _logger = logger;
     }
 
     /// <inheritdoc />
-    public Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId)
+    public Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, ExecutionContext executionContext)
     {
         _logger.SubscribingTo(subscriptionId);
 
@@ -59,7 +62,7 @@ public class Subscriptions : ISubscriptions
                         $"No microservice configuration for producer microservice {producerMicroserviceId}")));
         }
 
-        var subscription = _subscriptions.GetOrAdd(subscriptionId, _ => _subscriptionFactory.Create(_, producerConnectionAddress));
+        var subscription = _subscriptions.GetOrAdd(subscriptionId, subscriptionId => _subscriptionFactory.Create(subscriptionId, producerConnectionAddress, executionContext));
 
         if (subscription.State == SubscriptionState.Created)
         {
@@ -83,7 +86,7 @@ public class Subscriptions : ISubscriptions
         {
             return false;
         }
-        microserviceAddress = microserviceAddressConfig;
+        microserviceAddress = new MicroserviceAddress(microserviceAddressConfig.Host, microserviceAddressConfig.Port);
         return true;
     }
 }

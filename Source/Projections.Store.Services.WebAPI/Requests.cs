@@ -5,16 +5,16 @@ using System;
 using System.Globalization;
 using System.Linq;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Security;
-
+using Dolittle.Runtime.Execution;
 using RuntimeExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Projections.Store.Services.WebAPI;
 
 public record ExecutionContext(
     Guid Microservice,
     Guid Tenant,
-    Versioning.Version Version,
+    Version Version,
     string Environment,
     Guid CorrelationId,
     Claim[] Claims)

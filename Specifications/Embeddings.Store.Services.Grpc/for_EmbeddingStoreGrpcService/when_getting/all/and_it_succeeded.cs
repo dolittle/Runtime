@@ -9,7 +9,6 @@ using Dolittle.Runtime.Embeddings.Processing;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
-using static Moq.It;
 using static Moq.Times;
 
 namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpcService.when_getting.all;

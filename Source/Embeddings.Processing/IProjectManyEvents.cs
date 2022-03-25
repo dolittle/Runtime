@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -19,16 +20,18 @@ public interface IProjectManyEvents
     /// </summary>
     /// <param name="currentState">The <see cref="EmbeddingCurrentState" />.</param>
     /// <param name="events">The <see cref="CommittedAggregateEvents" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns></returns>
-    Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken);
+    Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Tries to project all the <see cref="UncommittedEvents" />.
     /// </summary>
     /// <param name="currentState">The <see cref="EmbeddingCurrentState" />.</param>
     /// <param name="events">The <see cref="UncommittedEvents" />.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns></returns>
-    Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken);
+    Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, ExecutionContext executionContext, CancellationToken cancellationToken);
 }

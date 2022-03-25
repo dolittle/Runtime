@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 
@@ -18,10 +18,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 public class StreamProcessor : IStreamProcessor
 {
     readonly SubscriptionId _identifier;
+    readonly ExecutionContext _executionContext;
     readonly IEventProcessor _eventProcessor;
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
     readonly EventsFromEventHorizonFetcher _eventsFetcher;
-    readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
+    readonly IEventFetcherPolicies _eventsFetcherPolicy;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
@@ -31,6 +32,7 @@ public class StreamProcessor : IStreamProcessor
     /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
     /// </summary>
     /// <param name="subscriptionId">The identifier of the subscription the stream processor will receive events for.</param>
+    /// <param name="executionContext">The <see cref="ExecutionContext"/>.</param>
     /// <param name="eventProcessor">The event processor that writes the received events to a scoped event log.</param>
     /// <param name="eventsFetcher">The event fetcher that receives fetches events over an event horizon connection.</param>
     /// <param name="streamProcessorStates">The repository to use for getting the subscription state.</param>
@@ -39,14 +41,16 @@ public class StreamProcessor : IStreamProcessor
     /// <param name="loggerFactory">The factory for creating loggers.</param>
     public StreamProcessor(
         SubscriptionId subscriptionId,
+        ExecutionContext executionContext,
         IEventProcessor eventProcessor,
         EventsFromEventHorizonFetcher eventsFetcher,
         IResilientStreamProcessorStateRepository streamProcessorStates,
-        IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+        IEventFetcherPolicies eventsFetcherPolicy,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
     {
         _identifier = subscriptionId;
+        _executionContext = executionContext;
         _eventProcessor = eventProcessor;
         _streamProcessorStates = streamProcessorStates;
         _eventsFetcher = eventsFetcher;
@@ -94,6 +98,7 @@ public class StreamProcessor : IStreamProcessor
             _eventProcessor,
             _streamProcessorStates,
             _eventsFetcher,
+            _executionContext,
             _eventsFetcherPolicy,
             _eventsFetcher,
             new TimeToRetryForUnpartitionedStreamProcessor(),

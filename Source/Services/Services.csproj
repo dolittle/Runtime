@@ -1,26 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props" />
+    <Import Project="../../default.props" />
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Services</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Services</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Services</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../Booting/Booting.csproj" />
-    <ProjectReference Include="../Configuration/Configuration.csproj" />
-    <ProjectReference Include="../Metrics/Metrics.csproj" />
-    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
-    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
-    <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
-    <ProjectReference Include="../Types/Types.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Configuration/Configuration.csproj" />
+        <ProjectReference Include="../Hosting/Hosting.csproj" />
+        <ProjectReference Include="../Metrics/Metrics.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
-    <PackageReference Include="Grpc" Version="$(GrpcVersion)" />
-    <PackageReference Include="Grpc.Reflection" Version="$(GrpcVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
+        <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="$(GrpcVersion)" />
+        <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="$(GrpcVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+        
+    </ItemGroup>
 </Project>

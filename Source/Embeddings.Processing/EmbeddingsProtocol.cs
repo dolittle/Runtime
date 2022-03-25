@@ -3,7 +3,6 @@
 
 using System.Linq;
 using Dolittle.Runtime.Embeddings.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Dolittle.Runtime.Services;

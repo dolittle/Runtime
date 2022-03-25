@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.Events;
-using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventTypes.List;

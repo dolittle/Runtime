@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Services.Clients;
+using Microservices;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
@@ -23,7 +24,10 @@ public class EventHorizonConnectionFactory : IEventHorizonConnectionFactory
     /// <param name="reverseCallClients">The reverse call clients to use for creating event horizon clients.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="loggerFactory">The logger factory to use for creating loggers for the event horizon connections</param>
-    public EventHorizonConnectionFactory(IReverseCallClients reverseCallClients, IMetricsCollector metrics, ILoggerFactory loggerFactory)
+    public EventHorizonConnectionFactory(
+        IReverseCallClients reverseCallClients,
+        IMetricsCollector metrics,
+        ILoggerFactory loggerFactory)
     {
         _reverseCallClients = reverseCallClients;
         _metrics = metrics;
@@ -32,7 +36,7 @@ public class EventHorizonConnectionFactory : IEventHorizonConnectionFactory
 
 
     /// <inheritdoc/>
-    public IEventHorizonConnection Create(MicroserviceAddress connectionAddress)
+    public IEventHorizonConnection Create(MicroserviceAddress connectionAddress, ExecutionContext executionContext)
     {
         var client = _reverseCallClients.GetFor(
             new EventHorizonProtocol(),
@@ -41,6 +45,7 @@ public class EventHorizonConnectionFactory : IEventHorizonConnectionFactory
             TimeSpan.FromSeconds(10));
 
         return new EventHorizonConnection(
+            executionContext,
             client,
             _metrics,
             _loggerFactory.CreateLogger<EventHorizonConnection>());
