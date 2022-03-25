@@ -1,3 +1,25 @@
+# [8.0.0] - 2022-3-25 [PR: #654](https://github.com/dolittle/Runtime/pull/654)
+## Summary
+
+The breaking change from v6 to v7 was that we changed `EventSource` and `Partition` from Guids to Strings - both in the Event Store schema and the Contracts. This ment that upgrading from v6 required both a full upgrade of all microservices that is connected through Event Horizon, and a MongoDB migration tool (that we never completed). This was sub-optimal.
+
+With this release, we introduce another breaking change, to un-break these changes. This means that a v8 Runtime is fully compatible with a v6 Runtime - all you need to do is upgrade the SDK. The v8 Runtime is also compatible with the Event Store from a v7 Runtime, **but not the Event Horizon**. We consider this a non-issue since it is not used by anyone to our knowledge.
+
+To use Runtime v8, you need to:
+- Update your SDK to `17.0.0` for .NET, or `24.0.0` for JavaScript.
+- Start the Runtime with an environmental variable called `DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION` set to either `V6` or `V7`.
+This configures how the v8 Runtime will write to the Event Store so that you can roll back to your previous version in case anything goes wrong. 
+
+### Added
+
+- Reading configuration from a single file called `runtime.json` in the current working directory, environmental variables, and command line arguments. The configuration specified in the `runtime.json` file will be overwritten by the previous configuration files (`resources.json`, `tenants.json`, ...) so that it is still backwards compatible with older setups.
+
+### Changed
+
+- The Event Horizon contracts are compatible with v6 and v8 of the Runtime.
+- The EventStore schema is configurable to be compatible with v6 or v7 of the Runtime. This __must__ be configured through the `DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION` environmental variable, otherwise the Runtime will refuse to commit or process any events.
+
+
 # [7.8.1] - 2022-3-25 [PR: #636](https://github.com/dolittle/Runtime/pull/636)
 ## Summary
 
