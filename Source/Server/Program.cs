@@ -15,7 +15,10 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(configuration =>
     {
         configuration.AddJsonFile("appsettings.json");
+        configuration.AddJsonFile("runtime.json");
         configuration.AddLegacyDolittleFiles();
+        configuration.AddEnvironmentVariables();
+        configuration.AddCommandLine(args);
     })
     .AddMetrics()
     .AddGrpcHost(EndpointVisibility.Private)

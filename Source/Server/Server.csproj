@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />

@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Contracts;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.EventHorizon.UnBreaking;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients;
@@ -62,7 +62,6 @@ public class EventHorizonConnection : IEventHorizonConnection
             _subscriptionId = subscription;
 
             var response = _reverseCallClient.ConnectResponse;
-
             if (response.Failure != default)
             {
                 _metrics.IncrementTotalFailureResponses();
@@ -135,13 +134,17 @@ public class EventHorizonConnection : IEventHorizonConnection
     }
 
     static ConsumerSubscriptionRequest CreateRequest(SubscriptionId subscription, StreamPosition publicEventsPosition)
-        => new()
+    {
+        var request = new ConsumerSubscriptionRequest
         {
             PartitionId = subscription.PartitionId.Value,
             StreamId = subscription.StreamId.ToProtobuf(),
             StreamPosition = publicEventsPosition.Value,
             TenantId = subscription.ProducerTenantId.ToProtobuf()
         };
+        request.TrySetPartitionIdLegacy();
+        return request;
+    }
 
     static ConsumerResponse CreateSuccessfulResponse() => new();
 
