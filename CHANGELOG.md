@@ -1,3 +1,34 @@
+# [7.8.1] - 2022-3-25 [PR: #636](https://github.com/dolittle/Runtime/pull/636)
+## Summary
+
+We have refactored a lot of the internals of the Runtime - to remove code that we no longer need, and to rely more on well tested frameworks over own code. Notable examples:
+- The booting system is gone, we only discover DI container bindings and use the .NET hosting model for the rest
+- The resources system is gone, and replaced with "normal" configuration. We don't need multiple implementations of the same resource types.
+- The configuration system was replaced with the Microsoft Configuration system, which should make it easier to load configuration from multiple sources - and in the future support hot-reloading.
+- The `ExecutionContextManager` that used `AsyncLocal` storage is gone, and we pass along the `ExecutionContext` explicitly or resolve dependencies from tenant-specific containers.
+- Removed the custom DepenencyInjection setup, and replaced it with AutoFac and a tenant-specific child container structure that allows us to ensure we don't mix dependencies for different tenants.
+- Upgraded from the native Grpc libraries to the C# Grpc libraries that uses AspNetCore (Kestrel) for hosting.
+
+### Added
+
+- A HealthCheck endpoint is exposed on the "web" endpoint (defaults to 8001) on `/healthz`. This endpoint returns 200 if the configuration files are correctly formatted, the MongoDB databases are reachable and the gRPC services running. Otherwise it returns an error and a JSON structure describing the issues.
+- The "web" endpoint port is configurable in the `endpoints.json` file.
+- More metrics for `ReverseCallDispatcher`
+
+### Changed
+
+- Change from the `Grpc.Core` native packages, to the `Grpc.AspNetCore` C# packages
+- The Docker Images that are pushed to Docker Hub are now multi-architecture, supporting `amd64` and `arm64`.
+
+### Fixed
+- The `RetryTime` that was passed along from the SDKs when a Projection failed was not used, meaning that failing projections were never retried.
+-  Filters that failed to write the filtered event to the stream, threw an error propagated to the SDK instead of handling it as a filter failure and retrying later.
+- ReverseCalls where the `Connect` arguments were invalid, caused the SDKs to receive a generic gRPC error instead of the failure that occurred in the Runtime.
+ 
+### Deprecated 
+- The `-arm64` images on Docker Hub will no longer be released. The "normal" images should be used in place.
+
+
 # [7.8.0] - 2022-2-14 [PR: #627](https://github.com/dolittle/Runtime/pull/627)
 ## Summary
 
