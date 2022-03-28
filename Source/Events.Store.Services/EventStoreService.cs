@@ -10,6 +10,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
+using Proto;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Store.Services;

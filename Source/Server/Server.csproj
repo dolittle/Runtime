@@ -17,6 +17,12 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
+        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Remote" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Remote.GrpcNet" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
     </ItemGroup>
 
 </Project>

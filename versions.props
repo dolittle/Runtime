@@ -20,9 +20,10 @@
         <MoqVersion>4.13.*</MoqVersion>
         <NewtonsoftVersion>12.0.3</NewtonsoftVersion>
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
-        <ProtobufVersion>3.18.1</ProtobufVersion>
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>5.0.2</PrometheusVersion>
+        <ProtoActorVersion>0.27.0</ProtoActorVersion>
+        <ProtobufVersion>3.18.1</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
         <SystemLinqAsyncVersion>5.1.0</SystemLinqAsyncVersion>
