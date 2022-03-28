@@ -71,6 +71,16 @@ An unrelated, but also useful change is the gRPC Server Reflection service that 
 - Implemented the GetOne endpoint on the Event Handler management service, and changed the CLI to use this method when getting a single Event Handler. This reduces a bit of work and traffic.
 
 
+# [7.7.1] - 2022-3-28
+## Summary
+
+Manually released new Docker Images that sets the `ASPNETCORE_URLS` environment variable to serve the Web endpoint on port `8001` by default, instead of `80`. This caused issues when running the Runtime in our platform.
+
+### Fixed
+
+- Sets the `ASPNETCORE_URLS` environment variable to to `"http://+:8001"` so that it binds the Web endpoint to port `8001` instead of `80`
+
+
 # [7.7.0] - 2022-2-11 [PR: #625](https://github.com/dolittle/Runtime/pull/625)
 ## Summary
 
@@ -94,6 +104,16 @@ Implements version 6.7.0 of Contracts adding two new event key selectors to proj
 - Projection definition in the Projection Store for MongoDB has two new fields, `StaticKey` and `OccurredFormat`
 
 
+# [7.6.1] - 2022-3-28
+## Summary
+
+Manually released new Docker Images that sets the `ASPNETCORE_URLS` environment variable to serve the Web endpoint on port `8001` by default, instead of `80`. This caused issues when running the Runtime in our platform.
+
+### Fixed
+
+- Sets the `ASPNETCORE_URLS` environment variable to to `"http://+:8001"` so that it binds the Web endpoint to port `8001` instead of `80`
+
+
 # [7.6.0] - 2022-2-9 [PR: #614](https://github.com/dolittle/Runtime/pull/614)
 ## Summary
 
@@ -108,6 +128,16 @@ Introduces secondary storage mechanisms for Projection read models, this enables
 - The Dolittle CLI now includes container names in the Runtime selection list when multiple Runtimes are detected.
 
 
+# [7.5.1] - 2022-3-28
+## Summary
+
+Manually released new Docker Images that sets the `ASPNETCORE_URLS` environment variable to serve the Web endpoint on port `8001` by default, instead of `80`. This caused issues when running the Runtime in our platform.
+
+### Fixed
+
+- Sets the `ASPNETCORE_URLS` environment variable to to `"http://+:8001"` so that it binds the Web endpoint to port `8001` instead of `80`
+
+
 # [7.5.0] - 2022-1-24 [PR: #609](https://github.com/dolittle/Runtime/pull/609)
 ## Summary
 
@@ -116,6 +146,16 @@ Implements the new method introduced in the projection store that retrieves all 
 ### Added
 
 - A new `GetAllInBatches` method on the `ProjectionStore` service that streams the responses back to the client in dynamically sized batches of approximately 2MB. Singular projection states that are larger than 2MB are sent in their own batch, as the client might still accept larger gRPC messages.
+
+
+# [7.4.1] - 2022-3-28
+## Summary
+
+Manually released new Docker Images that sets the `ASPNETCORE_URLS` environment variable to serve the Web endpoint on port `8001` by default, instead of `80`. This caused issues when running the Runtime in our platform.
+
+### Fixed
+
+- Sets the `ASPNETCORE_URLS` environment variable to to `"http://+:8001"` so that it binds the Web endpoint to port `8001` instead of `80`
 
 
 # [7.4.0] - 2022-1-20 [PR: #597](https://github.com/dolittle/Runtime/pull/597)
