@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BaselineTypeDiscovery;
+using Dolittle.Runtime.DependencyInversion.Actors;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 
@@ -44,6 +45,14 @@ public static class TypeScanner
             GroupClassesByLifecycle(classesByScope[Scopes.PerTenant]));
     }
 
+    public static ClassesByScopeAndActorType GroupClassesByScopeAndActorType(IEnumerable<Type> classes)
+    {
+        var classesByScope = classes.ToLookup(_ => _.GetScope());
+        return new ClassesByScopeAndActorType(
+            GroupClassesByActorType(classesByScope[Scopes.Global]),
+            GroupClassesByActorType(classesByScope[Scopes.PerTenant]));
+    }
+
     static ClassesByLifecycle GroupClassesByLifecycle(IEnumerable<Type> classes)
     {
         var classesByLifecycle = classes.ToLookup(_ => _.GetLifecycle());
@@ -52,5 +61,14 @@ public static class TypeScanner
             classesByLifecycle[Lifecycles.Singleton].ToArray(),
             classesByLifecycle[Lifecycles.Scoped].ToArray(),
             classesByLifecycle[Lifecycles.Transient].ToArray());
+    }
+
+    static ClassesByActorType GroupClassesByActorType(IEnumerable<Type> classes)
+    {
+        var classesByActorType = classes.ToLookup(_ => _.GetActorType());
+        var x = classesByActorType[ActorType.Actor];
+        return new ClassesByActorType(
+            classesByActorType[ActorType.Actor].ToArray(),
+            classesByActorType[ActorType.Grain].ToArray());
     }
 }

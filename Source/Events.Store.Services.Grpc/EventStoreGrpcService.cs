@@ -5,9 +5,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
+using Proto;
+using Proto.Cluster;
 using static Dolittle.Runtime.Events.Contracts.EventStore;
 
 namespace Dolittle.Runtime.Events.Store.Services.Grpc;
@@ -19,19 +22,22 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc;
 public class EventStoreGrpcService : EventStoreBase
 {
     readonly IEventStoreService _eventStoreService;
+    readonly ActorSystem _actorSystem;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStoreService"><see cref="IEventStoreService"/>.</param>
-    public EventStoreGrpcService(IEventStoreService eventStoreService)
+    public EventStoreGrpcService(IEventStoreService eventStoreService, ActorSystem actorSystem)
     {
         _eventStoreService = eventStoreService;
+        _actorSystem = actorSystem;
     }
 
     /// <inheritdoc/>
     public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
     {
+        return await _actorSystem.Cluster().GetEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid().ToString()).Commit(request, context.CancellationToken);
         var response = new Contracts.CommitEventsResponse();
         var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
         var commitResult = await _eventStoreService.TryCommit(

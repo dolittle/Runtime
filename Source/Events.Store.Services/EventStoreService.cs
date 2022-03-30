@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using Proto;
+using Proto.Cluster;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Store.Services;
@@ -23,6 +25,7 @@ public class EventStoreService : IEventStoreService
 {
     readonly ICreateExecutionContexts _executionContextCreator;
     readonly Func<TenantId, IEventStore> _getEventStore;
+    readonly ActorSystem _actorSystem;
     readonly ILogger _logger;
 
     /// <summary>
@@ -42,11 +45,10 @@ public class EventStoreService : IEventStoreService
     }
 
     /// <inheritdoc/>
-    public Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, ExecutionContext context, CancellationToken token)
+    public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, ExecutionContext context, CancellationToken token)
     {
         _logger.EventsReceivedForCommitting(false, events.Count);
-
-        return _executionContextCreator
+        return await _executionContextCreator
             .TryCreateUsing(context)
             .Then(executionContext =>
                 _getEventStore(executionContext.Tenant).CommitEvents(events, executionContext, token))

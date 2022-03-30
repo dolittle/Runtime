@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Actors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,7 +31,8 @@ public static class HostBuilderExtensions
                         identityLookup: new PartitionIdentityLookup())
                     .WithClusterKind(
                         kind: EventStoreGrainActor.Kind,
-                        prop: Props.FromProducer(provider.GetRequiredService<EventStoreGrainActor>));
+                        prop: Props.FromProducer(() => new EventStoreGrainActor((context, identity) => ActivatorUtilities.CreateInstance<EventStoreGrain>(provider, context, identity))));
+                        // prop: Props.FromProducer((x) => new EventStoreGrainActor((context, identity) => ActivatorUtilities.CreateInstance<EventStoreGrain>(provider, context, identity))));
 
                 return new ActorSystem(actorSystemConfig)
                     .WithServiceProvider(provider)

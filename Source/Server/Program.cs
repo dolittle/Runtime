@@ -3,13 +3,19 @@
 
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Server.Actors;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
+using Grpc.Core.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Proto;
+using Proto.DependencyInjection;
 
 var host = Host.CreateDefaultBuilder(args)
     .UseDolittleServices()
@@ -30,4 +36,8 @@ var host = Host.CreateDefaultBuilder(args)
     .AddWebHost()
     .Build();
 
-host.Run();
+await host.StartAsync();
+
+var system = host.Services.GetRequiredService<ActorSystem>();
+
+await host.WaitForShutdownAsync();

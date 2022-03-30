@@ -17,6 +17,12 @@
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
   </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Actors\Tenancy" />
+    </ItemGroup>
 
 </Project>

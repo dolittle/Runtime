@@ -1,9 +1,12 @@
 syntax = "proto3";
 
+package dolittle.runtime.events;
+
 option csharp_namespace = "Dolittle.Runtime.Events.Store.Actors";
 
 import "google/protobuf/empty.proto";
+import "Runtime/Events/EventStore.proto";
 
 service EventStoreGrain {
-    rpc Commit (google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc Commit (CommitEventsRequest) returns (CommitEventsResponse);
 }

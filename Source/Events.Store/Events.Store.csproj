@@ -17,12 +17,14 @@
 
     <ItemGroup>
         <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
         <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
         <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
         <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
     </ItemGroup>
     <ItemGroup>
-        <ProtoGrain Include="Actors/EventStore.proto" />
+<!--        <ProtoGrain Include="$(ContractsRootPath)Runtime/Events/EventStore.proto" />-->
+        <ProtoGrain Include="Actors/EventStoreGrain.proto" AdditionalImportDirs="$(ContractsRootPath)" />
     </ItemGroup>
 </Project>

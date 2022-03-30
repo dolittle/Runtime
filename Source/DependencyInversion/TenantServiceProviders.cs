@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Dolittle.Runtime.DependencyInversion.Actors;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Types;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -22,6 +23,7 @@ public class TenantServiceProviders : ITenantServiceProviders
     readonly ILifetimeScope _globalContainer;
     readonly IEnumerable<ICanAddTenantServices> _serviceAdders;
     readonly ClassesByLifecycle _perTenantClasses;
+    readonly ClassesByActorType _perTenantActors;
     readonly ConcurrentDictionary<TenantId, AutofacServiceProvider> _providers = new();
     
     /// <summary>
@@ -30,11 +32,12 @@ public class TenantServiceProviders : ITenantServiceProviders
     /// <param name="globalContainer">The <see cref="ILifetimeScope"/> root container that the tenant specific IoC containers are created from.</param>
     /// <param name="serviceAdders">The <see cref="IEnumerable{T}"/> of <see cref="ICanAddTenantServices"/>.</param>
     /// <param name="perTenantClasses">The <see cref="ClassesByLifecycle"/>.</param>
-    public TenantServiceProviders(ILifetimeScope globalContainer, IEnumerable<ICanAddTenantServices> serviceAdders, ClassesByLifecycle perTenantClasses)
+    public TenantServiceProviders(ILifetimeScope globalContainer, IEnumerable<ICanAddTenantServices> serviceAdders, ClassesByLifecycle perTenantClasses, ClassesByActorType perTenantActors)
     {
         _globalContainer = globalContainer;
         _serviceAdders = serviceAdders;
         _perTenantClasses = perTenantClasses;
+        _perTenantActors = perTenantActors;
     }
 
     /// <inheritdoc />
@@ -71,6 +74,7 @@ public class TenantServiceProviders : ITenantServiceProviders
             
             builder.Populate(services);
             builder.RegisterClassesByLifecycle(_perTenantClasses);
+            builder.RegisterActorsByActorType(_perTenantActors);
         });
         return new AutofacServiceProvider(tenantContainer);
     }
