@@ -33,12 +33,13 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
     {
         var discoveredClasses = TypeScanner.GetAllClassesInRuntimeAssemblies()
             .IgnoreClassesWithAttribute<DisableAutoRegistrationAttribute>()
+            .FilterClassesWithAttribute<ActorAttribute>(out var actorClasses)
+            .FilterClassesImplementing(typeof(IActor), out var _)
+            .FilterClassesWithAttribute<GrainAttribute>(out var grainClasses)
             .FilterClassesImplementing(typeof(ICanAddServices), out var classesThatCanAddServices)
             .FilterClassesImplementing(typeof(ICanAddTenantServices), out var classesThatCanAddTenantServices)
             .FilterClassesImplementing(typeof(ICanAddServicesForTypesWith<>), out var classesThatCanAddServicesForAttribute)
             .FilterClassesImplementing(typeof(ICanAddTenantServicesForTypesWith<>), out var classesThatCanAddTenantServicesForAttribute)
-            .FilterClassesImplementing(typeof(IActor), out var actorClasses)
-            .FilterClassesWithAttribute<GrainAttribute>(out var grainClasses)
             .ToList();
 
         var actorAndGrainClasses = actorClasses.Concat(grainClasses);
@@ -61,6 +62,7 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
 
         var groupedClasses = TypeScanner.GroupClassesByScopeAndLifecycle(discoveredClasses);
         var groupedActors = TypeScanner.GroupClassesByScopeAndActorType(actorAndGrainClasses);
+        containerBuilder.RegisterInstance(groupedActors);
         containerBuilder.RegisterClassesByLifecycle(groupedClasses.Global);
         containerBuilder.RegisterActorsByActorType(groupedActors.Global);
 
@@ -75,6 +77,7 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
 
         containerBuilder.AddLogging();
         containerBuilder.AddTenantFactories();
+        containerBuilder.AddClusterKindFactories();
 
         return _factory.CreateServiceProvider(containerBuilder);
     }

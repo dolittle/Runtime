@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BaselineTypeDiscovery;
 using Dolittle.Runtime.DependencyInversion.Actors;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -44,7 +45,12 @@ public static class TypeScanner
             GroupClassesByLifecycle(classesByScope[Scopes.Global]),
             GroupClassesByLifecycle(classesByScope[Scopes.PerTenant]));
     }
-
+    
+    /// <summary>
+    /// Groups classes from an <see cref="IEnumerable{T}"/> of <see cref="Type"/> by scope and actor type.
+    /// </summary>
+    /// <param name="classes">The classes to group.</param>
+    /// <returns>The <see cref="ClassesByScopeAndActorType"/> grouped by scope and actor type.</returns>
     public static ClassesByScopeAndActorType GroupClassesByScopeAndActorType(IEnumerable<Type> classes)
     {
         var classesByScope = classes.ToLookup(_ => _.GetScope());
@@ -66,9 +72,10 @@ public static class TypeScanner
     static ClassesByActorType GroupClassesByActorType(IEnumerable<Type> classes)
     {
         var classesByActorType = classes.ToLookup(_ => _.GetActorType());
-        var x = classesByActorType[ActorType.Actor];
         return new ClassesByActorType(
             classesByActorType[ActorType.Actor].ToArray(),
-            classesByActorType[ActorType.Grain].ToArray());
+            classesByActorType[ActorType.Grain]
+                .Select(grainType => new GrainAndActor(grainType, grainType.GetCustomAttribute<GrainAttribute>()!.ActorType))
+                .ToArray());
     }
 }

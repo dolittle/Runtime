@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using Autofac;
-using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.DependencyInversion.Types;
 using Proto;
 using Proto.Cluster;
@@ -24,19 +22,20 @@ public static class ContainerBuilderExtensions
     public static void RegisterActorsByActorType(this ContainerBuilder builder, ClassesByActorType classes)
     {
         builder.RegisterTypes(classes.Actor).AsSelf();
-        builder.RegisterTypes(classes.Grain).AsSelf();
-        foreach (var grainType in classes.Grain)
+        foreach (var (grain, actor) in classes.Grain)
         {
-            var actorType = grainType.GetCustomAttribute<GrainAttribute>().ActorType;
-            var grainFactoryType = typeof(Func<>).MakeGenericType(
-                typeof(IContext),
-                typeof(ClusterIdentity),
-                grainType);
-            
-            builder
-                .Register<Func<IContext, ClusterIdentity, object>>(ctx => (context, id) => ctx.Resolve(grainType, new TypedParameter(typeof(IContext), context), new TypedParameter(typeof(ClusterIdentity), id)))
-                .As(grainFactoryType);
-            builder.RegisterType(actorType).AsSelf();
+            builder.RegisterTypes(actor, grain).AsSelf();
         }
+    }
+    /// <summary>
+    /// Adds registrations for dependencies of type <see cref="Func{TResult}"/> where the first parameter is a <see cref="IContext"/>
+    /// and second is <see cref="ClusterIdentity"/>, by delegating the resolving to the per-tenant containers.
+    /// </summary>
+    /// <param name="builder">The container builder to add the registrations to.</param>
+    /// <returns>The container builder for continuation.</returns>
+    public static ContainerBuilder AddClusterKindFactories(this ContainerBuilder builder)
+    {
+        builder.RegisterSource<GeneratedClusterKindFactoryRegistrationSource>();
+        return builder;
     }
 }

@@ -22,18 +22,18 @@ using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-[Singleton, PerTenant, Grain(typeof(EventStoreGrainActor))]
+[PerTenant, Grain(typeof(EventStoreGrainActor))]
 public class EventStoreGrain : EventStoreGrainBase
 {
     readonly ClusterIdentity _identity;
-    readonly Func<TenantId, IEventStore> _getEventStore;
+    readonly IEventStore _eventStore;
     readonly ILogger _logger;
 
-    public EventStoreGrain(IContext context, ClusterIdentity identity, Func<TenantId, IEventStore> getEventStore, ILogger logger)
+    public EventStoreGrain(IContext context, ClusterIdentity identity, IEventStore eventStore, TenantId tenantId, ILogger logger)
         : base(context)
     {
         _identity = identity;
-        _getEventStore = getEventStore;
+        _eventStore = eventStore;
         logger.LogInformation($"Created actor {identity}");
     }
     // public EventStoreGrain(IContext context, ClusterIdentity identity)

@@ -21,8 +21,4 @@
         <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
   </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Actors\Tenancy" />
-    </ItemGroup>
-
 </Project>

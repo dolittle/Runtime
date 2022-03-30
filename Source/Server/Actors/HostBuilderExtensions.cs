@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Actors;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,28 +16,25 @@ using Proto.Remote.GrpcNet;
 
 namespace Dolittle.Runtime.Server.Actors;
 
+/// <summary>
+/// Extensions for <see cref="IHostBuilder"/>.
+/// </summary>
 public static class HostBuilderExtensions
 {
+    /// <summary>
+    /// Configures the <see cref="ActorSystem"/> service in the <see cref="ServiceCollection"/>.
+    /// </summary>
+    /// <param name="builder">The <see cref="IHostBuilder"/>.</param>
+    /// <returns>The builder for continuation.</returns>
     public static IHostBuilder AddActorSystem(this IHostBuilder builder)
         => builder.ConfigureServices(_ => _
-            .AddTransient<EventStoreGrain>()
-            .AddSingleton(provider =>
-            {
-                var actorSystemConfig = ActorSystemConfig.Setup();
-                var remoteConfig = GrpcNetRemoteConfig.BindToLocalhost();
-
-                var clusterConfig = ClusterConfig.Setup(
-                        clusterName: "Dolittle",
-                        clusterProvider: new TestProvider(new TestProviderOptions(), new InMemAgent()),
-                        identityLookup: new PartitionIdentityLookup())
-                    .WithClusterKind(
-                        kind: EventStoreGrainActor.Kind,
-                        prop: Props.FromProducer(() => new EventStoreGrainActor((context, identity) => ActivatorUtilities.CreateInstance<EventStoreGrain>(provider, context, identity))));
-                        // prop: Props.FromProducer((x) => new EventStoreGrainActor((context, identity) => ActivatorUtilities.CreateInstance<EventStoreGrain>(provider, context, identity))));
-
-                return new ActorSystem(actorSystemConfig)
-                    .WithServiceProvider(provider)
-                    .WithRemote(remoteConfig)
-                    .WithCluster(clusterConfig);
-            }));
+            .AddSingleton(provider => new ActorSystem(ActorSystemConfig.Setup())
+                .WithServiceProvider(provider)
+                .WithRemote(GrpcNetRemoteConfig.BindToLocalhost())
+                .WithCluster(ClusterConfig.Setup(
+                        "Dolittle",
+                        new TestProvider(new TestProviderOptions(), new InMemAgent()),
+                        new PartitionIdentityLookup())
+                    .WithDiscoveredClusterKinds(provider))));
+    
 }

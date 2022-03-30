@@ -6,16 +6,22 @@ using System;
 namespace Dolittle.Runtime.DependencyInversion.Scoping;
 
 /// <summary>
-/// Indicates that the class should be registered as a per-tenant dependency in a DI container.
-/// Meaning that instances will not be shared across execution contexts for different tenants.
+/// Indicates that the class should be registered as a grain in a DI container.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public class GrainAttribute : Attribute
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GrainAttribute"/>.
+    /// </summary>
+    /// <param name="actorType">The <see cref="Type"/> of the grain actor.</param>
     public GrainAttribute(Type actorType)
     {
         ActorType = actorType;
     }
-
+    
+    /// <summary>
+    /// Gets the <see cref="Type"/> of the grain actor.
+    /// </summary>
     public Type ActorType { get; }
 }

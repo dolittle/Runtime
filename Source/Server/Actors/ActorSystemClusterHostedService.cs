@@ -10,24 +10,33 @@ using Proto.Cluster;
 
 namespace Dolittle.Runtime.Server.Actors;
 
+/// <summary>
+/// Represents an implementation of <see cref="IHostedService"/> for the Proto.Actor Cluster.
+/// </summary>
 public class ActorSystemClusterHostedService : IHostedService
 {
     readonly ActorSystem _actorSystem;
     readonly ILoggerFactory _loggerFactory;
-
-
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActorSystemClusterHostedService"/>;
+    /// </summary>
+    /// <param name="actorSystem">The <see cref="ActorSystem"/>.</param>
+    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     public ActorSystemClusterHostedService(ActorSystem actorSystem, ILoggerFactory loggerFactory)
     {
         _actorSystem = actorSystem;
         _loggerFactory = loggerFactory;
     }
-
+    
+    /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
         Log.SetLoggerFactory(_loggerFactory);
         return _actorSystem.Cluster().StartMemberAsync();
     }
 
+    /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
         => _actorSystem.Cluster().ShutdownAsync();
 }

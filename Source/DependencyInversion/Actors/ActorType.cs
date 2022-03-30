@@ -4,7 +4,7 @@
 namespace Dolittle.Runtime.DependencyInversion.Actors;
 
 /// <summary>
-/// Defines the scoping types for a type registered in a DI container.
+/// Defines the actor types.
 /// </summary>
 public enum ActorType 
 {

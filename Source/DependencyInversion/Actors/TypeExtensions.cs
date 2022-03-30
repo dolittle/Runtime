@@ -13,10 +13,10 @@ namespace Dolittle.Runtime.DependencyInversion.Actors;
 public static class TypeExtensions
 {
     /// <summary>
-    /// Gets the <see cref="Scopes"/> for the <see cref="Type"/> from its defined attributes.
+    /// Gets the <see cref="ActorType"/> for the <see cref="Type"/> from its defined attributes.
     /// </summary>
-    /// <param name="type">The type to get the scope for.</param>
-    /// <returns>The scope for the type.</returns>
+    /// <param name="type">The type to get the actor type for.</param>
+    /// <returns>The actor type for the type.</returns>
     public static ActorType GetActorType(this Type type)
         => Attribute.IsDefined(type, typeof(GrainAttribute))
             ? ActorType.Grain

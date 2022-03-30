@@ -12,4 +12,4 @@ namespace Dolittle.Runtime.DependencyInversion.Actors;
 /// <param name="Grain">The discovered classes that should be registered as grains.</param>
 public record ClassesByActorType(
     Type[] Actor,
-    Type[] Grain);
+    GrainAndActor[] Grain);
