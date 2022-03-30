@@ -16,14 +16,14 @@ using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 namespace Benchmarks.Events.Store;
 
 /// <summary>
-/// Benchmarks for committing events to the Event Store.
+/// Benchmarks for committing aggregate events to the Event Store.
 /// </summary>
-public class CommitEvents : JobBase
+public class CommitAggregateEvents : JobBase
 {
     IEventStoreService _eventStoreService;
     ExecutionContext _executionContext;
-    UncommittedEvents _eventsToCommit;
-
+    UncommittedAggregateEvents _eventsToCommit;
+    
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
     {
@@ -34,43 +34,28 @@ public class CommitEvents : JobBase
         for (var n = 0; n < EventsToCommit; n++)
         {
             events.Add(new UncommittedEvent(
-                new EventSourceId("8453f4d4-861a-4042-a4e3-c1abf1c8eadd"),
-                new Artifact(new ArtifactId(Guid.Parse("752f88c9-70f0-4ffe-82b6-a69dcc96672e")), ArtifactGeneration.First),
-                false,
-                "{ \"hello\": \"world\" }"));
-        }
-        _eventsToCommit = new UncommittedEvents(events);
-
-        if (PreExistingEvents < 1)
-        {
-            return;
-        }
-        
-        var preExistingEvents = new List<UncommittedEvent>();
-        for (var n = 0; n < PreExistingEvents; n++)
-        {
-            preExistingEvents.Add(new UncommittedEvent(
-                new EventSourceId("8453f4d4-861a-4042-a4e3-c1abf1c8eadd"),
-                new Artifact(new ArtifactId(Guid.Parse("752f88c9-70f0-4ffe-82b6-a69dcc96672e")), ArtifactGeneration.First),
+                new EventSourceId("46c4de33-9a60-4465-97ab-a2a7f5b7e6a3"),
+                new Artifact(new ArtifactId(Guid.Parse("08db4b0a-3724-444f-9968-ada44922fb78")), ArtifactGeneration.First),
                 false,
                 "{ \"hello\": \"world\" }"));
         }
 
-        var result = _eventStoreService.TryCommit(
-            new UncommittedEvents(preExistingEvents),
-            _executionContext,
-            CancellationToken.None).GetAwaiter().GetResult();
-        if (!result.Success)
-        {
-            throw result.Exception;
-        }
+        _eventsToCommit = new UncommittedAggregateEvents(
+            new EventSourceId("46c4de33-9a60-4465-97ab-a2a7f5b7e6a3"),
+            new Artifact(new ArtifactId(Guid.Parse("1ad7a5dc-12e9-493a-ba10-714c88be4da7")), ArtifactGeneration.First),
+            AggregateRootVersion.Initial,
+            events);
     }
-    
-    /// <summary>
-    /// Gets the number of events that have been committed to the Event Store before the benchmarking commits.
-    /// </summary>
-    [Params(0, 100, 1000)]
-    public int PreExistingEvents { get; set; }
+
+    [IterationSetup]
+    public void IterationSetup()
+    {
+        _eventsToCommit = new UncommittedAggregateEvents(
+            new EventSourceId("46c4de33-9a60-4465-97ab-a2a7f5b7e6a3"),
+            new Artifact(new ArtifactId(Guid.NewGuid()), ArtifactGeneration.First),
+            AggregateRootVersion.Initial,
+            _eventsToCommit);
+    }
     
     /// <summary>
     /// Gets the number of events to be committed in the benchmarks.
@@ -86,8 +71,12 @@ public class CommitEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            var result = await _eventStoreService.TryCommit(
-                new UncommittedEvents(new[] { _eventsToCommit[n] }),
+            var result = await _eventStoreService.TryCommitForAggregate(
+                new UncommittedAggregateEvents(
+                    _eventsToCommit.EventSource,
+                    _eventsToCommit.AggregateRoot,
+                    _eventsToCommit.ExpectedAggregateRootVersion + (uint)n,
+                    new UncommittedEvents(new[] { _eventsToCommit[n] })),
                 _executionContext,
                 CancellationToken.None);
             if (!result.Success)
@@ -103,7 +92,7 @@ public class CommitEvents : JobBase
     [Benchmark]
     public async Task CommitEventsInBatch()
     {
-        var result = await _eventStoreService.TryCommit(
+        var result = await _eventStoreService.TryCommitForAggregate(
             _eventsToCommit,
             _executionContext,
             CancellationToken.None);
