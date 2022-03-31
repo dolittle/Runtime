@@ -1,14 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Events.Store.Services.Actors;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
@@ -23,34 +19,36 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc;
 public class EventStoreGrpcService : EventStoreBase
 {
     readonly IEventStoreService _eventStoreService;
-    readonly Func<TenantId, EventStoreGrainClient> _getEventStoreGrain;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStoreService"><see cref="IEventStoreService"/>.</param>
-    public EventStoreGrpcService(IEventStoreService eventStoreService, Func<TenantId, EventStoreGrainClient> getEventStoreGrain)
+    public EventStoreGrpcService(IEventStoreService eventStoreService)
     {
         _eventStoreService = eventStoreService;
-        _getEventStoreGrain = getEventStoreGrain;
     }
 
     /// <inheritdoc/>
     public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
     {
-        try
+        var response = new Contracts.CommitEventsResponse();
+        var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
+        var commitResult = await _eventStoreService.TryCommit(
+            new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
+            request.CallContext.ExecutionContext.ToExecutionContext(),
+            context.CancellationToken).ConfigureAwait(false);
+
+        if (commitResult.Success)
         {
-            var commit = new Commit{ExecutionContext = request.CallContext.ExecutionContext};
-            commit.Events.AddRange(request.Events);
-            return await _getEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid().ToString()).Commit(commit, context.CancellationToken);
+            response.Events.AddRange(commitResult.Result.ToProtobuf());
         }
-        catch (Exception ex)
+        else
         {
-            return new CommitEventsResponse
-            {
-                Failure = ex.ToFailure()
-            };
+            response.Failure = commitResult.Exception.ToFailure();
         }
+
+        return response;
     }
 
     /// <inheritdoc/>
