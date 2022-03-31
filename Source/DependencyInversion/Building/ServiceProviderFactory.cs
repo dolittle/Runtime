@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Dolittle.Runtime.DependencyInversion.Actors;
 using Dolittle.Runtime.DependencyInversion.Attributes;
 using Dolittle.Runtime.DependencyInversion.Logging;
 using Dolittle.Runtime.DependencyInversion.Tenancy;
@@ -66,7 +65,6 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
 
         containerBuilder.AddLogging();
         containerBuilder.AddTenantFactories();
-        containerBuilder.AddClusterKindFactories();
 
         return _factory.CreateServiceProvider(containerBuilder);
     }

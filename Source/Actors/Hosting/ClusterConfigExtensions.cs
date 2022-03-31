@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using Dolittle.Runtime.DependencyInversion.Actors;
 using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Proto;
@@ -33,19 +31,6 @@ public static class ClusterConfigExtensions
                 .Select(_ => new ClusterKind(_.Kind, CreatePropsFor(_, provider)))
                 .ToArray());
 
-    static Props CreatePropsFor(GrainAndActor grainAndActor, IServiceProvider provider)
-        => Props.FromProducer(() => Activator.CreateInstance(
-                grainAndActor.Actor,
-                grainAndActor.IsPerTenant
-                    ? GetTenantGrainFactory(grainAndActor, provider)
-                    : GetGrainFactory(grainAndActor, provider)) as IActor);
-
-    static object GetGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
-        => provider.GetRequiredService(typeof(Func<,,>).MakeGenericType(
-            typeof(IContext),
-            typeof(ClusterIdentity),
-            grainAndActor.Grain));
-
     static object GetTenantGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
     {
         var tenantDelegateType = typeof(Func<,,,>).MakeGenericType(
@@ -53,9 +38,7 @@ public static class ClusterConfigExtensions
             typeof(IContext),
             typeof(ClusterIdentity),
             grainAndActor.Grain);
-
         var resolvedTenantDelegate = provider.GetRequiredService(tenantDelegateType);
-
         var contextParameter = Expression.Parameter(typeof(IContext), "context");
         var clusterIdentityParameter = Expression.Parameter(typeof(ClusterIdentity), "identity");
 
@@ -70,4 +53,17 @@ public static class ClusterConfigExtensions
             clusterIdentityParameter
         ).Compile();
     }
+    
+    static Props CreatePropsFor(GrainAndActor grainAndActor, IServiceProvider provider)
+        => Props.FromProducer(() => Activator.CreateInstance(
+            grainAndActor.Actor,
+            grainAndActor.IsPerTenant
+                ? GetTenantGrainFactory(grainAndActor, provider)
+                : GetGrainFactory(grainAndActor, provider)) as IActor);
+
+    static object GetGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
+        => provider.GetRequiredService(typeof(Func<,,>).MakeGenericType(
+            typeof(IContext),
+            typeof(ClusterIdentity),
+            grainAndActor.Grain));
 }

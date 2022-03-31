@@ -6,8 +6,12 @@ using Proto.Cluster;
 
 namespace Dolittle.Runtime.Actors;
 
-public class TenantGrains : ICanAddTenantServicesForTypesWith<TenantGrainAttribute>
+/// <summary>
+/// Represents an implementation of <see cref="ICanAddTenantServicesForTypesWith{TAttribute}"/> that adds services for grains with <see cref="TenantGrainAttribute"/>.
+/// </summary>
+public class TenantGrains : ICanAddTenantServicesForTypesWith<TenantGrainAttribute>, ICanAddServicesForTypesWith<TenantGrainAttribute>
 {
+    /// <inheritdoc />
     public void AddServiceFor(Type type, TenantGrainAttribute attribute, TenantId tenant, IServiceCollection services)
     {
         services
@@ -18,5 +22,12 @@ public class TenantGrains : ICanAddTenantServicesForTypesWith<TenantGrainAttribu
                     provider.GetRequiredService<Cluster>(),
                     tenant.Value.ToString()))
             .AddTransient(type);
+    }
+
+    /// <inheritdoc />
+    public void AddServiceFor(Type type, TenantGrainAttribute attribute, IServiceCollection services)
+    {
+        services
+            .AddSingleton(new GrainAndActor(type, attribute.ActorType, true));
     }
 }
