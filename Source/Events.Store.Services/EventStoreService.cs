@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
@@ -54,6 +55,9 @@ public class EventStoreService : IEventStoreService
                 Log.ErrorCommittingEvents(_logger, exception));
     }
 
+    public Task<CommitEventsResponse> Commit(CommitEventsRequest request, CancellationToken token)
+        => throw new NotImplementedException();
+
     /// <inheritdoc/>
     public Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, ExecutionContext context, CancellationToken token)
     {
@@ -69,6 +73,9 @@ public class EventStoreService : IEventStoreService
                 Log.ErrorCommittingAggregateEvents(_logger, exception));
     }
 
+    public Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request, CancellationToken token)
+        => throw new NotImplementedException();
+
     /// <inheritdoc/>
     public Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, ExecutionContext context, CancellationToken token)
     {
@@ -83,4 +90,7 @@ public class EventStoreService : IEventStoreService
             .Catch(exception =>
                 Log.ErrorFetchingEventsFromAggregate(_logger, exception));
     }
+
+    public Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, CancellationToken token)
+        => throw new NotImplementedException();
 }

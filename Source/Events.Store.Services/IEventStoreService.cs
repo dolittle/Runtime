@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Rudimentary;
 using DolittleExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -22,6 +23,14 @@ public interface IEventStoreService
     /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of the <see cref="CommittedEvents" />.</returns>
     Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, DolittleExecutionContext context, CancellationToken token);
+    
+    /// <summary>
+    /// Performs a commit.
+    /// </summary>
+    /// <param name="request">The <see cref="CommitEventsRequest"/>.</param>
+    /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns  <see cref="CommitEventsResponse" />.</returns>
+    Task<CommitEventsResponse> Commit(CommitEventsRequest request, CancellationToken token);
 
     /// <summary>
     /// Try to commit the <see cref="UncommittedAggregateEvents" />.
@@ -33,6 +42,14 @@ public interface IEventStoreService
     Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, DolittleExecutionContext context, CancellationToken token);
 
     /// <summary>
+    /// Performs a commit for aggregate.
+    /// </summary>
+    /// <param name="request">The <see cref="CommitAggregateEventsRequest"/>.</param>
+    /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns  <see cref="CommitAggregateEventsResponse" />.</returns>
+    Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request, CancellationToken token);
+    
+    /// <summary>
     /// Try to fetch events for a specific aggregate.
     /// </summary>
     /// <param name="aggregateRoot">The <see cref="ArtifactId" /> of the aggregate root to fetch events from.</param>
@@ -41,4 +58,12 @@ public interface IEventStoreService
     /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of the <see cref="CommittedAggregateEvents" />.</returns>
     Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, DolittleExecutionContext context, CancellationToken token);
+    
+    /// <summary>
+    /// Performs fetch for aggregate.
+    /// </summary>
+    /// <param name="request">The <see cref="FetchForAggregateRequest"/>.</param>
+    /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns  <see cref="FetchForAggregateRequest" />.</returns>
+    Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, CancellationToken token);
 }

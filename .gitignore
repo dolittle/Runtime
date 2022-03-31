@@ -286,3 +286,5 @@ Distribution
 **/node_modules/
 
 wwwroot
+
+BenchmarkDotNet.Artifacts/
