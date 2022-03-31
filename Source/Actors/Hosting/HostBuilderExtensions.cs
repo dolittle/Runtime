@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Proto;
@@ -8,6 +9,7 @@ using Proto.Cluster;
 using Proto.Cluster.Partition;
 using Proto.Cluster.Testing;
 using Proto.DependencyInjection;
+using Proto.Remote;
 using Proto.Remote.GrpcNet;
 
 namespace Dolittle.Runtime.Actors.Hosting;
@@ -26,7 +28,9 @@ public static class HostBuilderExtensions
         => builder.ConfigureServices(_ => _
             .AddSingleton(provider => new ActorSystem(ActorSystemConfig.Setup())
                 .WithServiceProvider(provider)
-                .WithRemote(GrpcNetRemoteConfig.BindToLocalhost())
+                .WithRemote(GrpcNetRemoteConfig
+                    .BindToLocalhost()
+                    .WithProtoMessages(provider.GetRequiredService<IProtobufFileDescriptors>().All.ToArray()))
                 .WithCluster(ClusterConfig.Setup(
                         "Dolittle",
                         new TestProvider(new TestProviderOptions(), new InMemAgent()),

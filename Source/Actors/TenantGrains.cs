@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Actors;
 /// <summary>
 /// Represents an implementation of <see cref="ICanAddTenantServicesForTypesWith{TAttribute}"/> that adds services for grains with <see cref="TenantGrainAttribute"/>.
 /// </summary>
-public class TenantGrains : ICanAddTenantServicesForTypesWith<TenantGrainAttribute>, ICanAddServicesForTypesWith<TenantGrainAttribute>
+public class TenantGrainsTenantServices : ICanAddTenantServicesForTypesWith<TenantGrainAttribute>
 {
     /// <inheritdoc />
     public void AddServiceFor(Type type, TenantGrainAttribute attribute, TenantId tenant, IServiceCollection services)
@@ -23,7 +23,13 @@ public class TenantGrains : ICanAddTenantServicesForTypesWith<TenantGrainAttribu
                     tenant.Value.ToString()))
             .AddTransient(type);
     }
+}
 
+/// <summary>
+/// Represents an implementation of <see cref="ICanAddTenantServicesForTypesWith{TAttribute}"/> that adds services for grains with <see cref="TenantGrainAttribute"/>.
+/// </summary>
+public class TenantGrainsServices : ICanAddServicesForTypesWith<TenantGrainAttribute>
+{
     /// <inheritdoc />
     public void AddServiceFor(Type type, TenantGrainAttribute attribute, IServiceCollection services)
     {

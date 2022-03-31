@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package dolittle.runtime.events;
+
+option csharp_namespace = "Dolittle.Runtime.Events.Store.Services.Actors";
+
+import "Runtime/Events/Uncommitted.proto";
+import "Execution/ExecutionContext.proto";
+
+message Commit{
+    execution.ExecutionContext executionContext = 1;
+    repeated UncommittedEvent events = 2;
+}

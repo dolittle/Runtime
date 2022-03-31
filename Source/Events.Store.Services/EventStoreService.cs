@@ -7,12 +7,9 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
-using Proto;
-using Proto.Cluster;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Store.Services;
@@ -25,7 +22,6 @@ public class EventStoreService : IEventStoreService
 {
     readonly ICreateExecutionContexts _executionContextCreator;
     readonly Func<TenantId, IEventStore> _getEventStore;
-    readonly ActorSystem _actorSystem;
     readonly ILogger _logger;
 
     /// <summary>
