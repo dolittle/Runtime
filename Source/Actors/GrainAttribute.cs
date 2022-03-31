@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion.Scoping;
+namespace Dolittle.Runtime.Actors;
 
 /// <summary>
 /// Indicates that the class should be registered as a grain in a DI container.
@@ -15,13 +15,20 @@ public class GrainAttribute : Attribute
     /// Initializes a new instance of the <see cref="GrainAttribute"/>.
     /// </summary>
     /// <param name="actorType">The <see cref="Type"/> of the grain actor.</param>
-    public GrainAttribute(Type actorType)
+    /// <param name="clientType">The <see cref="Type"/> of the grain client.</param>
+    public GrainAttribute(Type actorType, Type clientType)
     {
         ActorType = actorType;
+        ClientType = clientType;
     }
     
     /// <summary>
     /// Gets the <see cref="Type"/> of the grain actor.
     /// </summary>
     public Type ActorType { get; }
+    
+    /// <summary>
+    /// Gets the <see cref="Type"/> of the grain client.
+    /// </summary>
+    public Type ClientType { get; }
 }

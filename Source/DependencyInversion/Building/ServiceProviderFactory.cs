@@ -9,11 +9,9 @@ using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.DependencyInversion.Actors;
 using Dolittle.Runtime.DependencyInversion.Attributes;
 using Dolittle.Runtime.DependencyInversion.Logging;
-using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.DependencyInversion.Tenancy;
 using Dolittle.Runtime.DependencyInversion.Types;
 using Microsoft.Extensions.DependencyInjection;
-using Proto;
 
 namespace Dolittle.Runtime.DependencyInversion.Building;
 
@@ -33,16 +31,11 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
     {
         var discoveredClasses = TypeScanner.GetAllClassesInRuntimeAssemblies()
             .IgnoreClassesWithAttribute<DisableAutoRegistrationAttribute>()
-            .FilterClassesWithAttribute<ActorAttribute>(out var actorClasses)
-            .FilterClassesImplementing(typeof(IActor), out var _)
-            .FilterClassesWithAttribute<GrainAttribute>(out var grainClasses)
             .FilterClassesImplementing(typeof(ICanAddServices), out var classesThatCanAddServices)
             .FilterClassesImplementing(typeof(ICanAddTenantServices), out var classesThatCanAddTenantServices)
             .FilterClassesImplementing(typeof(ICanAddServicesForTypesWith<>), out var classesThatCanAddServicesForAttribute)
             .FilterClassesImplementing(typeof(ICanAddTenantServicesForTypesWith<>), out var classesThatCanAddTenantServicesForAttribute)
             .ToList();
-
-        var actorAndGrainClasses = actorClasses.Concat(grainClasses);
 
         var instancesThatCanAddServices = CreateInstanceOfWithDefaultConstructor<ICanAddServices>(classesThatCanAddServices);
         var instancesThatCanAddServicesForAttribute = classesThatCanAddServicesForAttribute.Select(_ => ServicesForTypesWith.CreateBuilderFor(_, discoveredClasses));
@@ -61,17 +54,13 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
         containerBuilder.Populate(services);
 
         var groupedClasses = TypeScanner.GroupClassesByScopeAndLifecycle(discoveredClasses);
-        var groupedActors = TypeScanner.GroupClassesByScopeAndActorType(actorAndGrainClasses);
-        containerBuilder.RegisterInstance(groupedActors);
         containerBuilder.RegisterClassesByLifecycle(groupedClasses.Global);
-        containerBuilder.RegisterActorsByActorType(groupedActors.Global);
 
         containerBuilder.Register(
                 _ => new TenantServiceProviders(
                     _.Resolve<ILifetimeScope>(),
                     tenantServiceAdders,
-                    groupedClasses.PerTenant,
-                    groupedActors.PerTenant))
+                    groupedClasses.PerTenant))
                 .As<ITenantServiceProviders>()
                 .SingleInstance();
 

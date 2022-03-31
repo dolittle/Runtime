@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Microsoft.Extensions.Logging;
@@ -12,7 +12,7 @@ using Proto.Cluster;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-[PerTenant, Grain(typeof(EventStoreGrainActor))]
+[TenantGrain(typeof(EventStoreGrainActor), typeof(EventStoreGrainClient))]
 public class EventStoreGrain : EventStoreGrainBase
 {
     readonly ClusterIdentity _identity;

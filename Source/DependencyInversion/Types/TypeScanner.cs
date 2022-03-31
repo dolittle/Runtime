@@ -46,19 +46,6 @@ public static class TypeScanner
             GroupClassesByLifecycle(classesByScope[Scopes.PerTenant]));
     }
     
-    /// <summary>
-    /// Groups classes from an <see cref="IEnumerable{T}"/> of <see cref="Type"/> by scope and actor type.
-    /// </summary>
-    /// <param name="classes">The classes to group.</param>
-    /// <returns>The <see cref="ClassesByScopeAndActorType"/> grouped by scope and actor type.</returns>
-    public static ClassesByScopeAndActorType GroupClassesByScopeAndActorType(IEnumerable<Type> classes)
-    {
-        var classesByScope = classes.ToLookup(_ => _.GetScope());
-        return new ClassesByScopeAndActorType(
-            GroupClassesByActorType(classesByScope[Scopes.Global]),
-            GroupClassesByActorType(classesByScope[Scopes.PerTenant]));
-    }
-
     static ClassesByLifecycle GroupClassesByLifecycle(IEnumerable<Type> classes)
     {
         var classesByLifecycle = classes.ToLookup(_ => _.GetLifecycle());
@@ -67,15 +54,5 @@ public static class TypeScanner
             classesByLifecycle[Lifecycles.Singleton].ToArray(),
             classesByLifecycle[Lifecycles.Scoped].ToArray(),
             classesByLifecycle[Lifecycles.Transient].ToArray());
-    }
-
-    static ClassesByActorType GroupClassesByActorType(IEnumerable<Type> classes)
-    {
-        var classesByActorType = classes.ToLookup(_ => _.GetActorType());
-        return new ClassesByActorType(
-            classesByActorType[ActorType.Actor].ToArray(),
-            classesByActorType[ActorType.Grain]
-                .Select(grainType => new GrainAndActor(grainType, grainType.GetCustomAttribute<GrainAttribute>()!.ActorType))
-                .ToArray());
     }
 }

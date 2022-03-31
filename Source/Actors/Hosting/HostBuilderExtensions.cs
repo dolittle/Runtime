@@ -10,7 +10,7 @@ using Proto.Cluster.Testing;
 using Proto.DependencyInjection;
 using Proto.Remote.GrpcNet;
 
-namespace Dolittle.Runtime.Server.Actors;
+namespace Dolittle.Runtime.Actors.Hosting;
 
 /// <summary>
 /// Extensions for <see cref="IHostBuilder"/>.
@@ -31,6 +31,6 @@ public static class HostBuilderExtensions
                         "Dolittle",
                         new TestProvider(new TestProviderOptions(), new InMemAgent()),
                         new PartitionIdentityLookup())
-                    .WithDiscoveredClusterKinds(provider))));
-    
+                    .WithDiscoveredClusterKinds(provider)))
+            .AddSingleton(provider => provider.GetRequiredService<ActorSystem>().Cluster()));
 }

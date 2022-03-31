@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Proto;
 using Proto.Cluster;
 
-namespace Dolittle.Runtime.Server.Actors;
+namespace Dolittle.Runtime.Actors.Hosting;
 
 /// <summary>
 /// Represents an implementation of <see cref="IHostedService"/> for the Proto.Actor Cluster.

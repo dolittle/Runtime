@@ -33,14 +33,14 @@ public class GeneratedClusterKindFactoryRegistrationSource : IRegistrationSource
         {
             return Enumerable.Empty<IComponentRegistration>();
         }
-
         Func<IContext, ClusterIdentity, IServiceProvider, object> resolveGrain =
             (context, clusterIdentity, provider) =>
             {
-                if (Attribute.IsDefined(grainType, typeof(PerTenantAttribute)))
-                {
-                    provider = provider.GetRequiredService<ITenantServiceProviders>().ForTenant(clusterIdentity.Identity);
-                }
+                // if (Attribute.IsDefined(grainType, typeof()))
+                // {
+                //     provider = provider.GetRequiredService<ITenantServiceProviders>().ForTenant(clusterIdentity.Identity);
+                // }
+                provider = provider.GetRequiredService<ITenantServiceProviders>().ForTenant(clusterIdentity.Identity);
                 //TODO: To create the virtual actor grain we need the context and cluster identity, but the delegate to resolve cannot be Func<IContext, ClusterIdentity, TGrain>
                 // because it would cause endless recursion. That's why I put the int as the first type parameter
                 var getGrainDelegateToResolve = Expression.GetDelegateType(typeof(int), typeof(IContext), typeof(ClusterIdentity), grainType);

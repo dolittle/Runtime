@@ -1,10 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Hosting;
@@ -22,22 +24,22 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc;
 public class EventStoreGrpcService : EventStoreBase
 {
     readonly IEventStoreService _eventStoreService;
-    readonly ActorSystem _actorSystem;
+    readonly Func<TenantId, EventStoreGrainClient> _getEventStoreGrain;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStoreService"><see cref="IEventStoreService"/>.</param>
-    public EventStoreGrpcService(IEventStoreService eventStoreService, ActorSystem actorSystem)
+    public EventStoreGrpcService(IEventStoreService eventStoreService, Func<TenantId, EventStoreGrainClient> getEventStoreGrain)
     {
         _eventStoreService = eventStoreService;
-        _actorSystem = actorSystem;
+        _getEventStoreGrain = getEventStoreGrain;
     }
 
     /// <inheritdoc/>
     public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
     {
-        return await _actorSystem.Cluster().GetEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid().ToString()).Commit(request, context.CancellationToken);
+        return await _getEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid()).Commit(request, context.CancellationToken);
         var response = new Contracts.CommitEventsResponse();
         var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
         var commitResult = await _eventStoreService.TryCommit(
