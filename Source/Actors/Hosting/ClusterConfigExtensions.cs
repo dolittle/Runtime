@@ -19,6 +19,8 @@ namespace Dolittle.Runtime.Actors.Hosting;
 /// </summary>
 public static class ClusterConfigExtensions
 {
+    static readonly Expression<Func<ClusterIdentity, TenantId>> _parseIdentity = identity => identity.Identity;
+
     /// <summary>
     /// Registers all discovered <see cref="ClusterKind"/> on the <see cref="ActorSystem"/> <see cref="Cluster"/>.
     /// </summary>
@@ -26,62 +28,46 @@ public static class ClusterConfigExtensions
     /// <param name="provider">The <see cref="IServiceProvider"/>.</param>
     /// <returns>The modified <see cref="ClusterConfig"/>.</returns>
     public static ClusterConfig WithDiscoveredClusterKinds(this ClusterConfig config, IServiceProvider provider)
+        => config.WithClusterKinds(
+            provider.GetRequiredService<IEnumerable<GrainAndActor>>()
+                .Select(_ => new ClusterKind(_.Kind, CreatePropsFor(_, provider)))
+                .ToArray());
+
+    static Props CreatePropsFor(GrainAndActor grainAndActor, IServiceProvider provider)
+        => Props.FromProducer(() => Activator.CreateInstance(
+                grainAndActor.Actor,
+                grainAndActor.IsPerTenant
+                    ? GetTenantGrainFactory(grainAndActor, provider)
+                    : GetGrainFactory(grainAndActor, provider)) as IActor);
+
+    static object GetGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
+        => provider.GetRequiredService(typeof(Func<,,>).MakeGenericType(
+            typeof(IContext),
+            typeof(ClusterIdentity),
+            grainAndActor.Grain));
+
+    static object GetTenantGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
     {
-        foreach (var grainAndActor in provider.GetRequiredService<IEnumerable<GrainAndActor>>())
-        {
-            var delegateType = typeof(Func<,,>).MakeGenericType(
-                typeof(IContext),
-                typeof(ClusterIdentity),
-                grainAndActor.Grain);
-            
-            // var tenantDelegateType = typeof(Func<,,,>).MakeGenericType(
-            //     typeof(TenantId),
-            //     typeof(IContext),
-            //     typeof(ClusterIdentity),
-            //     grainAndActor.Grain);
-            //
-            // // Func<ClusterIdentity, TenantId> parser = identity => identity.Identity;
-            //
-            // dynamic resolvedTenantDelegate = provider.GetRequiredService(tenantDelegateType) as Delegate;
-            //
-            // var contextParameter = Expression.Parameter(typeof(IContext), "context");
-            // var clusterIdentityParameter = Expression.Parameter(typeof(ClusterIdentity), "identity");
-            //
-            // var constructedDelegate = Expression.Lambda(
-            //         Expression.Invoke(
-            //             resolvedTenantDelegate,
-            //             Expression.Call(
-            //                 null,
-            //                 typeof(ClusterConfigExtensions).GetMethod("Parse", BindingFlags.Static | BindingFlags.NonPublic),
-            //                 clusterIdentityParameter),
-            //             contextParameter,
-            //             clusterIdentityParameter
-            //         ),
-            //         contextParameter,
-            //         clusterIdentityParameter
-            //     ).Compile();
-            //
+        var tenantDelegateType = typeof(Func<,,,>).MakeGenericType(
+            typeof(TenantId),
+            typeof(IContext),
+            typeof(ClusterIdentity),
+            grainAndActor.Grain);
 
-            var resolvedDelegate = provider.GetRequiredService(delegateType);
+        var resolvedTenantDelegate = provider.GetRequiredService(tenantDelegateType);
 
-            config = config.WithClusterKind(
-                grainAndActor.Kind,
-                Props.FromProducer(() => Activator.CreateInstance(
-                    grainAndActor.Actor,
-                    resolvedDelegate) as IActor));
-                    // grainAndActor.IsPerTenant ? constructedDelegate : resolvedDelegate) as IActor));
-        }
+        var contextParameter = Expression.Parameter(typeof(IContext), "context");
+        var clusterIdentityParameter = Expression.Parameter(typeof(ClusterIdentity), "identity");
 
-        return config;
-        
-        // return config
-        //     .WithClusterKinds(globalActors.Grain.Concat(perTenantActors.Grain)
-        //         .Select(grainAndActor => new ClusterKind(
-        //             grainAndActor.Kind,
-        //             Props.FromProducer(() => Activator.CreateInstance(
-        //                 grainAndActor.Actor,
-        //                 provider.GetRequiredService(Expression.GetDelegateType(typeof(IContext), typeof(ClusterIdentity), grainAndActor.Grain))) as IActor))).ToArray());
+        return Expression.Lambda(
+            Expression.Invoke(
+                Expression.Constant(resolvedTenantDelegate),
+                Expression.Invoke(_parseIdentity, clusterIdentityParameter),
+                contextParameter,
+                clusterIdentityParameter
+            ),
+            contextParameter,
+            clusterIdentityParameter
+        ).Compile();
     }
-
-    static TenantId Parse(ClusterIdentity id) => id.Identity;
 }

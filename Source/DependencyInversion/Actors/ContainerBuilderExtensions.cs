@@ -21,7 +21,7 @@ public static class ContainerBuilderExtensions
     /// <returns>The container builder for continuation.</returns>
     public static ContainerBuilder AddClusterKindFactories(this ContainerBuilder builder)
     {
-        builder.RegisterSource<GeneratedClusterKindFactoryRegistrationSource>();
+        //builder.RegisterSource<GeneratedClusterKindFactoryRegistrationSource>();
         return builder;
     }
 }

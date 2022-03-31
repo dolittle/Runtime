@@ -24,6 +24,7 @@ public class Grains2 : ICanAddServicesForTypesWith<TenantGrainAttribute>
 {
     public void AddServiceFor(Type type, TenantGrainAttribute attribute, IServiceCollection services)
     {
-        services.AddSingleton(new GrainAndActor(type, attribute.ActorType, false));
+        services
+            .AddSingleton(new GrainAndActor(type, attribute.ActorType, true));
     }
 }
