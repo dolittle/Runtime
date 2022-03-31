@@ -32,19 +32,5 @@ public static class ClusterConfigExtensions
                     Props.FromProducer(() => Activator.CreateInstance(
                         grainAndActor.Actor,
                         provider.GetRequiredService(Expression.GetDelegateType(typeof(IContext), typeof(ClusterIdentity), grainAndActor.Grain))) as IActor))).ToArray());
-        // .WithClusterKinds(
-        //     globalActors.Grain
-        //         .Select(grainAndActor => new ClusterKind(
-        //             grainAndActor.Kind,
-        //             Props.FromProducer(() => provider.GetRequiredService(grainAndActor.Actor) as IActor)))
-        //         .ToArray())
-        // .WithClusterKinds(
-        //     perTenantActors.Grain
-        //         .Select(grainAndActor => new ClusterKind(
-        //             grainAndActor.Kind,
-        //             Props.FromProducer(() => Activator.CreateInstance(
-        //                 grainAndActor.Actor,
-        //                 provider.GetRequiredService(Expression.GetDelegateType(typeof(IContext), typeof(ClusterIdentity), grainAndActor.Grain))) as IActor)))
-        //         .ToArray());
     }
 }
