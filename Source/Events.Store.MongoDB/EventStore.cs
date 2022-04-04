@@ -14,6 +14,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Rudimentary;
 using MongoDB.Driver;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -22,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 /// <summary>
 /// Represents the MongoDB implementation of <see cref="IEventStore"/>.
 /// </summary>
-[PerTenant] //TODO: Singleton?
+[PerTenant]
 public class EventStore : IEventStore
 {
     readonly FilterDefinitionBuilder<Events.Event> _eventFilter = Builders<Events.Event>.Filter;
@@ -55,30 +56,23 @@ public class EventStore : IEventStore
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public async Task<Try> Persist(CommittedEvents events, CancellationToken cancellationToken)
     {
-        ThrowIfNoEventsToCommit(events);
-        return await DoCommit<CommittedEvents, CommittedEvent>(async (transaction, cancel) =>
+        //ThrowIfNoEventsToCommit(events); TODO: Fix
+        try
         {
-            var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
-                transaction,
-                _eventFilter.Empty,
-                cancellationToken: cancel).ConfigureAwait(false);
-            var committedEvents = new List<CommittedEvent>();
-            foreach (var @event in events)
+            await DoCommit<CommittedEvents, CommittedEvent>(async (transaction, cancel) =>
             {
-                var committedEvent = await _eventCommitter.CommitEvent(
-                    transaction,
-                    eventLogSequenceNumber,
-                    DateTimeOffset.UtcNow,
-                    executionContext,
-                    @event,
-                    cancel).ConfigureAwait(false);
-                committedEvents.Add(committedEvent);
-                eventLogSequenceNumber++;
-            }
-            return new CommittedEvents(committedEvents);
-        }, cancellationToken).ConfigureAwait(false);
+                await _eventCommitter.PersistEvents(transaction, events, cancel).ConfigureAwait(false);
+                return events;
+            }, cancellationToken).ConfigureAwait(false);
+            return Try.Succeeded();
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+        // TODO: Use try correctly
     }
 
     /// <inheritdoc/>
@@ -122,6 +116,15 @@ public class EventStore : IEventStore
 
             return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
         }, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(CancellationToken cancellationToken)
+    {
+        return await _streams.DefaultEventLog.CountDocumentsAsync(
+                _eventFilter.Empty,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

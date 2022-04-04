@@ -14,22 +14,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
 /// </summary>
 public interface IEventCommitter
 {
+    // TODO: Move and use Try?
     /// <summary>
-    /// Commits a single <see cref="UncommittedEvent"/> to the event log.
+    /// Persists <see cref="CommittedEvents"/> to the event log.
     /// </summary>
     /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
-    /// <param name="sequenceNumber">The expected next <see cref="EventLogSequenceNumber"/> of the event log.</param>
-    /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
-    /// <param name="executionContext">The <see cref="Execution.ExecutionContext" />.</param>
-    /// <param name="event">The <see cref="UncommittedEvent"/> to commit.</param>
+    /// <param name="events">The <see cref="CommittedEvents"/> to persist.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>The <see cref="CommittedEvent" />.</returns>
-    Task<CommittedEvent> CommitEvent(
+    /// <returns>A <see cref="Task"/> that is resolved when the events are persisted.</returns>
+    Task PersistEvents(
         IClientSessionHandle transaction,
-        EventLogSequenceNumber sequenceNumber,
-        DateTimeOffset occurred,
-        Execution.ExecutionContext executionContext,
-        UncommittedEvent @event,
+        CommittedEvents events,
         CancellationToken cancellationToken);
 
     /// <summary>

@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
+using Dolittle.Runtime.Protobuf;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -28,6 +30,19 @@ public class EventCommitter : IEventCommitter
     }
 
     /// <inheritdoc/>
+    public Task PersistEvents(IClientSessionHandle transaction, CommittedEvents events, CancellationToken cancellationToken)
+        => _streams.DefaultEventLog.InsertManyAsync(
+            transaction,
+            events.Select(_ => new Event(
+                _.EventLogSequenceNumber,
+                _.ExecutionContext.ToStoreRepresentation(),
+                _.GetEventMetadata(),
+                _.GetAggregateMetadata(),
+                _.GetEventHorizonMetadata(),
+                BsonDocument.Parse(_.Content))),
+            new InsertManyOptions{ IsOrdered = true },
+            cancellationToken);
+
     public async Task<CommittedEvent> CommitEvent(
         IClientSessionHandle transaction,
         EventLogSequenceNumber sequenceNumber,

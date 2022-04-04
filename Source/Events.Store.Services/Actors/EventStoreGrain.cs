@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ public class EventStoreGrain : EventStoreGrainBase
     readonly ICreateExecutionContexts _executionContextCreator;
     readonly ILogger _logger;
 
+    EventLogSequenceNumber _nextSequenceNumber;
+
     public EventStoreGrain(IContext context, ClusterIdentity identity, IEventStore eventStore, ICreateExecutionContexts executionContextCreator, ILogger logger)
         : base(context)
     {
@@ -37,23 +40,41 @@ public class EventStoreGrain : EventStoreGrainBase
         _logger = logger;
     }
 
+    /// <inheritdoc />
+    public override async Task OnStarted()
+    {
+        _nextSequenceNumber = await _eventStore.FetchNextSequenceNumber(Context.CancellationToken).ConfigureAwait(false); // TODO: What is this cancellation token?
+    }
+
     public override async Task<CommitEventsResponse> Commit(Commit request)
     {
         var result =  await _executionContextCreator
             .TryCreateUsing(request.ExecutionContext.ToExecutionContext())
             .Then(async executionContext =>
             {
+                var events = request.Events.Select(_ => new CommittedEvent(
+                    _nextSequenceNumber++,
+                    DateTimeOffset.UtcNow,
+                    _.EventSourceId,
+                    executionContext,
+                    _.EventType.ToArtifact(),
+                    _.Public,
+                    _.Content)).ToList();
+                var commit = new CommittedEvents(events);
+                var result = await _eventStore.Persist(commit, Context.CancellationToken).ConfigureAwait(false);
+                if (!result.Success)
+                {
+                    //TODO: Revert sequence number if it failed.
+                    throw result.Exception;
+                }
+
                 var response = new Contracts.CommitEventsResponse();
-                var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
-                var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
-                _logger.EventsReceivedForCommitting(false, uncommittedEvents.Count);
-                var res = await _eventStore.CommitEvents(uncommittedEvents, executionContext, Context.CancellationToken).ConfigureAwait(false);
-                response.Events.AddRange(res.ToProtobuf());
+                response.Events.AddRange(commit.ToProtobuf());
                 return response;
             })
             .Then(_ => Log.EventsSuccessfullyCommitted(_logger))
             .Catch(exception => Log.ErrorCommittingEvents(_logger, exception));
-        return result.Success ? result : new CommitEventsResponse
+        return result.Success ? result.Result : new CommitEventsResponse
         {
             Failure = result.Exception.ToFailure()
         };

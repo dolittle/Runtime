@@ -13,11 +13,17 @@ public record EventLogSequenceNumber(ulong Value) : ConceptAs<ulong>(Value)
     /// <summary>
     /// The initial sequence number of the Event Store before any Events are committed.
     /// </summary>
-    public static readonly EventLogSequenceNumber Initial = 0;
+    public static readonly EventLogSequenceNumber Initial = 0L;
 
     /// <summary>
     /// Implicitly convert a <see cref="ulong"/> to an <see cref="EventLogSequenceNumber"/>.
     /// </summary>
     /// <param name="number">The number.</param>
     public static implicit operator EventLogSequenceNumber(ulong number) => new(number);
+    
+    /// <summary>
+    /// Implicitly convert a <see cref="long"/> to an <see cref="EventLogSequenceNumber"/>.
+    /// </summary>
+    /// <param name="number">The number.</param>
+    public static implicit operator EventLogSequenceNumber(long number) => new((ulong)number);
 }

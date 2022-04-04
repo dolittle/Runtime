@@ -50,14 +50,16 @@ public class EventStoreService : IEventStoreService
     public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, ExecutionContext context, CancellationToken token)
     {
         _logger.EventsReceivedForCommitting(false, events.Count);
-        return await _executionContextCreator
-            .TryCreateUsing(context)
-            .Then(executionContext =>
-                _getEventStore(executionContext.Tenant).CommitEvents(events, executionContext, token))
-            .Then(_ => 
-                Log.EventsSuccessfullyCommitted(_logger))
-            .Catch(exception => 
-                Log.ErrorCommittingEvents(_logger, exception));
+        throw new NotImplementedException();
+        // TODO: Implement this, and merge with the next method. We just need one way - some proto<->runtime conversions we need to get rid of.
+        //return await _executionContextCreator
+        //    .TryCreateUsing(context)
+        //    .Then(executionContext =>
+        //        _getEventStore(executionContext.Tenant).CommitEvents(events, executionContext, token))
+        //    .Then(_ => 
+        //        Log.EventsSuccessfullyCommitted(_logger))
+        //    .Catch(exception => 
+        //        Log.ErrorCommittingEvents(_logger, exception));
     }
 
     public Task<CommitEventsResponse> Commit(CommitEventsRequest request, CancellationToken token)
