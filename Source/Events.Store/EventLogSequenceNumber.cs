@@ -20,10 +20,4 @@ public record EventLogSequenceNumber(ulong Value) : ConceptAs<ulong>(Value)
     /// </summary>
     /// <param name="number">The number.</param>
     public static implicit operator EventLogSequenceNumber(ulong number) => new(number);
-    
-    /// <summary>
-    /// Implicitly convert a <see cref="long"/> to an <see cref="EventLogSequenceNumber"/>.
-    /// </summary>
-    /// <param name="number">The number.</param>
-    public static implicit operator EventLogSequenceNumber(long number) => new((ulong)number);
 }

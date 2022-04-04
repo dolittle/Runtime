@@ -121,7 +121,7 @@ public class EventStore : IEventStore
     /// <inheritdoc />
     public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(CancellationToken cancellationToken)
     {
-        return await _streams.DefaultEventLog.CountDocumentsAsync(
+        return (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
                 _eventFilter.Empty,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
