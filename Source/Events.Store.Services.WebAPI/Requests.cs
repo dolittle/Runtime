@@ -6,7 +6,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Protobuf;
 using RuntimeExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using RuntimeArtifact = Dolittle.Runtime.Artifacts.Artifact;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
@@ -60,5 +62,16 @@ public record JsonRequestUncommittedAggregateEvents(
             new ReadOnlyCollection<UncommittedEvent>(Events.Select(_ => _.ToUncommittedEvent(EventSource)).ToList()));
 }
 
-public record CommitForAggregateRequest(JsonRequestUncommittedAggregateEvents AggregateEvents, CallRequestContext CallContext);
-public record FetchForAggregateRequest(Guid AggregateRoot, string EventSource, CallRequestContext CallContext);
+public record FetchForAggregateRequest(Guid AggregateRoot, string EventSource, CallRequestContext CallContext)
+{
+    public static implicit operator Contracts.FetchForAggregateRequest(FetchForAggregateRequest request)
+        => new()
+        {
+            CallContext = request.CallContext,
+            Aggregate = new Aggregate
+            {
+                AggregateRootId = request.AggregateRoot.ToProtobuf(),
+                EventSourceId = request.EventSource
+            }
+        };
+}

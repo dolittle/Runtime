@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.Events.Store.Services.WebAPI;
 
@@ -12,4 +13,12 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI;
 /// <param name="HeadId">The identifier for the Head that made the request.</param>
 public record CallRequestContext(
     ExecutionContext ExecutionContext,
-    Guid HeadId);
+    Guid HeadId)
+{
+    public static implicit operator Dolittle.Services.Contracts.CallRequestContext(CallRequestContext request)
+        => new()
+        {
+            ExecutionContext = request.ExecutionContext.ToExecutionContext().ToProtobuf(),
+            HeadId = request.HeadId.ToProtobuf()
+        };
+}

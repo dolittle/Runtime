@@ -5,6 +5,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,56 +31,33 @@ public class EventStoreController : ControllerBase
     public async Task<IActionResult> Commit(CommitEventsRequest request)
     {
         var result = await _eventStore.CommitEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
-        if (result.Failure != default)
+        if (result.Failure == default)
         {
-            
+            return Ok(CommitResponse.From(new CommittedEvents(result.Events.Select(_ => _.ToCommittedEvent()).ToList())));
         }
-
-        return Ok(result);
-        
-        
-        var commitResult = await _eventStore.TryCommit(
-            new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(request.Events.Select(_ => _.ToUncommittedEvent()).ToList())),
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (commitResult.Success)
-        {
-            return Ok(CommitResponse.From(commitResult.Result));
-        }
-        
-        
-        
-        
         Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(CommitResponse.From(commitResult.Exception.ToFailure()));
+        return new JsonResult(CommitResponse.From(result.Failure));
     }
     [HttpPost("commitForAggregate")]
     public async Task<IActionResult> CommitForAggregate(CommitForAggregateRequest request)
     {
-        var commitResult = await _eventStore.TryCommitForAggregate(
-            request.AggregateEvents.ToUncommittedAggregateEvents(),
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (commitResult.Success)
+        var result = await _eventStore.CommitAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
+        if (result.Failure == default)
         {
-            return Ok(CommitForAggregateResponse.From(commitResult.Result));
+            return Ok(CommitForAggregateResponse.From(result.Events.ToCommittedEvents()));
         }
         Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(CommitForAggregateResponse.From(commitResult.Exception.ToFailure(), request.AggregateEvents.EventSource, request.AggregateEvents.AggregateRoot));
+        return new JsonResult(CommitForAggregateResponse.From(result.Failure, request.AggregateEvents.EventSource, request.AggregateEvents.AggregateRoot));
     }
     [HttpPost("fetchForAggregate")]
     public async Task<IActionResult> FetchForAggregate(FetchForAggregateRequest request)
     {
-        var fetchResult = await _eventStore.TryFetchForAggregate(
-            request.AggregateRoot,
-            request.EventSource,
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (fetchResult.Success)
+        var result = await _eventStore.FetchAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
+        if (result.Failure == default)
         {
-            return Ok(FetchForAggregateResponse.From(fetchResult.Result));
+            return Ok(FetchForAggregateResponse.From(result.Events.ToCommittedEvents()));
         }
         Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(FetchForAggregateResponse.From(fetchResult.Exception.ToFailure(), request.EventSource, request.AggregateRoot));
+        return new JsonResult(FetchForAggregateResponse.From(result.Failure, request.EventSource, request.AggregateRoot));
     }
 }

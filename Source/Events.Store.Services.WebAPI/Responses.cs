@@ -28,7 +28,7 @@ public record JsonResponseCommittedEvent(
             @event.Occurred,
             @event.EventSource,
             ExecutionContext.From(@event.ExecutionContext),
-            Artifact.From(@event.Type),
+            @event.Type,
             @event.Public,
             @event.Content);
 }
@@ -47,7 +47,7 @@ public record JsonResponseCommittedAggregateEvent(
             @event.EventLogSequenceNumber,
             @event.Occurred,
             ExecutionContext.From(@event.ExecutionContext),
-            Artifact.From(@event.Type),
+            @event.Type,
             @event.Public,
             @event.Content);
 }
