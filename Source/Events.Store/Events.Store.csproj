@@ -19,5 +19,10 @@
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
+        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProtoGrain Include="Actors/EventStore.proto" AdditionalImportDirs="$(ContractsRootPath);." />
     </ItemGroup>
 </Project>
