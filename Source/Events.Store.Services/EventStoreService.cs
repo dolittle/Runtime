@@ -8,7 +8,9 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
+using Dolittle.Runtime.Events.Store.Services.Actors;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -23,6 +25,7 @@ public class EventStoreService : IEventStoreService
 {
     readonly ICreateExecutionContexts _executionContextCreator;
     readonly Func<TenantId, IEventStore> _getEventStore;
+    readonly Func<TenantId, EventStoreGrainClient> _getEventStoreGrain;
     readonly ILogger _logger;
 
     /// <summary>
@@ -34,10 +37,12 @@ public class EventStoreService : IEventStoreService
     public EventStoreService(
         ICreateExecutionContexts executionContextCreator,
         Func<TenantId, IEventStore> getEventStore,
+        Func<TenantId, EventStoreGrainClient> getEventStoreGrain,
         ILogger logger)
     {
         _executionContextCreator = executionContextCreator;
         _getEventStore = getEventStore;
+        _getEventStoreGrain = getEventStoreGrain;
         _logger = logger;
     }
 
@@ -56,7 +61,11 @@ public class EventStoreService : IEventStoreService
     }
 
     public Task<CommitEventsResponse> Commit(CommitEventsRequest request, CancellationToken token)
-        => throw new NotImplementedException();
+    {
+        var commit = new Commit{ExecutionContext = request.CallContext.ExecutionContext};
+        commit.Events.AddRange(request.Events);
+        return _getEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid()).Commit(commit, token);
+    }
 
     /// <inheritdoc/>
     public Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, ExecutionContext context, CancellationToken token)
@@ -74,7 +83,10 @@ public class EventStoreService : IEventStoreService
     }
 
     public Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request, CancellationToken token)
-        => throw new NotImplementedException();
+    {
+        var commit = new CommitForAggregate{ExecutionContext = request.CallContext.ExecutionContext, Events = request.Events};
+        return _getEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid()).CommitForAggregate(commit, token);
+    }
 
     /// <inheritdoc/>
     public Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, ExecutionContext context, CancellationToken token)
@@ -92,5 +104,8 @@ public class EventStoreService : IEventStoreService
     }
 
     public Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, CancellationToken token)
-        => throw new NotImplementedException();
+    {
+        var fetch = new FetchForAggregate{ExecutionContext = request.CallContext.ExecutionContext, Aggregate = request.Aggregate};
+        return _getEventStoreGrain(request.CallContext.ExecutionContext.TenantId.ToGuid()).FetchForAggregate(fetch, token);
+    }
 }

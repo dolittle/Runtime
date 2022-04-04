@@ -32,23 +32,25 @@ public class EventStoreGrpcService : EventStoreBase
     /// <inheritdoc/>
     public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
     {
-        var response = new Contracts.CommitEventsResponse();
-        var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
-        var commitResult = await _eventStoreService.TryCommit(
-            new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            context.CancellationToken).ConfigureAwait(false);
-
-        if (commitResult.Success)
-        {
-            response.Events.AddRange(commitResult.Result.ToProtobuf());
-        }
-        else
-        {
-            response.Failure = commitResult.Exception.ToFailure();
-        }
-
-        return response;
+        var res = await _eventStoreService.Commit(request, context.CancellationToken).ConfigureAwait(false);
+        return res;
+        // var response = new Contracts.CommitEventsResponse();
+        // var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
+        // var commitResult = await _eventStoreService.TryCommit(
+        //     new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
+        //     request.CallContext.ExecutionContext.ToExecutionContext(),
+        //     context.CancellationToken).ConfigureAwait(false);
+        //
+        // if (commitResult.Success)
+        // {
+        //     response.Events.AddRange(commitResult.Result.ToProtobuf());
+        // }
+        // else
+        // {
+        //     response.Failure = commitResult.Exception.ToFailure();
+        // }
+        //
+        // return response;
     }
 
     /// <inheritdoc/>

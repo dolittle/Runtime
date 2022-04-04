@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -200,7 +201,7 @@ public class EventStore : IEventStore
         return committedEvents;
     }
 
-    void ThrowIfNoEventsToCommit(UncommittedEvents events)
+    static void ThrowIfNoEventsToCommit(UncommittedEvents events)
     {
         if (!events.HasEvents)
         {

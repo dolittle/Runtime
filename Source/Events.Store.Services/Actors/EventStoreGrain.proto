@@ -9,4 +9,6 @@ import "Actors/EventStoreMessages.proto";
 
 service EventStoreGrain {
     rpc Commit (Commit) returns (CommitEventsResponse);
+    rpc CommitForAggregate (CommitForAggregate) returns (CommitAggregateEventsResponse);
+    rpc FetchForAggregate (FetchForAggregate) returns (FetchForAggregateResponse);
 }
