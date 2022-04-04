@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Events.Store.Services;
+namespace Dolittle.Runtime.Events.Store;
 
 /// <summary>
 /// Extension methods for <see cref="Exception" />.

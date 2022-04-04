@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Events.Store.Services;
+namespace Dolittle.Runtime.Events.Store;
 
 /// <summary>
 /// Holds the unique <see cref="FailureId"> failure ids </see> unique to the Event Store.

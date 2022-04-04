@@ -14,17 +14,30 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI;
 [ApiController]
 public class EventStoreController : ControllerBase
 {
-    readonly IEventStoreService _eventStoreService;
+    readonly IEventStore _eventStore;
 
-    public EventStoreController(IEventStoreService eventStoreService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventStoreController"/> class.
+    /// </summary>
+    /// <param name="eventStore">The event store to use.</param>
+    public EventStoreController(IEventStore eventStore)
     {
-        _eventStoreService = eventStoreService;
+        _eventStore = eventStore;
     }
 
     [HttpPost("commit")]
-    public async Task<IActionResult> Commit(CommitRequest request)
+    public async Task<IActionResult> Commit(CommitEventsRequest request)
     {
-        var commitResult = await _eventStoreService.TryCommit(
+        var result = await _eventStore.CommitEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
+        if (result.Failure != default)
+        {
+            
+        }
+
+        return Ok(result);
+        
+        
+        var commitResult = await _eventStore.TryCommit(
             new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(request.Events.Select(_ => _.ToUncommittedEvent()).ToList())),
             request.CallContext.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
@@ -32,13 +45,17 @@ public class EventStoreController : ControllerBase
         {
             return Ok(CommitResponse.From(commitResult.Result));
         }
+        
+        
+        
+        
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return new JsonResult(CommitResponse.From(commitResult.Exception.ToFailure()));
     }
     [HttpPost("commitForAggregate")]
     public async Task<IActionResult> CommitForAggregate(CommitForAggregateRequest request)
     {
-        var commitResult = await _eventStoreService.TryCommitForAggregate(
+        var commitResult = await _eventStore.TryCommitForAggregate(
             request.AggregateEvents.ToUncommittedAggregateEvents(),
             request.CallContext.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
@@ -52,7 +69,7 @@ public class EventStoreController : ControllerBase
     [HttpPost("fetchForAggregate")]
     public async Task<IActionResult> FetchForAggregate(FetchForAggregateRequest request)
     {
-        var fetchResult = await _eventStoreService.TryFetchForAggregate(
+        var fetchResult = await _eventStore.TryFetchForAggregate(
             request.AggregateRoot,
             request.EventSource,
             request.CallContext.ExecutionContext.ToExecutionContext(),

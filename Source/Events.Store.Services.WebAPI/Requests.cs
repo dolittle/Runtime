@@ -40,23 +40,6 @@ public record ExecutionContext(
             executionContext.Claims.ToArray());
 }
 
-public record CallRequestContext(Guid HeadId, ExecutionContext ExecutionContext);
-
-public record Artifact(Guid Id, uint Generation)
-{
-    public RuntimeArtifact ToArtifact()
-        => new(Id, Generation);
-
-    public static Artifact From(RuntimeArtifact artifact)
-        => new(artifact.Id, artifact.Generation);
-}
-
-public record JsonRequestUncommittedEvent(string EventSource, Artifact Type, bool Public, string Content)
-{
-    public UncommittedEvent ToUncommittedEvent()
-        => new(EventSource, Type.ToArtifact(), Public, Content);
-}
-
 public record JsonRequestUncommittedAggregateEvent(Artifact Type, bool Public, string Content)
 {
     public UncommittedEvent ToUncommittedEvent(EventSourceId eventSource)
@@ -77,6 +60,5 @@ public record JsonRequestUncommittedAggregateEvents(
             new ReadOnlyCollection<UncommittedEvent>(Events.Select(_ => _.ToUncommittedEvent(EventSource)).ToList()));
 }
 
-public record CommitRequest(JsonRequestUncommittedEvent[] Events, CallRequestContext CallContext);
 public record CommitForAggregateRequest(JsonRequestUncommittedAggregateEvents AggregateEvents, CallRequestContext CallContext);
 public record FetchForAggregateRequest(Guid AggregateRoot, string EventSource, CallRequestContext CallContext);
