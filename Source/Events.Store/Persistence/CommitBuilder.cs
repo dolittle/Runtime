@@ -17,8 +17,10 @@ namespace Dolittle.Runtime.Events.Store.Persistence;
 public class CommitBuilder
 {
     record Aggregate(ArtifactId AggregateRoot, EventSourceId EventSourceId);
+
     record AggregateRootVersionRange(AggregateRootVersion Start, AggregateRootVersion End);
-    
+
+
     readonly List<CommittedEvents> _committedEvents = new();
     readonly List<CommittedAggregateEvents> _committedAggregateEvents = new();
     readonly Dictionary<Aggregate, AggregateRootVersionRange> _aggregates = new();
@@ -32,6 +34,8 @@ public class CommitBuilder
     {
         _nextSequenceNumber = nextSequenceNumber;
     }
+
+    public bool HasCommits => _committedEvents.Count > 0 || _committedAggregateEvents.Count > 0;
 
     /// <summary>
     /// Try to add unto the <see cref="Commit"/> the events from a <see cref="CommitEventsRequest"/>.
@@ -63,7 +67,7 @@ public class CommitBuilder
             return ex;
         }
     }
-    
+
     /// <summary>
     /// Try to add unto the <see cref="Commit"/> the events from a <see cref="CommitAggregateEventsRequest"/>.
     /// </summary>
@@ -113,7 +117,7 @@ public class CommitBuilder
             return ex;
         }
     }
-    
+
     /// <summary>
     /// Builds the <see cref="Commit"/> with the next <see cref="EventLogSequenceNumber"/>.
     /// </summary>
