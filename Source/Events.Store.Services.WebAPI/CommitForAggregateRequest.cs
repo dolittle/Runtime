@@ -7,7 +7,9 @@ using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.Events.Store.Services.WebAPI;
 
-public record CommitForAggregateRequest(JsonRequestUncommittedAggregateEvents AggregateEvents, CallRequestContext CallContext)
+public record CommitForAggregateRequest(
+    CallRequestContext CallContext,
+    UncommittedAggregateEvents AggregateEvents)
 {
     /// <summary>
     /// Converts a <see cref="CommitEventsRequest"/> to a <see cref="Contracts.CommitEventsRequest"/>.

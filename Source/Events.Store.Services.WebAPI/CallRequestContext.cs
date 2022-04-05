@@ -18,7 +18,7 @@ public record CallRequestContext(
     public static implicit operator Dolittle.Services.Contracts.CallRequestContext(CallRequestContext request)
         => new()
         {
-            ExecutionContext = request.ExecutionContext.ToExecutionContext().ToProtobuf(),
+            ExecutionContext = request.ExecutionContext,
             HeadId = request.HeadId.ToProtobuf()
         };
 }
