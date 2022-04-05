@@ -16,11 +16,6 @@ namespace Dolittle.Runtime.Events.Store.Persistence;
 /// </summary>
 public class CommitBuilder
 {
-    record Aggregate(ArtifactId AggregateRoot, EventSourceId EventSourceId);
-
-    record AggregateRootVersionRange(AggregateRootVersion Start, AggregateRootVersion End);
-
-
     readonly List<CommittedEvents> _committedEvents = new();
     readonly List<CommittedAggregateEvents> _committedAggregateEvents = new();
     readonly Dictionary<Aggregate, AggregateRootVersionRange> _aggregates = new();
@@ -97,18 +92,11 @@ public class CommitBuilder
                     _.Public,
                     _.Content)).ToList());
 
-            if (_aggregates.TryGetValue(aggregate, out var aggregateRootVersionRange))
+            if (!TryAddCommittedAggregateEvents(committedEvents, out var error))
             {
-                // Todo: Throw exception if it breaks the incremental ordering.
-                if (nextSequenceNumber != aggregateRootVersionRange.Start || request.Events.ExpectedAggregateRootVersion != aggregateRootVersionRange.End)
-                {
-                    // TODO: Might maybe need a new exception?
-                    return new AggregateRootConcurrencyConflict(aggregate.EventSourceId, aggregate.AggregateRoot, request.Events.ExpectedAggregateRootVersion, aggregateRootVersionRange.End);
-                }
+                return error;
             }
-            
-            //TODO: Update the aggregate root version range
-            _committedAggregateEvents.Add(committedEvents);
+
             _nextSequenceNumber = nextSequenceNumber;
             return committedEvents;
         }
@@ -116,6 +104,31 @@ public class CommitBuilder
         {
             return ex;
         }
+    }
+
+    bool TryAddCommittedAggregateEvents(CommittedAggregateEvents events, out Exception error)
+    {
+        error = default;
+        var aggregate = new Aggregate(events.AggregateRoot, events.EventSource);
+        if (_aggregates.ContainsKey(new Aggregate(events.AggregateRoot, events.EventSource)))
+        {
+            error = new EventsForAggregateAlreadyAddedToCommit(aggregate);
+            return false;
+        }
+        _committedAggregateEvents.Add(events);
+        return true;
+        
+        //TODO: Make more sophisticated logic for determining whether a commit for the same aggregate can be added to the commit.
+        // if (_aggregates.TryGetValue(aggregate, out var aggregateRootVersionRange))
+        // {
+        //     if (nextSequenceNumber != aggregateRootVersionRange.Start || request.Events.ExpectedAggregateRootVersion != aggregateRootVersionRange.End)
+        //     {
+        //         return new AggregateRootConcurrencyConflict(aggregate.EventSourceId, aggregate.AggregateRoot, request.Events.ExpectedAggregateRootVersion, aggregateRootVersionRange.End);
+        //     }
+        // }
+        //
+        // //TODO: Update the aggregate root version range
+        // _committedAggregateEvents.Add(committedEvents);
     }
 
     /// <summary>

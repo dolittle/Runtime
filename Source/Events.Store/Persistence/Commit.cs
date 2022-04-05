@@ -12,13 +12,4 @@ namespace Dolittle.Runtime.Events.Store.Persistence;
 /// <param name="AggregateEvents">The aggregate events of the commit.</param>
 public record Commit(
     IEnumerable<CommittedEvents> Events,
-    IEnumerable<CommittedAggregateEvents> AggregateEvents)
-{
-    /// <summary>
-    /// Get a fresh <see cref="CommitBuilder"/>.
-    /// </summary>
-    /// <param name="nextSequenceNumber">The next <see cref="EventLogSequenceNumber"/>.</param>
-    /// <returns>The <see cref="CommitBuilder"/>.</returns>
-    public static CommitBuilder New(EventLogSequenceNumber nextSequenceNumber) => new(nextSequenceNumber);
-}
-//TODO: Should this record be more clever, and check the contents for overlapping sequence numbers and aggregate commits?
+    IEnumerable<CommittedAggregateEvents> AggregateEvents);
