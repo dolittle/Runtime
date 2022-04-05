@@ -29,7 +29,10 @@ public class CommitBuilder
     {
         _nextSequenceNumber = nextSequenceNumber;
     }
-
+    
+    /// <summary>
+    /// Gets a value indicating whether the commit has events.
+    /// </summary>
     public bool HasCommits => _committedEvents.Count > 0 || _committedAggregateEvents.Count > 0;
 
     /// <summary>
@@ -106,6 +109,13 @@ public class CommitBuilder
         }
     }
 
+    /// <summary>
+    /// Builds the <see cref="Commit"/> with the next <see cref="EventLogSequenceNumber"/>.
+    /// </summary>
+    /// <returns>A tuple of the built <see cref="Commit"/> and the next <see cref="EventLogSequenceNumber"/>.</returns>
+    public (Commit Commit, EventLogSequenceNumber NextSequenceNumber) Build()
+        => (new Commit(_committedEvents, _committedAggregateEvents), _nextSequenceNumber);
+    
     bool TryAddCommittedAggregateEvents(CommittedAggregateEvents events, out Exception error)
     {
         error = default;
@@ -130,11 +140,4 @@ public class CommitBuilder
         // //TODO: Update the aggregate root version range
         // _committedAggregateEvents.Add(committedEvents);
     }
-
-    /// <summary>
-    /// Builds the <see cref="Commit"/> with the next <see cref="EventLogSequenceNumber"/>.
-    /// </summary>
-    /// <returns>A tuple of the built <see cref="Commit"/> and the next <see cref="EventLogSequenceNumber"/>.</returns>
-    public (Commit Commit, EventLogSequenceNumber NextSequenceNumber) Build()
-        => (new Commit(_committedEvents, _committedAggregateEvents), _nextSequenceNumber);
 }
