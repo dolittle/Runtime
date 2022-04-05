@@ -18,10 +18,16 @@ public record UncommittedEvent(
 {
     
     /// <summary>
-    /// Converts an <see cref="UncommittedEvent"/> to an <see cref="Store.UncommittedEvent"/>.
+    /// Converts an <see cref="UncommittedEvent"/> to an <see cref="Contracts.UncommittedEvent"/>.
     /// </summary>
     /// <param name="event">The uncommitted event to convert.</param>
     /// <returns>The converted uncommitted event.</returns>
-    public static implicit operator Store.UncommittedEvent(UncommittedEvent @event)
-        => new(@event.EventSource, @event.Type, @event.Public, @event.Content);
+    public static implicit operator Contracts.UncommittedEvent(UncommittedEvent @event)
+        => new()
+        {
+            EventSourceId = @event.EventSource,
+            EventType = @event.Type,
+            Public = @event.Public,
+            Content = @event.Content,
+        };
 }

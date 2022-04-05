@@ -2,8 +2,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,60 +23,54 @@ public class EventStoreController : ControllerBase
         _eventStore = eventStore;
     }
 
+    /// <summary>
+    /// Commits events.
+    /// </summary>
+    /// <param name="request">The commit request.</param>
+    /// <returns>The commit response.</returns>
     [HttpPost("commit")]
-    public async Task<IActionResult> Commit(CommitEventsRequest request)
+    public async Task<CommitResponse> Commit(CommitEventsRequest request)
     {
         var result = await _eventStore.CommitEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
-        if (result.Failure != default)
+        if (result.Failure is not null)
         {
-            
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
 
-        return Ok(result);
-        
-        
-        var commitResult = await _eventStore.TryCommit(
-            new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(request.Events.Select(_ => _.ToUncommittedEvent()).ToList())),
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (commitResult.Success)
-        {
-            return Ok(CommitResponse.From(commitResult.Result));
-        }
-        
-        
-        
-        
-        Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(CommitResponse.From(commitResult.Exception.ToFailure()));
+        return result;
     }
+    
+    /// <summary>
+    /// Commits events for an aggregate root.
+    /// </summary>
+    /// <param name="request">The commit request.</param>
+    /// <returns>The commit response.</returns>
     [HttpPost("commitForAggregate")]
-    public async Task<IActionResult> CommitForAggregate(CommitForAggregateRequest request)
+    public async Task<CommitForAggregateResponse> CommitForAggregate(CommitForAggregateRequest request)
     {
-        var commitResult = await _eventStore.TryCommitForAggregate(
-            request.AggregateEvents.ToUncommittedAggregateEvents(),
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (commitResult.Success)
+        var result = await _eventStore.CommitAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
+        if (result.Failure is not null)
         {
-            return Ok(CommitForAggregateResponse.From(commitResult.Result));
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
-        Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(CommitForAggregateResponse.From(commitResult.Exception.ToFailure(), request.AggregateEvents.EventSource, request.AggregateEvents.AggregateRoot));
+
+        return result;
     }
+    
+    /// <summary>
+    /// Fetches committed events for an aggregate root instance.
+    /// </summary>
+    /// <param name="request">The fetch request.</param>
+    /// <returns>The fetch response.</returns>
     [HttpPost("fetchForAggregate")]
-    public async Task<IActionResult> FetchForAggregate(FetchForAggregateRequest request)
+    public async Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request)
     {
-        var fetchResult = await _eventStore.TryFetchForAggregate(
-            request.AggregateRoot,
-            request.EventSource,
-            request.CallContext.ExecutionContext.ToExecutionContext(),
-            System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (fetchResult.Success)
+        var result = await _eventStore.FetchAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
+        if (result.Failure is not null)
         {
-            return Ok(FetchForAggregateResponse.From(fetchResult.Result));
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
-        Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(FetchForAggregateResponse.From(fetchResult.Exception.ToFailure(), request.EventSource, request.AggregateRoot));
+
+        return result;
     }
 }
