@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Embeddings.Processing;
 public class EmbeddingStateUpdater : IUpdateEmbeddingStates
 {
     readonly EmbeddingId _embedding;
-    readonly IEventStore _eventStore;
+    readonly IFetchCommittedEvents _committedEvents;
     readonly IEmbeddingStore _embeddingStore;
     readonly IProjectManyEvents _projectManyEvents;
     readonly ILogger _logger;
@@ -31,18 +31,18 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
     /// Initializes a new instance of the <see cref="EmbeddingStateUpdater"/> class.
     /// </summary>
     /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
-    /// <param name="eventStore">The <see cref="IEventStore"/> that is used to fetch aggregate events.</param>
+    /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/> that is used to fetch aggregate events.</param>
     /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> that is used to persist the states.</param>
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public EmbeddingStateUpdater(
         EmbeddingId embedding,
-        IEventStore eventStore,
+        IFetchCommittedEvents committedEvents,
         IEmbeddingStore embeddingStore,
         IProjectManyEvents projectManyEvents,
         ILogger logger)
     {
         _embedding = embedding;
-        _eventStore = eventStore;
+        _committedEvents = committedEvents;
         _embeddingStore = embeddingStore;
         _projectManyEvents = projectManyEvents;
         _logger = logger;
@@ -123,7 +123,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
     {
         try
         {
-            return await _eventStore.FetchForAggregateAfter(
+            return await _committedEvents.FetchForAggregateAfter(
                 key.Value,
                 _embedding.Value,
                 aggregateRootVersion,

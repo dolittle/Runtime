@@ -3,18 +3,23 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Services.Contracts;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -163,8 +168,13 @@ public class EmbeddingProcessor : IEmbeddingProcessor
                 return Try.Succeeded();
             }
             _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
-            var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, executionContext, cancellationToken).ConfigureAwait(false);
-            await replaceOrRemoveEmbedding(committedEvents[^1].AggregateRootVersion + 1).ConfigureAwait(false);
+            var response = await _eventStore.CommitAggregateEvents(CreateCommitRequest(uncommittedEvents, executionContext), cancellationToken).ConfigureAwait(false);
+            if (response.Failure != default)
+            {
+                return new FailedToCommitEmbeddingEvents(response.Failure.ToFailure());
+            }
+
+            await replaceOrRemoveEmbedding(response.Events.ToCommittedEvents()[^1].AggregateRootVersion + 1).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)
@@ -175,6 +185,30 @@ public class EmbeddingProcessor : IEmbeddingProcessor
         }
     }
 
+    static CommitAggregateEventsRequest CreateCommitRequest(UncommittedAggregateEvents events, ExecutionContext executionContext)
+    {
+        var request = new CommitAggregateEventsRequest
+        {
+            CallContext = new CallRequestContext
+            {
+                ExecutionContext = executionContext.ToProtobuf()
+            },
+            Events = new Events.Contracts.UncommittedAggregateEvents
+            {
+                AggregateRootId = events.AggregateRoot.Id.ToProtobuf(),
+                EventSourceId = events.EventSource,
+                ExpectedAggregateRootVersion = events.ExpectedAggregateRootVersion,
+            }
+        };
+        request.Events.Events.AddRange(events.Select(_ => new Events.Contracts.UncommittedAggregateEvents.Types.UncommittedAggregateEvent
+        {
+            Content = _.Content,
+            Public = _.Public,
+            EventType = _.Type.ToProtobuf()
+        }));
+        return request;
+    }
+    
     async Task WaitForEventOrJob()
     {
         _waitForEvent?.Dispose();
