@@ -35,7 +35,7 @@ public class and_updating_the_state_fails : given.all_dependencies_and_a_key
             .Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
         event_store
             .Setup(_ => _.CommitAggregateEvents(commit_request, Moq.It.IsAny<CancellationToken>()))
-            .ReturnsAsync(FailedCommitResponse());
+            .ReturnsAsync(SuccessfulCommitResponse(committed_events));
         embedding_store
             .Setup(_ => _.TryRemove(embedding, key, aggregate_root_version, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try.Failed(exception)));

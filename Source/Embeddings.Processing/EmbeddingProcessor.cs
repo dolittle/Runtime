@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
@@ -172,7 +173,8 @@ public class EmbeddingProcessor : IEmbeddingProcessor
                 return new FailedToCommitEmbeddingEvents(response.Failure.ToFailure());
             }
 
-            await replaceOrRemoveEmbedding(response.Events.ToCommittedEvents()[^1].AggregateRootVersion + 1).ConfigureAwait(false);
+            var committedEvents = response.Events.ToCommittedEvents();
+            await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)
