@@ -34,13 +34,11 @@ public interface IAggregateRoots
     /// <summary>
     /// Fetches the current version of the aggregate root instance in the event store.
     /// </summary>
-    /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
     /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
     /// <param name="aggregateRoot">The <see cref="ArtifactId" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The current <see cref="AggregateRootVersion" /> for an aggregate root instance.</returns>
     Task<AggregateRootVersion> FetchVersionFor(
-        IClientSessionHandle transaction,
         EventSourceId eventSource,
         ArtifactId aggregateRoot,
         CancellationToken cancellationToken);
