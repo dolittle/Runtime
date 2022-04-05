@@ -56,7 +56,7 @@ public class and_two_of_three_keys_fails : given.all_dependencies
         embedding_store
             .Setup(_ => _.TryGet(embedding, projection_key_a, cancellation_token))
             .Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state_a));
-        event_store
+        committed_events_fetcher
             .Setup(_ => _.FetchForAggregateAfter(projection_key_a.Value, embedding.Value, current_state_a.Version, cancellation_token))
             .Returns(Task.FromResult(unprocessed_events_a));
         project_many_events
@@ -73,7 +73,7 @@ public class and_two_of_three_keys_fails : given.all_dependencies
         embedding_store
             .Setup(_ => _.TryGet(embedding, projection_key_c, cancellation_token))
             .Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state_c));
-        event_store
+        committed_events_fetcher
             .Setup(_ => _.FetchForAggregateAfter(projection_key_c.Value, embedding.Value, current_state_c.Version, cancellation_token))
             .Returns(Task.FromResult(unprocessed_events_c));
         project_many_events
@@ -91,12 +91,12 @@ public class and_two_of_three_keys_fails : given.all_dependencies
     It should_fail_with_the_first_error = () => result.Exception.ShouldBeTheSameAs(exception_a);
     It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
     It should_get_the_last_state_from_the_embedding_store_for_a = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_a, cancellation_token));
-    It should_ask_the_event_store_for_new_events_for_a = () => event_store.Verify(_ => _.FetchForAggregateAfter(projection_key_a.Value, embedding.Value, current_state_a.Version, cancellation_token));
+    It should_ask_the_event_store_for_new_events_for_a = () => committed_events_fetcher.Verify(_ => _.FetchForAggregateAfter(projection_key_a.Value, embedding.Value, current_state_a.Version, cancellation_token));
     It should_project_the_events_for_a = () => project_many_events.Verify(_ => _.TryProject(current_state_a, unprocessed_events_a, execution_context, cancellation_token));
     It should_delete_for_a = () => embedding_store.Verify(_ => _.TryRemove(embedding, projection_key_a, projection_result_a.Version, cancellation_token));
     It should_get_the_last_state_from_the_embedding_store_for_b = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_b, cancellation_token));
     It should_get_the_last_state_from_the_embedding_store_for_c = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_c, cancellation_token));
-    It should_ask_the_event_store_for_new_events_for_c = () => event_store.Verify(_ => _.FetchForAggregateAfter(projection_key_c.Value, embedding.Value, current_state_c.Version, cancellation_token));
+    It should_ask_the_event_store_for_new_events_for_c = () => committed_events_fetcher.Verify(_ => _.FetchForAggregateAfter(projection_key_c.Value, embedding.Value, current_state_c.Version, cancellation_token));
     It should_project_the_events_for_c = () => project_many_events.Verify(_ => _.TryProject(current_state_c, unprocessed_events_c, execution_context, cancellation_token));
     It should_update_for_c = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key_c, projection_result_c.Version, projection_result_c.State, cancellation_token));
 }

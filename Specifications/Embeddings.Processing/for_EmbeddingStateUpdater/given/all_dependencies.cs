@@ -25,7 +25,7 @@ public class all_dependencies
     protected static ExecutionContext execution_context;
     protected static Artifact event_type;
     protected static Mock<IProjectManyEvents> project_many_events;
-    protected static Mock<IEventStore> event_store;
+    protected static Mock<IFetchCommittedEvents> committed_events_fetcher;
     protected static Mock<IEmbeddingStore> embedding_store;
     protected static ProjectionState initial_state;
     protected static EmbeddingStateUpdater state_updater;
@@ -45,12 +45,12 @@ public class all_dependencies
             CultureInfo.InvariantCulture);
         event_type = new Artifact(Guid.Parse("c57caeef-ce47-46f5-ad2e-6133833b1846"), ArtifactGeneration.First);
         project_many_events = new Mock<IProjectManyEvents>();
-        event_store = new Mock<IEventStore>();
+        committed_events_fetcher = new Mock<IFetchCommittedEvents>();
         embedding_store = new Mock<IEmbeddingStore>();
         initial_state = "projection-initial-state";
         state_updater = new EmbeddingStateUpdater(
             embedding,
-            event_store.Object,
+            committed_events_fetcher.Object,
             embedding_store.Object,
             project_many_events.Object,
             Mock.Of<ILogger>());
