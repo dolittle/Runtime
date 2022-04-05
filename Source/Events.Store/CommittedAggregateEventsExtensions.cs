@@ -29,10 +29,16 @@ public static class CommittedAggregateEventsExtensions
         protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
         return protobuf;
     }
-
+    
+    // TODO: THIS NEEDS SPECS
+    /// <summary>
+    /// Converts the <see cref="Contracts.CommittedAggregateEvents"/> to <see cref="CommittedAggregateEvents"/>.
+    /// </summary>
+    /// <param name="committedAggregateEvents">The committed events.</param>
+    /// <returns>The converted <see cref="CommittedAggregateEvents"/>.</returns>
     public static CommittedAggregateEvents ToCommittedEvents(this Contracts.CommittedAggregateEvents committedAggregateEvents)
     {
-        var version = committedAggregateEvents.AggregateRootVersion - (ulong)committedAggregateEvents.Events.Count;
+        var version = committedAggregateEvents.AggregateRootVersion + 1 - (ulong)committedAggregateEvents.Events.Count;
         return new CommittedAggregateEvents(
             committedAggregateEvents.EventSourceId,
             committedAggregateEvents.AggregateRootId.ToGuid(),

@@ -22,16 +22,16 @@ namespace Dolittle.Runtime.Aggregates.Management;
 public class AggregateRootsService : AggregateRootsBase
 {
     readonly IGetTenantScopedAggregateRoot _tenantScopedAggregateRoot;
-    readonly Func<TenantId, IEventStore> _getEventStoreFor;
+    readonly Func<TenantId, IFetchCommittedEvents> _getCommittedEventsFetcher;
     readonly ILogger _logger;
         
     public AggregateRootsService(
         IGetTenantScopedAggregateRoot tenantScopedAggregateRoot,
-        Func<TenantId, IEventStore> getEventStoreFor,
+        Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher,
         ILogger logger)
     {
         _tenantScopedAggregateRoot = tenantScopedAggregateRoot;
-        _getEventStoreFor = getEventStoreFor;
+        _getCommittedEventsFetcher = getCommittedEventsFetcher;
         _logger = logger;
     }
 
@@ -88,7 +88,7 @@ public class AggregateRootsService : AggregateRootsBase
             
             _logger.GetEvents(aggregateRootId, eventSourceId);
             
-            var events = await _getEventStoreFor(tenant).FetchForAggregate(eventSourceId, aggregateRootId, context.CancellationToken).ConfigureAwait(false);
+            var events = await _getCommittedEventsFetcher(tenant).FetchForAggregate(eventSourceId, aggregateRootId, context.CancellationToken).ConfigureAwait(false);
             
             return new GetEventsResponse { Events = events.ToProtobuf() };
         }

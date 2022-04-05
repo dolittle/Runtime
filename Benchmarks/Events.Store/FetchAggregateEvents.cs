@@ -19,7 +19,7 @@ namespace Benchmarks.Events.Store;
 /// </summary>
 public class FetchAggregateEvents : JobBase
 {
-    IEventStoreService _eventStoreService;
+    IEventStore _eventStore;
     ExecutionContext _executionContext;
     ArtifactId _aggregateRoot;
     EventSourceId _eventSource;
@@ -27,7 +27,7 @@ public class FetchAggregateEvents : JobBase
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
     {
-        _eventStoreService = services.GetRequiredService<IEventStoreService>();
+        _eventStore = services.GetRequiredService<IEventStore>();
         _executionContext = CreateExecutionContextFor(ConfiguredTenants.First());
 
         _aggregateRoot = new ArtifactId(Guid.NewGuid());
@@ -40,7 +40,8 @@ public class FetchAggregateEvents : JobBase
 
         for (var n = 0; n < CommittedEvents; n++)
         {
-            var aggregateResult = _eventStoreService.TryCommitForAggregate(
+            Commit(
+                _eventStore,
                 new UncommittedAggregateEvents(
                     _eventSource,
                     new Artifact(_aggregateRoot, ArtifactGeneration.First),
@@ -53,12 +54,7 @@ public class FetchAggregateEvents : JobBase
                             false,
                             "{ \"hello\": \"world\" }")
                     }),
-                _executionContext,
-                CancellationToken.None).GetAwaiter().GetResult();
-            if (!aggregateResult.Success)
-            {
-                throw aggregateResult.Exception;
-            }
+                _executionContext).GetAwaiter().GetResult();
 
             if (UnrelatedEventsRatio < 1)
             {
@@ -67,7 +63,8 @@ public class FetchAggregateEvents : JobBase
 
             for (var m = 0; m < UnrelatedEventsRatio; m++)
             {
-                var unrelatedResult = _eventStoreService.TryCommit(
+                Commit(
+                    _eventStore,
                     new UncommittedEvents(new[]
                     {
                         new UncommittedEvent(
@@ -76,12 +73,7 @@ public class FetchAggregateEvents : JobBase
                             false,
                             "{ \"hello\": \"world\" }")
                     }),
-                    _executionContext,
-                    CancellationToken.None).GetAwaiter().GetResult();
-                if (!unrelatedResult.Success)
-                {
-                    throw unrelatedResult.Exception;
-                }
+                    _executionContext).GetAwaiter().GetResult();
             }
         }
     }
@@ -104,15 +96,11 @@ public class FetchAggregateEvents : JobBase
     [Benchmark]
     public async Task FetchEvents()
     {
-        var result = await _eventStoreService.TryFetchForAggregate(
+        await FetchForAggregate(
+            _eventStore,
             _aggregateRoot,
             _eventSource,
-            _executionContext,
-            CancellationToken.None);
-        if (!result.Success)
-        {
-            throw result.Exception;
-        }
+            _executionContext);
     }
 
     /// <inheritdoc />
