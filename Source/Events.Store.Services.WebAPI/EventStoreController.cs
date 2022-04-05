@@ -2,11 +2,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Protobuf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,37 +23,54 @@ public class EventStoreController : ControllerBase
         _eventStore = eventStore;
     }
 
+    /// <summary>
+    /// Commits events.
+    /// </summary>
+    /// <param name="request">The commit request.</param>
+    /// <returns>The commit response.</returns>
     [HttpPost("commit")]
-    public async Task<IActionResult> Commit(CommitEventsRequest request)
+    public async Task<CommitResponse> Commit(CommitEventsRequest request)
     {
         var result = await _eventStore.CommitEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
-        if (result.Failure == default)
+        if (result.Failure is not null)
         {
-            return Ok(CommitResponse.From(new CommittedEvents(result.Events.Select(_ => _.ToCommittedEvent()).ToList())));
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
-        Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(CommitResponse.From(result.Failure));
+
+        return result;
     }
+    
+    /// <summary>
+    /// Commits events for an aggregate root.
+    /// </summary>
+    /// <param name="request">The commit request.</param>
+    /// <returns>The commit response.</returns>
     [HttpPost("commitForAggregate")]
-    public async Task<IActionResult> CommitForAggregate(CommitForAggregateRequest request)
+    public async Task<CommitForAggregateResponse> CommitForAggregate(CommitForAggregateRequest request)
     {
         var result = await _eventStore.CommitAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
-        if (result.Failure == default)
+        if (result.Failure is not null)
         {
-            return Ok(CommitForAggregateResponse.From(result.Events.ToCommittedEvents()));
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
-        Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(CommitForAggregateResponse.From(result.Failure, request.AggregateEvents.EventSource, request.AggregateEvents.AggregateRoot));
+
+        return result;
     }
+    
+    /// <summary>
+    /// Fetches committed events for an aggregate root instance.
+    /// </summary>
+    /// <param name="request">The fetch request.</param>
+    /// <returns>The fetch response.</returns>
     [HttpPost("fetchForAggregate")]
-    public async Task<IActionResult> FetchForAggregate(FetchForAggregateRequest request)
+    public async Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request)
     {
         var result = await _eventStore.FetchAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
-        if (result.Failure == default)
+        if (result.Failure is not null)
         {
-            return Ok(FetchForAggregateResponse.From(result.Events.ToCommittedEvents()));
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
-        Response.StatusCode = StatusCodes.Status500InternalServerError;
-        return new JsonResult(FetchForAggregateResponse.From(result.Failure, request.EventSource, request.AggregateRoot));
+
+        return result;
     }
 }
