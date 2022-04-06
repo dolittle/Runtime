@@ -59,7 +59,7 @@ public static class ClusterConfigExtensions
             grainAndActor.Actor,
             grainAndActor.IsPerTenant
                 ? GetTenantGrainFactory(grainAndActor, provider)
-                : GetGrainFactory(grainAndActor, provider)) as IActor);
+                : GetGrainFactory(grainAndActor, provider)) as IActor).WithClusterRequestDeduplication(TimeSpan.FromSeconds(60));
 
     static object GetGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
         => provider.GetRequiredService(typeof(Func<,,>).MakeGenericType(
