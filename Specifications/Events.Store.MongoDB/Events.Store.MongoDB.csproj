@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../specs.props" />
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Events.Store.MongoDB.Specs</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events.Store.MongoDB</RootNamespace>
   </PropertyGroup>
-
-  <Import Project="../../specs.props"></Import>
   
   <ItemGroup>
     <ProjectReference Include="../../Source/Events.Store.MongoDB/Events.Store.MongoDB.csproj" />
