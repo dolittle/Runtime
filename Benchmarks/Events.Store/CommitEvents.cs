@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,14 +21,14 @@ namespace Benchmarks.Events.Store;
 /// </summary>
 public class CommitEvents : JobBase
 {
-    IEventStoreService _eventStoreService;
+    IEventStore _eventStore;
     ExecutionContext _executionContext;
     UncommittedEvents _eventsToCommit;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
     {
-        _eventStoreService = services.GetRequiredService<IEventStoreService>();
+        _eventStore = services.GetRequiredService<IEventStore>();
         _executionContext = CreateExecutionContextFor(ConfiguredTenants.First());
 
         var events = new List<UncommittedEvent>();
@@ -55,15 +56,11 @@ public class CommitEvents : JobBase
                 false,
                 "{ \"hello\": \"world\" }"));
         }
-
-        var result = _eventStoreService.TryCommit(
+        
+        Commit(
+            _eventStore,
             new UncommittedEvents(preExistingEvents),
-            _executionContext,
-            CancellationToken.None).GetAwaiter().GetResult();
-        if (!result.Success)
-        {
-            throw result.Exception;
-        }
+            _executionContext).GetAwaiter().GetResult();
     }
     
     /// <summary>
@@ -86,14 +83,10 @@ public class CommitEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            var result = await _eventStoreService.TryCommit(
-                new UncommittedEvents(new[] { _eventsToCommit[n] }),
-                _executionContext,
-                CancellationToken.None);
-            if (!result.Success)
+            await Commit(_eventStore, new UncommittedEvents(new[]
             {
-                throw result.Exception;
-            }
+                _eventsToCommit[n]
+            }), _executionContext);
         }
     }
 
@@ -103,14 +96,7 @@ public class CommitEvents : JobBase
     [Benchmark]
     public async Task CommitEventsInBatch()
     {
-        var result = await _eventStoreService.TryCommit(
-            _eventsToCommit,
-            _executionContext,
-            CancellationToken.None);
-        if (!result.Success)
-        {
-            throw result.Exception;
-        }
+        await Commit(_eventStore, _eventsToCommit, _executionContext);
     }
 
     /// <inheritdoc />

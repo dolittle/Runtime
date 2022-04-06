@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
@@ -12,9 +14,11 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -163,8 +167,14 @@ public class EmbeddingProcessor : IEmbeddingProcessor
                 return Try.Succeeded();
             }
             _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
-            var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, executionContext, cancellationToken).ConfigureAwait(false);
-            await replaceOrRemoveEmbedding(committedEvents[^1].AggregateRootVersion + 1).ConfigureAwait(false);
+            var response = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result.ToCommitRequest(executionContext), cancellationToken).ConfigureAwait(false);
+            if (response.Failure != default)
+            {
+                return new FailedToCommitEmbeddingEvents(response.Failure.ToFailure());
+            }
+
+            var committedEvents = response.Events.ToCommittedEvents();
+            await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)

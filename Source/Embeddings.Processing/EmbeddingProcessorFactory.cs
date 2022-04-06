@@ -21,6 +21,7 @@ public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
 {
     readonly TenantId _tenant;
     readonly IEventStore _eventStore;
+    readonly IFetchCommittedEvents _committedEventsFetcher;
     readonly IEmbeddingStore _embeddingStore;
     readonly IStreamEventWatcher _streamEventWatcher;
     readonly ICompareStates _stateComparer;
@@ -33,6 +34,7 @@ public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
     public EmbeddingProcessorFactory(
         TenantId tenant,
         IEventStore eventStore,
+        IFetchCommittedEvents committedEventsFetcher,
         IEmbeddingStore embeddingStore,
         IStreamEventWatcher streamEventWatcher,
         ICompareStates stateComparer,
@@ -42,6 +44,7 @@ public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
     {
         _tenant = tenant;
         _eventStore = eventStore;
+        _committedEventsFetcher = committedEventsFetcher;
         _embeddingStore = embeddingStore;
         _streamEventWatcher = streamEventWatcher;
         _stateComparer = stateComparer;
@@ -67,7 +70,7 @@ public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
     }
 
     EmbeddingStateUpdater CreateEmbeddingStateUpdater(EmbeddingId embeddingId, IProjectManyEvents projectManyEvents)
-        => new(embeddingId, _eventStore, _embeddingStore, projectManyEvents, _loggerFactory.CreateLogger<EmbeddingStateUpdater>());
+        => new(embeddingId, _committedEventsFetcher, _embeddingStore, projectManyEvents, _loggerFactory.CreateLogger<EmbeddingStateUpdater>());
 
     StateTransitionEventsCalculator CreateStateTransitionEventsCalculator(EmbeddingId embeddingId, IEmbedding embedding, IProjectManyEvents projectManyEvents)
         => new(embeddingId, embedding, projectManyEvents, _stateComparer, _loopDetector, _loggerFactory.CreateLogger<StateTransitionEventsCalculator>());

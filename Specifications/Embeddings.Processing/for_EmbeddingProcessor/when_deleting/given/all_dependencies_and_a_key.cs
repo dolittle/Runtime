@@ -5,10 +5,15 @@ using System;
 using System.Globalization;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
+using CommittedAggregateEvents = Dolittle.Runtime.Events.Store.CommittedAggregateEvents;
+using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
+using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting.given;
@@ -55,4 +60,5 @@ public class all_dependencies_and_a_key : for_EmbeddingProcessor.given.all_depen
             new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),
             1,
             events);
+
 }

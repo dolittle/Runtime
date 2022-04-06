@@ -30,7 +30,7 @@ public class and_getting_unprocessed_events_fails : given.all_dependencies
 
         embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));
         embedding_store.Setup(_ => _.TryGet(embedding, projection_key, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state));
-        event_store.Setup(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token)).Returns(Task.FromException<CommittedAggregateEvents>(exception));
+        committed_events_fetcher.Setup(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token)).Returns(Task.FromException<CommittedAggregateEvents>(exception));
     };
 
     static Try result;
@@ -40,5 +40,5 @@ public class and_getting_unprocessed_events_fails : given.all_dependencies
     It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);
     It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
     It should_get_the_last_state_from_the_embedding_store = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key, cancellation_token));
-    It should_ask_the_event_store_for_new_events = () => event_store.Verify(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token));
+    It should_ask_the_event_store_for_new_events = () => committed_events_fetcher.Verify(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token));
 }

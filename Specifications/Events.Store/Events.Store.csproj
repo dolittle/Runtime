@@ -2,12 +2,13 @@
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Events.Store.Specs</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
     </PropertyGroup>
 
-    <Import Project="../../specs.props"/>
+    <Import Project="../../specs.props" />
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)"  />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
 
     <ItemGroup>

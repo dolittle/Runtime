@@ -19,6 +19,7 @@ public class all_dependencies
 {
     protected static ExecutionContext execution_context;
     protected static Mock<IEventStore> event_store;
+    protected static Mock<IFetchCommittedEvents> committed_events_fetcher;
     protected static Mock<IEmbeddingStore> embedding_store;
     protected static Mock<IStreamEventWatcher> stream_event_watcher;
     protected static Mock<IDetectEmbeddingLoops> detect_embedding_loops;
@@ -31,6 +32,7 @@ public class all_dependencies
         tenant_id = "edacfd6f-ab94-49bd-bb0d-15b0041a870b";
         execution_context = execution_contexts.create();
         event_store = new Mock<IEventStore>();
+        committed_events_fetcher = new Mock<IFetchCommittedEvents>();
         embedding_store = new Mock<IEmbeddingStore>();
         stream_event_watcher = new Mock<IStreamEventWatcher>();
         detect_embedding_loops = new Mock<IDetectEmbeddingLoops>();
@@ -38,6 +40,7 @@ public class all_dependencies
         factory = new EmbeddingProcessorFactory(
             tenant_id,
             event_store.Object,
+            committed_events_fetcher.Object,
             embedding_store.Object,
             stream_event_watcher.Object,
             compare_states.Object,

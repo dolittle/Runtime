@@ -20,14 +20,14 @@ namespace Benchmarks.Events.Store;
 /// </summary>
 public class CommitAggregateEvents : JobBase
 {
-    IEventStoreService _eventStoreService;
+    IEventStore _eventStore;
     ExecutionContext _executionContext;
     UncommittedAggregateEvents _eventsToCommit;
     
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
     {
-        _eventStoreService = services.GetRequiredService<IEventStoreService>();
+        _eventStore = services.GetRequiredService<IEventStore>();
         _executionContext = CreateExecutionContextFor(ConfiguredTenants.First());
 
         var events = new List<UncommittedEvent>();
@@ -71,18 +71,18 @@ public class CommitAggregateEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            var result = await _eventStoreService.TryCommitForAggregate(
+
+            await Commit(
+                _eventStore,
                 new UncommittedAggregateEvents(
                     _eventsToCommit.EventSource,
                     _eventsToCommit.AggregateRoot,
-                    _eventsToCommit.ExpectedAggregateRootVersion + (uint)n,
-                    new UncommittedEvents(new[] { _eventsToCommit[n] })),
-                _executionContext,
-                CancellationToken.None);
-            if (!result.Success)
-            {
-                throw result.Exception;
-            }
+                    _eventsToCommit.ExpectedAggregateRootVersion + (uint) n,
+                    new UncommittedEvents(new[]
+                    {
+                        _eventsToCommit[n]
+                    })),
+                _executionContext);
         }
     }
 
@@ -92,14 +92,10 @@ public class CommitAggregateEvents : JobBase
     [Benchmark]
     public async Task CommitEventsInBatch()
     {
-        var result = await _eventStoreService.TryCommitForAggregate(
+        await Commit(
+            _eventStore,
             _eventsToCommit,
-            _executionContext,
-            CancellationToken.None);
-        if (!result.Success)
-        {
-            throw result.Exception;
-        }
+            _executionContext);
     }
 
     /// <inheritdoc />
