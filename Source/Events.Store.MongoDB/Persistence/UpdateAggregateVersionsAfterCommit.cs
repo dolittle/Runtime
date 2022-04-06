@@ -36,7 +36,6 @@ public class UpdateAggregateVersionsAfterCommit : IUpdateAggregateVersionsAfterC
             AggregateRootVersion nextVersion = expectedVersion + (ulong)committedAggregateEvents.Count;
             tasks.Add(_aggregateRoots.IncrementVersionFor(session, committedAggregateEvents.EventSource, committedAggregateEvents.AggregateRoot, expectedVersion, nextVersion, cancellationToken));
         }
-        await Task.WhenAll().ConfigureAwait(false);
-    
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 }
