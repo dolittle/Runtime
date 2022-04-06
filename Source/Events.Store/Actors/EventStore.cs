@@ -48,6 +48,7 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override async Task OnStarted()
     {
+        // TODO: setup lifecycle hooks, enabling graceful shutdown
         _nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
         ResetBatchBuilderState(_nextSequenceNumber);
     }
@@ -67,10 +68,11 @@ public class EventStore : EventStoreBase
         }
 
         var committedEvents = tryAdd.Result;
-
+        var onNextBatchCompleted = OnNextBatchCompleted;
+        
         TrySendBatch();
 
-        Context.ReenterAfter(OnNextBatchCompleted, task =>
+        Context.ReenterAfter(onNextBatchCompleted, task =>
         {
             if (TryGetFailure(task, out var failure))
             {
@@ -106,10 +108,11 @@ public class EventStore : EventStoreBase
         }
 
         var committedEvents = tryAdd.Result;
+        var onNextBatchCompleted = OnNextBatchCompleted;
 
         TrySendBatch();
 
-        Context.ReenterAfter(OnNextBatchCompleted, task =>
+        Context.ReenterAfter(onNextBatchCompleted, task =>
         {
             if (TryGetFailure(task, out var failure))
             {
