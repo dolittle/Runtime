@@ -1,0 +1,62 @@
+using System.Collections.Generic;
+using System.Linq;
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Store.Persistence;
+using MongoDB.Bson;
+
+namespace Dolittle.Runtime.Events.Store.MongoDB.Persistence;
+
+/// <summary>
+/// Represents an implementation of <see cref="IConvertCommitToEvents"/>.
+/// </summary>
+public class ConvertCommitToEvents : IConvertCommitToEvents
+{
+    /// <inheritdoc />
+    public IEnumerable<Events.Event> ToEvents(Commit commit)
+    {
+        var eventsInCommit = commit.Events.ToArray();
+        var aggregateEventsInCommit = commit.AggregateEvents.ToArray();
+        if (eventsInCommit.Length == 0 && aggregateEventsInCommit.Length == 0)
+        {
+            return Enumerable.Empty<Events.Event>();
+        }
+
+        var eventsToStore = new List<MongoDB.Events.Event>();
+        var eventHorizonMetadata = new EventHorizonMetadata();
+
+        foreach (var committedEvents in eventsInCommit)
+        {
+            var executionContext = committedEvents.First().ExecutionContext.ToStoreRepresentation();
+            var aggregateMetadata = new AggregateMetadata();
+            eventsToStore.AddRange(committedEvents.Select(_ => new Events.Event(
+                _.EventLogSequenceNumber,
+                executionContext,
+                new EventMetadata(
+                    _.Occurred.UtcDateTime,
+                    _.EventSource,
+                    _.Type.Id,
+                    _.Type.Generation,
+                    _.Public),
+                aggregateMetadata,
+                eventHorizonMetadata,
+                BsonDocument.Parse(_.Content))));
+        }
+        foreach (var committedEvents in aggregateEventsInCommit)
+        {
+            var executionContext = committedEvents.First().ExecutionContext.ToStoreRepresentation();
+            eventsToStore.AddRange(committedEvents.Select(_ => new Events.Event(
+                _.EventLogSequenceNumber,
+                executionContext,
+                new EventMetadata(
+                    _.Occurred.UtcDateTime,
+                    _.EventSource,
+                    _.Type.Id,
+                    _.Type.Generation,
+                    _.Public),
+                new AggregateMetadata(true, _.AggregateRoot.Id, _.AggregateRoot.Generation, _.AggregateRootVersion),
+                eventHorizonMetadata,
+                BsonDocument.Parse(_.Content))));
+        }
+        return eventsToStore;
+    }
+}
