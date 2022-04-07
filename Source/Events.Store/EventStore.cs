@@ -19,6 +19,7 @@ namespace Dolittle.Runtime.Events.Store;
 public class EventStore : IEventStore
 {
     readonly Func<TenantId, EventStoreClient> _getEventStoreClient;
+    readonly Func<TenantId, IFetchCommittedEvents> _getCommittedEventsFetcher;
     readonly ILogger _logger;
 
     /// <summary>
@@ -26,10 +27,11 @@ public class EventStore : IEventStore
     /// </summary>
     /// <param name="getEventStoreClient">The factory to use to get the <see cref="EventStoreActor"/> client.</param>
     /// <param name="logger">The logger to use for logging.</param>
-    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger)
+    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher)
     {
         _getEventStoreClient = getEventStoreClient;
         _logger = logger;
+        _getCommittedEventsFetcher = getCommittedEventsFetcher;
     }
 
     /// <inheritdoc />
@@ -51,14 +53,28 @@ public class EventStore : IEventStore
         return _getEventStoreClient(GetTenantFrom(request.CallContext))
             .CommitForAggregate(request, cancellationToken);
     }
-
-    public Task<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateRequest request, CancellationToken cancellationToken)
+    
+    /// <inheritdoc />
+    public async Task<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateRequest request, CancellationToken cancellationToken)
     {
-        //Log.FetchEventsForAggregate(_logger);
-        //Log.SuccessfullyFetchedEventsForAggregate(_logger))
-        //Log.ErrorFetchingEventsFromAggregate(_logger, exception));
-        // TODO: Implement
-        throw new System.NotImplementedException();
+        try
+        {
+            var events = await _getCommittedEventsFetcher(GetTenantFrom(request.CallContext))
+                .FetchForAggregate(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), cancellationToken);
+
+            return new FetchForAggregateResponse
+            {
+                Events = events.ToProtobuf()
+            };
+        }
+        catch (Exception e)
+        {
+            Log.ErrorFetchingEventsFromAggregate(_logger,e);
+            return new FetchForAggregateResponse
+            {
+                Failure = e.ToFailure()
+            };
+        }
     }
 
     static TenantId GetTenantFrom(CallRequestContext context)

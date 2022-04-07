@@ -3,16 +3,17 @@
 
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Proto;
+using Aggregate = Dolittle.Runtime.Events.Store.Persistence.Aggregate;
 using Failure = Dolittle.Runtime.Protobuf.Failure;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
@@ -30,12 +31,13 @@ public class EventStore : EventStoreBase
 
     readonly IPersistCommits _commits;
     readonly IFetchCommittedEvents _committedEvents;
+    readonly IFetchAggregateRootVersions _aggregateRootVersions;
 
-    readonly ICreateProps _propsCreator;
+    readonly HashSet<Aggregate> _aggregateCommitInFlight = new();
+    readonly Dictionary<Aggregate, AggregateRootVersion> _aggregateRootVersionCache = new();
 
     EventLogSequenceNumber _nextSequenceNumber;
     bool _readyToSend = true;
-    PID _aggregatesActor;
 
     readonly IApplicationLifecycleHooks _lifecycleHooks;
 
@@ -50,13 +52,14 @@ public class EventStore : EventStoreBase
     /// <param name="commits">The <see cref="IPersistCommits"/>.</param>
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/> for getting the next event log sequence number.</param>
     /// <param name="lifecycleHooks"></param>
-    public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents, ICreateProps propsCreator, IApplicationLifecycleHooks lifecycleHooks)
+    public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents, IApplicationLifecycleHooks lifecycleHooks,
+        IFetchAggregateRootVersions aggregateRootVersions)
         : base(context)
     {
         _commits = commits;
         _committedEvents = committedEvents;
-        _propsCreator = propsCreator;
         _lifecycleHooks = lifecycleHooks;
+        _aggregateRootVersions = aggregateRootVersions;
     }
 
     /// <inheritdoc />
@@ -65,7 +68,6 @@ public class EventStore : EventStoreBase
         // TODO: setup lifecycle hooks, enabling graceful shutdown
         _nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
         ResetBatchBuilderState(_nextSequenceNumber);
-        _aggregatesActor = Context.SpawnNamed(_propsCreator.PropsFor<Aggregates.Aggregates>(), "aggregates");
         _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
         Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
         {
@@ -131,82 +133,108 @@ public class EventStore : EventStoreBase
     {
         if (_shuttingDown)
         {
-            respond(new CommitAggregateEventsResponse
+            return RespondWithFailure(_eventStoreShuttingDown);
+        }
+
+        var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
+
+        if (_aggregateCommitInFlight.Contains(aggregate))
+        {
+            return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
+        }
+        
+        _aggregateCommitInFlight.Add(aggregate);
+        
+        if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
+        {
+            return CommitForAggregate(request, aggregate, aggregateRootVersion, respond);
+        }
+
+
+        
+        Context.ReenterAfter(GetAggregateRootVersion(aggregate), getAggregateRootVersionTask =>
+        {
+            
+            if (!getAggregateRootVersionTask.IsCompletedSuccessfully)
             {
-                Failure = _eventStoreShuttingDown
-            });
+                _aggregateCommitInFlight.Remove(aggregate);
+                return RespondWithFailure(getAggregateRootVersionTask.Exception.ToFailure());
+            }
+            
+            
+            var currentAggregateRootVersion = getAggregateRootVersionTask.Result;
+            _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
+            return CommitForAggregate(request, aggregate, currentAggregateRootVersion, respond);
+
+        });
+        return Task.CompletedTask;
+
+        Task RespondWithFailure(Failure failure)
+        {
+            respond(new CommitAggregateEventsResponse { Failure = failure });
             return Task.CompletedTask;
         }
-        ArtifactId aggregateRootId = request.Events.AggregateRootId.ToGuid();
-        EventSourceId eventSourceId = request.Events.EventSourceId;
-        AggregateRootVersion expectedAggregateRootVersion = request.Events.ExpectedAggregateRootVersion;
-        var getAggregateRootVersion = Context.RequestAsync<AggregateRootVersion>(
-            _aggregatesActor,
-            Aggregates.Aggregates.GetVersion(eventSourceId, aggregateRootId));
-        Context.ReenterAfter(getAggregateRootVersion, getAggregateRootVersionTask =>
+    }
+
+    Task CommitForAggregate(CommitAggregateEventsRequest request, Aggregate aggregate, AggregateRootVersion currentAggregateRootVersion,
+        Action<CommitAggregateEventsResponse> respond)
+    {
+        var expectedAggregateRootVersion = request.Events.ExpectedAggregateRootVersion;
+        if (currentAggregateRootVersion != expectedAggregateRootVersion)
         {
-            if (!getAggregateRootVersionTask.IsCompletedSuccessfully || getAggregateRootVersionTask.Result != expectedAggregateRootVersion)
+            return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
+                request.Events.EventSourceId,
+                request.Events.AggregateRootId.ToGuid(),
+                currentAggregateRootVersion,
+                expectedAggregateRootVersion).ToFailure());
+        }
+
+        var tryAdd = CommitBuilder.TryAddEventsFrom(request);
+
+        if (!tryAdd.Success)
+        {
+            return RespondWithFailureAndClearInFlight(tryAdd.Exception.ToFailure());
+        }
+
+        var committedEvents = tryAdd.Result;
+        var onNextBatchCompleted = OnNextBatchCompleted;
+
+        TrySendBatch();
+
+        Context.ReenterAfter(onNextBatchCompleted, task =>
+        {
+            if (TryGetFailure(task, out var failure))
             {
-                respond(new CommitAggregateEventsResponse
-                {
-                    Failure = new AggregateRootConcurrencyConflict(
-                        eventSourceId,
-                        aggregateRootId,
-                        getAggregateRootVersionTask.Result,
-                        expectedAggregateRootVersion).ToFailure()
-                });
-                return Task.CompletedTask;
+                return RespondWithFailureAndClearInFlight(failure);
             }
-            var tryAdd = CommitBuilder.TryAddEventsFrom(request);
 
-            if (!tryAdd.Success)
+            _aggregateCommitInFlight.Remove(aggregate);
+            _aggregateRootVersionCache[aggregate] = committedEvents[^1].AggregateRootVersion + 1;
+            respond(new CommitAggregateEventsResponse
             {
-                respond(new CommitAggregateEventsResponse
-                {
-                    Failure = tryAdd.Exception.ToFailure()
-                });
-                return Task.CompletedTask;
-            }
-
-            var committedEvents = tryAdd.Result;
-            var onNextBatchCompleted = OnNextBatchCompleted;
-
-            TrySendBatch();
-
-            Context.ReenterAfter(onNextBatchCompleted, task =>
-            {
-                if (TryGetFailure(task, out var failure))
-                {
-                    respond(new CommitAggregateEventsResponse
-                    {
-                        Failure = failure
-                    });
-                    return Task.CompletedTask;
-                }
-
-                respond(new CommitAggregateEventsResponse
-                {
-                    Events = committedEvents.ToProtobuf()
-                });
-                return Task.CompletedTask;
+                Events = committedEvents.ToProtobuf()
             });
             return Task.CompletedTask;
         });
         return Task.CompletedTask;
         
+        Task RespondWithFailureAndClearInFlight(Failure failure)
+        {
+            _aggregateCommitInFlight.Remove(aggregate);
+            respond(new CommitAggregateEventsResponse { Failure = failure });
+            return Task.CompletedTask;
+        }
     }
 
-    /// <inheritdoc />
-    public override Task<CommitEventsResponse> Commit(CommitEventsRequest request)
+    Task<AggregateRootVersion> GetAggregateRootVersion(Aggregate aggregate)
     {
-        throw new NotImplementedException("Unused");
+        return _aggregateRootVersions.FetchVersionFor(aggregate.EventSourceId, aggregate.AggregateRoot, Context.CancellationToken);
     }
 
-    /// <inheritdoc />
-    public override Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request)
-    {
-        throw new NotImplementedException("Unused");
-    }
+    public override Task<CommitEventsResponse> Commit(CommitEventsRequest request) => throw new NotImplementedException("Unused");
+
+    public override Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request) => throw new NotImplementedException("Unused");
+
 
     void TrySendBatch()
     {
