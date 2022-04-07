@@ -1,7 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
@@ -16,13 +18,17 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc;
 public class EventStoreGrpcService : EventStoreBase
 {
     readonly IEventStore _eventStore;
+    readonly IFetchCommittedEvents _committedEventsFetcher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStore">The event store to use.</param>
+    /// <param name="committedEventsReader"></param>
     public EventStoreGrpcService(IEventStore eventStore)
-        => _eventStore = eventStore;
+    {
+        _eventStore = eventStore;
+    }
 
     /// <inheritdoc/>
     public override Task<CommitEventsResponse> Commit(CommitEventsRequest request, ServerCallContext context)
