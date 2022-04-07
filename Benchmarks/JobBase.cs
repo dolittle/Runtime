@@ -74,12 +74,12 @@ public abstract class JobBase
                 .AddLogging(_ => _
                     .ClearProviders()))
             .AddActorSystem()
-            .AddMetrics()
+            // .AddMetrics()
             .AddGrpcHost(EndpointVisibility.Private)
             .AddGrpcHost(EndpointVisibility.Public)
             .AddGrpcHost(EndpointVisibility.Management)
-            .AddMetricsHost()
-            .AddWebHost()
+            // .AddMetricsHost()
+            // .AddWebHost()
             .Build();
         
         _runtimeHost.StartAsync().GetAwaiter().GetResult();
