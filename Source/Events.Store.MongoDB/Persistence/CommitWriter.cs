@@ -23,6 +23,7 @@ public class CommitWriter : IPersistCommits
     readonly IStreams _streams;
     readonly IStreamEventWatcher _streamWatcher;
     readonly IConvertCommitToEvents _commitConverter;
+    readonly IUpdateAggregateVersionsAfterCommit _aggregateVersions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitWriter"/> class. 
@@ -30,11 +31,12 @@ public class CommitWriter : IPersistCommits
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher"/>.</param>
     /// <param name="commitConverter">The <see cref="IConvertCommitToEvents"/>.</param>
-    public CommitWriter(IStreams streams, IStreamEventWatcher streamWatcher, IConvertCommitToEvents commitConverter)
+    public CommitWriter(IStreams streams, IStreamEventWatcher streamWatcher, IConvertCommitToEvents commitConverter, IUpdateAggregateVersionsAfterCommit aggregateVersions)
     {
         _streams = streams;
         _streamWatcher = streamWatcher;
         _commitConverter = commitConverter;
+        _aggregateVersions = aggregateVersions;
     }
 
     /// <inheritdoc />
@@ -53,6 +55,7 @@ public class CommitWriter : IPersistCommits
                 session,
                 eventsToStore,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
+            await _aggregateVersions.UpdateAggregateVersions(session, commit, cancellationToken).ConfigureAwait(false);
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
             //TODO: Notifying for events should be a concern handled by actors
             _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, eventsToStore.Max(_ => _.EventLogSequenceNumber));

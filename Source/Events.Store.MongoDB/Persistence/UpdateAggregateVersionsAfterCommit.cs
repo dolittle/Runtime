@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Scoping;
@@ -30,7 +31,12 @@ public class UpdateAggregateVersionsAfterCommit : IUpdateAggregateVersionsAfterC
     public async Task UpdateAggregateVersions(IClientSessionHandle session, Commit commit, CancellationToken cancellationToken)
     {
         var tasks = new List<Task>();
-        foreach (var committedAggregateEvents in commit.AggregateEvents)
+        var batchedCommittedAggregateEvents = commit.AggregateEvents.ToArray();
+        if (batchedCommittedAggregateEvents.Length == 0)
+        {
+            return;
+        }
+        foreach (var committedAggregateEvents in batchedCommittedAggregateEvents)
         {
             var expectedVersion = committedAggregateEvents[0].AggregateRootVersion;
             AggregateRootVersion nextVersion = expectedVersion + (ulong)committedAggregateEvents.Count;
