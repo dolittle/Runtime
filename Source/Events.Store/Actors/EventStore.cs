@@ -105,7 +105,11 @@ public class EventStore : EventStoreBase
             Aggregates.Aggregates.GetVersion(request.Events.EventSourceId, request.Events.AggregateRootId.ToGuid()));
         Context.ReenterAfter(getAggregateRootVersion, getAggregateRootVersionTask =>
         {
-            if (!getAggregateRootVersionTask.IsCompletedSuccessfully || getAggregateRootVersionTask.)
+            if (!getAggregateRootVersionTask.IsCompletedSuccessfully || getAggregateRootVersionTask.Result != request.Events.ExpectedAggregateRootVersion)
+            {
+                // TODO: Respond with concurrency conflict failure
+            }
+            return Task.CompletedTask;
         });
         var tryAdd = CommitBuilder.TryAddEventsFrom(request);
 
