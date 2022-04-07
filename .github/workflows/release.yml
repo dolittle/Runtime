@@ -56,7 +56,10 @@ jobs:
     if: needs.setup.outputs.should-publish == 'true'
     strategy:
       matrix:
-        benchmark: ['CommitAggregateEvents', 'CommitEvents', 'FetchAggregateEvents']
+        benchmark:
+          - 'Events.Store.CommitAggregateEvents'
+          - 'Events.Store.CommitEvents'
+          - 'Events.Store.FetchAggregateEvents'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
@@ -66,7 +69,7 @@ jobs:
         run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
         working-directory: ./Benchmarks
-        run: dotnet run --configuration Release -- -m -f *${{ matrix.benchmark }}*
+        run: dotnet run --configuration Release -- -m -f '*Benchmarks.${{ matrix.benchmark }}*'
       - name: Upload benchmark results
         uses: actions/upload-release-asset@v1
         env:
