@@ -16,16 +16,19 @@ namespace Dolittle.Runtime.Actors.Hosting;
 public class ActorSystemClusterHostedService : IHostedService
 {
     readonly ActorSystem _actorSystem;
+    readonly IApplicationLifecycleHooks _shutdownHook;
     readonly ILoggerFactory _loggerFactory;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ActorSystemClusterHostedService"/>;
     /// </summary>
     /// <param name="actorSystem">The <see cref="ActorSystem"/>.</param>
+    /// <param name="shutdownHook"></param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-    public ActorSystemClusterHostedService(ActorSystem actorSystem, ILoggerFactory loggerFactory)
+    public ActorSystemClusterHostedService(ActorSystem actorSystem, IApplicationLifecycleHooks shutdownHook, ILoggerFactory loggerFactory)
     {
         _actorSystem = actorSystem;
+        _shutdownHook = shutdownHook;
         _loggerFactory = loggerFactory;
     }
     
@@ -37,6 +40,9 @@ public class ActorSystemClusterHostedService : IHostedService
     }
 
     /// <inheritdoc />
-    public Task StopAsync(CancellationToken cancellationToken)
-        => _actorSystem.Cluster().ShutdownAsync();
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _shutdownHook.ShutdownGracefully(cancellationToken);
+        await _actorSystem.Cluster().ShutdownAsync();
+    }
 }

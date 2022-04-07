@@ -30,7 +30,6 @@ public static class CommittedAggregateEventsExtensions
         return protobuf;
     }
     
-    // TODO: THIS NEEDS SPECS
     /// <summary>
     /// Converts the <see cref="Contracts.CommittedAggregateEvents"/> to <see cref="CommittedAggregateEvents"/>.
     /// </summary>

@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
@@ -28,9 +29,13 @@ public class EventStore : EventStoreBase
 
     readonly IPersistCommits _commits;
     readonly IFetchCommittedEvents _committedEvents;
+    readonly IApplicationLifecycleHooks _lifecycleHooks;
 
     EventLogSequenceNumber _nextSequenceNumber;
     bool _readyToSend = true;
+    bool _shuttingDown = false;
+    readonly Failure _eventStoreShuttingDown = new EventStoreUnavailable("Runtime shutting down").ToFailure();
+    IShutdownHook _shutdownHook;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStore"/> class.
@@ -38,39 +43,61 @@ public class EventStore : EventStoreBase
     /// <param name="context">The actor context.</param>
     /// <param name="commits">The <see cref="IPersistCommits"/>.</param>
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/> for getting the next event log sequence number.</param>
-    public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents)
+    /// <param name="lifecycleHooks"></param>
+    public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents, IApplicationLifecycleHooks lifecycleHooks)
         : base(context)
     {
         _commits = commits;
         _committedEvents = committedEvents;
+        _lifecycleHooks = lifecycleHooks;
     }
 
     /// <inheritdoc />
     public override async Task OnStarted()
     {
+        // TODO: setup lifecycle hooks, enabling graceful shutdown
         _nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
         ResetBatchBuilderState(_nextSequenceNumber);
+        _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
+        Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
+        {
+            _shuttingDown = true;
+            if (_readyToSend) // No current batch
+            {
+                _shutdownHook.MarkCompleted();
+            }
+        });
     }
 
     /// <inheritdoc />
     public override Task Commit(CommitEventsRequest request, Action<CommitEventsResponse> respond, Action<string> onError)
     {
+        if (_shuttingDown)
+        {
+            respond(new CommitEventsResponse
+            {
+                Failure = _eventStoreShuttingDown
+            });
+            return Task.CompletedTask;
+        }
+
         var tryAdd = CommitBuilder.TryAddEventsFrom(request);
 
         if (!tryAdd.Success)
         {
             respond(new CommitEventsResponse
             {
-                Failure = tryAdd.Exception.ToProtobuf()
+                Failure = tryAdd.Exception.ToFailure()
             });
             return Task.CompletedTask;
         }
 
         var committedEvents = tryAdd.Result;
+        var onNextBatchCompleted = OnNextBatchCompleted;
 
         TrySendBatch();
 
-        Context.ReenterAfter(OnNextBatchCompleted, task =>
+        Context.ReenterAfter(onNextBatchCompleted, task =>
         {
             if (TryGetFailure(task, out var failure))
             {
@@ -80,7 +107,7 @@ public class EventStore : EventStoreBase
                 });
                 return Task.CompletedTask;
             }
-            
+
             respond(new CommitEventsResponse
             {
                 Events = { committedEvents.ToProtobuf() }
@@ -94,22 +121,32 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override Task CommitForAggregate(CommitAggregateEventsRequest request, Action<CommitAggregateEventsResponse> respond, Action<string> onError)
     {
+        if (_shuttingDown)
+        {
+            respond(new CommitAggregateEventsResponse
+            {
+                Failure = _eventStoreShuttingDown
+            });
+            return Task.CompletedTask;
+        }
+
         var tryAdd = CommitBuilder.TryAddEventsFrom(request);
 
         if (!tryAdd.Success)
         {
             respond(new CommitAggregateEventsResponse
             {
-                Failure = tryAdd.Exception.ToProtobuf()
+                Failure = tryAdd.Exception.ToFailure()
             });
             return Task.CompletedTask;
         }
 
         var committedEvents = tryAdd.Result;
+        var onNextBatchCompleted = OnNextBatchCompleted;
 
         TrySendBatch();
 
-        Context.ReenterAfter(OnNextBatchCompleted, task =>
+        Context.ReenterAfter(onNextBatchCompleted, task =>
         {
             if (TryGetFailure(task, out var failure))
             {
@@ -119,7 +156,7 @@ public class EventStore : EventStoreBase
                 });
                 return Task.CompletedTask;
             }
-            
+
             respond(new CommitAggregateEventsResponse
             {
                 Events = committedEvents.ToProtobuf()
@@ -144,7 +181,9 @@ public class EventStore : EventStoreBase
 
     void TrySendBatch()
     {
-        if (!_readyToSend || !CommitBuilder.HasCommits)
+        // TODO: Refactor
+        
+        if (_shuttingDown || !_readyToSend || !CommitBuilder.HasCommits)
         {
             return;
         }
@@ -154,8 +193,7 @@ public class EventStore : EventStoreBase
         var (commit, newNextSequenceNumber) = CommitBuilder.Build();
         _nextSequenceNumber = newNextSequenceNumber;
         var tcs = _nextBatchResult;
-        
-        // Reset for next batch
+
         ResetBatchBuilderState(newNextSequenceNumber);
 
         Context.ReenterAfter(_commits.Persist(commit, CancellationToken.None), persistTask =>
@@ -177,6 +215,11 @@ public class EventStore : EventStoreBase
                 ResetBatchBuilderState(beforeSequenceNumber);
             }
 
+            if (_shuttingDown)
+            {
+                _shutdownHook.MarkCompleted();
+            }
+            
             return Task.CompletedTask;
         });
     }
@@ -200,12 +243,11 @@ public class EventStore : EventStoreBase
 
         if (!task.Result.Success)
         {
-            failure = task.Result.Exception.ToProtobuf();
+            failure = task.Result.Exception.ToFailure();
             return true;
         }
 
         failure = default;
         return false;
     }
-
 }
