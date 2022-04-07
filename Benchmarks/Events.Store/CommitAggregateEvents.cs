@@ -50,11 +50,36 @@ public class CommitAggregateEvents : JobBase
     [IterationSetup]
     public void IterationSetup()
     {
+        var eventSource = new EventSourceId("46c4de33-9a60-4465-97ab-a2a7f5b7e6a3");
+        var aggregateRoot = new Artifact(new ArtifactId(Guid.NewGuid()), ArtifactGeneration.First);
         _eventsToCommit = new UncommittedAggregateEvents(
-            new EventSourceId("46c4de33-9a60-4465-97ab-a2a7f5b7e6a3"),
-            new Artifact(new ArtifactId(Guid.NewGuid()), ArtifactGeneration.First),
-            AggregateRootVersion.Initial,
+            eventSource,
+            aggregateRoot,
+            AggregateRootVersion.Initial + (ulong)PreExistingEvents,
             _eventsToCommit);
+
+        if (PreExistingEvents > 0)
+        {
+            var events = new List<UncommittedEvent>();
+            for (var n = 0; n < PreExistingEvents; n++)
+            {
+                events.Add(new UncommittedEvent(
+                    new EventSourceId("46c4de33-9a60-4465-97ab-a2a7f5b7e6a3"),
+                    new Artifact(new ArtifactId(Guid.Parse("08db4b0a-3724-444f-9968-ada44922fb78")), ArtifactGeneration.First),
+                    false,
+                    "{ \"hello\": \"world\" }"));
+            }
+            var preExistingEvents = new UncommittedAggregateEvents(
+                eventSource,
+                aggregateRoot,
+                AggregateRootVersion.Initial,
+                events);
+            
+            Commit(
+                _eventStore,
+                preExistingEvents,
+                _executionContext).GetAwaiter().GetResult();
+        }
     }
     
     /// <summary>
@@ -64,6 +89,12 @@ public class CommitAggregateEvents : JobBase
     public int EventsToCommit { get; set; }
 
     /// <summary>
+    /// Gets the number of events that have been committed to the Event Store before the benchmarking commits.
+    /// </summary>
+    [Params(0, 1, 100)]
+    public int PreExistingEvents { get; set; }
+
+    /// <summary>
     /// Commits the events one-by-one in a loop.
     /// </summary>
     [Benchmark]
@@ -71,7 +102,6 @@ public class CommitAggregateEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-
             await Commit(
                 _eventStore,
                 new UncommittedAggregateEvents(
@@ -85,6 +115,28 @@ public class CommitAggregateEvents : JobBase
                 _executionContext);
         }
     }
+    /// <summary>
+    /// Commits the events one-by-one in a loop.
+    /// </summary>
+    [Benchmark]
+    public async Task FetchAndCommitEventsInLoop()
+    {
+        for (var n = 0; n < EventsToCommit; n++)
+        {
+            await FetchForAggregate(_eventStore, _eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+            await Commit(
+                _eventStore,
+                new UncommittedAggregateEvents(
+                    _eventsToCommit.EventSource,
+                    _eventsToCommit.AggregateRoot,
+                    _eventsToCommit.ExpectedAggregateRootVersion + (uint) n,
+                    new UncommittedEvents(new[]
+                    {
+                        _eventsToCommit[n]
+                    })),
+                _executionContext).ConfigureAwait(false);
+        }
+    }
 
     /// <summary>
     /// Commits the events in a single batch.
@@ -92,6 +144,18 @@ public class CommitAggregateEvents : JobBase
     [Benchmark]
     public async Task CommitEventsInBatch()
     {
+        await Commit(
+            _eventStore,
+            _eventsToCommit,
+            _executionContext);
+    }
+    /// <summary>
+    /// Commits the events in a single batch.
+    /// </summary>
+    [Benchmark]
+    public async Task FetchCommitEventsInBatch()
+    {
+        await FetchForAggregate(_eventStore, _eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
         await Commit(
             _eventStore,
             _eventsToCommit,

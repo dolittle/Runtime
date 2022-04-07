@@ -66,13 +66,13 @@ public class CommitEvents : JobBase
     /// <summary>
     /// Gets the number of events that have been committed to the Event Store before the benchmarking commits.
     /// </summary>
-    [Params(0, 100, 1000)]
+    [Params(0, 100)]
     public int PreExistingEvents { get; set; }
     
     /// <summary>
     /// Gets the number of events to be committed in the benchmarks.
     /// </summary>
-    [Params(1, 10, 50, 100)]
+    [Params(1, 10, 50, 100, 500)]
     public int EventsToCommit { get; set; }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class CommitEvents : JobBase
             await Commit(_eventStore, new UncommittedEvents(new[]
             {
                 _eventsToCommit[n]
-            }), _executionContext);
+            }), _executionContext).ConfigureAwait(false);
         }
     }
 
@@ -96,7 +96,24 @@ public class CommitEvents : JobBase
     [Benchmark]
     public async Task CommitEventsInBatch()
     {
-        await Commit(_eventStore, _eventsToCommit, _executionContext);
+        await Commit(_eventStore, _eventsToCommit, _executionContext).ConfigureAwait(false);
+    }
+    
+    /// <summary>
+    /// Commits the events in a single batch.
+    /// </summary>
+    [Benchmark]
+    [Arguments(10)]
+    [Arguments(50)]
+    [Arguments(100)]
+    public async Task CommitEventsInParallel(int parallelCommits)
+    {
+        var tasks = new List<Task>();
+        foreach (var i in Enumerable.Range(0, parallelCommits))
+        {
+            tasks.Add(Commit(_eventStore, _eventsToCommit, _executionContext));   
+        }
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
