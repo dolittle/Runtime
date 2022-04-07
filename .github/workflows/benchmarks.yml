@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "6.0.x"
+      - name: Run Mongo container
+        run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
         working-directory: ./Benchmarks
         run: dotnet run --configuration Release -- -j short -m -f *${{ matrix.benchmark }}*
@@ -34,6 +36,8 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "6.0.x"
+      - name: Run Mongo container
+        run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
         working-directory: ./Benchmarks
         run: dotnet run --configuration Release -- -m -f *${{ matrix.benchmark }}*
