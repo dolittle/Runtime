@@ -75,6 +75,7 @@ jobs:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
           asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/*${{ matrix.benchmark }}-report-github.md
           asset_name: runtime-${{ matrix.benchmark }}-benchmarks
+          asset_content_type: text/markdown
   
   release-runtime-production-image:
     name: Release Runtime Production Image
