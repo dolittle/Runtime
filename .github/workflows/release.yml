@@ -76,7 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/*${{ matrix.benchmark }}-report-github.md
+          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report-github.md
           asset_name: runtime-${{ matrix.benchmark }}-benchmarks
           asset_content_type: text/markdown
   
