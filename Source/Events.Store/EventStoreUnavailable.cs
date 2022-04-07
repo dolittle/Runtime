@@ -19,4 +19,13 @@ public class EventStoreUnavailable : Exception
         : base(cause, innerException)
     {
     }
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventStoreUnavailable"/> class.
+    /// </summary>
+    /// <param name="cause">The cause of why the event store is unavailable.</param>
+    public EventStoreUnavailable(string cause)
+        : base(cause)
+    {
+    }
 }
