@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -13,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 /// <summary>
 /// Represents an implementation of <see cref="IAggregateRoots" />.
 /// </summary>
+[PerTenant]
 public class AggregateRoots : IAggregateRoots
 {
     readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;

@@ -28,9 +28,11 @@ public class EventStore : EventStoreBase
 
     readonly IPersistCommits _commits;
     readonly IFetchCommittedEvents _committedEvents;
+    readonly ICreateProps _propsCreator;
 
     EventLogSequenceNumber _nextSequenceNumber;
     bool _readyToSend = true;
+    PID _aggregatesActor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStore"/> class.
@@ -38,11 +40,12 @@ public class EventStore : EventStoreBase
     /// <param name="context">The actor context.</param>
     /// <param name="commits">The <see cref="IPersistCommits"/>.</param>
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/> for getting the next event log sequence number.</param>
-    public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents)
+    public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents, ICreateProps propsCreator)
         : base(context)
     {
         _commits = commits;
         _committedEvents = committedEvents;
+        _propsCreator = propsCreator;
     }
 
     /// <inheritdoc />
@@ -51,6 +54,7 @@ public class EventStore : EventStoreBase
         // TODO: setup lifecycle hooks, enabling graceful shutdown
         _nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
         ResetBatchBuilderState(_nextSequenceNumber);
+        _aggregatesActor = Context.SpawnNamed(_propsCreator.PropsFor<Aggregates.Aggregates>(), "aggregates");
     }
 
     /// <inheritdoc />
@@ -96,6 +100,13 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override Task CommitForAggregate(CommitAggregateEventsRequest request, Action<CommitAggregateEventsResponse> respond, Action<string> onError)
     {
+        var getAggregateRootVersion = Context.RequestAsync<AggregateRootVersion>(
+            _aggregatesActor,
+            Aggregates.Aggregates.GetVersion(request.Events.EventSourceId, request.Events.AggregateRootId.ToGuid()));
+        Context.ReenterAfter(getAggregateRootVersion, getAggregateRootVersionTask =>
+        {
+            if (!getAggregateRootVersionTask.IsCompletedSuccessfully || getAggregateRootVersionTask.)
+        });
         var tryAdd = CommitBuilder.TryAddEventsFrom(request);
 
         if (!tryAdd.Success)

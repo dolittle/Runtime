@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 /// <summary>
 /// Defines a system that is capable of ensuring consistency with optimistic concurrency for aggregate root versions in the event store.
 /// </summary>
-public interface IAggregateRoots
+public interface IAggregateRoots : IFetchAggregateRootVersions
 {
     /// <summary>
     /// Increments the version of the aggregate root instance in the event store.
@@ -29,17 +29,5 @@ public interface IAggregateRoots
         ArtifactId aggregateRoot,
         AggregateRootVersion expectedVersion,
         AggregateRootVersion nextVersion,
-        CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Fetches the current version of the aggregate root instance in the event store.
-    /// </summary>
-    /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
-    /// <param name="aggregateRoot">The <see cref="ArtifactId" />.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>The current <see cref="AggregateRootVersion" /> for an aggregate root instance.</returns>
-    Task<AggregateRootVersion> FetchVersionFor(
-        EventSourceId eventSource,
-        ArtifactId aggregateRoot,
         CancellationToken cancellationToken);
 }
