@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
@@ -136,54 +137,63 @@ public class EventStore : EventStoreBase
             });
             return Task.CompletedTask;
         }
+        ArtifactId aggregateRootId = request.Events.AggregateRootId.ToGuid();
+        EventSourceId eventSourceId = request.Events.EventSourceId;
+        AggregateRootVersion expectedAggregateRootVersion = request.Events.ExpectedAggregateRootVersion;
         var getAggregateRootVersion = Context.RequestAsync<AggregateRootVersion>(
             _aggregatesActor,
-            Aggregates.Aggregates.GetVersion(request.Events.EventSourceId, request.Events.AggregateRootId.ToGuid()));
+            Aggregates.Aggregates.GetVersion(eventSourceId, aggregateRootId));
         Context.ReenterAfter(getAggregateRootVersion, getAggregateRootVersionTask =>
         {
-            if (!getAggregateRootVersionTask.IsCompletedSuccessfully || getAggregateRootVersionTask.Result != request.Events.ExpectedAggregateRootVersion)
-            {
-                // TODO: Respond with concurrency conflict failure
-            }
-            return Task.CompletedTask;
-        });
-        
-        //TODO: This should then be in the reenter?
-        var tryAdd = CommitBuilder.TryAddEventsFrom(request);
-
-        if (!tryAdd.Success)
-        {
-            respond(new CommitAggregateEventsResponse
-            {
-                Failure = tryAdd.Exception.ToFailure()
-            });
-            return Task.CompletedTask;
-        }
-
-        var committedEvents = tryAdd.Result;
-        var onNextBatchCompleted = OnNextBatchCompleted;
-
-        TrySendBatch();
-
-        Context.ReenterAfter(onNextBatchCompleted, task =>
-        {
-            if (TryGetFailure(task, out var failure))
+            if (!getAggregateRootVersionTask.IsCompletedSuccessfully || getAggregateRootVersionTask.Result != expectedAggregateRootVersion)
             {
                 respond(new CommitAggregateEventsResponse
                 {
-                    Failure = failure
+                    Failure = new AggregateRootConcurrencyConflict(
+                        eventSourceId,
+                        aggregateRootId,
+                        getAggregateRootVersionTask.Result,
+                        expectedAggregateRootVersion).ToFailure()
+                });
+                return Task.CompletedTask;
+            }
+            var tryAdd = CommitBuilder.TryAddEventsFrom(request);
+
+            if (!tryAdd.Success)
+            {
+                respond(new CommitAggregateEventsResponse
+                {
+                    Failure = tryAdd.Exception.ToFailure()
                 });
                 return Task.CompletedTask;
             }
 
-            respond(new CommitAggregateEventsResponse
+            var committedEvents = tryAdd.Result;
+            var onNextBatchCompleted = OnNextBatchCompleted;
+
+            TrySendBatch();
+
+            Context.ReenterAfter(onNextBatchCompleted, task =>
             {
-                Events = committedEvents.ToProtobuf()
+                if (TryGetFailure(task, out var failure))
+                {
+                    respond(new CommitAggregateEventsResponse
+                    {
+                        Failure = failure
+                    });
+                    return Task.CompletedTask;
+                }
+
+                respond(new CommitAggregateEventsResponse
+                {
+                    Events = committedEvents.ToProtobuf()
+                });
+                return Task.CompletedTask;
             });
             return Task.CompletedTask;
         });
-
         return Task.CompletedTask;
+        
     }
 
     /// <inheritdoc />
