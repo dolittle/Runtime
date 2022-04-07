@@ -1,0 +1,39 @@
+name: Benchmarks
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  short-benchmarks:
+    name: Short benchmarks
+    runs-on: ubuntu-latest
+    strategy: 
+      matrix:
+        benchmark: ['CommitAggregateEvents', 'CommitEvents', 'FetchAggregateEvents']
+    
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+      - name: Run Benchmarks
+        working-directory: ./Benchmarks
+        run: dotnet run --configuration Release -- -j short -m -f *${{ matrix.benchmark }}*
+          
+  long-benchmarks:
+    name: Long benchmarks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        benchmark: ['CommitAggregateEvents', 'CommitEvents', 'FetchAggregateEvents']
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+      - name: Run Benchmarks
+        working-directory: ./Benchmarks
+        run: dotnet run --configuration Release -- -m -f *${{ matrix.benchmark }}*
