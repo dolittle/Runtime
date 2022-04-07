@@ -42,7 +42,6 @@ public class EventStore : EventStoreBase
     readonly Failure _eventStoreShuttingDown = new EventStoreUnavailable("Runtime shutting down").ToFailure();
     IShutdownHook _shutdownHook;
 
-
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStore"/> class.
     /// </summary>
@@ -148,7 +147,8 @@ public class EventStore : EventStoreBase
             }
             return Task.CompletedTask;
         });
-
+        
+        //TODO: This should then be in the reenter?
         var tryAdd = CommitBuilder.TryAddEventsFrom(request);
 
         if (!tryAdd.Success)
