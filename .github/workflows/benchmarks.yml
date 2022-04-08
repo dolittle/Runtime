@@ -15,6 +15,8 @@ jobs:
           - 'Events.Store.CommitAggregateEvents'
           - 'Events.Store.CommitEvents'
           - 'Events.Store.FetchAggregateEvents'
+    env:
+      BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
     
     steps:
       - uses: actions/checkout@v2
@@ -37,6 +39,8 @@ jobs:
           - 'Events.Store.CommitAggregateEvents'
           - 'Events.Store.CommitEvents'
           - 'Events.Store.FetchAggregateEvents'
+    env:
+      BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
 
     steps:
       - uses: actions/checkout@v2
@@ -47,4 +51,4 @@ jobs:
         run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
         working-directory: ./Benchmarks
-        run: dotnet run --configuration Release -- -m -f '*Benchmarks.${{ matrix.benchmark }}*'
+        run: dotnet run --configuration Release -- -m -f '*${{ env.BENCHMARK_NAME }}*'
