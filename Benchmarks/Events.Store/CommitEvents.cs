@@ -72,7 +72,7 @@ public class CommitEvents : JobBase
     /// <summary>
     /// Gets the number of events to be committed in the benchmarks.
     /// </summary>
-    [Params(1, 10, 50, 100, 500)]
+    [Params(1, 100)]
     public int EventsToCommit { get; set; }
 
     /// <summary>
@@ -104,12 +104,11 @@ public class CommitEvents : JobBase
     /// </summary>
     [Benchmark]
     [Arguments(10)]
-    [Arguments(50)]
     [Arguments(100)]
-    public async Task CommitEventsInParallel(int parallelCommits)
+    public async Task CommitEventsInParallel(int ParallelCommits)
     {
         var tasks = new List<Task>();
-        foreach (var i in Enumerable.Range(0, parallelCommits))
+        foreach (var i in Enumerable.Range(0, ParallelCommits))
         {
             tasks.Add(Commit(_eventStore, _eventsToCommit, _executionContext));   
         }

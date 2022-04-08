@@ -81,13 +81,13 @@ public class FetchAggregateEvents : JobBase
     /// <summary>
     /// Gets the number of events that has been committed for the aggregate root.
     /// </summary>
-    [Params(0, 1, 100, 500, 1000)]
+    [Params(0, 1, 100, 1000)]
     public int CommittedEvents { get; set; }
     
     /// <summary>
     /// Gets the ratio of other events unrelated to the aggregate root that have been committed.
     /// </summary>
-    [Params(0, 1, 10)]
+    [Params(0, 10)]
     public int UnrelatedEventsRatio { get; set; }
 
     /// <summary>

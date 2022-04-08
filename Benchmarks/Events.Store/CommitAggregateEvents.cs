@@ -85,7 +85,7 @@ public class CommitAggregateEvents : JobBase
     /// <summary>
     /// Gets the number of events to be committed in the benchmarks.
     /// </summary>
-    [Params(1, 10, 50, 100)]
+    [Params(1, 100)]
     public int EventsToCommit { get; set; }
 
     /// <summary>
