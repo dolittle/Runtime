@@ -64,7 +64,7 @@ jobs:
       BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
     steps:
       - name: Echo benchmark
-        run: echo "${{env.BENCHMARK_NAME}}"
+        run: echo "Running ${{ env.BENCHMARK_NAME }}"
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
@@ -73,15 +73,15 @@ jobs:
         run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
         working-directory: ./Benchmarks
-        run: dotnet run --configuration Release -- -m -f '*Benchmarks.${{ matrix.benchmark }}*'
+        run: dotnet run --configuration Release -- -m -f '*${{ env.BENCHMARK_NAME }}*'
       - name: Upload benchmark markdown results
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report-github.md
-          asset_name: Benchmarks-${{ matrix.benchmark }}-markdown
+          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report-github.md
+          asset_name: ${{ env.BENCHMARK_NAME }}.md
           asset_content_type: text/markdown
       - name: Upload benchmark html results
         uses: actions/upload-release-asset@v1
@@ -89,8 +89,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report.html
-          asset_name: Benchmarks-${{ matrix.benchmark }}-html
+          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.html
+          asset_name: ${{ env.BENCHMARK_NAME }}.html
           asset_content_type: text/html
       - name: Upload benchmark csv results
         uses: actions/upload-release-asset@v1
@@ -98,8 +98,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report.csv
-          asset_name: Benchmarks-${{ matrix.benchmark }}-csv
+          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.csv
+          asset_name: ${{ env.BENCHMARK_NAME }}.csv
           asset_content_type: text/csv
   
   release-runtime-production-image:
