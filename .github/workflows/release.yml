@@ -92,15 +92,6 @@ jobs:
           asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.html
           asset_name: ${{ env.BENCHMARK_NAME }}.html
           asset_content_type: text/html
-      - name: Upload benchmark csv results
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.csv
-          asset_name: ${{ env.BENCHMARK_NAME }}.csv
-          asset_content_type: text/csv
   
   release-runtime-production-image:
     name: Release Runtime Production Image
