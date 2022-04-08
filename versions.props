@@ -22,7 +22,7 @@
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>5.0.2</PrometheusVersion>
-        <ProtoActorVersion>0.27.0</ProtoActorVersion>
+        <ProtoActorVersion>0.29.0</ProtoActorVersion>
         <ProtobufVersion>3.19.4</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
