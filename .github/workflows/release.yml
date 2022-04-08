@@ -60,7 +60,11 @@ jobs:
           - 'Events.Store.CommitAggregateEvents'
           - 'Events.Store.CommitEvents'
           - 'Events.Store.FetchAggregateEvents'
+    env: 
+      BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
     steps:
+      - name: Echo benchmark
+        run: echo "${{env.BENCHMARK_NAME}}"
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
@@ -70,15 +74,33 @@ jobs:
       - name: Run Benchmarks
         working-directory: ./Benchmarks
         run: dotnet run --configuration Release -- -m -f '*Benchmarks.${{ matrix.benchmark }}*'
-      - name: Upload benchmark results
+      - name: Upload benchmark markdown results
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
           asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report-github.md
-          asset_name: runtime-${{ matrix.benchmark }}-benchmarks
+          asset_name: Benchmarks-${{ matrix.benchmark }}-markdown
           asset_content_type: text/markdown
+      - name: Upload benchmark html results
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report.html
+          asset_name: Benchmarks-${{ matrix.benchmark }}-html
+          asset_content_type: text/html
+      - name: Upload benchmark csv results
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/Benchmarks.${{ matrix.benchmark }}-report.csv
+          asset_name: Benchmarks-${{ matrix.benchmark }}-csv
+          asset_content_type: text/csv
   
   release-runtime-production-image:
     name: Release Runtime Production Image
