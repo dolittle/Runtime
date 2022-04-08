@@ -5,6 +5,7 @@ using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Metrics.Hosting;
+using Dolittle.Runtime.Server.Tracing;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
@@ -23,6 +24,7 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .AddActorSystem()
     .AddMetrics()
+    .ConfigureServices(services => services.AddTracing())
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)
     .AddGrpcHost(EndpointVisibility.Management)
