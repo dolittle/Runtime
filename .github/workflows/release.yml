@@ -60,6 +60,7 @@ jobs:
           - 'Events.Store.CommitAggregateEvents'
           - 'Events.Store.CommitEvents'
           - 'Events.Store.FetchAggregateEvents'
+          - 'Events.Processing.EventHandler'
     env: 
       BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
     steps:
