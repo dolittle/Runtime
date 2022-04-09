@@ -32,10 +32,9 @@ namespace Benchmarks.Events.Processing;
 public class EventHandler : JobBase
 {
     IEventStore _eventStore;
-    ExecutionContext _executionContext;
     IEventHandlers _eventHandlers;
     IEventHandlerFactory _eventHandlerFactory;
-    IEventHandler _eventHandler;
+    IEnumerable<IEventHandler> _eventHandlersToRun;
     ArtifactId[] _eventTypes;
     Mock<ReverseCallDispatcher> _dispatcher;
 
@@ -43,7 +42,6 @@ public class EventHandler : JobBase
     protected override void Setup(IServiceProvider services)
     {
         _eventStore = services.GetRequiredService<IEventStore>();
-        _executionContext = CreateExecutionContextFor(ConfiguredTenants.First());
         _eventHandlers = services.GetRequiredService<IEventHandlers>();
         _eventHandlerFactory = services.GetRequiredService<IEventHandlerFactory>();
         
@@ -51,12 +49,15 @@ public class EventHandler : JobBase
         var uncommittedEvents = new List<UncommittedEvent>();
         foreach (var eventType in _eventTypes)
         {
-            foreach (var _ in Enumerable.Range(0, EventsPerType))
+            foreach (var _ in Enumerable.Range(0, Events))
             {
                 uncommittedEvents.Add(new UncommittedEvent("some event source", new Artifact(eventType, ArtifactGeneration.First), false, "{\"hello\": 42}"));
             }
         }
-        _eventStore.Commit(new UncommittedEvents(uncommittedEvents), _executionContext).GetAwaiter().GetResult();
+        foreach (var tenant in ConfiguredTenants)
+        {
+            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
+        }
     }
         
     [IterationSetup]
@@ -75,44 +76,61 @@ public class EventHandler : JobBase
             .Setup(_ => _.Call(It.IsAny<HandleEventRequest>(), It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>()))
             .Returns<HandleEventRequest, ExecutionContext, CancellationToken>((request, _, __) =>
             {
+                Interlocked.Add(ref numEventsProcessed, 1);
                 var response = new EventHandlerResponse();
-                if (++numEventsProcessed == NumberEventsToProcess)
+                if (numEventsProcessed == NumberEventsToProcess)
                 {
                     tcs.SetResult();
                 }
                 return Task.FromResult(response);
             });
-        _eventHandler = _eventHandlerFactory.Create(
-            new EventHandlerRegistrationArguments(_executionContext, Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
+
+        var eventHandlers = new List<IEventHandler>();
+        eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.Create(
+            new EventHandlerRegistrationArguments(CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
             _dispatcher.Object,
-            CancellationToken.None);
+            CancellationToken.None)));
+        _eventHandlersToRun = eventHandlers;
     }
     
     [IterationCleanup]
     public void IterationCleanup()
     {
-        _eventHandler.Dispose();
+        foreach (var eventHandler in _eventHandlersToRun)
+        {
+            eventHandler.Dispose();
+        }
     }
     
+    /// <inheritdoc />
+    [Params(1, 2, 5, 10)]
+    public override int NumTenants { get; set; }
+    
+    /// <summary>
+    /// Gets the number of simultaneously running event handlers.
+    /// </summary>
+    [Params(1, 2, 5, 10)]
+    public int EventHandlers { get; set; }
+
     /// <summary>
     /// Gets the value indicating whether performing benchmark on a partitioned event handler or not.
     /// </summary>
-    [Params(false, true)]
-    public bool Partitioned { get; set; }
+    // [Params(false, true)] TODO: We can maybe enable this in the future, but as of now it seems that the performance is the same.
+    public bool Partitioned { get; set; } = true;
+
+    /// <summary>
+    /// Gets the number of event types.
+    /// </summary>
+    // [Params(1, 10)] TODO: We can maybe enable this in the future, but as of now it seems that the performance depends on the amount of events processed.
+    public int EventTypes { get; set; } = 1;
     
     /// <summary>
     /// Gets the number of events committed per configured event type.
     /// </summary>
-    [Params(1, 10)]
-    public int EventsPerType { get; set; }
+    [Params(1, 10, 100)]
+    public int Events { get; set; }
     
-    /// <summary>
-    /// Gets the number of event types.
-    /// </summary>
-    [Params(1, 10)]
-    public int EventTypes { get; set; }
-
-    int NumberEventsToProcess => EventsPerType * EventTypes;
+    int NumberEventsToProcess => Events * EventTypes * NumTenants * EventHandlers;
 
     /// <summary>
     /// Commits the events one-by-one in a loop.
@@ -120,10 +138,10 @@ public class EventHandler : JobBase
     [Benchmark]
     public Task RegisteringAndProcessing()
     {
-        return _eventHandlers.RegisterAndStart(
-            _eventHandler,
+        return Task.WhenAll(_eventHandlersToRun.Select(eventHandler => _eventHandlers.RegisterAndStart(
+            eventHandler,
             (_, _) => _dispatcher.Object.Reject(new EventHandlerRegistrationResponse(), CancellationToken.None),
-            CancellationToken.None);
+            CancellationToken.None)));
     }
     
     /// <inheritdoc />
