@@ -12,6 +12,7 @@ using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -62,11 +63,11 @@ public abstract class JobBase
                 .AddLogging(_ => _
                     .ClearProviders()))
             .AddActorSystem()
-            // .AddMetrics()
+            .AddMetrics()
             .AddGrpcHost(EndpointVisibility.Private)
             .AddGrpcHost(EndpointVisibility.Public)
             .AddGrpcHost(EndpointVisibility.Management)
-            // .AddMetricsHost()
+            .AddMetricsHost()
             // .AddWebHost()
             .Build();
         
