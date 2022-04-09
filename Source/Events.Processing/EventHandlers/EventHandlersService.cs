@@ -28,7 +28,6 @@ public class EventHandlersService : EventHandlersBase
     readonly IEventHandlersProtocol _eventHandlersProtocol;
     readonly IEventHandlers _eventHandlers;
     readonly IEventHandlerFactory _eventHandlerFactory;
-    readonly ILoggerFactory _loggerFactory;
     readonly ILogger _logger;
     readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -53,7 +52,6 @@ public class EventHandlersService : EventHandlersBase
         _eventHandlersProtocol = eventHandlersProtocol;
         _eventHandlers = eventHandlers;
         _eventHandlerFactory = eventHandlerFactory;
-        _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<EventHandlersService>();
         _hostApplicationLifetime = hostApplicationLifetime;
     }

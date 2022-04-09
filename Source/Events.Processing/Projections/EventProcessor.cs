@@ -77,7 +77,7 @@ public class EventProcessor : IEventProcessor
 
         var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, executionContext, cancellationToken).ConfigureAwait(false);
 
-        return await HandleResult(tryGetCurrentState.Result.Key, result, cancellationToken).ConfigureAwait(false);
+        return await HandleResult(tryGetCurrentState.Result.Key, result).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -98,7 +98,7 @@ public class EventProcessor : IEventProcessor
 
         var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, failureReason, retryCount, executionContext, cancellationToken).ConfigureAwait(false);
 
-        return await HandleResult(tryGetCurrentState.Result.Key, result, cancellationToken).ConfigureAwait(false);
+        return await HandleResult(tryGetCurrentState.Result.Key, result).ConfigureAwait(false);
     }
 
     bool ShouldProcessEvent(CommittedEvent @event)
@@ -114,15 +114,15 @@ public class EventProcessor : IEventProcessor
         return await _projectionStore.TryGet(_projectionDefinition.Projection, Scope, projectionKey, token).ConfigureAwait(false);
     }
 
-    async Task<IProcessingResult> HandleResult(ProjectionKey key, IProjectionResult result, CancellationToken token)
+    async Task<IProcessingResult> HandleResult(ProjectionKey key, IProjectionResult result)
         => result switch
         {
-            ProjectionReplaceResult replace => await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, token).ConfigureAwait(false) switch
+            ProjectionReplaceResult replace => await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, CancellationToken.None).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to replace state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
             },
-            ProjectionDeleteResult => await _projectionPersister.TryRemove(_projectionDefinition, key, token).ConfigureAwait(false) switch
+            ProjectionDeleteResult => await _projectionPersister.TryRemove(_projectionDefinition, key, CancellationToken.None).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to remove state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
