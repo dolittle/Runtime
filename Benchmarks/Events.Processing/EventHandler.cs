@@ -103,13 +103,13 @@ public class EventHandler : JobBase
     }
     
     /// <inheritdoc />
-    [Params(1, 2, 5, 10)]
+    [Params(1, 2, 3)] // TODO: Adding 10 here results in really slow benchmarks. Let's adding 100 when we've made this blazingly fast :) 
     public override int NumTenants { get; set; }
     
     /// <summary>
     /// Gets the number of simultaneously running event handlers.
     /// </summary>
-    [Params(1, 2, 5, 10)]
+    [Params(1, 2, 3)] // TODO: Adding 10 here results in really slow benchmarks. Let's adding 100 when we've made this blazingly fast :) 
     public int EventHandlers { get; set; }
 
     /// <summary>
