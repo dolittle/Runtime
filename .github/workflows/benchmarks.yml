@@ -16,6 +16,7 @@ jobs:
           - 'Events.Store.CommitEvents'
           - 'Events.Store.FetchAggregateEvents'
           - 'Events.Processing.EventHandler'
+          - 'Events.Processing.EventHandlerFilter'
     env:
       BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
 
