@@ -13,5 +13,6 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
         <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
+        <PackageReference Include="Moq" Version="$(MoqVersion)" />
     </ItemGroup>
 </Project>

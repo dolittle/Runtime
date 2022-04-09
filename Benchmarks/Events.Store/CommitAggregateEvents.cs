@@ -75,10 +75,7 @@ public class CommitAggregateEvents : JobBase
                 AggregateRootVersion.Initial,
                 events);
             
-            Commit(
-                _eventStore,
-                preExistingEvents,
-                _executionContext).GetAwaiter().GetResult();
+            _eventStore.Commit(preExistingEvents, _executionContext).GetAwaiter().GetResult();
         }
     }
     
@@ -102,8 +99,7 @@ public class CommitAggregateEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            await Commit(
-                _eventStore,
+            await _eventStore.Commit(
                 new UncommittedAggregateEvents(
                     _eventsToCommit.EventSource,
                     _eventsToCommit.AggregateRoot,
@@ -112,7 +108,7 @@ public class CommitAggregateEvents : JobBase
                     {
                         _eventsToCommit[n]
                     })),
-                _executionContext);
+                _executionContext).ConfigureAwait(false);
         }
     }
     /// <summary>
@@ -123,9 +119,8 @@ public class CommitAggregateEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            await FetchForAggregate(_eventStore, _eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
-            await Commit(
-                _eventStore,
+            await _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+            await _eventStore.Commit(
                 new UncommittedAggregateEvents(
                     _eventsToCommit.EventSource,
                     _eventsToCommit.AggregateRoot,
@@ -142,12 +137,9 @@ public class CommitAggregateEvents : JobBase
     /// Commits the events in a single batch.
     /// </summary>
     [Benchmark]
-    public async Task CommitEventsInBatch()
+    public Task CommitEventsInBatch()
     {
-        await Commit(
-            _eventStore,
-            _eventsToCommit,
-            _executionContext);
+        return _eventStore.Commit(_eventsToCommit, _executionContext);
     }
     /// <summary>
     /// Commits the events in a single batch.
@@ -155,11 +147,8 @@ public class CommitAggregateEvents : JobBase
     [Benchmark]
     public async Task FetchCommitEventsInBatch()
     {
-        await FetchForAggregate(_eventStore, _eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
-        await Commit(
-            _eventStore,
-            _eventsToCommit,
-            _executionContext);
+        await _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+        await _eventStore.Commit(_eventsToCommit, _executionContext).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

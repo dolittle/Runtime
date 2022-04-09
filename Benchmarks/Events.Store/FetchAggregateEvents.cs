@@ -40,8 +40,7 @@ public class FetchAggregateEvents : JobBase
 
         for (var n = 0; n < CommittedEvents; n++)
         {
-            Commit(
-                _eventStore,
+            _eventStore.Commit(
                 new UncommittedAggregateEvents(
                     _eventSource,
                     new Artifact(_aggregateRoot, ArtifactGeneration.First),
@@ -63,8 +62,7 @@ public class FetchAggregateEvents : JobBase
 
             for (var m = 0; m < UnrelatedEventsRatio; m++)
             {
-                Commit(
-                    _eventStore,
+                _eventStore.Commit(
                     new UncommittedEvents(new[]
                     {
                         new UncommittedEvent(
@@ -94,13 +92,9 @@ public class FetchAggregateEvents : JobBase
     /// Fetches the events for the aggregate root.
     /// </summary>
     [Benchmark]
-    public async Task FetchEvents()
+    public Task FetchEvents()
     {
-        await FetchForAggregate(
-            _eventStore,
-            _aggregateRoot,
-            _eventSource,
-            _executionContext);
+        return _eventStore.FetchForAggregate(_aggregateRoot, _eventSource, _executionContext);
     }
 
     /// <inheritdoc />

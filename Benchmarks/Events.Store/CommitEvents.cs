@@ -57,10 +57,7 @@ public class CommitEvents : JobBase
                 "{ \"hello\": \"world\" }"));
         }
         
-        Commit(
-            _eventStore,
-            new UncommittedEvents(preExistingEvents),
-            _executionContext).GetAwaiter().GetResult();
+        _eventStore.Commit(new UncommittedEvents(preExistingEvents), _executionContext).GetAwaiter().GetResult();
     }
     
     /// <summary>
@@ -83,7 +80,7 @@ public class CommitEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            await Commit(_eventStore, new UncommittedEvents(new[]
+            await _eventStore.Commit( new UncommittedEvents(new[]
             {
                 _eventsToCommit[n]
             }), _executionContext).ConfigureAwait(false);
@@ -94,9 +91,9 @@ public class CommitEvents : JobBase
     /// Commits the events in a single batch.
     /// </summary>
     [Benchmark]
-    public async Task CommitEventsInBatch()
+    public Task CommitEventsInBatch()
     {
-        await Commit(_eventStore, _eventsToCommit, _executionContext).ConfigureAwait(false);
+        return _eventStore.Commit(_eventsToCommit, _executionContext);
     }
     
     /// <summary>
@@ -110,7 +107,7 @@ public class CommitEvents : JobBase
         var tasks = new List<Task>();
         foreach (var i in Enumerable.Range(0, ParallelCommits))
         {
-            tasks.Add(Commit(_eventStore, _eventsToCommit, _executionContext));   
+            tasks.Add(_eventStore.Commit(_eventsToCommit, _executionContext));   
         }
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }

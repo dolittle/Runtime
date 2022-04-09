@@ -6,24 +6,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Actors.Hosting;
-using Dolittle.Runtime.Aggregates;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Embeddings.Processing;
-using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Metrics.Hosting;
-using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
-using Dolittle.Services.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,8 +22,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using Environment = Dolittle.Runtime.Domain.Platform.Environment;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
-using UncommittedEvent = Dolittle.Runtime.Events.Contracts.UncommittedEvent;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Benchmarks;
@@ -103,11 +91,10 @@ public abstract class JobBase
     protected IEnumerable<TenantId> ConfiguredTenants { get; private set; }
 
     /// <summary>
-    /// Method to override to define the <see cref="TenantId">tenants</see> to run configure for the running benchmark.
+    /// Gets the number of tenants to setup.
     /// </summary>
     /// <returns>The <see cref="IEnumerable{T}"/> of <see cref="TenantId"/> to configure.</returns>
-    protected virtual IEnumerable<TenantId> GetTenantsToSetup()
-        => new[] {new TenantId(Guid.NewGuid())};
+    public virtual int NumTenants { get; set; } = 1;
 
     /// <summary>
     /// Creates a new <see cref="Dolittle.Runtime.Execution.ExecutionContext"/> for the specified tenant to be used in the benchmark.
@@ -116,48 +103,6 @@ public abstract class JobBase
     /// <returns>The newly created <see cref="Dolittle.Runtime.Execution.ExecutionContext"/>.</returns>
     protected static ExecutionContext CreateExecutionContextFor(TenantId tenant)
         => new(_microserviceId, tenant, Version.NotSet, _environment, CorrelationId.New(), Claims.Empty, CultureInfo.InvariantCulture);
-    
-    
-    protected static async Task Commit(IEventStore eventStore, UncommittedEvents events, ExecutionContext executionContext)
-    {
-        var request = new CommitEventsRequest{CallContext = new CallRequestContext{ExecutionContext = executionContext.ToProtobuf()}};
-        request.Events.AddRange(events.Select(_ => new UncommittedEvent
-        {
-            Content = _.Content,
-            Public = _.Public,
-            EventType = _.Type.ToProtobuf(),
-            EventSourceId = _.EventSource
-        }));
-        var response = await eventStore.CommitEvents(request, CancellationToken.None);
-        if (response.Failure != default)
-        {
-            throw new Exception(response.Failure.Reason);
-        }
-    }
-    protected static async Task Commit(IEventStore eventStore, UncommittedAggregateEvents events, ExecutionContext executionContext)
-    {
-        var response = await eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
-        if (response.Failure != default)
-        {
-            throw new Exception(response.Failure.Reason);
-        }
-    }
-    protected static async Task FetchForAggregate(IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, ExecutionContext executionContext)
-    {
-        
-        var response = await eventStore.FetchAggregateEvents(new FetchForAggregateRequest
-        {
-            CallContext = new CallRequestContext
-            {
-                ExecutionContext = executionContext.ToProtobuf()
-            },
-            Aggregate = new Aggregate{AggregateRootId = aggregateRootId.ToProtobuf(), EventSourceId = eventSourceId}
-        }, CancellationToken.None);
-        if (response.Failure != default)
-        {
-            throw new Exception(response.Failure.Reason);
-        }
-    }
 
     /// <summary>
     /// The method that sets up the environment for each benchmark to run.
@@ -176,7 +121,7 @@ public abstract class JobBase
         configuration["dolittle:runtime:platform:microserviceID"] = _microserviceId.ToString();
         configuration["dolittle:runtime:platform:environment"] = _environment.ToString();
         
-        ConfiguredTenants = GetTenantsToSetup();
+        ConfiguredTenants = Enumerable.Range(0, NumTenants).Select(_ => new TenantId(Guid.NewGuid())).ToArray();
         foreach (var tenant in ConfiguredTenants)
         {
             var eventStoreName = Guid.NewGuid().ToString();
