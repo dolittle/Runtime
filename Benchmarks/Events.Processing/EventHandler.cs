@@ -127,7 +127,7 @@ public class EventHandler : JobBase
     /// <summary>
     /// Gets the number of events committed per configured event type.
     /// </summary>
-    [Params(1, 10, 100)]
+    [Params(1, 10)] // TODO: Adding 100 here results in really slow benchmarks. Let's adding 100 when we've made this blazingly fast :) 
     public int Events { get; set; }
     
     int NumberEventsToProcess => Events * EventTypes * NumTenants * EventHandlers;
