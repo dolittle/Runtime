@@ -23,7 +23,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 
-namespace Benchmarks.Events.Processing;
+namespace Benchmarks.Events.Processing.EventHandlers;
 
 
 /// <summary>

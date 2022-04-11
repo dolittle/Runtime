@@ -22,13 +22,13 @@ using Moq;
 using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 using StreamProcessor = Dolittle.Runtime.Events.Processing.Streams.StreamProcessor;
 
-namespace Benchmarks.Events.Processing;
+namespace Benchmarks.Events.Processing.EventHandlers;
 
 
 /// <summary>
 /// Benchmarks for Event Handler filters. How long it takes to write events to streams.
 /// </summary>
-public class EventHandlerFilter : JobBase
+public class Filter : JobBase
 {
     IEventStore _eventStore;
     IStreamProcessors _streamProcessors;

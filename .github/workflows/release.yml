@@ -60,9 +60,10 @@ jobs:
           - 'Events.Store.CommitAggregateEvents'
           - 'Events.Store.CommitEvents'
           - 'Events.Store.FetchAggregateEvents'
-          - 'Events.Processing.EventHandler'
-          - 'Events.Processing.EventHandlerFilter'
-          - 'Events.Processing.Projection'
+          - 'Events.Store.Streams.StreamProcessorStateRepository'
+          - 'Events.Processing.EventHandlers.EventHandler'
+          - 'Events.Processing.EventHandlers.Filter'
+          - 'Events.Processing.Projections.Projection'
     env: 
       BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
     steps:
