@@ -29,7 +29,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.ProjectionRequest,
     Dolittle.Runtime.Events.Processing.Contracts.ProjectionResponse>;
 
-namespace Benchmarks.Events.Processing;
+namespace Benchmarks.Events.Processing.Projections;
 
 /// <summary>
 /// Benchmarks for Projections.
