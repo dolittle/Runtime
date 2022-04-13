@@ -14,7 +14,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.DependencyInjection;
 using PartitionedStreamProcessorState = Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState;
 
-namespace Benchmarks.Events.Store.Streams;
+namespace Integration.Benchmarks.Events.Store.Streams;
 
 /// <summary>
 /// Benchmarks for committing aggregate events to the Event Store.

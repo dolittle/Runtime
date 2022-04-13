@@ -3,16 +3,15 @@
 
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Services;
+using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Benchmarks.Events.Store;
+namespace Integration.Benchmarks.Events.Store;
 
 /// <summary>
 /// Benchmarks for fetching aggregate events from the Event Store.
@@ -20,7 +19,7 @@ namespace Benchmarks.Events.Store;
 public class FetchAggregateEvents : JobBase
 {
     IEventStore _eventStore;
-    ExecutionContext _executionContext;
+    Dolittle.Runtime.Execution.ExecutionContext _executionContext;
     ArtifactId _aggregateRoot;
     EventSourceId _eventSource;
     
@@ -28,7 +27,7 @@ public class FetchAggregateEvents : JobBase
     protected override void Setup(IServiceProvider services)
     {
         _eventStore = services.GetRequiredService<IEventStore>();
-        _executionContext = CreateExecutionContextFor(ConfiguredTenants.First());
+        _executionContext = Runtime.CreateExecutionContextFor(ConfiguredTenants.First());
 
         _aggregateRoot = new ArtifactId(Guid.NewGuid());
         _eventSource = new EventSourceId("fe7d58f0-2f4c-4736-8f9e-68dd7dfaec82");

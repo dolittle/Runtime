@@ -1,0 +1,23 @@
+name: Integration Tests
+
+on:
+  push:
+    paths:
+      - 'Source/**'
+      - 'Integration/Tests/**'
+      - 'Integration/Shared*/**'
+
+jobs:
+  ci:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+      - name: Run Mongo container
+        run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
+      - name: Test
+        run: dotnet test --filter Tag=IntegrationTest --configuration Release

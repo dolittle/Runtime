@@ -11,22 +11,21 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
-using UncommittedEvent = Dolittle.Runtime.Events.Contracts.UncommittedEvent;
+using UncommittedEventContract = Dolittle.Runtime.Events.Contracts.UncommittedEvent;
 
-namespace Benchmarks.Events.Store;
+namespace Integration;
 
 public static class EventStoreExtensions
 {
-    public static async Task Commit(this IEventStore eventStore, UncommittedEvents events, ExecutionContext executionContext)
+    public static async Task<CommitEventsResponse> Commit(this IEventStore eventStore, UncommittedEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
     {
         var request = new CommitEventsRequest{CallContext = new CallRequestContext{ExecutionContext = executionContext.ToProtobuf()}};
-        request.Events.AddRange(events.Select(_ => new UncommittedEvent
+        request.Events.AddRange(events.Select(_ => new UncommittedEventContract
         {
             Content = _.Content,
             Public = _.Public,
-            EventType = ArtifactsExtensions.ToProtobuf(_.Type),
+            EventType = _.Type.ToProtobuf(),
             EventSourceId = _.EventSource
         }));
         var response = await eventStore.CommitEvents(request, CancellationToken.None);
@@ -34,18 +33,22 @@ public static class EventStoreExtensions
         {
             throw new Exception(response.Failure.Reason);
         }
+
+        return response;
     }
-    public static async Task Commit(this IEventStore eventStore, UncommittedAggregateEvents events, ExecutionContext executionContext)
+    public static async Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
     {
         var response = await eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
         if (response.Failure != default)
         {
             throw new Exception(response.Failure.Reason);
         }
+
+        return response;
+
     }
-    public static async Task FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, ExecutionContext executionContext)
+    public static async Task<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, Dolittle.Runtime.Execution.ExecutionContext executionContext)
     {
-        
         var response = await eventStore.FetchAggregateEvents(new FetchForAggregateRequest
         {
             CallContext = new CallRequestContext
@@ -58,5 +61,7 @@ public static class EventStoreExtensions
         {
             throw new Exception(response.Failure.Reason);
         }
+        
+        return response;
     }
 }
