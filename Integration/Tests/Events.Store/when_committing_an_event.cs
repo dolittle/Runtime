@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
-using MongoDB.Driver;
-using Event = Dolittle.Runtime.Events.Store.MongoDB.Events.Event;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 
@@ -22,8 +19,8 @@ class when_committing_an_event : given.a_clean_event_store
     
     Establish context = () =>
     {
-        event_source = "some event source";
-        event_to_commit = new UncommittedEvent(event_source, Artifact.New(), false, "{\"hello\": 42}");
+        event_to_commit = given.event_to_commit.create();
+        event_source = event_to_commit.EventSource;
         uncommitted_events_list = new List<UncommittedEvent>
         {
             event_to_commit
@@ -33,62 +30,47 @@ class when_committing_an_event : given.a_clean_event_store
     [Tags("IntegrationTest")]
     class once
     {
+        static UncommittedEvents uncommitted_events;
         static CommitEventsResponse response;
 
-        Because of = () => response = event_store.Commit(new UncommittedEvents(uncommitted_events_list), execution_context).GetAwaiter().GetResult();
+        Establish context = () => uncommitted_events = new UncommittedEvents(uncommitted_events_list);
+        
+        Because of = () => response = event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
 
         It should_not_fail = () => response.Failure.ShouldBeNull();
 
-        It should_return_the_correct_committed_event = () =>
-        {
-            var committedEvents = response.Events.ToCommittedEvents();
+        It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial);
 
-            committedEvents.Count.ShouldEqual(1);
-            var committedEvent = committedEvents.First();
-            committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            committedEvent.EventLogSequenceNumber.ShouldEqual(new EventLogSequenceNumber(0));
-            committedEvent.Content.ShouldEqual(event_to_commit.Content);
-            committedEvent.Public.ShouldEqual(event_to_commit.Public);
-            committedEvent.Type.ShouldEqual(event_to_commit.Type);
-            committedEvent.EventSource.ShouldEqual(event_to_commit.EventSource);
-        };
+        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(1);
 
-        It should_have_stored_one_event_in_the_event_log = () => streams.DefaultEventLog.CountDocuments(Builders<Event>.Filter.Empty).ShouldEqual(1);
+        It should_have_stored_the_correct_events = () => response.Events.ToCommittedEvents().should_have_stored_committed_events(streams, event_content_converter);
     }
     
     [Tags("IntegrationTest")]
     class for_an_aggregate
     {
+        static UncommittedAggregateEvents uncommitted_events; 
         static CommitAggregateEventsResponse response;
         static Artifact aggregate_root;
 
         Establish context = () =>
         {
             aggregate_root = new Artifact("8640c18a-8d3c-48bb-959f-bb894907b9aa", ArtifactGeneration.First);
+            uncommitted_events = new UncommittedAggregateEvents(
+                event_source,
+                aggregate_root,
+                AggregateRootVersion.Initial,
+                uncommitted_events_list);
         };
 
-        Because of = () => response = event_store.Commit(new UncommittedAggregateEvents(
-            event_source,
-            aggregate_root,
-            0,
-            uncommitted_events_list),execution_context).GetAwaiter().GetResult();
+        Because of = () => response = event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
 
         It should_not_fail = () => response.Failure.ShouldBeNull();
 
-        It should_return_the_correct_committed_event = () =>
-        {
-            var committedEvents = response.Events.ToCommittedEvents();
+        It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
 
-            committedEvents.Count.ShouldEqual(1);
-            var committedEvent = committedEvents.First();
-            committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            committedEvent.EventLogSequenceNumber.ShouldEqual(new EventLogSequenceNumber(0));
-            committedEvent.Content.ShouldEqual(event_to_commit.Content);
-            committedEvent.Public.ShouldEqual(event_to_commit.Public);
-            committedEvent.Type.ShouldEqual(event_to_commit.Type);
-            committedEvent.EventSource.ShouldEqual(event_to_commit.EventSource);
-        };
-
-        It should_have_stored_one_event_in_the_event_log = () => streams.DefaultEventLog.CountDocuments(Builders<Event>.Filter.Empty).ShouldEqual(1);
+        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(1);
+        
+        It should_have_stored_the_correct_events = () => response.Events.ToCommittedEvents().should_have_stored_committed_events(streams, event_content_converter);
     }
 }
