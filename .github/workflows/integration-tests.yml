@@ -6,6 +6,7 @@ on:
       - 'Source/**'
       - 'Integration/Tests/**'
       - 'Integration/Shared*/**'
+      - '.github/workflows/integration-tests.yml'
 
 jobs:
   ci:
