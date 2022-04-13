@@ -25,6 +25,29 @@ namespace Integration.Tests.Events.Store;
 static class should_extensions
 {
 
+    public static void should_be_the_correct_responses(this CommitEventsResponse[] responses, UncommittedEvents[] uncommitted_events, ExecutionContext execution_context)
+    {
+        var startEventLogSequenceNumber = EventLogSequenceNumber.Initial;
+        for (var i = 0; i < responses.Length; i++)
+        {
+            var response = responses[i];
+            var events = uncommitted_events[i];
+            response.should_be_the_correct_response(events, execution_context, startEventLogSequenceNumber);
+            startEventLogSequenceNumber += (ulong)events.Count;
+        }
+    }
+    public static void should_be_the_correct_responses(this CommitAggregateEventsResponse[] responses, UncommittedAggregateEvents[] uncommitted_events, ExecutionContext execution_context)
+    {
+        var startEventLogSequenceNumber = EventLogSequenceNumber.Initial;
+        for (var i = 0; i < responses.Length; i++)
+        {
+            var response = responses[i];
+            var events = uncommitted_events[i];
+            response.should_be_the_correct_response(events, execution_context, startEventLogSequenceNumber);
+            startEventLogSequenceNumber += (ulong)events.Count;
+        }
+    }
+    
     public static void should_be_the_correct_response(this CommitEventsResponse response, UncommittedEvents uncommitted_events, ExecutionContext execution_context, EventLogSequenceNumber start_sequence_number = null)
     {
         var committedEvents = response.Events.ToCommittedEvents();
@@ -38,7 +61,7 @@ static class should_extensions
         for (var i = 0; i < committedEvents.Count; i++)
         {
             var committedEvent = committedEvents[i];
-            var uncommittedEvent = uncommitted_events[0];
+            var uncommittedEvent = uncommitted_events[i];
 
             if (start_sequence_number != null)
             {
@@ -73,7 +96,7 @@ static class should_extensions
         for (var i = 0; i < committedEvents.Count; i++)
         {
             var committedEvent = committedEvents[i];
-            var uncommittedEvent = uncommitted_events[0];
+            var uncommittedEvent = uncommitted_events[i];
 
             if (start_sequence_number != null)
             {
@@ -115,15 +138,16 @@ static class should_extensions
     public static void should_have_stored_committed_events<TEvent>(
         this IEnumerable<CommittedEventSequence<TEvent>> batches,
         IStreams streams,
-        IEventContentConverter event_content_converter,
-        Func<CommittedEventSequence<TEvent>, FilterDefinition<Event>> get_batch_filter)
+        IEventContentConverter event_content_converter)
         where TEvent : Dolittle.Runtime.Events.Store.CommittedEvent
     {
         var eventLog = streams.DefaultEventLog;
 
         foreach (var batch in batches)
         {
-            var storedEvents = eventLog.FindSync(get_batch_filter(batch)).ToList();
+            var storedEvents = eventLog.FindSync(
+                Builders<Event>.Filter.Gte(_ => _.EventLogSequenceNumber, batch.First().EventLogSequenceNumber.Value)
+                & Builders<Event>.Filter.Lte(_ => _.EventLogSequenceNumber, batch.Last().EventLogSequenceNumber.Value)).ToList();
             switch (batch)
             {
                 case CommittedEvents committedEvents:
@@ -174,7 +198,6 @@ static class should_extensions
         {
             should_be_the_same_base_committed_event(event_content_converter, events[i], stored_events[i]);
         }
-        
     }
 
     static void should_have_same_execution_context(ExecutionContext execution_context, Dolittle.Runtime.Events.Store.MongoDB.Events.ExecutionContext stored_execution_context)
