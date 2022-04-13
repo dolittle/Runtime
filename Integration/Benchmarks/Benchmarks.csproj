@@ -2,7 +2,7 @@
     <Import Project="../../default.props" />
 
     <PropertyGroup>
-        <AssemblyName>Integration.Benchmarks</AssemblyName>
+        <AssemblyName>Benchmarks</AssemblyName>
         <RootNamespace>Integration.Benchmarks</RootNamespace>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
