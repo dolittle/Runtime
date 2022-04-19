@@ -65,10 +65,8 @@ jobs:
           - 'Events.Processing.EventHandlers.Filter'
           - 'Events.Processing.Projections.Projection'
     env: 
-      BENCHMARK_NAME: Benchmarks.${{ matrix.benchmark }}
+      BENCHMARK_NAME: Integration.Benchmarks.${{ matrix.benchmark }}
     steps:
-      - name: Echo benchmark
-        run: echo "Running ${{ env.BENCHMARK_NAME }}"
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
@@ -76,7 +74,7 @@ jobs:
       - name: Run Mongo container
         run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
-        working-directory: ./Benchmarks
+        working-directory: ./Integration/Benchmarks
         run: dotnet run --configuration Release -- -m -f '*${{ env.BENCHMARK_NAME }}*'
       - name: Upload benchmark markdown results
         uses: actions/upload-release-asset@v1
@@ -84,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report-github.md
+          asset_path: ./Integration/Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report-github.md
           asset_name: ${{ env.BENCHMARK_NAME }}.md
           asset_content_type: text/markdown
       - name: Upload benchmark html results
@@ -93,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.html
+          asset_path: ./Integration/Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.html
           asset_name: ${{ env.BENCHMARK_NAME }}.html
           asset_content_type: text/html
   

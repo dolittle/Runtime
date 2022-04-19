@@ -7,11 +7,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using Benchmarks.Events.Store;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
+using Integration.Benchmarks.Events.Store;
+using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -23,7 +24,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 
-namespace Benchmarks.Events.Processing.EventHandlers;
+namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 
 
 /// <summary>
@@ -56,7 +57,7 @@ public class EventHandler : JobBase
         }
         foreach (var tenant in ConfiguredTenants)
         {
-            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
+            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), Runtime.CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
         }
     }
         
@@ -73,8 +74,8 @@ public class EventHandler : JobBase
             .Setup(_ => _.Accept(It.IsAny<EventHandlerRegistrationResponse>(), It.IsAny<CancellationToken>()))
             .Returns(tcs.Task);
         _dispatcher
-            .Setup(_ => _.Call(It.IsAny<HandleEventRequest>(), It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>()))
-            .Returns<HandleEventRequest, ExecutionContext, CancellationToken>((request, _, __) =>
+            .Setup(_ => _.Call(It.IsAny<HandleEventRequest>(), It.IsAny<Dolittle.Runtime.Execution.ExecutionContext>(), It.IsAny<CancellationToken>()))
+            .Returns<HandleEventRequest, Dolittle.Runtime.Execution.ExecutionContext, CancellationToken>((request, _, __) =>
             {
                 Interlocked.Add(ref numEventsProcessed, 1);
                 var response = new EventHandlerResponse();
@@ -87,7 +88,7 @@ public class EventHandler : JobBase
 
         var eventHandlers = new List<IEventHandler>();
         eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.Create(
-            new EventHandlerRegistrationArguments(CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
+            new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
             _dispatcher.Object,
             CancellationToken.None)));
         _eventHandlersToRun = eventHandlers;

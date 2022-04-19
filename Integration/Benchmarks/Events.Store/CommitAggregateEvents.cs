@@ -4,16 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Services;
+using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Benchmarks.Events.Store;
+namespace Integration.Benchmarks.Events.Store;
 
 /// <summary>
 /// Benchmarks for committing aggregate events to the Event Store.
@@ -28,7 +27,7 @@ public class CommitAggregateEvents : JobBase
     protected override void Setup(IServiceProvider services)
     {
         _eventStore = services.GetRequiredService<IEventStore>();
-        _executionContext = CreateExecutionContextFor(ConfiguredTenants.First());
+        _executionContext = Runtime.CreateExecutionContextFor(ConfiguredTenants.First());
 
         var events = new List<UncommittedEvent>();
         for (var n = 0; n < EventsToCommit; n++)

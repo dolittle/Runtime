@@ -9,7 +9,7 @@
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
         <GrpcVersion>2.43.0</GrpcVersion>
-        <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>
+        <MachineSpecificationsRunnerVersion>2.10.2</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
         <McMasterVersion>3.1.0</McMasterVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>

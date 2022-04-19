@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using Benchmarks.Events.Store;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing;
@@ -16,13 +15,15 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Integration.Benchmarks.Events.Store;
+using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 using StreamProcessor = Dolittle.Runtime.Events.Processing.Streams.StreamProcessor;
 
-namespace Benchmarks.Events.Processing.EventHandlers;
+namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 
 
 /// <summary>
@@ -57,7 +58,7 @@ public class Filter : JobBase
         }
         foreach (var tenant in ConfiguredTenants)
         {
-            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
+            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), Runtime.CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
         }
     }
         
@@ -78,7 +79,7 @@ public class Filter : JobBase
                     new TypeFilterWithEventSourcePartitionDefinition(StreamId.EventLog, eventHandlerId.Value, _eventTypes, Partitioned),
                     GetEventWriterForTenant(tenant),
                     _loggerFactor.CreateLogger<TypeFilterWithEventSourcePartition>()),
-                CreateExecutionContextFor("e3921d20-da26-422e-bf13-e959a5f505ef"),
+                Runtime.CreateExecutionContextFor("e3921d20-da26-422e-bf13-e959a5f505ef"),
                 _stopStreamProcessorSource.Token).Result;
         }).ToArray();
 

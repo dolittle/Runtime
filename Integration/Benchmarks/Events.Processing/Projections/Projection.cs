@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using Benchmarks.Events.Store;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
@@ -17,6 +16,8 @@ using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using Integration.Benchmarks.Events.Store;
+using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -29,7 +30,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.ProjectionRequest,
     Dolittle.Runtime.Events.Processing.Contracts.ProjectionResponse>;
 
-namespace Benchmarks.Events.Processing.Projections;
+namespace Integration.Benchmarks.Events.Processing.Projections;
 
 /// <summary>
 /// Benchmarks for Projections.
@@ -59,7 +60,7 @@ public class Projection : JobBase
         }
         foreach (var tenant in ConfiguredTenants)
         {
-            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
+            _eventStore.Commit(new UncommittedEvents(uncommittedEvents), Runtime.CreateExecutionContextFor(tenant)).GetAwaiter().GetResult();
         }
     }
         
@@ -77,8 +78,8 @@ public class Projection : JobBase
             .Setup(_ => _.Accept(It.IsAny<ProjectionRegistrationResponse>(), It.IsAny<CancellationToken>()))
             .Returns(tcs.Task);
         _dispatcher
-            .Setup(_ => _.Call(It.IsAny<ProjectionRequest>(), It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>()))
-            .Returns<ProjectionRequest, ExecutionContext, CancellationToken>((request, _, __) =>
+            .Setup(_ => _.Call(It.IsAny<ProjectionRequest>(), It.IsAny<Dolittle.Runtime.Execution.ExecutionContext>(), It.IsAny<CancellationToken>()))
+            .Returns<ProjectionRequest, Dolittle.Runtime.Execution.ExecutionContext, CancellationToken>((request, _, __) =>
             {
                 Interlocked.Add(ref numEventsProcessed, 1);
                 var response = new ProjectionResponse{Replace = new ProjectionReplaceResponse{State = request.CurrentState.State}};
@@ -139,7 +140,7 @@ public class Projection : JobBase
     {
         var x = await Task.WhenAll(_projectionsToRun.Select(projection => _projections.Register(
             projection,
-            CreateExecutionContextFor("a2775100-bad1-4260-a97f-13ef9caf9720"),
+            Runtime.CreateExecutionContextFor("a2775100-bad1-4260-a97f-13ef9caf9720"),
             _cancellationTokenSource.Token))).ConfigureAwait(false);
 
         var dispatcherTask = _dispatcher.Object.Accept(new ProjectionRegistrationResponse(), CancellationToken.None);
