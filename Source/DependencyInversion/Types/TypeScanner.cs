@@ -43,7 +43,7 @@ public static class TypeScanner
             GroupClassesByLifecycle(classesByScope[Scopes.Global]),
             GroupClassesByLifecycle(classesByScope[Scopes.PerTenant]));
     }
-
+    
     static ClassesByLifecycle GroupClassesByLifecycle(IEnumerable<Type> classes)
     {
         var classesByLifecycle = classes.ToLookup(_ => _.GetLifecycle());

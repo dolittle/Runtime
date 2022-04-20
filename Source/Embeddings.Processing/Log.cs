@@ -7,10 +7,12 @@ using System.Linq;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Microsoft.Extensions.Logging;
+using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
@@ -182,8 +184,8 @@ static partial class Log
             new EventId(319, nameof(CommittingTransitionEvents)),
             "Embedding processor with id {Embedding} is committing {NumberOfEvents} transition events for state with key {Key}");
 
-    internal static void CommittingTransitionEvents(this ILogger logger, EmbeddingId embedding, ProjectionKey key, UncommittedAggregateEvents events)
-        => _committingTransitionEvents(logger, embedding, events.Count, key, null);
+    internal static void CommittingTransitionEvents(this ILogger logger, EmbeddingId embedding, ProjectionKey key, UncommittedAggregateEvents uncommittedEvents)
+        => _committingTransitionEvents(logger, embedding, uncommittedEvents.Count, key, null);
 
     #endregion
     #region EmbeddingProcessors

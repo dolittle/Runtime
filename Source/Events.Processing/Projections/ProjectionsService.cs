@@ -84,7 +84,6 @@ public class ProjectionsService : ProjectionsBase
         }
         
         Log.ReceivedProjectionArguments(_logger, definition.Scope, definition.Projection);
-
         
         var projection = new Projection(dispatcher, definition, arguments.Alias, arguments.HasAlias);
         var registration = await _projections.Register(projection, executionContext, cts.Token);

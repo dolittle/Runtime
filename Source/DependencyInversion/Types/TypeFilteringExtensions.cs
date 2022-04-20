@@ -22,6 +22,20 @@ public static class TypeFilteringExtensions
     public static IEnumerable<Type> IgnoreClassesWithAttribute<TAttribute>(this IEnumerable<Type> classes)
         where TAttribute : Attribute
         => classes.Where(type => !Attribute.IsDefined(type, typeof(TAttribute)));
+
+    /// <summary>
+    /// Filter classes with a specific attribute.
+    /// </summary>
+    /// <param name="classes">The <see cref="IEnumerable{T}"/> classes to filter.</param>
+    /// <typeparam name="TAttribute">The <see cref="Type"/> of the attribute.</typeparam>
+    /// <returns>The <see cref="IEnumerable{T}"/> of <see cref="Type"/> without the <typeparamref name="TAttribute"/> attribute.</returns>
+    public static IEnumerable<Type> FilterClassesWithAttribute<TAttribute>(this IEnumerable<Type> classes, out IEnumerable<Type> classesWithAttribute)
+        where TAttribute : Attribute
+    {
+        var groupedByAttribute = classes.ToLookup(type => Attribute.IsDefined(type, typeof(TAttribute)));
+        classesWithAttribute = groupedByAttribute[true];
+        return groupedByAttribute[false];
+    }
     
     /// <summary>
     /// Filters classes implementing a specific type.

@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../Actors/Actors.csproj" />
         <ProjectReference Include="../Artifacts/Artifacts.csproj" />
         <ProjectReference Include="../Execution/Execution.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
@@ -16,6 +17,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
+        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProtoGrain Include="Actors/EventStore.proto" AdditionalImportDirs="$(ContractsRootPath);." />
     </ItemGroup>
 </Project>

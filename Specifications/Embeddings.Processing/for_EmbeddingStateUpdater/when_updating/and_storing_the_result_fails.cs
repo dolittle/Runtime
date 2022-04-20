@@ -35,7 +35,7 @@ public class and_storing_the_result_fails : given.all_dependencies
         embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));
         embedding_store.Setup(_ => _.TryGet(embedding, projection_key, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state));
         embedding_store.Setup(_ => _.TryReplace(embedding, projection_key, projection_result.Version, projection_result.State, cancellation_token)).Returns(Task.FromResult<Try>(exception));
-        event_store.Setup(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token)).Returns(Task.FromResult(unprocessed_events));
+        committed_events_fetcher.Setup(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token)).Returns(Task.FromResult(unprocessed_events));
         project_many_events.Setup(_ => _.TryProject(current_state, unprocessed_events, execution_context, cancellation_token)).Returns(Task.FromResult<Partial<EmbeddingCurrentState>>(projection_result));
     };
 
@@ -46,7 +46,7 @@ public class and_storing_the_result_fails : given.all_dependencies
     It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);
     It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
     It should_get_the_last_state_from_the_embedding_store = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key, cancellation_token));
-    It should_ask_the_event_store_for_new_events = () => event_store.Verify(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token));
+    It should_ask_the_event_store_for_new_events = () => committed_events_fetcher.Verify(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token));
     It should_project_the_event = () => project_many_events.Verify(_ => _.TryProject(current_state, unprocessed_events, execution_context, cancellation_token));
     It should_store_the_final_state = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key, projection_result.Version, projection_result.State, cancellation_token));
 }

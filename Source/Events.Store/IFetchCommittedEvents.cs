@@ -12,6 +12,14 @@ namespace Dolittle.Runtime.Events.Store;
 /// </summary>
 public interface IFetchCommittedEvents
 {
+    // TODO: Maybe move this?
+    /// <summary>
+    /// Fetches the next <see cref="EventLogSequenceNumber"/> to use to commit an event.
+    /// </summary>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the next <see cref="EventLogSequenceNumber"/> to use to commit an event.</returns>
+    Task<EventLogSequenceNumber> FetchNextSequenceNumber(CancellationToken cancellationToken);
+
     /// <summary>
     /// Fetches all <see cref="CommittedAggregateEvent"/>s applied to an Event Source by an Aggregate Root.
     /// </summary>

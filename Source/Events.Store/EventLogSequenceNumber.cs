@@ -13,7 +13,7 @@ public record EventLogSequenceNumber(ulong Value) : ConceptAs<ulong>(Value)
     /// <summary>
     /// The initial sequence number of the Event Store before any Events are committed.
     /// </summary>
-    public static readonly EventLogSequenceNumber Initial = 0;
+    public static readonly EventLogSequenceNumber Initial = 0L;
 
     /// <summary>
     /// Implicitly convert a <see cref="ulong"/> to an <see cref="EventLogSequenceNumber"/>.

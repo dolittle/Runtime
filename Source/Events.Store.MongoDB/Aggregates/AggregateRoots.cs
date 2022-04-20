@@ -4,6 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -13,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 /// <summary>
 /// Represents an implementation of <see cref="IAggregateRoots" />.
 /// </summary>
+[PerTenant]
 public class AggregateRoots : IAggregateRoots
 {
     readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
@@ -67,7 +70,6 @@ public class AggregateRoots : IAggregateRoots
 
     /// <inheritdoc/>
     public async Task<AggregateRootVersion> FetchVersionFor(
-        IClientSessionHandle transaction,
         EventSourceId eventSource,
         ArtifactId aggregateRoot,
         CancellationToken cancellationToken)
@@ -75,9 +77,9 @@ public class AggregateRoots : IAggregateRoots
         _logger.FetchingVersionFor(aggregateRoot, eventSource);
         var eqFilter = _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
             & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
-        var aggregateDocuments = await _aggregates.Aggregates.Find(
-            transaction,
-            eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var aggregateDocuments = await _aggregates.Aggregates
+            .Find(eqFilter)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return aggregateDocuments.Count switch
         {
@@ -167,7 +169,6 @@ public class AggregateRoots : IAggregateRoots
         if (result.ModifiedCount == 0)
         {
             var currentVersion = await FetchVersionFor(
-                transaction,
                 eventSource,
                 aggregateRoot,
                 cancellationToken).ConfigureAwait(false);
@@ -181,24 +182,8 @@ public class AggregateRoots : IAggregateRoots
         return new AggregateRoot(eventSource, aggregateRoot, nextVersion);
     }
 
-    async Task<AggregateRootVersion> FetchVersionFor(
-        EventSourceId eventSource,
-        ArtifactId aggregateRoot,
-        CancellationToken cancellationToken)
-    {
-        var eqFilter = _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
-            & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
-        var aggregateDocuments = await _aggregates.Aggregates.Find(eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        return aggregateDocuments.Count switch
-        {
-            0 => AggregateRootVersion.Initial,
-            1 => aggregateDocuments[0].Version,
-            _ => throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot),
-        };
-    }
-
-    void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
+    static void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
     {
         if (nextVersion <= expectedVersion)
         {

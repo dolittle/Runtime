@@ -1,18 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
-using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
-    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
-    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
-    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationRequest,
-    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
-    Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
-    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
 /// <summary>
@@ -35,11 +31,11 @@ public interface IEventHandlers
     /// <summary>
     /// Registers and starts an Event Handler for all tenants.
     /// </summary>
-    /// <param name="dispatcher">The actual <see cref="ReverseCallDispatcherType"/>.</param>
-    /// <param name="arguments">Connecting arguments.</param>
+    /// <param name="eventHandler">The event handler to to register and start.</param>
+    /// <param name="onFailure">The <see cref="Func{T}"/> callback for failures.</param>
     /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
     /// <returns>A <see cref="Task"/> that represents the asynchronous processing operation.</returns>
-    Task RegisterAndStart(ReverseCallDispatcherType dispatcher, EventHandlerRegistrationArguments arguments, CancellationToken cancellationToken);
+    Task RegisterAndStart(IEventHandler eventHandler, Func<Failure, CancellationToken, Task> onFailure, CancellationToken cancellationToken);
 
     /// <summary>
     /// Reprocesses all events for an event handler from a <see cref="StreamPosition" /> for a tenant.
@@ -56,4 +52,5 @@ public interface IEventHandlers
     /// <param name="eventHandlerId">The <see cref="EventHandlerId"/> of the identifying the event handler.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
     Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId);
+    
 }

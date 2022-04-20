@@ -5,24 +5,26 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Moq;
 using It = Machine.Specifications.It;
+using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_updating;
 
 public class and_committing_events_fails : given.all_dependencies_and_a_desired_state
 {
     static Task task;
-    static Exception exception;
     static UncommittedAggregateEvents uncommitted_events;
+    static CommitAggregateEventsRequest commit_request;
 
     Establish context = () =>
     {
         uncommitted_events = CreateUncommittedEvents(uncommitted_event);
-        exception = new Exception();
+        commit_request = uncommitted_events.ToCommitRequest(execution_context);
         task = embedding_processor.Start(cancellation_token);
         embedding_store
             .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
@@ -31,8 +33,8 @@ public class and_committing_events_fails : given.all_dependencies_and_a_desired_
             .Setup(_ => _.TryConverge(current_state, desired_state, execution_context, Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
         event_store
-            .Setup(_ => _.CommitAggregateEvents(uncommitted_events, execution_context, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromException<CommittedAggregateEvents>(exception));
+            .Setup(_ => _.CommitAggregateEvents(commit_request, Moq.It.IsAny<CancellationToken>()))
+            .ReturnsAsync(FailedCommitResponse());
     };
 
     static Try<ProjectionState> result;
@@ -42,6 +44,6 @@ public class and_committing_events_fails : given.all_dependencies_and_a_desired_
     It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
     It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryConverge(current_state, desired_state, execution_context, Moq.It.IsAny<CancellationToken>()));
-    It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, execution_context, Moq.It.IsAny<CancellationToken>()));
-    It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
+    It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(commit_request, Moq.It.IsAny<CancellationToken>()));
+    It should_return_the_failure = () => result.Exception.ShouldBeOfExactType<FailedToCommitEmbeddingEvents>();
 }

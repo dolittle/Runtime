@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+  <Import Project="../../default.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Events.Store.Services.WebAPI</AssemblyName>
@@ -12,8 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../Artifacts/Artifacts.csproj" />
-    <ProjectReference Include="../Events.Store.Services/Events.Store.Services.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+    <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
   </ItemGroup>
 
 </Project>

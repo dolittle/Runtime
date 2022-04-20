@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package dolittle.runtime.events;
+
+option csharp_namespace = "Dolittle.Runtime.Events.Store.Actors";
+
+import "Runtime/Events/EventStore.proto";
+
+service EventStore {
+    rpc Commit (CommitEventsRequest) returns (CommitEventsResponse);
+    rpc CommitForAggregate (CommitAggregateEventsRequest) returns (CommitAggregateEventsResponse);
+}

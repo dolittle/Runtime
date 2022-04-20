@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Metrics.Hosting;
@@ -20,6 +21,7 @@ var host = Host.CreateDefaultBuilder(args)
         configuration.AddEnvironmentVariables();
         configuration.AddCommandLine(args);
     })
+    .AddActorSystem()
     .AddMetrics()
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../../specs.props"/>
+  <Import Project="../../specs.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Embeddings.Store.MongoDB.Specs</AssemblyName>

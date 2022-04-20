@@ -1,0 +1,34 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    types: [synchronize, opened, labeled]
+
+jobs:
+  long-benchmarks:
+    name: Long benchmarks
+    runs-on: ubuntu-latest
+    if: contains( github.event.pull_request.labels.*.name, 'perf')
+    strategy:
+      matrix:
+        benchmark:
+          - 'Events.Store.CommitAggregateEvents'
+          - 'Events.Store.CommitEvents'
+          - 'Events.Store.FetchAggregateEvents'
+          - 'Events.Store.Streams.StreamProcessorStateRepository'
+          - 'Events.Processing.EventHandlers.EventHandler'
+          - 'Events.Processing.EventHandlers.Filter'
+          - 'Events.Processing.Projections.Projection'
+    env:
+      BENCHMARK_NAME: Integration.Benchmarks.${{ matrix.benchmark }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+      - name: Run Mongo container
+        run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
+      - name: Run Benchmarks
+        working-directory: ./Integration/Benchmarks
+        run: dotnet run --configuration Release -- -m -f '*${{ env.BENCHMARK_NAME }}*'
