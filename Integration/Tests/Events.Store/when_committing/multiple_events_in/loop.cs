@@ -7,19 +7,16 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
-using MongoDB.Driver;
-using Event = Dolittle.Runtime.Events.Store.MongoDB.Events.Event;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 
-namespace Integration.Tests.Events.Store;
+namespace Integration.Tests.Events.Store.when_committing.multiple_events_in;
 
-class when_committing_multiple_events_in_loop : given.a_clean_event_store
+class loop : given.a_clean_event_store
 {
     static IEnumerable<List<UncommittedEvent>> events_to_commit;
     static EventSourceId event_source;
-    static int number_of_events_to_commit;
-    
+
     Establish context = () =>
     {
         event_source = "some event source";
