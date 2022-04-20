@@ -39,11 +39,6 @@ public static class EventStoreExtensions
     public static async Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
     {
         var response = await eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
-        if (response.Failure != default)
-        {
-            throw new Exception(response.Failure.Reason);
-        }
-
         return response;
 
     }
@@ -57,11 +52,7 @@ public static class EventStoreExtensions
             },
             Aggregate = new Aggregate{AggregateRootId = aggregateRootId.ToProtobuf(), EventSourceId = eventSourceId}
         }, CancellationToken.None);
-        if (response.Failure != default)
-        {
-            throw new Exception(response.Failure.Reason);
-        }
-        
+
         return response;
     }
 }

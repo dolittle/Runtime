@@ -25,25 +25,25 @@ namespace Integration.Tests.Events.Store;
 static class should_extensions
 {
 
-    public static void should_be_the_correct_responses(this CommitEventsResponse[] responses, UncommittedEvents[] uncommitted_events, ExecutionContext execution_context)
+    public static void should_be_the_correct_responses(this CommitEventsResponse[] responses, UncommittedEvents[] uncommitted_events, ExecutionContext execution_context, bool random_commit_order = false)
     {
         var startEventLogSequenceNumber = EventLogSequenceNumber.Initial;
         for (var i = 0; i < responses.Length; i++)
         {
             var response = responses[i];
             var events = uncommitted_events[i];
-            response.should_be_the_correct_response(events, execution_context, startEventLogSequenceNumber);
+            response.should_be_the_correct_response(events, execution_context, random_commit_order ? response.Events?.First().EventLogSequenceNumber : startEventLogSequenceNumber);
             startEventLogSequenceNumber += (ulong)events.Count;
         }
     }
-    public static void should_be_the_correct_responses(this CommitAggregateEventsResponse[] responses, UncommittedAggregateEvents[] uncommitted_events, ExecutionContext execution_context)
+    public static void should_be_the_correct_responses(this CommitAggregateEventsResponse[] responses, UncommittedAggregateEvents[] uncommitted_events, ExecutionContext execution_context, bool random_commit_order = false)
     {
         var startEventLogSequenceNumber = EventLogSequenceNumber.Initial;
         for (var i = 0; i < responses.Length; i++)
         {
             var response = responses[i];
             var events = uncommitted_events[i];
-            response.should_be_the_correct_response(events, execution_context, startEventLogSequenceNumber);
+            response.should_be_the_correct_response(events, execution_context, random_commit_order ? response.Events?.Events?.First().EventLogSequenceNumber : startEventLogSequenceNumber);
             startEventLogSequenceNumber += (ulong)events.Count;
         }
     }

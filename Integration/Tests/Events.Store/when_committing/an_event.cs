@@ -9,22 +9,21 @@ using Machine.Specifications;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 
-namespace Integration.Tests.Events.Store;
+namespace Integration.Tests.Events.Store.when_committing;
 
-class when_committing_multiple_events_in_batch : given.a_clean_event_store
+class an_event : given.a_clean_event_store
 {
+    static UncommittedEvent event_to_commit;
     static List<UncommittedEvent> uncommitted_events_list;
     static EventSourceId event_source;
-    static int number_of_events_to_commit;
     
     Establish context = () =>
     {
-        event_source = "some event source";
+        event_to_commit = given.event_to_commit.create();
+        event_source = event_to_commit.EventSource;
         uncommitted_events_list = new List<UncommittedEvent>
         {
-            given.event_to_commit.with_content(new {Hello = "world"}).with_event_source(event_source).build(),
-            given.event_to_commit.with_content(new {Hello = "Jakob"}).with_event_source(event_source).build(),
-            given.event_to_commit.with_content(new {Hello = "Groot"}).with_event_source(event_source).build(),
+            event_to_commit
         };
     };
     
@@ -42,7 +41,7 @@ class when_committing_multiple_events_in_batch : given.a_clean_event_store
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial);
 
-        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(uncommitted_events.Count);
+        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(1);
 
         It should_have_stored_the_correct_events = () => response.Events.ToCommittedEvents().should_have_stored_committed_events(streams, event_content_converter);
     }
@@ -70,7 +69,7 @@ class when_committing_multiple_events_in_batch : given.a_clean_event_store
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
 
-        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(uncommitted_events.Count);
+        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(1);
         
         It should_have_stored_the_correct_events = () => response.Events.ToCommittedEvents().should_have_stored_committed_events(streams, event_content_converter);
     }
