@@ -1,3 +1,15 @@
+# [8.0.1] - 2022-4-20 [PR: #659](https://github.com/dolittle/Runtime/pull/659)
+## Summary
+
+Start integrating the Actor Model into the Runtime code with first introducing [Proto.Actor](https://proto.actor) into the Event Store. We're taking advantage of the Actor Model to implement batching logic on the write side of the Event Store (committing events) to massively increase the throughput for committing events. This is also built in a way that enables us to in the future be able to scale horizontally through having multiple Runtimes running together in clusters.
+
+In addition we now do benchmarking on key parts of the system and publishing the results on each GitHub release so that we can keep an eye on the current performance. 
+
+### Changed
+
+- When committing events the commits will be written and responded in batches which in turn increases the throughput of commits by several times.
+
+
 # [8.0.0] - 2022-3-25 [PR: #654](https://github.com/dolittle/Runtime/pull/654)
 ## Summary
 
