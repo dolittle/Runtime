@@ -52,6 +52,28 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     }
 
     /// <inheritdoc/>
+    public async Task<CommittedEvents> FetchCommittedEvents(EventLogSequenceNumber from, int limit, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var events = await _streams.DefaultEventLog
+                .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
+                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
+                .Limit(limit)
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            return new CommittedEvents(
+                events.Select(_ => _eventConverter.ToRuntimeStreamEvent(_))
+                    .Select(_ => _.Event)
+                    .ToList());
+        }
+        catch (Exception ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+    
+    /// <inheritdoc/>
     public Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
         => DoFetchForAggregate(
             eventSource,

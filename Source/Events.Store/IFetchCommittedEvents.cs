@@ -21,6 +21,16 @@ public interface IFetchCommittedEvents
     Task<EventLogSequenceNumber> FetchNextSequenceNumber(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Fetches EventLog <see cref="CommittedEvent"/>s from a given offset
+    /// </summary>
+    /// <param name="from">EventLogSequenceNumber to read from (inclusive)</param>
+    /// <param name="limit">Max number of events to retrieve</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns></returns>
+    Task<CommittedEvents> FetchCommittedEvents(EventLogSequenceNumber from, int limit, CancellationToken cancellationToken);
+
+    
+    /// <summary>
     /// Fetches all <see cref="CommittedAggregateEvent"/>s applied to an Event Source by an Aggregate Root.
     /// </summary>
     /// <param name="eventSource">The <see cref="EventSourceId"/> identifying the Event Source.</param>
