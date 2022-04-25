@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Metrics.Hosting;
@@ -29,5 +30,7 @@ var host = Host.CreateDefaultBuilder(args)
     .AddMetricsHost()
     .AddWebHost()
     .Build();
+
+await host.PerformBootstrap().ConfigureAwait(false);
 
 host.Run();
