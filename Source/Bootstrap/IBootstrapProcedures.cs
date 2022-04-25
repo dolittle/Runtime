@@ -14,5 +14,5 @@ public interface IBootstrapProcedures
     /// Performs all bootstrap procedures.
     /// </summary>
     /// <returns></returns>
-    public Task PerformAll();
+    Task PerformAll();
 }

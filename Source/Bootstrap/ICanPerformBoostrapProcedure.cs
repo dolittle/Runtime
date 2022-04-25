@@ -15,11 +15,11 @@ public interface ICanPerformBoostrapProcedure
     /// Performs a bootstrap procedure.
     /// </summary>
     /// <returns>The <see cref="Task"/> representing the asynchronous action.</returns>
-    public Task Perform();
+    Task Perform();
     
     /// <summary>
     /// Performs a bootstrap procedure for a specific tenant. 
     /// </summary>
     /// <returns>The <see cref="Task"/> representing the asynchronous action.</returns>
-    public Task PerformForTenant(TenantId tenant);
+    Task PerformForTenant(TenantId tenant);
 }
