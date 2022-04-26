@@ -69,7 +69,7 @@ public class EventStore : IEventStore
         }
         catch (Exception e)
         {
-            Log.ErrorFetchingEventsFromAggregate(_logger,e);
+            _logger.ErrorFetchingEventsFromAggregate(e);
             return new FetchForAggregateResponse
             {
                 Failure = e.ToFailure()

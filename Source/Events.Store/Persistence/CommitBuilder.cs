@@ -20,6 +20,10 @@ public class CommitBuilder
     readonly List<CommittedAggregateEvents> _committedAggregateEvents = new();
     readonly Dictionary<Aggregate, AggregateRootVersionRange> _aggregates = new();
     EventLogSequenceNumber _nextSequenceNumber;
+    readonly List<CommittedEvent> _orderedEvents = new();
+    readonly EventLogSequenceNumber _initialSequenceNumber;
+
+    public IReadOnlyList<CommittedEvent> AllEvents => _orderedEvents;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitBuilder"/> class.
@@ -27,6 +31,7 @@ public class CommitBuilder
     /// <param name="nextSequenceNumber">The next <see cref="EventLogSequenceNumber"/>.</param>
     public CommitBuilder(EventLogSequenceNumber nextSequenceNumber)
     {
+        _initialSequenceNumber = nextSequenceNumber;
         _nextSequenceNumber = nextSequenceNumber;
     }
     
@@ -57,6 +62,7 @@ public class CommitBuilder
                 _.Content)).ToList());
             
             _committedEvents.Add(committedEvents);
+            _orderedEvents.AddRange(committedEvents);
             _nextSequenceNumber = nextSequenceNumber;
             return committedEvents;
         }
@@ -99,6 +105,8 @@ public class CommitBuilder
             {
                 return error;
             }
+            _orderedEvents.AddRange(committedEvents);
+
 
             _nextSequenceNumber = nextSequenceNumber;
             return committedEvents;
@@ -114,7 +122,7 @@ public class CommitBuilder
     /// </summary>
     /// <returns>A tuple of the built <see cref="Commit"/> and the next <see cref="EventLogSequenceNumber"/>.</returns>
     public (Commit Commit, EventLogSequenceNumber NextSequenceNumber) Build()
-        => (new Commit(_committedEvents, _committedAggregateEvents), _nextSequenceNumber);
+        => (new Commit(_committedEvents, _committedAggregateEvents, _orderedEvents, _initialSequenceNumber, _nextSequenceNumber - 1), _nextSequenceNumber);
     
     bool TryAddCommittedAggregateEvents(CommittedAggregateEvents events, out Exception error)
     {

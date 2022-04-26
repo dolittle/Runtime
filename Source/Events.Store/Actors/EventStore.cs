@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
@@ -32,6 +33,10 @@ public class EventStore : EventStoreBase
     readonly IPersistCommits _commits;
     readonly IFetchCommittedEvents _committedEvents;
     readonly IFetchAggregateRootVersions _aggregateRootVersions;
+    readonly TenantId _tenantId;
+    readonly ICreateProps _propsFactory;
+
+    PID streamSubscriptionManagerPid;
 
     readonly HashSet<Aggregate> _aggregateCommitInFlight = new();
     readonly Dictionary<Aggregate, AggregateRootVersion> _aggregateRootVersionCache = new();
@@ -52,20 +57,23 @@ public class EventStore : EventStoreBase
     /// <param name="commits">The <see cref="IPersistCommits"/>.</param>
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/> for getting the next event log sequence number.</param>
     /// <param name="lifecycleHooks"></param>
+    /// <param name="aggregateRootVersions"></param>
+    /// <param name="tenantId"></param>
     public EventStore(IContext context, IPersistCommits commits, IFetchCommittedEvents committedEvents, IApplicationLifecycleHooks lifecycleHooks,
-        IFetchAggregateRootVersions aggregateRootVersions)
+        IFetchAggregateRootVersions aggregateRootVersions, TenantId tenantId, ICreateProps propsFactory)
         : base(context)
     {
         _commits = commits;
         _committedEvents = committedEvents;
         _lifecycleHooks = lifecycleHooks;
         _aggregateRootVersions = aggregateRootVersions;
+        _tenantId = tenantId;
+        _propsFactory = propsFactory;
     }
 
     /// <inheritdoc />
     public override async Task OnStarted()
     {
-        // TODO: setup lifecycle hooks, enabling graceful shutdown
         _nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
         ResetBatchBuilderState(_nextSequenceNumber);
         _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
@@ -77,6 +85,9 @@ public class EventStore : EventStoreBase
                 _shutdownHook.MarkCompleted();
             }
         });
+
+        var propsFor = _propsFactory.PropsFor<StreamSubscriptionManagerActor>(_nextSequenceNumber, _tenantId);
+        streamSubscriptionManagerPid = Context.Spawn(propsFor);
     }
 
     /// <inheritdoc />
@@ -142,30 +153,27 @@ public class EventStore : EventStoreBase
         {
             return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
         }
-        
+
         _aggregateCommitInFlight.Add(aggregate);
-        
+
         if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
         {
             return CommitForAggregate(request, aggregate, aggregateRootVersion, respond);
         }
 
 
-        
         Context.ReenterAfter(GetAggregateRootVersion(aggregate), getAggregateRootVersionTask =>
         {
-            
             if (!getAggregateRootVersionTask.IsCompletedSuccessfully)
             {
                 _aggregateCommitInFlight.Remove(aggregate);
                 return RespondWithFailure(getAggregateRootVersionTask.Exception.ToFailure());
             }
-            
-            
+
+
             var currentAggregateRootVersion = getAggregateRootVersionTask.Result;
             _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
             return CommitForAggregate(request, aggregate, currentAggregateRootVersion, respond);
-
         });
         return Task.CompletedTask;
 
@@ -217,7 +225,7 @@ public class EventStore : EventStoreBase
             return Task.CompletedTask;
         });
         return Task.CompletedTask;
-        
+
         Task RespondWithFailureAndClearInFlight(Failure failure)
         {
             _aggregateCommitInFlight.Remove(aggregate);
@@ -234,6 +242,51 @@ public class EventStore : EventStoreBase
     public override Task<CommitEventsResponse> Commit(CommitEventsRequest request) => throw new NotImplementedException("Unused");
 
     public override Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request) => throw new NotImplementedException("Unused");
+
+
+    public override Task RegisterSubscription(EventStoreSubscriptionRequest request, Action<EventStoreSubscriptionAck> respond, Action<string> onError)
+    {
+        Context.RequestReenter(streamSubscriptionManagerPid, request, (Task<EventStoreSubscriptionAck> task) =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    respond(task.Result);
+                }
+                else
+                {
+                    onError(task.Exception?.Message ?? "Failed while registering subscription");
+                }
+
+                return Task.CompletedTask;
+            },
+            Context.CancellationToken);
+        return Task.CompletedTask;
+    }
+
+    public override Task CancelSubscription(CancelEventStoreSubscription request, Action<CancelEventStoreSubscriptionAck> respond, Action<string> onError)
+    {
+        Context.RequestReenter(streamSubscriptionManagerPid, request, (Task<CancelEventStoreSubscriptionAck> task) =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    respond(task.Result);
+                }
+                else
+                {
+                    onError(task.Exception?.Message ?? "Failed while cancelling subscription");
+                }
+
+                return Task.CompletedTask;
+            },
+            Context.CancellationToken);
+        return Task.CompletedTask;
+    }
+
+    
+    public override Task<EventStoreSubscriptionAck> RegisterSubscription(EventStoreSubscriptionRequest request) => throw new NotImplementedException("unused");
+
+    public override Task<CancelEventStoreSubscriptionAck> CancelSubscription(CancelEventStoreSubscription request) =>
+        throw new NotImplementedException("unused");
 
 
     void TrySendBatch()
@@ -261,6 +314,7 @@ public class EventStore : EventStoreBase
             if (completedSuccessfully)
             {
                 tcs.SetResult(Try.Succeeded());
+                Context.Send(streamSubscriptionManagerPid, commit);
                 TrySendBatch();
             }
             else
