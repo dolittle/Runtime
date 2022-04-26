@@ -101,7 +101,7 @@ public class StreamSubscriptionActor : IActor
         }
     }
 
-    SubscriptionEventsRequest ToSubscriptionEvent(CommittedEventsRequest request) =>
+    SubscriptionEvents ToSubscriptionEvent(CommittedEventsRequest request) =>
         new()
         {
             SubscriptionId = _subscriptionId,

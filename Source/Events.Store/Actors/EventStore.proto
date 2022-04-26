@@ -47,7 +47,7 @@ message CommittedEventsRequest{
     repeated CommittedEvent events = 3;
 }
 
-message SubscriptionEventsRequest{
+message SubscriptionEvents{
     protobuf.Uuid subscriptionId = 1;
     uint64 fromOffset = 2;
     uint64 toOffset = 3;

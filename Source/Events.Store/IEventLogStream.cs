@@ -8,6 +8,8 @@ using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store;
 
+public record EventLogBatch(EventLogSequenceNumber From, EventLogSequenceNumber To, IEnumerable<Contracts.CommittedEvent> MatchedEvents);
+
 public interface IEventLogStream
 {
     /// <summary>
@@ -17,13 +19,14 @@ public interface IEventLogStream
     /// <param name="eventTypes">Included event types, min 1</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<Contracts.CommittedEvent> Subscribe(EventLogSequenceNumber from, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken);
+    ChannelReader<EventLogBatch> Subscribe(EventLogSequenceNumber from, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken);
     
     /// <summary>
     /// Subscribe to the complete event log stream at the given offset
     /// </summary>
     /// <param name="from"></param>
+    /// 
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<Contracts.CommittedEvent> SubscribeAll(EventLogSequenceNumber from, CancellationToken cancellationToken);
+    ChannelReader<EventLogBatch> SubscribeAll(EventLogSequenceNumber from, CancellationToken cancellationToken);
 }
