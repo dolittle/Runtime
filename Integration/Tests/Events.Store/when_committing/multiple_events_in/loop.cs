@@ -70,7 +70,7 @@ class loop : given.a_clean_event_store
         
         It should_have_subscribable_events  = () =>
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var reader = event_log_stream.SubscribeAll(0, cts.Token);
             var hasData = reader.WaitToReadAsync().AsTask().GetAwaiter().GetResult();
             hasData.ShouldBeTrue(); // Should get a single batch
