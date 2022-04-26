@@ -81,7 +81,7 @@ class loop : given.a_clean_event_store
 
             batchCommittedEvents.Count.ShouldEqual(events.Count);
             
-            for (int i = 0; i < events.Count; i++)
+            for (var i = 0; i < events.Count; i++)
             {
                 var expectedEvent = events[i];
                 var actualEvent = batchCommittedEvents[i];

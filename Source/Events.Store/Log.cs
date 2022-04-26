@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Extensions.Logging;
+using Proto;
 
 namespace Dolittle.Runtime.Events.Store;
 
@@ -32,6 +33,9 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "Error fetching catchup events")]
     internal static partial void ErrorFetchingCatchupEvents(this ILogger logger, Exception ex);
 
+    [LoggerMessage(0, LogLevel.Warning, "Error publishing subscribed events")]
+    internal static partial void ErrorPublishingSubscribedEvents(this ILogger logger, Exception ex);
+    
     static readonly Action<ILogger, int, string, Exception> _eventsReceivedForCommitting = LoggerMessage
         .Define<int, string>(
             LogLevel.Debug,
@@ -49,4 +53,14 @@ static partial class Log
 
     internal static void LogUnexpectedOffset(this ILogger logger, EventLogSequenceNumber expected, EventLogSequenceNumber actual)
         => _unexpectedEventLogOffset(logger, actual, expected, null);
+    
+    
+    static readonly Action<ILogger, Exception> _subscriptionReturnedDeadLetter = LoggerMessage
+        .Define(
+            LogLevel.Warning,
+            new EventId(0, nameof(SubscriptionReturnedDeadLetter)),
+            "Subscription target returned dead letter response");
+
+    internal static void SubscriptionReturnedDeadLetter(this ILogger logger, DeadLetterException deadLetter)
+        => _subscriptionReturnedDeadLetter(logger, deadLetter);
 }

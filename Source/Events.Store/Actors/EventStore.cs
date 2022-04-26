@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
@@ -321,7 +322,7 @@ public class EventStore : EventStoreBase
             {
                 // Current version also fails the batch being built
                 var failed = Try.Failed(persistTask.Exception);
-                _nextBatchResult!.SetResult(failed);
+                _nextBatchResult.SetResult(failed);
                 tcs.SetResult(failed);
                 ResetBatchBuilderState(beforeSequenceNumber);
             }
@@ -344,7 +345,7 @@ public class EventStore : EventStoreBase
     Task<EventLogSequenceNumber> GetNextEventLogSequenceNumber(CancellationToken cancellationToken)
         => _committedEvents.FetchNextSequenceNumber(cancellationToken);
 
-    static bool TryGetFailure(Task<Try> task, out Failure failure)
+    static bool TryGetFailure(Task<Try> task, [NotNullWhen(true)] out Failure? failure)
     {
         if (!task.IsCompletedSuccessfully)
         {

@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Artifacts.Contracts;
 using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Google.Protobuf.Collections;
@@ -14,6 +12,7 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class StreamSubscriptionActor : IActor
 {
     readonly TenantId _tenantId;
@@ -48,13 +47,13 @@ public class StreamSubscriptionActor : IActor
         var toOffset = request.CurrentHighWatermark;
 
         var catchupPid = PID.FromAddress(context.System.Address, EventStoreCatchupActor.GetActorName(_tenantId));
-        
+
         while (fromOffset < toOffset && !context.CancellationToken.IsCancellationRequested)
         {
             try
             {
                 var response = await context.RequestAsync<CommittedEventsRequest>(catchupPid,
-                    new EventLogCatchupRequest(fromOffset, (int)((toOffset + 1) - fromOffset)), context.CancellationToken);
+                    new EventLogCatchupRequest(fromOffset, (int)(toOffset + 1 - fromOffset)), context.CancellationToken);
                 await OnCommittedEventsRequest(response, context);
             }
             catch (OperationCanceledException)
@@ -63,13 +62,12 @@ public class StreamSubscriptionActor : IActor
             }
             catch (Exception e)
             {
-                
-                _logger.LogError(e, "failed to catchup events. retrying");
+                _logger.ErrorFetchingCatchupEvents(e);
             }
         }
     }
 
-    static Func<global::Dolittle.Runtime.Events.Contracts.CommittedEvent,bool> CreateFilter(RepeatedField<Uuid> eventTypes)
+    static Func<global::Dolittle.Runtime.Events.Contracts.CommittedEvent, bool> CreateFilter(RepeatedField<Uuid> eventTypes)
     {
         var eventSet = eventTypes.Select(artifactId => artifactId).ToHashSet();
         if (!eventSet.Any())
@@ -81,28 +79,29 @@ public class StreamSubscriptionActor : IActor
         return committedEvent => eventSet.Contains(committedEvent.EventType.Id);
     }
 
-    async Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context)
+    async Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context) 
     {
         var subscriptionEvent = ToSubscriptionEvent(request);
         while (!context.CancellationToken.IsCancellationRequested)
         {
             try
             {
-                var response = await context.RequestAsync<SubscriptionEventsAck>(_target, subscriptionEvent, context.CancellationToken);
+                var response = await context.RequestAsync<SubscriptionEventsAck>(_target, subscriptionEvent, TimeSpan.FromSeconds(10));
                 if (response != null)
                 {
                     return;
                 }
             }
-            catch (DeadLetterException)
+            catch (DeadLetterException e)
             {
-                _logger.LogError("subscription target returned deadletter");
+                _logger.SubscriptionReturnedDeadLetter(e);
+                // ReSharper disable once MethodHasAsyncOverload
                 context.Stop(context.Self);
                 return;
             }
             catch (Exception e)
             {
-                _logger.LogError(e,"failed to publish subscription events");
+                _logger.ErrorPublishingSubscribedEvents(e);
             }
         }
     }
