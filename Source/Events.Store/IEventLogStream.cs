@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store;
@@ -18,7 +17,7 @@ public interface IEventLogStream
     /// <param name="eventTypes">Included event types, min 1</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Channel<Contracts.CommittedEvent>> Subscribe(EventLogSequenceNumber from, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken);
+    ChannelReader<Contracts.CommittedEvent> Subscribe(EventLogSequenceNumber from, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken);
     
     /// <summary>
     /// Subscribe to the complete event log stream at the given offset
@@ -26,5 +25,5 @@ public interface IEventLogStream
     /// <param name="from"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Channel<Contracts.CommittedEvent>> SubscribeAll(EventLogSequenceNumber from, CancellationToken cancellationToken);
+    ChannelReader<Contracts.CommittedEvent> SubscribeAll(EventLogSequenceNumber from, CancellationToken cancellationToken);
 }
