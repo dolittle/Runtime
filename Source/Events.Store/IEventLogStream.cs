@@ -19,7 +19,7 @@ public interface IEventLogStream
     /// <param name="eventTypes">Included event types, min 1</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<EventLogBatch> Subscribe(EventLogSequenceNumber from, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken);
+    ChannelReader<EventLogBatch> Subscribe(EventLogSequenceNumber from, IReadOnlyCollection<ArtifactId> eventTypes, CancellationToken cancellationToken);
     
     /// <summary>
     /// Subscribe to the complete event log stream at the given offset

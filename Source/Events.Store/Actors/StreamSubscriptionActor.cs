@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Artifacts.Contracts;
 using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Domain.Tenancy;
+using Google.Protobuf.Collections;
 using Microsoft.Extensions.Logging;
 using Proto;
 
@@ -42,7 +43,7 @@ public class StreamSubscriptionActor : IActor
     {
         _subscriptionId = request.SubscriptionId;
         _target = PID.FromAddress(request.PidAddress, request.PidId);
-        _shouldIncludeEvent = CreateFilter(request.EventTypes);
+        _shouldIncludeEvent = CreateFilter(request.EventTypeIds);
         var fromOffset = request.FromOffset;
         var toOffset = request.CurrentHighWatermark;
 
@@ -53,7 +54,7 @@ public class StreamSubscriptionActor : IActor
             try
             {
                 var response = await context.RequestAsync<CommittedEventsRequest>(catchupPid,
-                    new EventLogCatchupRequest(fromOffset, (int)(toOffset - fromOffset)), context.CancellationToken);
+                    new EventLogCatchupRequest(fromOffset, (int)((toOffset + 1) - fromOffset)), context.CancellationToken);
                 await OnCommittedEventsRequest(response, context);
             }
             catch (OperationCanceledException)
@@ -68,9 +69,14 @@ public class StreamSubscriptionActor : IActor
         }
     }
 
-    static Func<global::Dolittle.Runtime.Events.Contracts.CommittedEvent,bool> CreateFilter(IEnumerable<Artifact> eventTypes)
+    static Func<global::Dolittle.Runtime.Events.Contracts.CommittedEvent,bool> CreateFilter(RepeatedField<Uuid> eventTypes)
     {
-        var eventSet = eventTypes.Select(artifact => artifact.Id).ToHashSet();
+        var eventSet = eventTypes.Select(artifactId => artifactId).ToHashSet();
+        if (!eventSet.Any())
+        {
+            // Empty set, consume all events
+            return _ => true;
+        }
 
         return committedEvent => eventSet.Contains(committedEvent.EventType.Id);
     }

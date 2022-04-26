@@ -1,8 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
@@ -65,6 +67,27 @@ class loop : given.a_clean_event_store
         It should_have_stored_the_correct_events = () => responses.Select(_ => _.Events.ToCommittedEvents()).should_have_stored_committed_events(
             streams,
             event_content_converter);
+        
+        It should_have_subscribable_events  = () =>
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            var reader = event_log_stream.SubscribeAll(0, cts.Token);
+            var hasData = reader.WaitToReadAsync().AsTask().GetAwaiter().GetResult();
+            hasData.ShouldBeTrue(); // Should get a single batch
+
+            reader.TryRead(out var batch);
+            var events = responses.Select(_ => _.Events.ToCommittedEvents()).SelectMany(it => it).ToList();
+            var batchCommittedEvents = batch!.MatchedEvents.ToCommittedEvents().ToList();
+
+            batchCommittedEvents.Count.ShouldEqual(events.Count);
+            
+            for (int i = 0; i < events.Count; i++)
+            {
+                var expectedEvent = events[i];
+                var actualEvent = batchCommittedEvents[i];
+                actualEvent.should_be_the_same_committed_event(expectedEvent);
+            }
+        };
     }
     
     [Tags("IntegrationTest")]

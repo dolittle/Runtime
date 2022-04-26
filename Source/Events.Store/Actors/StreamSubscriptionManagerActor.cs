@@ -82,7 +82,6 @@ public class StreamSubscriptionManagerActor : IActor
         var id = request.SubscriptionId.ToGuid();
         if (_activeSubscriptions.ContainsKey(id))
         {
-            // Log err
             context.Respond(new EventStoreSubscriptionAck
             {
                 SubscriptionId = request.SubscriptionId,
@@ -96,7 +95,7 @@ public class StreamSubscriptionManagerActor : IActor
 
         context.Send(pid, new StartEventStoreSubscription
         {
-            EventTypes = { request.EventTypes },
+            EventTypeIds = { request.EventTypeIds },
             FromOffset = request.FromOffset,
             PidId = request.PidId,
             PidAddress = request.PidAddress,

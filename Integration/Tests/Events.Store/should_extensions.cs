@@ -221,6 +221,18 @@ static class should_extensions
         should_have_same_execution_context(committed_event.ExecutionContext, stored_event.ExecutionContext);
         stored_event.EventLogSequenceNumber.ShouldEqual(committed_event.EventLogSequenceNumber.Value);
     }
+    
+    public static void should_be_the_same_committed_event(this CommittedEvent actual, CommittedEvent expected)
+    {
+        JToken.DeepEquals(JToken.Parse(actual.Content), JToken.Parse(expected.Content)).ShouldBeTrue();
+        actual.Occurred.UtcDateTime.ShouldBeCloseTo(expected.Occurred.UtcDateTime, TimeSpan.FromMilliseconds(1));
+        actual.Public.ShouldEqual(expected.Public);
+        actual.EventSource.Value.ShouldEqual(expected.EventSource.Value);
+        actual.Type.Generation.Value.ShouldEqual(expected.Type.Generation.Value);
+        actual.Type.Id.Value.ShouldEqual(expected.Type.Id.Value);
+        actual.ExecutionContext.ShouldEqual(expected.ExecutionContext);
+        actual.EventLogSequenceNumber.Value.ShouldEqual(expected.EventLogSequenceNumber.Value);
+    }
 
     static void should_have_the_same_version(Version version, Dolittle.Runtime.Events.Store.MongoDB.Events.Version stored_version)
     {
