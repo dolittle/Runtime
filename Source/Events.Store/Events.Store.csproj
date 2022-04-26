@@ -9,6 +9,7 @@
     <ItemGroup>
         <ProjectReference Include="../Actors/Actors.csproj" />
         <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Bootstrap/Bootstrap.csproj" />
         <ProjectReference Include="../Execution/Execution.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
