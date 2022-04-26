@@ -24,6 +24,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 /// Represents the event store grain. 
 /// </summary>
 [TenantGrain(typeof(EventStoreActor), typeof(EventStoreClient))]
+// ReSharper disable once UnusedType.Global
 public class EventStore : EventStoreBase
 {
     TaskCompletionSource<Try> _nextBatchResult;
@@ -37,7 +38,7 @@ public class EventStore : EventStoreBase
     readonly TenantId _tenantId;
     readonly ICreateProps _propsFactory;
 
-    PID streamSubscriptionManagerPid;
+    PID _streamSubscriptionManagerPid;
 
     readonly HashSet<Aggregate> _aggregateCommitInFlight = new();
     readonly Dictionary<Aggregate, AggregateRootVersion> _aggregateRootVersionCache = new();
@@ -47,7 +48,7 @@ public class EventStore : EventStoreBase
 
     readonly IApplicationLifecycleHooks _lifecycleHooks;
 
-    bool _shuttingDown = false;
+    bool _shuttingDown;
     readonly Failure _eventStoreShuttingDown = new EventStoreUnavailable("Runtime shutting down").ToFailure();
     IShutdownHook _shutdownHook;
 
@@ -88,7 +89,7 @@ public class EventStore : EventStoreBase
         });
 
         var propsFor = _propsFactory.PropsFor<StreamSubscriptionManagerActor>(_nextSequenceNumber, _tenantId);
-        streamSubscriptionManagerPid = Context.Spawn(propsFor);
+        _streamSubscriptionManagerPid = Context.Spawn(propsFor);
     }
 
     /// <inheritdoc />
@@ -247,7 +248,7 @@ public class EventStore : EventStoreBase
 
     public override Task RegisterSubscription(EventStoreSubscriptionRequest request, Action<EventStoreSubscriptionAck> respond, Action<string> onError)
     {
-        Context.RequestReenter(streamSubscriptionManagerPid, request, (Task<EventStoreSubscriptionAck> task) =>
+        Context.RequestReenter(_streamSubscriptionManagerPid, request, (Task<EventStoreSubscriptionAck> task) =>
             {
                 if (task.IsCompletedSuccessfully)
                 {
@@ -266,7 +267,7 @@ public class EventStore : EventStoreBase
 
     public override Task CancelSubscription(CancelEventStoreSubscription request, Action<CancelEventStoreSubscriptionAck> respond, Action<string> onError)
     {
-        Context.RequestReenter(streamSubscriptionManagerPid, request, (Task<CancelEventStoreSubscriptionAck> task) =>
+        Context.RequestReenter(_streamSubscriptionManagerPid, request, (Task<CancelEventStoreSubscriptionAck> task) =>
             {
                 if (task.IsCompletedSuccessfully)
                 {
@@ -315,7 +316,7 @@ public class EventStore : EventStoreBase
             if (completedSuccessfully)
             {
                 tcs.SetResult(Try.Succeeded());
-                Context.Send(streamSubscriptionManagerPid, commit);
+                Context.Send(_streamSubscriptionManagerPid, commit);
                 TrySendBatch();
             }
             else
