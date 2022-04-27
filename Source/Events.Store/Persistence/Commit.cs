@@ -15,5 +15,5 @@ public record Commit(
     IReadOnlyCollection<CommittedEvents> Events,
     IReadOnlyCollection<CommittedAggregateEvents> AggregateEvents,
     IReadOnlyCollection<CommittedEvent> AllEvents,
-    EventLogSequenceNumber FromOffset,
-    EventLogSequenceNumber ToOffset);
+    EventLogSequenceNumber FirstSequenceNumber,
+    EventLogSequenceNumber LastSequenceNumber);
