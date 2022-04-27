@@ -4,7 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;

@@ -17,6 +17,7 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
@@ -44,6 +45,7 @@ public class FastEventHandler : IEventHandler
     readonly Func<CancellationToken, Task> _acceptRegistration;
     readonly Func<Failure, CancellationToken, Task> _rejectRegistration;
     readonly ExecutionContext _executionContext;
+    readonly IOptions<EventHandlersConfiguration> _configuration;
     readonly ILogger _logger;
     readonly CancellationTokenSource _cancellationTokenSource;
 
@@ -52,6 +54,7 @@ public class FastEventHandler : IEventHandler
     /// <summary>
     /// Initializes a new instance of <see cref="EventHandler"/>.
     /// </summary>
+    /// <param name="configuration">The <see cref="EventHandlersConfiguration"/>.</param>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
     /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
     /// <param name="filterValidationForAllTenants">The <see cref="IValidateFilterForAllTenants" /> for validating the filter definition.</param>
@@ -65,6 +68,7 @@ public class FastEventHandler : IEventHandler
     /// <param name="executionContext">The execution context for the event handler.</param>
     /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
     public FastEventHandler(
+        IOptions<EventHandlersConfiguration> configuration,
         IStreamProcessors streamProcessors,
         IFilterStreamProcessors filterStreamProcessors,
         IValidateFilterForAllTenants filterValidationForAllTenants,
@@ -78,6 +82,7 @@ public class FastEventHandler : IEventHandler
         ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
+        _configuration = configuration;
         _logger = logger;
         _streamProcessors = streamProcessors;
         _filterStreamProcessors = filterStreamProcessors;
@@ -207,6 +212,11 @@ public class FastEventHandler : IEventHandler
 
     async Task<bool> RegisterFilterStreamProcessor()
     {
+        if (_configuration.Value.ImplicitFilter)
+        {
+            return true;
+        }
+
         _logger.RegisteringStreamProcessorForFilter(EventProcessor);
         return await RegisterFilterStreamProcessor(
             FilterDefinition,
@@ -309,16 +319,27 @@ public class FastEventHandler : IEventHandler
         try
         {
             var runningDispatcher = _acceptRegistration(_cancellationTokenSource.Token);
-            await FilterStreamProcessor.Initialize().ConfigureAwait(false);
+            if (!_configuration.Value.ImplicitFilter)
+            {
+                await FilterStreamProcessor.Initialize().ConfigureAwait(false);
+            }
             await EventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
             await ValidateFilter().ConfigureAwait(false);
-
-            var tasks = new TaskGroup(FilterStreamProcessor.Start(), EventProcessorStreamProcessor.Start(), runningDispatcher);
+            var tasks = new List<Task>
+            {
+                EventProcessorStreamProcessor.Start(),
+                runningDispatcher
+            };
+            if (!_configuration.Value.ImplicitFilter)
+            {
+                tasks.Add(FilterStreamProcessor.Start());
+            }
+            var taskGroup = new TaskGroup(tasks);
             
-            tasks.OnFirstTaskFailure += (_, ex) => _logger.ErrorWhileRunningEventHandler(ex, EventProcessor, Scope);
-            tasks.OnAllTasksCompleted += () => _logger.EventHandlerDisconnected(EventProcessor, Scope);
+            taskGroup.OnFirstTaskFailure += (_, ex) => _logger.ErrorWhileRunningEventHandler(ex, EventProcessor, Scope);
+            taskGroup.OnAllTasksCompleted += () => _logger.EventHandlerDisconnected(EventProcessor, Scope);
 
-            await tasks.WaitForAllCancellingOnFirst(_cancellationTokenSource).ConfigureAwait(false);
+            await taskGroup.WaitForAllCancellingOnFirst(_cancellationTokenSource).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

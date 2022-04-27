@@ -11,6 +11,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
@@ -29,6 +30,7 @@ public class EventHandlerFactory : IEventHandlerFactory
 {
     readonly IStreamProcessors _streamProcessors;
     readonly IFilterStreamProcessors _filterStreamProcessors;
+    readonly IOptions<EventHandlersConfiguration> _configuration;
     readonly IValidateFilterForAllTenants _filterValidator;
     readonly Func<TenantId, IWriteEventsToStreams> _getEventsToStreamsWriter;   
     readonly IStreamDefinitions _streamDefinitions;
@@ -43,13 +45,15 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <param name="streamDefinitions">The <see cref="IStreamDefinitions"/>.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
+    /// <param name="configuration">The <see cref="EventHandlersConfiguration"/>.</param>
     public EventHandlerFactory(
         IStreamProcessors streamProcessors,
         IValidateFilterForAllTenants filterValidator,
         Func<TenantId, IWriteEventsToStreams> getEventsToStreamsWriter,
         IStreamDefinitions streamDefinitions,
         ILoggerFactory loggerFactory,
-        IFilterStreamProcessors filterStreamProcessors)
+        IFilterStreamProcessors filterStreamProcessors,
+        IOptions<EventHandlersConfiguration> configuration)
     {
         _streamProcessors = streamProcessors;
         _filterValidator = filterValidator;
@@ -57,6 +61,7 @@ public class EventHandlerFactory : IEventHandlerFactory
         _streamDefinitions = streamDefinitions;
         _loggerFactory = loggerFactory;
         _filterStreamProcessors = filterStreamProcessors;
+        _configuration = configuration;
     }
 
     /// <inheritdoc />
@@ -82,6 +87,7 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <inheritdoc />
     public FastEventHandler CreateFast(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
         => new(
+            _configuration,
             _streamProcessors,
             _filterStreamProcessors,
             _filterValidator,
