@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -64,9 +63,9 @@ class CommitPipeline
 
     (Commit, TaskCompletionSource<Try>) BuildAndReplaceCurrentBatch()
     {
-        var (commit, eventLogSequenceNumber) = _currentBuilder.Build();
+        var (commit, nextEventLogSequenceNumber) = _currentBuilder.Build();
         var tcs = _completionSource;
-        _currentBuilder = new CommitBuilder(eventLogSequenceNumber);
+        _currentBuilder = new CommitBuilder(nextEventLogSequenceNumber);
         _completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
         return (commit, tcs);
     }
