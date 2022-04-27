@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store;
 [Singleton, PerTenant]
 public class EventLogStream : IEventLogStream
 {
-    const int ChannelSize = 5_000;
+    const int ChannelSize = 100;
 
     readonly ActorSystem _actorSystem;
     readonly ICreateProps _createProps;
@@ -96,22 +96,21 @@ public class EventLogStreamActor : IActor
     {
         if (request.FromOffset == _nextOffset)
         {
-            Ack(request, context);
-            await _channelWriter.WriteAsync(new EventLogBatch(request.FromOffset, request.ToOffset, request.Events), _cancellationToken);
             _nextOffset = request.ToOffset + 1;
+            Ack(_nextOffset, context);
+            await _channelWriter.WriteAsync(new EventLogBatch(request.FromOffset, request.ToOffset, request.Events), _cancellationToken);
         }
         else
         {
+            Ack(_nextOffset, context);
             _logger.LogUnexpectedOffset(_nextOffset, request.FromOffset);
-            // TODO: nack?
         }
     }
 
-    static void Ack(SubscriptionEvents request, IContext context) =>
+    static void Ack(EventLogSequenceNumber nextOffset, IContext context) =>
         context.Respond(new SubscriptionEventsAck
         {
-            FromOffset = request.FromOffset,
-            ToOffset = request.ToOffset
+            ContinueFromOffset = nextOffset,
         });
 
     async Task OnStopping()

@@ -55,8 +55,7 @@ message SubscriptionEvents{
 }
 
 message SubscriptionEventsAck{
-    uint64 from_offset = 1;
-    uint64 to_offset = 2;
+    uint64 continue_from_offset = 1;
 }
 
 service EventStore {
