@@ -24,6 +24,7 @@ public class CommitBuilder
     readonly EventLogSequenceNumber _initialSequenceNumber;
 
     public IReadOnlyList<CommittedEvent> AllEvents => _orderedEvents;
+    public int Count => _orderedEvents.Count;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitBuilder"/> class.
@@ -34,7 +35,7 @@ public class CommitBuilder
         _initialSequenceNumber = nextSequenceNumber;
         _nextSequenceNumber = nextSequenceNumber;
     }
-    
+
     /// <summary>
     /// Gets a value indicating whether the commit has events.
     /// </summary>
@@ -60,7 +61,7 @@ public class CommitBuilder
                 _.EventType.ToArtifact(),
                 _.Public,
                 _.Content)).ToList());
-            
+
             _committedEvents.Add(committedEvents);
             _orderedEvents.AddRange(committedEvents);
             _nextSequenceNumber = nextSequenceNumber;
@@ -105,6 +106,7 @@ public class CommitBuilder
             {
                 return error;
             }
+
             _orderedEvents.AddRange(committedEvents);
 
 
@@ -123,7 +125,7 @@ public class CommitBuilder
     /// <returns>A tuple of the built <see cref="Commit"/> and the next <see cref="EventLogSequenceNumber"/>.</returns>
     public (Commit Commit, EventLogSequenceNumber NextSequenceNumber) Build()
         => (new Commit(_committedEvents, _committedAggregateEvents, _orderedEvents, _initialSequenceNumber, _nextSequenceNumber - 1), _nextSequenceNumber);
-    
+
     bool TryAddCommittedAggregateEvents(CommittedAggregateEvents events, out Exception error)
     {
         error = default;
@@ -133,9 +135,10 @@ public class CommitBuilder
             error = new EventsForAggregateAlreadyAddedToCommit(aggregate);
             return false;
         }
+
         _committedAggregateEvents.Add(events);
         return true;
-        
+
         //TODO: Make more sophisticated logic for determining whether a commit for the same aggregate can be added to the commit.
         // if (_aggregates.TryGetValue(aggregate, out var aggregateRootVersionRange))
         // {

@@ -29,6 +29,10 @@ public static class EventStoreExtensions
             EventSourceId = _.EventSource
         }));
         var response = await eventStore.CommitEvents(request, CancellationToken.None);
+        if (response is null)
+        {
+            throw new TimeoutException();
+        }
         if (response.Failure != default)
         {
             throw new Exception(response.Failure.Reason);
