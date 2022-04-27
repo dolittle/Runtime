@@ -52,9 +52,10 @@ public class StreamSubscriptionActor : IActor
         {
             try
             {
-                var response = await context.RequestAsync<CommittedEventsRequest>(catchupPid,
+                var response = await context.RequestAsync<EventLogCatchupResponse>(catchupPid,
                     new EventLogCatchupRequest(fromOffset, (int)(toOffset + 1 - fromOffset)), context.CancellationToken);
-                await OnCommittedEventsRequest(response, context);
+                await Publish(ToSubscriptionEvent(response), context);
+                fromOffset = response.ToOffset + 1;
             }
             catch (OperationCanceledException)
             {
@@ -79,9 +80,10 @@ public class StreamSubscriptionActor : IActor
         return committedEvent => eventSet.Contains(committedEvent.EventType.Id);
     }
 
-    async Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context) 
+    Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context) => Publish(ToSubscriptionEvent(request), context);
+
+    async Task Publish(SubscriptionEvents subscriptionEvent, IContext context)
     {
-        var subscriptionEvent = ToSubscriptionEvent(request);
         while (!context.CancellationToken.IsCancellationRequested)
         {
             try
@@ -89,6 +91,7 @@ public class StreamSubscriptionActor : IActor
                 var response = await context.RequestAsync<SubscriptionEventsAck>(_target, subscriptionEvent, TimeSpan.FromSeconds(10));
                 if (response != null)
                 {
+                    
                     return;
                 }
             }
@@ -113,5 +116,14 @@ public class StreamSubscriptionActor : IActor
             FromOffset = request.FromOffset,
             ToOffset = request.ToOffset,
             Events = { request.Events.Where(_shouldIncludeEvent) }
+        };
+    
+    SubscriptionEvents ToSubscriptionEvent(EventLogCatchupResponse response) =>
+        new()
+        {
+            SubscriptionId = _subscriptionId,
+            FromOffset = response.FromOffset,
+            ToOffset = response.ToOffset,
+            Events = { response.Events.Where(_shouldIncludeEvent) }
         };
 }

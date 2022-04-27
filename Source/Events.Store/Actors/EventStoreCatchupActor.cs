@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.Logging;
@@ -10,6 +12,7 @@ using Proto;
 namespace Dolittle.Runtime.Events.Store.Actors;
 
 record EventLogCatchupRequest(EventLogSequenceNumber From, int MaxCount);
+record EventLogCatchupResponse(EventLogSequenceNumber FromOffset, EventLogSequenceNumber ToOffset, IReadOnlyCollection<Contracts.CommittedEvent> Events);
 
 public class EventStoreCatchupActor : IActor
 {
@@ -39,11 +42,7 @@ public class EventStoreCatchupActor : IActor
         var maxEvents = Math.Min(request.MaxCount, BatchSize);
         if (maxEvents < 1)
         {
-            context.Respond(new CommittedEventsRequest
-            {
-                FromOffset = request.From,
-                ToOffset = request.From
-            });
+            context.Respond(new EventLogCatchupResponse(request.From, request.From, ImmutableList<Contracts.CommittedEvent>.Empty));
             return Task.CompletedTask;
         }
 
@@ -55,13 +54,7 @@ public class EventStoreCatchupActor : IActor
                 var committedEvents = task.Result;
                 var fromOffset = request.From;
                 var toOffset = committedEvents.Count > 0 ? committedEvents[^1].EventLogSequenceNumber : fromOffset;
-                context.Respond(new CommittedEventsRequest
-                    {
-                        Events = { committedEvents.ToProtobuf() },
-                        FromOffset = fromOffset,
-                        ToOffset = toOffset,
-                    }
-                );
+                context.Respond(new EventLogCatchupResponse(fromOffset, toOffset, committedEvents.ToProtobuf().ToImmutableList()));
             }
             else
             {

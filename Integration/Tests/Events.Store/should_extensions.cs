@@ -221,6 +221,30 @@ static class should_extensions
         should_have_same_execution_context(committed_event.ExecutionContext, stored_event.ExecutionContext);
         stored_event.EventLogSequenceNumber.ShouldEqual(committed_event.EventLogSequenceNumber.Value);
     }
+
+    public static void should_be_the_same_committed_events(this IReadOnlyList<Dolittle.Runtime.Events.Contracts.CommittedEvent> actual, IReadOnlyList<Dolittle.Runtime.Events.Contracts.CommittedEvent> expected)
+    {
+        actual.Count.ShouldEqual(expected.Count);
+            
+        for (var i = 0; i < actual.Count; i++)
+        {
+            var expectedEvent = expected[i];
+            var actualEvent = actual[i];
+            actualEvent.ToCommittedEvent().should_be_the_same_committed_event(expectedEvent.ToCommittedEvent());
+        }
+    }
+    
+    public static void should_be_the_same_committed_events(this IReadOnlyList<CommittedEvent> actual, IReadOnlyList<CommittedEvent> expected)
+    {
+        actual.Count.ShouldEqual(expected.Count);
+            
+        for (var i = 0; i < actual.Count; i++)
+        {
+            var expectedEvent = expected[i];
+            var actualEvent = actual[i];
+            actualEvent.should_be_the_same_committed_event(expectedEvent);
+        }
+    }
     
     public static void should_be_the_same_committed_event(this CommittedEvent actual, CommittedEvent expected)
     {
