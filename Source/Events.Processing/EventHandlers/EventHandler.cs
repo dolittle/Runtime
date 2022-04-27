@@ -98,22 +98,22 @@ public class EventHandler : IEventHandler
         _arguments.EventTypes,
         _arguments.Partitioned);
     
-    ScopeId Scope => _arguments.Scope.Value;
+    public ScopeId Scope => _arguments.Scope.Value;
     
-    EventProcessorId EventProcessor => _arguments.EventHandler.Value;
+    public EventProcessorId EventProcessor => _arguments.EventHandler.Value;
     
-    IEnumerable<ArtifactId> EventTypes => _arguments.EventTypes;
+    public IEnumerable<ArtifactId> EventTypes => _arguments.EventTypes;
     
-    bool Partitioned => _arguments.Partitioned;
+    public bool Partitioned => _arguments.Partitioned;
     
-    StreamDefinition FilteredStreamDefinition => new(
+    public StreamDefinition FilteredStreamDefinition => new(
         new TypeFilterWithEventSourcePartitionDefinition(
             TargetStream,
             TargetStream,
             EventTypes,
             Partitioned));
     
-    TypeFilterWithEventSourcePartitionDefinition FilterDefinition => new(
+    public TypeFilterWithEventSourcePartitionDefinition FilterDefinition => new(
         StreamId.EventLog,
         TargetStream,
         EventTypes,
