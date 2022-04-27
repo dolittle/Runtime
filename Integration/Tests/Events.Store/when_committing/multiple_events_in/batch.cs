@@ -66,7 +66,7 @@ class batch : given.a_clean_event_store
         It should_return_the_correct_committed_event = () =>
             response_before_subscribe.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial);
 
-        It should_have_stored_one_event_in_the_event_log = () => number_of_events_stored_should_be(all_committed_events.Count);
+        It should_have_stored_events_in_the_event_log = () => number_of_events_stored_should_be(all_committed_events.Count);
 
         It should_have_stored_the_correct_events =
             () => all_committed_events.ToCommittedEvents().should_have_stored_committed_events(streams, event_content_converter);
