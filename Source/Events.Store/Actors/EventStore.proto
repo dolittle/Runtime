@@ -1,12 +1,66 @@
 syntax = "proto3";
 
-package dolittle.runtime.events;
+package dolittle.runtime.events.actors;
 
 option csharp_namespace = "Dolittle.Runtime.Events.Store.Actors";
 
 import "Runtime/Events/EventStore.proto";
+import "Runtime/Events/Committed.proto";
+
+import "Protobuf/Uuid.proto";
+import "Artifacts/Artifact.proto";
+
+
+message EventStoreSubscriptionRequest{
+    protobuf.Uuid subscription_id = 1;
+    repeated protobuf.Uuid event_type_ids = 2;
+    string pid_id = 3;
+    string pid_address = 4;
+    uint64 from_offset = 5;
+}
+
+message StartEventStoreSubscription{
+    protobuf.Uuid subscription_id = 1;
+    repeated protobuf.Uuid event_type_ids = 2;
+    string pid_id = 3;
+    string pid_address = 4;
+    uint64 from_offset = 5;
+    uint64 current_high_watermark = 6;
+}
+
+message EventStoreSubscriptionAck{
+    protobuf.Uuid subscription_id = 1;
+    bool ok = 2;
+}
+
+message CancelEventStoreSubscription{
+    protobuf.Uuid subscription_id = 1;
+}
+
+message CancelEventStoreSubscriptionAck{
+    protobuf.Uuid subscription_id = 1;
+}
+
+message CommittedEventsRequest{
+    uint64 from_offset = 1;
+    uint64 to_offset = 2;
+    repeated CommittedEvent events = 3;
+}
+
+message SubscriptionEvents{
+    protobuf.Uuid subscription_id = 1;
+    uint64 from_offset = 2;
+    uint64 to_offset = 3;
+    repeated CommittedEvent events = 4;
+}
+
+message SubscriptionEventsAck{
+    uint64 continue_from_offset = 1;
+}
 
 service EventStore {
     rpc Commit (CommitEventsRequest) returns (CommitEventsResponse);
     rpc CommitForAggregate (CommitAggregateEventsRequest) returns (CommitAggregateEventsResponse);
+    rpc RegisterSubscription(EventStoreSubscriptionRequest) returns (EventStoreSubscriptionAck);
+    rpc CancelSubscription(CancelEventStoreSubscription) returns (CancelEventStoreSubscriptionAck);
 }

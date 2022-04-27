@@ -222,6 +222,42 @@ static class should_extensions
         stored_event.EventLogSequenceNumber.ShouldEqual(committed_event.EventLogSequenceNumber.Value);
     }
 
+    public static void should_be_the_same_committed_events(this IReadOnlyList<Dolittle.Runtime.Events.Contracts.CommittedEvent> actual, IReadOnlyList<Dolittle.Runtime.Events.Contracts.CommittedEvent> expected)
+    {
+        actual.Count.ShouldEqual(expected.Count);
+            
+        for (var i = 0; i < actual.Count; i++)
+        {
+            var expectedEvent = expected[i];
+            var actualEvent = actual[i];
+            actualEvent.ToCommittedEvent().should_be_the_same_committed_event(expectedEvent.ToCommittedEvent());
+        }
+    }
+    
+    public static void should_be_the_same_committed_events(this IReadOnlyList<CommittedEvent> actual, IReadOnlyList<CommittedEvent> expected)
+    {
+        actual.Count.ShouldEqual(expected.Count);
+            
+        for (var i = 0; i < actual.Count; i++)
+        {
+            var expectedEvent = expected[i];
+            var actualEvent = actual[i];
+            actualEvent.should_be_the_same_committed_event(expectedEvent);
+        }
+    }
+    
+    public static void should_be_the_same_committed_event(this CommittedEvent actual, CommittedEvent expected)
+    {
+        JToken.DeepEquals(JToken.Parse(actual.Content), JToken.Parse(expected.Content)).ShouldBeTrue();
+        actual.Occurred.UtcDateTime.ShouldBeCloseTo(expected.Occurred.UtcDateTime, TimeSpan.FromMilliseconds(1));
+        actual.Public.ShouldEqual(expected.Public);
+        actual.EventSource.Value.ShouldEqual(expected.EventSource.Value);
+        actual.Type.Generation.Value.ShouldEqual(expected.Type.Generation.Value);
+        actual.Type.Id.Value.ShouldEqual(expected.Type.Id.Value);
+        actual.ExecutionContext.ShouldEqual(expected.ExecutionContext);
+        actual.EventLogSequenceNumber.Value.ShouldEqual(expected.EventLogSequenceNumber.Value);
+    }
+
     static void should_have_the_same_version(Version version, Dolittle.Runtime.Events.Store.MongoDB.Events.Version stored_version)
     {
         version.Build.ShouldEqual(stored_version.Build);
