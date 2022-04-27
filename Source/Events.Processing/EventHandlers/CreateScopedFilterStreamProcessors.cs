@@ -59,7 +59,6 @@ public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProce
                 cancellationToken)
             .ConfigureAwait(false);
         
-        
         if (processorState is not StreamProcessorState unpartitionedProcessorState)
         {
             throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
