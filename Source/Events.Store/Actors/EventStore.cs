@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,8 +30,7 @@ public class EventStore : EventStoreBase
 {
     TaskCompletionSource<Try> _nextBatchResult;
 
-    Task<Try> OnNextBatchCompleted => _nextBatchResult.Task;
-    CommitBuilder CommitBuilder { get; set; }
+    CommitPipeline Pipeline { get; set; }
 
     readonly IPersistCommits _commits;
     readonly IFetchCommittedEvents _committedEvents;
@@ -43,7 +43,6 @@ public class EventStore : EventStoreBase
     readonly HashSet<Aggregate> _aggregateCommitInFlight = new();
     readonly Dictionary<Aggregate, AggregateRootVersion> _aggregateRootVersionCache = new();
 
-    EventLogSequenceNumber _nextSequenceNumber;
     bool _readyToSend = true;
 
     readonly IApplicationLifecycleHooks _lifecycleHooks;
@@ -76,8 +75,8 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override async Task OnStarted()
     {
-        _nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
-        ResetBatchBuilderState(_nextSequenceNumber);
+        var nextSequenceNumber = await GetNextEventLogSequenceNumber(Context.CancellationToken).ConfigureAwait(false);
+        Pipeline = new CommitPipeline(nextSequenceNumber);
         _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
         Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
         {
@@ -88,7 +87,7 @@ public class EventStore : EventStoreBase
             }
         });
 
-        var propsFor = _propsFactory.PropsFor<StreamSubscriptionManagerActor>(_nextSequenceNumber, _tenantId);
+        var propsFor = _propsFactory.PropsFor<StreamSubscriptionManagerActor>(nextSequenceNumber, _tenantId);
         _streamSubscriptionManagerPid = Context.Spawn(propsFor);
     }
 
@@ -104,7 +103,7 @@ public class EventStore : EventStoreBase
             return Task.CompletedTask;
         }
 
-        var tryAdd = CommitBuilder.TryAddEventsFrom(request);
+        var tryAdd = Pipeline.TryAddEventsFrom(request);
 
         if (!tryAdd.Success)
         {
@@ -115,8 +114,7 @@ public class EventStore : EventStoreBase
             return Task.CompletedTask;
         }
 
-        var committedEvents = tryAdd.Result;
-        var onNextBatchCompleted = OnNextBatchCompleted;
+        var (committedEvents, onNextBatchCompleted) = tryAdd.Result;
 
         TrySendBatch();
 
@@ -199,15 +197,14 @@ public class EventStore : EventStoreBase
                 expectedAggregateRootVersion).ToFailure());
         }
 
-        var tryAdd = CommitBuilder.TryAddEventsFrom(request);
+        var tryAdd = Pipeline.TryAddEventsFrom(request);
 
         if (!tryAdd.Success)
         {
             return RespondWithFailureAndClearInFlight(tryAdd.Exception.ToFailure());
         }
 
-        var committedEvents = tryAdd.Result;
-        var onNextBatchCompleted = OnNextBatchCompleted;
+        var (committedEvents, onNextBatchCompleted) = tryAdd.Result;
 
         TrySendBatch();
 
@@ -295,18 +292,12 @@ public class EventStore : EventStoreBase
     {
         // TODO: Refactor
 
-        if (_shuttingDown || !_readyToSend || !CommitBuilder.HasCommits)
+        if (_shuttingDown || !_readyToSend || !Pipeline.TryGetNextCommit(out var commit, out var tcs))
         {
             return;
         }
 
         _readyToSend = false;
-        var beforeSequenceNumber = _nextSequenceNumber;
-        var (commit, newNextSequenceNumber) = CommitBuilder.Build();
-        _nextSequenceNumber = newNextSequenceNumber;
-        var tcs = _nextBatchResult;
-
-        ResetBatchBuilderState(newNextSequenceNumber);
 
         Context.ReenterAfter(_commits.Persist(commit, CancellationToken.None), persistTask =>
         {
@@ -325,7 +316,8 @@ public class EventStore : EventStoreBase
                 var failed = Try.Failed(persistTask.Exception);
                 _nextBatchResult.SetResult(failed);
                 tcs.SetResult(failed);
-                ResetBatchBuilderState(beforeSequenceNumber);
+                FailPipeline(Pipeline, failed);
+                Pipeline = new CommitPipeline(commit.FromOffset);
             }
 
             if (_shuttingDown)
@@ -337,11 +329,19 @@ public class EventStore : EventStoreBase
         });
     }
 
-    void ResetBatchBuilderState(EventLogSequenceNumber newNextSequenceNumber)
+    void FailPipeline(CommitPipeline commitBuilder, Try failure)
     {
-        CommitBuilder = new CommitBuilder(newNextSequenceNumber);
-        _nextBatchResult = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
+        while (commitBuilder.TryGetNextCommit(out _, out var tcs))
+        {
+            tcs.SetResult(failure);
+        }
     }
+
+    // void ResetBatchBuilderState(EventLogSequenceNumber newNextSequenceNumber)
+    // {
+    //     CommitBuilder = new CommitBuilder(newNextSequenceNumber);
+    //     _nextBatchResult = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
+    // }
 
     Task<EventLogSequenceNumber> GetNextEventLogSequenceNumber(CancellationToken cancellationToken)
         => _committedEvents.FetchNextSequenceNumber(cancellationToken);
