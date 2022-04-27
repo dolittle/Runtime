@@ -50,7 +50,7 @@ public class EventHandlers : IEventHandlers
         var eventHandlerId = eventHandler.Info.Id;
         if (!_eventHandlers.TryAdd(eventHandlerId, eventHandler))
         {
-            Log.EventHandlerAlreadyRegistered(_logger, eventHandlerId);
+            _logger.EventHandlerAlreadyRegistered(eventHandlerId);
             await onFailure(new EventHandlerAlreadyRegistered(eventHandlerId), cancellationToken).ConfigureAwait(false);
             return;
         }

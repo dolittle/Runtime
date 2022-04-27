@@ -4,12 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
@@ -17,54 +13,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 public interface IEventHandler : IDisposable
 {
     /// <summary>
-    /// Gets the <see cref="StreamId">target stream</see> for the <see cref="EventHandler"/>.
-    /// </summary>
-    StreamId TargetStream { get; }
-
-    /// <summary>
     /// Gets the <see cref="EventHandlerInfo"/> for the <see cref="EventHandler"/>.
     /// </summary>
     EventHandlerInfo Info { get; }
-
-    /// <summary>
-    /// Gets the <see cref="Scope"/> for the <see cref="EventHandler"/>.
-    /// </summary>
-    ScopeId Scope { get; }
-
-    /// <summary>
-    /// Gets the <see cref="EventProcessorId"/> for the <see cref="EventHandler"/>.
-    /// </summary>
-    EventProcessorId EventProcessor { get; }
-
-    /// <summary>
-    /// Gets the <see cref="ArtifactId"/> for the <see cref="EventHandler"/>.
-    /// </summary>
-    IEnumerable<ArtifactId> EventTypes { get; }
-
-    /// <summary>
-    /// Gets whether or not the <see cref="EventHandler"/> is partitioned.
-    /// </summary>
-    bool Partitioned { get; }
-
-    /// <summary>
-    /// Gets the <see cref="StreamDefinition"/> for the filtered stream.
-    /// </summary>
-    StreamDefinition FilteredStreamDefinition { get; }
-
-    /// <summary>
-    /// Gets the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> for the filter.
-    /// </summary>
-    TypeFilterWithEventSourcePartitionDefinition FilterDefinition { get; }
-
-    /// <summary>
-    /// Gets the <see cref="StreamProcessor"/> for the filter.
-    /// </summary>
-    StreamProcessor FilterStreamProcessor { get; }
-
-    /// <summary>
-    /// Gets the <see cref="StreamProcessor"/> for the event processor.
-    /// </summary>
-    StreamProcessor EventProcessorStreamProcessor { get; }
 
     /// <summary>
     /// Gets the current state of the Event Handler. 
