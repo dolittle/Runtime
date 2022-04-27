@@ -4,7 +4,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -336,12 +335,6 @@ public class EventStore : EventStoreBase
             tcs.SetResult(failure);
         }
     }
-
-    // void ResetBatchBuilderState(EventLogSequenceNumber newNextSequenceNumber)
-    // {
-    //     CommitBuilder = new CommitBuilder(newNextSequenceNumber);
-    //     _nextBatchResult = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
-    // }
 
     Task<EventLogSequenceNumber> GetNextEventLogSequenceNumber(CancellationToken cancellationToken)
         => _committedEvents.FetchNextSequenceNumber(cancellationToken);
