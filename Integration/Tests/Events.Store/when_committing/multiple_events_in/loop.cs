@@ -79,14 +79,7 @@ class loop : given.a_clean_event_store
             var events = responses.Select(_ => _.Events.ToCommittedEvents()).SelectMany(it => it).ToList();
             var batchCommittedEvents = batch!.MatchedEvents.ToCommittedEvents().ToList();
 
-            batchCommittedEvents.Count.ShouldEqual(events.Count);
-            
-            for (var i = 0; i < events.Count; i++)
-            {
-                var expectedEvent = events[i];
-                var actualEvent = batchCommittedEvents[i];
-                actualEvent.should_be_the_same_committed_event(expectedEvent);
-            }
+            batchCommittedEvents.should_be_the_same_committed_events(events);
         };
     }
     

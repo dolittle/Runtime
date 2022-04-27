@@ -8,7 +8,7 @@ using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store;
 
-public record EventLogBatch(EventLogSequenceNumber From, EventLogSequenceNumber To, IEnumerable<Contracts.CommittedEvent> MatchedEvents);
+public record EventLogBatch(EventLogSequenceNumber From, EventLogSequenceNumber To, IReadOnlyList<Contracts.CommittedEvent> MatchedEvents);
 
 public interface IEventLogStream
 {
