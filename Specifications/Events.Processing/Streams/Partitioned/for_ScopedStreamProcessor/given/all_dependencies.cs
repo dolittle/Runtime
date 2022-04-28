@@ -127,27 +127,5 @@ public class all_dependencies
                     : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
         event_waiter.NotifyForEvent(source_stream_id, (ulong)(streamEvents.Length - 1));
-        // for (var i = 0; i <= streamEvents.Length; i++)
-        // {
-        //     var position = new StreamPosition((ulong)i);
-        //     if (i == streamEvents.Length)
-        //     {
-        //         events_fetcher
-        //             .Setup(_ => _.Fetch(position, It.IsAny<CancellationToken>()))
-        //             .Returns(Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception())));
-        //         
-        //         events_fetcher
-        //             .Setup(_ => _.FetchInPartition(It.IsAny<PartitionId>(), position, It.IsAny<CancellationToken>()))
-        //             .Returns(Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception())));
-        //         break;
-        //     }
-        //     events_fetcher
-        //         .Setup(_ => _.Fetch(position, It.IsAny<CancellationToken>()))
-        //         .Returns(Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(streamEvents.Skip(i))));
-        //     events_fetcher
-        //         .Setup(_ => _.FetchInPartition(It.IsAny<PartitionId>(), position, It.IsAny<CancellationToken>()))
-        //         .Returns<PartitionId, StreamPosition, CancellationToken>((partition, streamPosition, cancellation) => Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(streamEvents.Skip(i).Where(_ => _.Partition == partition))));
-        //     event_waiter.NotifyForEvent(source_stream_id, position);
-        // }
     }
 }

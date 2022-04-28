@@ -106,20 +106,5 @@ public class all_dependencies
                     : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
         event_waiter.NotifyForEvent(source_stream_id, (ulong)(streamEvents.Length - 1));
-            // for (var i = 0; i <= streamEvents.Length; i++)
-        // {
-        //     var position = new StreamPosition((ulong)i);
-        //     if (i == streamEvents.Length)
-        //     {
-        //         events_fetcher
-        //             .Setup(_ => _.Fetch(position, Moq.It.IsAny<CancellationToken>()))
-        //             .Returns(Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception())));
-        //         break;
-        //     }
-        //     events_fetcher
-        //         .Setup(_ => _.Fetch(position, Moq.It.IsAny<CancellationToken>()))
-        //         .Returns(Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(streamEvents.Skip(i))));
-        //     event_waiter.NotifyForEvent(source_stream_id, position);
-        // }
     }
 }
