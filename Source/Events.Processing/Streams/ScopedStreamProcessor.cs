@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -70,15 +71,29 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
             }
             else
             {
-                var getNextEvent = await FetchNextEventToProcess(streamProcessorState, cancellationToken).ConfigureAwait(false);
-                if (!getNextEvent.Success)
+                var getNextEvents = await FetchNextEventsToProcess(streamProcessorState, cancellationToken).ConfigureAwait(false);
+                if (!getNextEvents.Success)
                 {
-                    throw getNextEvent.Exception; // TODO: This check wasn't here before - does it make sense?
+                    throw getNextEvents.Exception;
                 }
 
-                var eventToProcess = getNextEvent.Result;
-                var executionContext = GetExecutionContextForEvent(eventToProcess);
-                streamProcessorState = (await RetryProcessingEvent(eventToProcess, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, executionContext, cancellationToken).ConfigureAwait(false)) as StreamProcessorState;
+                var eventToRetry = getNextEvents.Result.First();
+                
+                var executionContext = GetExecutionContextForEvent(eventToRetry);
+                streamProcessorState = await RetryProcessingEvent(
+                    eventToRetry,
+                    streamProcessorState.FailureReason,
+                    streamProcessorState.ProcessingAttempts,
+                    streamProcessorState,
+                    executionContext,
+                    cancellationToken).ConfigureAwait(false) as StreamProcessorState;
+
+                if (streamProcessorState.IsFailing)
+                {
+                    continue;
+                }
+                var newStreamProcessorState = await ProcessEvents(getNextEvents.Result.Skip(1).Select(_ => (_, GetExecutionContextForEvent(_))), streamProcessorState, cancellationToken).ConfigureAwait(false);
+                streamProcessorState = newStreamProcessorState as StreamProcessorState;
             }
         }
 

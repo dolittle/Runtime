@@ -60,17 +60,29 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
+    protected override async Task<IStreamProcessorState> ProcessEvents(IEnumerable<(StreamEvent, ExecutionContext)> events, IStreamProcessorState currentState, CancellationToken cancellationToken)
     {
         var streamProcessorState = currentState as StreamProcessorState;
-        if (!streamProcessorState.FailingPartitions.ContainsKey(@event.Partition))
+        
+        foreach (var (@event, executionContext) in events)
         {
-            return await base.ProcessEvent(@event, streamProcessorState, executionContext, cancellationToken).ConfigureAwait(false);
+            if (streamProcessorState.FailingPartitions.ContainsKey(@event.Partition))
+            {
+                var newState = streamProcessorState with
+                {
+                    Position = @event.Position + 1
+                };
+                await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
+                streamProcessorState = newState;
+            }
+            else
+            {
+                var (newState, _) = await ProcessEvent(@event, streamProcessorState, executionContext, cancellationToken).ConfigureAwait(false);
+                streamProcessorState = newState as StreamProcessorState;
+            }
         }
-        var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions, streamProcessorState.LastSuccessfullyProcessed);
-        await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
-        return newState;
-
+        
+        return streamProcessorState;
     }
 
     /// <inheritdoc/>

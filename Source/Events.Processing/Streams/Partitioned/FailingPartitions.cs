@@ -78,22 +78,23 @@ public class FailingPartitions : IFailingPartitions
         }
 
         var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
+        
+        // TODO: Failing partitions should be actorified
         foreach (var kvp in failingPartitionsList)
         {
             var partition = kvp.Key;
             var failingPartitionState = kvp.Value;
-            if (ShouldRetryProcessing(failingPartitionState))
+            while (ShouldProcessNextEventInPartition(failingPartitionState.Position, streamProcessorState.Position) && ShouldRetryProcessing(failingPartitionState))
             {
-                while (ShouldProcessNextEventInPartition(failingPartitionState.Position, streamProcessorState.Position))
+                var tryGetEvents = await _eventFetcherPolicies.Fetching.ExecuteAsync(
+                    _ => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, _),
+                    cancellationToken).ConfigureAwait(false);
+                if (!tryGetEvents.Success)
                 {
-                    var tryGetEvent = await _eventFetcherPolicies.Fetching.ExecuteAsync(
-                        _ => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, _),
-                        cancellationToken).ConfigureAwait(false);
-                    if (!tryGetEvent.Success)
-                    {
-                        break;
-                    }
-                    var streamEvent = tryGetEvent.Result;
+                    break;
+                }
+                foreach (var streamEvent in tryGetEvents.Result)
+                {
                     if (streamEvent.Partition != partition)
                     {
                         throw new StreamEventInWrongPartition(streamEvent, partition);
@@ -136,6 +137,8 @@ public class FailingPartitions : IFailingPartitions
                             streamEvent.Position,
                             DateTimeOffset.UtcNow,
                             cancellationToken).ConfigureAwait(false);
+                        // Important to not process the next events if this failed
+                        break;
                     }
                     else
                     {
@@ -149,13 +152,16 @@ public class FailingPartitions : IFailingPartitions
                             streamEvent.Position,
                             DateTimeOffset.UtcNow,
                             cancellationToken).ConfigureAwait(false);
+                        // Important to not process the next events if this failed
+                        break;
                     }
                 }
+                
+            }
 
-                if (ShouldRetryProcessing(failingPartitionState))
-                {
-                    streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken).ConfigureAwait(false);
-                }
+            if (ShouldRetryProcessing(failingPartitionState))
+            {
+                streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -224,9 +230,9 @@ public class FailingPartitions : IFailingPartitions
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
 
-    bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
+    static bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
         failingPartitionPosition.Value < streamProcessorPosition.Value;
 
-    bool ShouldRetryProcessing(FailingPartitionState state) =>
+    static bool ShouldRetryProcessing(FailingPartitionState state) =>
         DateTimeOffset.UtcNow.CompareTo(state.RetryTime) >= 0;
 }

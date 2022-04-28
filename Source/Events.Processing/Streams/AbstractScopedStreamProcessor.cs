@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -194,15 +196,35 @@ public abstract class AbstractScopedStreamProcessor
     /// <summary>
     /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
     /// </summary>
+    /// <param name="events">The <see cref="StreamEvent" /> events to process..</param>
+    /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
+    protected virtual async Task<IStreamProcessorState> ProcessEvents(IEnumerable<(StreamEvent, ExecutionContext)> events, IStreamProcessorState currentState, CancellationToken cancellationToken)
+    {
+        foreach (var (@event, executionContext) in events)
+        {
+            (currentState, var processingResult) = await ProcessEvent(@event, currentState, executionContext, cancellationToken).ConfigureAwait(false);
+            if (!processingResult.Succeeded)
+            {
+                break;
+            }
+        }
+        return currentState;
+    }
+    
+    /// <summary>
+    /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
+    /// </summary>
     /// <param name="event">The <see cref="StreamEvent" />.</param>
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
     /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    protected virtual async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
+    protected async Task<(IStreamProcessorState, IProcessingResult)> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var processingResult = await _processor.Process(@event.Event, @event.Partition, executionContext, cancellationToken).ConfigureAwait(false);
-        return await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false);
+        return (await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false), processingResult);
     }
 
     /// <summary>
@@ -211,7 +233,7 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="StreamEvent" />.</returns>
-    protected Task<Try<StreamEvent>> FetchNextEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken)
+    protected Task<Try<IEnumerable<StreamEvent>>> FetchNextEventsToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken)
         => _eventFetcherPolicies.Fetching.ExecuteAsync(_ => _eventsFetcher.Fetch(currentState.Position, _), cancellationToken);
     // TODO: Shouldn't this policy rather be used in the actual fetcher?
 
@@ -291,7 +313,7 @@ public abstract class AbstractScopedStreamProcessor
         {
             do
             {
-                Try<StreamEvent> tryGetEvent;
+                Try<IEnumerable<StreamEvent>> tryGetEvents;
                 do
                 {
                     _resetStreamProcessor = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -325,8 +347,8 @@ public abstract class AbstractScopedStreamProcessor
                     try
                     {
                         _currentState = await Catchup(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
-                        tryGetEvent = await FetchNextEventToProcess(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
-                        if (!tryGetEvent.Success)
+                        tryGetEvents = await FetchNextEventsToProcess(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
+                        if (!tryGetEvents.Success)
                         {
                             await _eventWaiter.WaitForEvent(
                                 Identifier.ScopeId,
@@ -338,19 +360,18 @@ public abstract class AbstractScopedStreamProcessor
                     }
                     catch (TaskCanceledException ex)
                     {
-                        tryGetEvent = ex;
+                        tryGetEvents = ex;
                     }
                 }
-                while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
+                while (!tryGetEvents.Success && !cancellationToken.IsCancellationRequested);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                var eventToProcess = tryGetEvent.Result;
-                var executionContext = GetExecutionContextForEvent(eventToProcess);
-                _currentState = await ProcessEvent(eventToProcess, _currentState, executionContext, cancellationToken).ConfigureAwait(false);
+                var eventsToProcess = tryGetEvents.Result;
+                _currentState = await ProcessEvents(eventsToProcess.Select(_ => (_, GetExecutionContextForEvent(_))), _currentState, cancellationToken).ConfigureAwait(false);
             }
             while (!cancellationToken.IsCancellationRequested);
         }
