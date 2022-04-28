@@ -64,16 +64,15 @@ public class StreamSubscriptionManagerActor : IActor
         var request = new CommittedEventsRequest
         {
             Events = { commit.AllEvents.Select(it => it.ToProtobuf()) },
-            FromOffset = commit.FromOffset,
-            ToOffset = commit.ToOffset
+            FromOffset = commit.FirstSequenceNumber,
+            ToOffset = commit.LastSequenceNumber
         };
 
         foreach (var kv in _activeSubscriptions)
         {
             context.Send(kv.Value, request);
         }
-
-        _nextSequenceNumber = request.ToOffset;
+        _nextSequenceNumber = request.ToOffset + 1;
         return Task.CompletedTask;
     }
 

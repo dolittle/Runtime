@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
@@ -58,4 +60,17 @@ public class EventsToPublicStreamsWriter : IWriteEventsToPublicStreams
     /// <inheritdoc/>
     public Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken) =>
         Write(@event, streamId, partitionId, cancellationToken);
+
+    public async Task Write(IEnumerable<(CommittedEvent, PartitionId)> events, ScopeId scope, StreamId streamId, CancellationToken cancellationToken)
+    {
+        var writtenStreamPosition = await _eventsToStreamsWriter.Write(
+            await _streams.GetPublic(streamId, cancellationToken).ConfigureAwait(false),
+            _filter,
+            streamPosition =>
+            {
+                return events.Select((eventAndPartition, i) => _eventConverter.ToStoreStreamEvent(eventAndPartition.Item1, streamPosition + (ulong)i, eventAndPartition.Item2));
+            },
+            cancellationToken).ConfigureAwait(false);
+        _streamWatcher.NotifyForEvent(streamId, writtenStreamPosition);
+    }
 }

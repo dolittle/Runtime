@@ -8,14 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
-using Integration.Benchmarks.Events.Store;
 using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
@@ -30,7 +29,7 @@ namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 /// <summary>
 /// Benchmarks for Event Handlers.
 /// </summary>
-public class EventHandler : JobBase
+public class FastEventHandler : JobBase
 {
     IEventStore _eventStore;
     IEventHandlers _eventHandlers;
@@ -87,7 +86,7 @@ public class EventHandler : JobBase
             });
 
         var eventHandlers = new List<IEventHandler>();
-        eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.Create(
+        eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.CreateFast(
             new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
             _dispatcher.Object,
             CancellationToken.None)));

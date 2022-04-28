@@ -62,6 +62,7 @@ jobs:
           - 'Events.Store.FetchAggregateEvents'
           - 'Events.Store.Streams.StreamProcessorStateRepository'
           - 'Events.Processing.EventHandlers.EventHandler'
+          - 'Events.Processing.EventHandlers.FastEventHandler'
           - 'Events.Processing.EventHandlers.Filter'
           - 'Events.Processing.Projections.Projection'
     env: 

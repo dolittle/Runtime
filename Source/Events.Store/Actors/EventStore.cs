@@ -316,7 +316,7 @@ public class EventStore : EventStoreBase
                 _nextBatchResult.SetResult(failed);
                 tcs.SetResult(failed);
                 FailPipeline(Pipeline, failed);
-                Pipeline = new CommitPipeline(commit.FromOffset);
+                Pipeline = new CommitPipeline(commit.FirstSequenceNumber);
             }
 
             if (_shuttingDown)

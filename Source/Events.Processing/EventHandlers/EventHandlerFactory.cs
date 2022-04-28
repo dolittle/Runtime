@@ -11,6 +11,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
@@ -28,6 +29,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 public class EventHandlerFactory : IEventHandlerFactory
 {
     readonly IStreamProcessors _streamProcessors;
+    readonly IFilterStreamProcessors _filterStreamProcessors;
+    readonly IOptions<EventHandlersConfiguration> _configuration;
     readonly IValidateFilterForAllTenants _filterValidator;
     readonly Func<TenantId, IWriteEventsToStreams> _getEventsToStreamsWriter;   
     readonly IStreamDefinitions _streamDefinitions;
@@ -41,24 +44,52 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <param name="getEventsToStreamsWriter">The <see cref="Func{TResult}"/> for getting a tenant scoped <see cref="IWriteEventsToStreams"/>.</param>
     /// <param name="streamDefinitions">The <see cref="IStreamDefinitions"/>.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+    /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
+    /// <param name="configuration">The <see cref="EventHandlersConfiguration"/>.</param>
     public EventHandlerFactory(
         IStreamProcessors streamProcessors,
         IValidateFilterForAllTenants filterValidator,
         Func<TenantId, IWriteEventsToStreams> getEventsToStreamsWriter,
         IStreamDefinitions streamDefinitions,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        IFilterStreamProcessors filterStreamProcessors,
+        IOptions<EventHandlersConfiguration> configuration)
     {
         _streamProcessors = streamProcessors;
         _filterValidator = filterValidator;
         _getEventsToStreamsWriter = getEventsToStreamsWriter;
         _streamDefinitions = streamDefinitions;
         _loggerFactory = loggerFactory;
+        _filterStreamProcessors = filterStreamProcessors;
+        _configuration = configuration;
     }
 
     /// <inheritdoc />
     public IEventHandler Create(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
         => new EventHandler(
             _streamProcessors,
+            _filterValidator,
+            _streamDefinitions,
+            arguments,
+            tenant => new TypeFilterWithEventSourcePartition(
+                arguments.Scope,
+                new TypeFilterWithEventSourcePartitionDefinition(StreamId.EventLog, arguments.EventHandler.Value, arguments.EventTypes ,arguments.Partitioned),
+                _getEventsToStreamsWriter(tenant),
+                _loggerFactory.CreateLogger<TypeFilterWithEventSourcePartition>()),
+            _ => new EventProcessor(arguments.Scope, arguments.EventHandler, dispatcher, _loggerFactory.CreateLogger<EventProcessor>()),
+            cancellation => dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellation),
+            (failure, cancellation) => dispatcher.Reject(new EventHandlerRegistrationResponse{Failure = failure.ToProtobuf()}, cancellation),
+            _loggerFactory.CreateLogger<EventHandler>(),
+            arguments.ExecutionContext,
+            cancellationToken
+        );
+
+    /// <inheritdoc />
+    public FastEventHandler CreateFast(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
+        => new(
+            _configuration,
+            _streamProcessors,
+            _filterStreamProcessors,
             _filterValidator,
             _streamDefinitions,
             arguments,
