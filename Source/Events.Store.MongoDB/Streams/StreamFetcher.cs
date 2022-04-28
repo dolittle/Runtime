@@ -22,6 +22,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsFromPartitionedStream, ICanFetchRangeOfEventsFromStream, ICanFetchEventTypesFromStream, ICanFetchEventTypesFromPartitionedStream
     where TEvent : class
 {
+    const int FetchEventsBatchSize = 100;
+
     readonly StreamId _stream;
     readonly ScopeId _scope;
     readonly IMongoCollection<TEvent> _collection;
@@ -90,17 +92,18 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
     {
         try
         {
-            var @event = await _collection.Find(
-                    _filter.Eq(_sequenceNumberExpression, streamPosition.Value))
+            var events = await _collection.Find(
+                    _filter.Gte(_sequenceNumberExpression, streamPosition.Value))
+                .Limit(FetchEventsBatchSize)
                 .Project(_eventToStreamEvent)
-                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-            return @event == default
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            return events == default || events.Count == 0
                 ? new NoEventInStreamAtPosition(_stream, _scope, streamPosition)
-                : @event;
+                : events;
         }
         catch (MongoWaitQueueFullException ex)
         {
@@ -109,20 +112,20 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<Try<StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
     {
         ThrowIfNotConstructedWithPartitionIdExpression();
         try
         {
-            var @event = await _collection.Find(
+            var events = await _collection.Find(
                     _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
                     & _filter.Gte(_sequenceNumberExpression, streamPosition.Value))
-                .Limit(1)
+                .Limit(FetchEventsBatchSize)
                 .Project(_eventToStreamEvent)
-                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-            return @event == default
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            return events == default || events.Count == 0
                 ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, streamPosition)
-                : @event;
+                : events;
         }
         catch (MongoWaitQueueFullException ex)
         {
