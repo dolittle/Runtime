@@ -25,6 +25,5 @@ public class all_dependencies
         stream_processor_state_repository = new Mock<IResilientStreamProcessorStateRepository>();
         events_fetcher = new Mock<ICanFetchEventsFromPartitionedStream>();
         create_execution_context = stream_event => stream_event.Event.ExecutionContext;
-
     };
 }

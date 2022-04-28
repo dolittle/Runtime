@@ -45,12 +45,6 @@ public class and_processing_fails_at_second_event_in_both_partitions : given.all
                 Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
         setup_event_stream(first_event, second_event, third_event, fourth_event);
-        events_fetcher
-            .Setup(_ => _.FetchInPartition(first_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<StreamEvent>>(third_event));
-        events_fetcher
-            .Setup(_ => _.FetchInPartition(second_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<StreamEvent>>(fourth_event));
     };
 
     Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();

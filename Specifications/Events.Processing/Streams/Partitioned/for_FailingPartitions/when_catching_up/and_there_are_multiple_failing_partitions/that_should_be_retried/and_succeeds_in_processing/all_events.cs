@@ -59,7 +59,7 @@ public class all_events : given.all_dependencies
 
     It should_have_first_failing_partition_process_first_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[0].Event,
+            eventStream[0].Event,
             first_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -68,7 +68,7 @@ public class all_events : given.all_dependencies
 
     It should_have_second_failing_partition_process_second_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[1].Event,
+            eventStream[1].Event,
             second_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -77,7 +77,7 @@ public class all_events : given.all_dependencies
 
     It should_have_first_failing_process_process_third_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[2].Event,
+            eventStream[2].Event,
             first_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
