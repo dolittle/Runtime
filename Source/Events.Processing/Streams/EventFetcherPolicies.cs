@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -23,7 +24,7 @@ public class EventFetcherPolicies : IEventFetcherPolicies
     /// <param name="logger"></param>
     public EventFetcherPolicies(ILogger logger)
     {
-        Fetching = Policy<Try<StreamEvent>>
+        Fetching = Policy<Try<IEnumerable<StreamEvent>>>
             .Handle<EventStoreUnavailable>(exception =>
             {
                 Log.EventStoreUnavailable(logger, exception);
@@ -35,5 +36,5 @@ public class EventFetcherPolicies : IEventFetcherPolicies
     }
 
     /// <inheritdoc />
-    public IAsyncPolicy<Try<StreamEvent>> Fetching { get; }
+    public IAsyncPolicy<Try<IEnumerable<StreamEvent>>> Fetching { get; }
 }
