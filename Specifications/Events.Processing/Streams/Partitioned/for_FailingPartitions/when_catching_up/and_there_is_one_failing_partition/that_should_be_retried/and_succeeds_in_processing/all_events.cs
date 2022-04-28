@@ -43,7 +43,7 @@ public class all_events : given.all_dependencies
 
     It should_have_retried_processing_first_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[0].Event,
+            eventStream[0].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -52,7 +52,7 @@ public class all_events : given.all_dependencies
 
     It should_have_retried_processing_second_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[1].Event,
+            eventStream[1].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -61,7 +61,7 @@ public class all_events : given.all_dependencies
 
     It should_have_retried_processing_third_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[2].Event,
+            eventStream[2].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),

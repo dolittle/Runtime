@@ -157,19 +157,22 @@ public class EventHorizon : IDisposable
                         continue;
                     }
 
-                    var streamEvent = tryGetStreamEvent.Result;
-                    _metrics.IncrementTotalEventsWrittenToEventHorizon();
-                    var response = await _dispatcher.Call(
-                        new ConsumerRequest { Event = streamEvent.ToEventHorizonEvent() },
-                        _executionContexts.TryCreateUsing(streamEvent.Event.ExecutionContext),
-                        _cancellationTokenSource.Token).ConfigureAwait(false);
-                    if (response.Failure != null)
+                    var streamEvents = tryGetStreamEvent.Result;
+                    foreach (var streamEvent in streamEvents)
                     {
-                        Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
-                        return;
-                    }
+                        _metrics.IncrementTotalEventsWrittenToEventHorizon();
+                        var response = await _dispatcher.Call(
+                            new ConsumerRequest { Event = streamEvent.ToEventHorizonEvent() },
+                            _executionContexts.TryCreateUsing(streamEvent.Event.ExecutionContext),
+                            _cancellationTokenSource.Token).ConfigureAwait(false);
+                        if (response.Failure != null)
+                        {
+                            Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
+                            return;
+                        }
 
-                    CurrentPosition = streamEvent.Position + 1;
+                        CurrentPosition = streamEvent.Position + 1;
+                    }
                 }
                 catch (EventStoreUnavailable)
                 {

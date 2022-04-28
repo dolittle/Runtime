@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
 using Polly;
@@ -15,5 +16,5 @@ public interface IEventFetcherPolicies
     /// <summary>
     /// The policy to use while fetching.
     /// </summary>
-    IAsyncPolicy<Try<StreamEvent>> Fetching { get; }
+    IAsyncPolicy<Try<IEnumerable<StreamEvent>>> Fetching { get; }
 }

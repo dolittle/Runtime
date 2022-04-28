@@ -19,13 +19,13 @@ public class but_fails_on_last_event : given.all_dependencies
     Establish context = () =>
     {
         event_processor
-            .Setup(_ => _.Process(events[0].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Process(eventStream[0].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
         event_processor
-            .Setup(_ => _.Process(events[1].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Process(eventStream[1].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
         event_processor
-            .Setup(_ => _.Process(events[2].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Process(eventStream[2].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)));
     };
 
@@ -56,7 +56,7 @@ public class but_fails_on_last_event : given.all_dependencies
 
     It should_have_processed_first_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[0].Event,
+            eventStream[0].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -65,7 +65,7 @@ public class but_fails_on_last_event : given.all_dependencies
 
     It should_have_processed_second_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[1].Event,
+            eventStream[1].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -74,7 +74,7 @@ public class but_fails_on_last_event : given.all_dependencies
 
     It should_have_processed_third_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[2].Event,
+            eventStream[2].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),

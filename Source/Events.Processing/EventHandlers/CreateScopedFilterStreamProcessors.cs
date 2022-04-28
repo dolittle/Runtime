@@ -18,7 +18,7 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
 /// <summary>
-/// Represents an implementation <see cref="ICreateScopedStreamProcessors" />.
+/// Represents an implementation <see cref="ICreateScopedFilterStreamProcessors" />.
 /// </summary>
 [Singleton, PerTenant]
 public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProcessors
@@ -29,7 +29,7 @@ public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProce
     readonly Func<ChannelReader<EventLogBatch>, StreamProcessorId, bool, StreamProcessorState, ScopedFilterStreamProcessor> _createFilterStreamProcessor;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CreateScopedStreamProcessors"/> class.
+    /// Initializes a new instance of the <see cref="CreateScopedFilterStreamProcessors"/> class.
     /// </summary>
     /// <param name="streamProcessorStates">The stream processor states repository to use to get or create the current state of the stream processor.</param>
     /// <param name="streamWatcher">The stream watcher to use to notify waiters when the stream processor is created..</param>

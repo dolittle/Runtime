@@ -10,4 +10,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// </summary>
 /// <param name="Fast">Whether to use the new fast event handlers.</param>
 [Configuration("processing:eventhandlers")]
-public record EventHandlersConfiguration(bool Fast = false, bool ImplicitFilter = false);
+public record EventHandlersConfiguration(bool Fast = false)
+{
+    /// <summary>
+    /// Whether to register a filter stream processor that keeps stream processor state and persists to a stream collection
+    /// </summary>
+    public bool ImplicitFilter => false;
+}

@@ -15,7 +15,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
-public class ScopedFilterStreamProcessor
+/// <summary>
+/// Represents a fast scoped filter stream processor 
+/// </summary>
+public class ScopedFilterStreamProcessor 
 {
     readonly ChannelReader<EventLogBatch> _eventLogStream;
     readonly StreamId _streamId;

@@ -15,6 +15,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
+/// <summary>
+/// Represents a fast stream processor meant to be used for the filter of an event handler.
+/// TODO: This should be replaced at some point 
+/// </summary>
 public class FilterStreamProcessor : IDisposable
 {
     readonly TypeFilterWithEventSourcePartitionDefinition _filterDefinition;
@@ -31,7 +35,7 @@ public class FilterStreamProcessor : IDisposable
     bool _disposed;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
+    /// Initializes a new instance of the <see cref="FilterStreamProcessor"/> class.
     /// </summary>
     /// <param name="streamProcessorId">The stream processor id.</param>
     /// <param name="filterDefinition">The filter definition.</param>

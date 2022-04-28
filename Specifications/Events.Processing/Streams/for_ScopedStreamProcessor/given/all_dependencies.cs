@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -92,23 +94,17 @@ public class all_dependencies
             .GetResult()
             .Result as StreamProcessorState;
 
-    protected static void setup_event_stream(params Try<StreamEvent>[] streamEvents)
+    protected static void setup_event_stream(params StreamEvent[] streamEvents)
     {
-        for (var i = 0; i <= streamEvents.Length; i++)
-        {
-            var position = new StreamPosition((ulong)i);
-            if (i == streamEvents.Length)
+        events_fetcher
+            .Setup(_ => _.Fetch(It.IsAny<StreamPosition>(), It.IsAny<CancellationToken>()))
+            .Returns<StreamPosition, CancellationToken>((position, ct) =>
             {
-                events_fetcher
-                    .Setup(_ => _.Fetch(position, Moq.It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(Try<StreamEvent>.Failed(new Exception())));
-                break;
-            }
-            var streamEvent = streamEvents[i];
-            events_fetcher
-                .Setup(_ => _.Fetch(position, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(streamEvent));
-            event_waiter.NotifyForEvent(source_stream_id, position);
-        }
+                var events = streamEvents.Skip((int) position.Value);
+                return events.Any()
+                    ? Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(events))
+                    : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
+            });
+        event_waiter.NotifyForEvent(source_stream_id, (ulong)(streamEvents.Length - 1));
     }
 }

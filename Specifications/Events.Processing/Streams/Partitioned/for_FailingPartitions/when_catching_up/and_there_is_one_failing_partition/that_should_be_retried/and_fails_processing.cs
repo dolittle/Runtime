@@ -45,7 +45,7 @@ public class and_fails_processing : given.all_dependencies
 
     It should_have_retried_processing_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[(int)(result as StreamProcessorState).FailingPartitions[failing_partition_id].Position.Value].Event,
+            eventStream[(int)(result as StreamProcessorState).FailingPartitions[failing_partition_id].Position.Value].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),

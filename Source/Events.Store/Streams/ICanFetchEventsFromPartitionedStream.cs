@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
@@ -19,5 +20,5 @@ public interface ICanFetchEventsFromPartitionedStream : ICanFetchEventsFromStrea
     /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The <see cref="Try{TResult}" /> with <see cref="StreamEvent" /> result.</returns>
-    Task<Try<StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken);
+    Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken);
 }
