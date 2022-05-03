@@ -14,6 +14,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// </summary>
 static partial class Log
 {
+    [LoggerMessage(0, LogLevel.Warning, "Fast scoped event handler is not supported yet")]
+    internal static partial void FastScopedEventHandlerNotSupported(this ILogger logger, Exception exception);
+    
     [LoggerMessage(0, LogLevel.Debug, "Connecting Event Handler {EventHandler}")]
     internal static partial void ConnectingEventHandlerWithId(this ILogger logger, EventProcessorId eventHandler);
     
