@@ -18,7 +18,7 @@ RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linu
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 SHELL ["/bin/bash", "-c"]
 
-ENV LOGGING__CONSOLE__FormatterName=""
+ENV Logging__Console__FormatterName=""
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./

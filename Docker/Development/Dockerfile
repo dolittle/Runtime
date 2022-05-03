@@ -19,7 +19,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 SHELL ["/bin/bash", "-c"]
 ARG TARGETARCH
 
-ENV LOGGING__CONSOLE__FormatterName=""
+ENV Logging__Console__FormatterName=""
 ENV DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION="V7"
 
 WORKDIR /app
