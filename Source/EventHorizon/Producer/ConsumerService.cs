@@ -256,7 +256,12 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         var tryGetStreamEvent = await publicEvents.FetchInPartition(partition, streamPosition, cancellationToken).ConfigureAwait(false);
                         if (!tryGetStreamEvent.Success)
                         {
-                            await eventWaiter.WaitForEvent(publicStream, streamPosition, TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(false);
+                            var nextPosition = await publicEvents.GetNextStreamPosition(cancellationToken).ConfigureAwait(false);
+                            if (!nextPosition.Success)
+                            {
+                                throw nextPosition.Exception;
+                            }
+                            await eventWaiter.WaitForEvent(publicStream, nextPosition, TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(false);
                             continue;
                         }
 
