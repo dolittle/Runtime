@@ -27,5 +27,5 @@ class without_problems : given.single_tenant_and_event_handlers
     };
 
     It should_have_persisted_stream_definition = () => get_stream_definition_for(event_handler).Success.ShouldBeTrue();
-    It should_have_persisted_a_partitioned_stream_definition = () => get_stream_definition_for(event_handler).ShouldBeTrue();
+    It should_have_persisted_a_partitioned_stream_definition = () => get_stream_definition_for(event_handler).Result.Partitioned.ShouldBeTrue();
 }
