@@ -49,7 +49,7 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
 
     /// <inheritdoc />
     public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
-        => new NotImplementedException();
+        => new NotImplementedException("GetNextStreamPosition should never be used on this specific fetcher");
 
     /// <inheritdoc/>
     public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
