@@ -47,6 +47,10 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
+        => new NotImplementedException();
+
     /// <inheritdoc/>
     public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
     {

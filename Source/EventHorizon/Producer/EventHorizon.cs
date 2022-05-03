@@ -149,9 +149,14 @@ public class EventHorizon : IDisposable
                         _cancellationTokenSource.Token).ConfigureAwait(false);
                     if (!tryGetStreamEvent.Success)
                     {
+                        var nextPosition = await publicEvents.GetNextStreamPosition(_cancellationTokenSource.Token).ConfigureAwait(false);
+                        if (!nextPosition.Success)
+                        {
+                            throw nextPosition.Exception;
+                        }
                         await eventWaiter.WaitForEvent(
                             Id.PublicStream,
-                            CurrentPosition,
+                            nextPosition,
                             TimeSpan.FromMinutes(1),
                             _cancellationTokenSource.Token).ConfigureAwait(false);
                         continue;

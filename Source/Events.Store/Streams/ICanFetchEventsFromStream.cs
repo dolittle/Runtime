@@ -20,4 +20,11 @@ public interface ICanFetchEventsFromStream
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The <see cref="StreamEvent" />.</returns>
     Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the current <see cref="StreamPosition"/> offset. 
+    /// </summary>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    /// <returns>The <see cref="StreamPosition"/> offset.</returns>
+    Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken);
 }
