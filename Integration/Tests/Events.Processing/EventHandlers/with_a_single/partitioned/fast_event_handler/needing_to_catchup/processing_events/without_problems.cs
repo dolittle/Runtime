@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.needing_to_catchup.processing_events;
@@ -28,4 +30,10 @@ class without_problems : given.single_tenant_and_event_handlers
 
     It should_have_persisted_stream_definition = () => get_stream_definition_for(event_handler).Success.ShouldBeTrue();
     It should_have_persisted_a_partitioned_stream_definition = () => get_stream_definition_for(event_handler).Result.Partitioned.ShouldBeTrue();
+    It should_have_persisted_a_non_public_stream_definition = () => get_stream_definition_for(event_handler).Result.Public.ShouldBeFalse();
+    It should_have_persisted_stream_definition_with_correct_filter_definition_type = () => get_stream_definition_for(event_handler).Result.FilterDefinition.ShouldBeOfExactType<TypeFilterWithEventSourcePartitionDefinition>();
+    It should_have_persisted_stream_definition_with_partitioned_filter_definition = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).Partitioned.ShouldBeTrue();
+    It should_have_persisted_stream_definition_with_non_public_filter_definition = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).Public.ShouldBeFalse();
+    It should_have_persisted_stream_definition_with_filter_definition_with_event_log_as_source_stream = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).SourceStream.ShouldEqual(StreamId.EventLog);
+    It should_have_persisted_stream_definition_with_filter_definition_with_correct_target_stream = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).SourceStream.ShouldEqual(StreamId.EventLog);
 }

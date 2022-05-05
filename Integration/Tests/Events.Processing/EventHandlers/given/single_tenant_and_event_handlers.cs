@@ -13,6 +13,7 @@ using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
 using Integration.Shared;
 using Machine.Specifications;
@@ -150,7 +151,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             return fast
                 ? event_handler_factory.CreateFast(registration_arguments, dispatcher.Object, CancellationToken.None)
                 : event_handler_factory.Create(registration_arguments, dispatcher.Object, CancellationToken.None);
-        });
+        }).ToArray();
     }
 
     protected static void complete_after_processing_number_of_events(int number_of_events)
@@ -187,4 +188,8 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         }
         return persisted_stream_definitions[event_handler.Info];
     }
+
+    protected static IFilterDefinition get_filter_definition_for<TDefinition>(IEventHandler event_handler)
+        where TDefinition : class, IFilterDefinition
+        => get_stream_definition_for(event_handler).Result.FilterDefinition as TDefinition;
 }
