@@ -111,6 +111,20 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var numEvents = await _collection.CountDocumentsAsync(_filter.Empty, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return Try<StreamPosition>.Succeeded((ulong)numEvents);
+        }
+        catch (MongoWaitQueueFullException ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+
     /// <inheritdoc/>
     public async Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
     {
