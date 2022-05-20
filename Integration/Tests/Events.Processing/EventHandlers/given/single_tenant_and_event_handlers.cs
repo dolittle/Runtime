@@ -62,6 +62,19 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         event_handler_factory = runtime.Host.Services.GetRequiredService<IEventHandlerFactory>();
         event_types = Enumerable.Range(0, number_of_event_types).Select(_ => new ArtifactId(Guid.NewGuid())).ToArray();
         dispatcher = new Mock<ReverseCallDispatcher>();
+        on_handle_event = (_, _, _) =>
+        {
+            var response = new EventHandlerResponse();
+            Console.WriteLine($"Handled {number_of_events_handled} events");
+            // if (number_of_events_handled == number_of_events)
+            // {
+            //     Console.WriteLine("Finishing");
+            //     dispatcher_cancellation_source.SetResult();
+            // }
+            Console.WriteLine("Returning response");
+            return Task.FromResult(response);
+        };
+        
         dispatcher
             .Setup(_ => _.Reject(Moq.It.IsAny<EventHandlerRegistrationResponse>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -89,7 +102,6 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         var uncommitted_events = event_types.SelectMany(event_type => Enumerable.Range(0, number_of_events)
             .Select(_ => new UncommittedEvent(event_source, new Artifact(event_type, ArtifactGeneration.First), false, "{\"hello\": 42}")));
         var response = await event_store.Commit(new UncommittedEvents(uncommitted_events.ToArray()), Runtime.CreateExecutionContextFor(tenant)).ConfigureAwait(false);
-
         var newly_committed_events = response.Events.ToCommittedEvents();
         var all_committed_events = committed_events.ToList();
         all_committed_events.AddRange(newly_committed_events);
@@ -156,13 +168,17 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     protected static void complete_after_processing_number_of_events(int number_of_events)
     {
+        Console.WriteLine($"Completing after processing {number_of_events} events");
         on_handle_event = (_, _, _) =>
         {
             var response = new EventHandlerResponse();
+            Console.WriteLine($"Handled {number_of_events_handled} events");
             if (number_of_events_handled == number_of_events)
             {
+                Console.WriteLine("Finishing");
                 dispatcher_cancellation_source.SetResult();
             }
+            Console.WriteLine("Returning response");
             return Task.FromResult(response);
         };
     }

@@ -18,13 +18,14 @@ class without_problems : given.single_tenant_and_event_handlers
     Establish context = () =>
     {
         commit_events_for_each_event_type(10, "some event source").GetAwaiter().GetResult();
+        complete_after_processing_number_of_events(committed_events.Count);
         with_event_handlers((true, number_of_event_types, ScopeId.Default, true));
         event_handler = event_handlers_to_run.First();
     };
 
     Because of = () =>
     {
-        stop_event_handlers_after(TimeSpan.FromSeconds(10));
+        // stop_event_handlers_after(TimeSpan.FromSeconds(10));
         run_event_handlers_until_completion_and_commit_events_after_starting_event_handlers().GetAwaiter().GetResult();
     };
 
