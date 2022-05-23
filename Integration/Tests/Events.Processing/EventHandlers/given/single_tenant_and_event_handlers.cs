@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -51,6 +53,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     static CancellationTokenSource? cancel_event_handlers_source;
 
     static Dictionary<EventHandlerInfo, Try<IStreamDefinition>> persisted_stream_definitions;
+    static Dictionary<StreamProcessorId, Try<IStreamProcessorState>> persisted_stream_processor_states;
 
     Establish context = () =>
     {
@@ -62,18 +65,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         event_handler_factory = runtime.Host.Services.GetRequiredService<IEventHandlerFactory>();
         event_types = Enumerable.Range(0, number_of_event_types).Select(_ => new ArtifactId(Guid.NewGuid())).ToArray();
         dispatcher = new Mock<ReverseCallDispatcher>();
-        on_handle_event = (_, _, _) =>
-        {
-            var response = new EventHandlerResponse();
-            Console.WriteLine($"Handled {number_of_events_handled} events");
-            // if (number_of_events_handled == number_of_events)
-            // {
-            //     Console.WriteLine("Finishing");
-            //     dispatcher_cancellation_source.SetResult();
-            // }
-            Console.WriteLine("Returning response");
-            return Task.FromResult(response);
-        };
+        on_handle_event = (_, _, _) => Task.FromResult(new EventHandlerResponse());
         
         dispatcher
             .Setup(_ => _.Reject(Moq.It.IsAny<EventHandlerRegistrationResponse>(), Moq.It.IsAny<CancellationToken>()))
@@ -168,19 +160,19 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     protected static void complete_after_processing_number_of_events(int number_of_events)
     {
-        Console.WriteLine($"Completing after processing {number_of_events} events");
         on_handle_event = (_, _, _) =>
         {
             var response = new EventHandlerResponse();
-            Console.WriteLine($"Handled {number_of_events_handled} events");
             if (number_of_events_handled == number_of_events)
             {
-                Console.WriteLine("Finishing");
                 dispatcher_cancellation_source.SetResult();
             }
-            Console.WriteLine("Returning response");
             return Task.FromResult(response);
         };
+        dispatcher
+            .Setup(_ => _.Call(Moq.It.IsAny<HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
+            .Returns(on_handle_event);
     }
 
     static async Task commit_after_delay(params (int number_of_events, EventSourceId event_source, ScopeId scope)[] events)
@@ -204,8 +196,156 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         }
         return persisted_stream_definitions[event_handler.Info];
     }
+    protected static Try<IStreamProcessorState> get_stream_processor_state_for(StreamProcessorId stream_processor_id)
+    {
+        if (persisted_stream_processor_states == default)
+        {
+            persisted_stream_processor_states = new Dictionary<StreamProcessorId, Try<IStreamProcessorState>>();
+            foreach (var info in event_handlers_to_run.Select(_ => _.Info))
+            {
+                var filterProcessorId = info.GetFilterStreamId();
+                var eventProcessorId = info.GetEventProcessorStreamId();
+                persisted_stream_processor_states[filterProcessorId] = stream_processor_states.TryGetFor(filterProcessorId,  CancellationToken.None).Result;;
+                persisted_stream_processor_states[eventProcessorId] = stream_processor_states.TryGetFor(eventProcessorId,  CancellationToken.None).Result;;
+            }
+        }
+        return persisted_stream_processor_states[stream_processor_id];
+    }
 
-    protected static IFilterDefinition get_filter_definition_for<TDefinition>(IEventHandler event_handler)
+    protected static TDefinition get_filter_definition_for<TDefinition>(IEventHandler event_handler)
         where TDefinition : class, IFilterDefinition
         => get_stream_definition_for(event_handler).Result.FilterDefinition as TDefinition;
+    protected static TState get_stream_processor_state_for<TState>(StreamProcessorId id)
+        where TState : class, IStreamProcessorState
+        => get_stream_processor_state_for(id).Result as TState;
+
+    protected static void expect_stream_definition(
+        IEventHandler event_handler,
+        bool partitioned = false,
+        bool public_stream = false,
+        int? max_handled_event_types = 0)
+    {
+        var handledEventTypes = event_types.Take(max_handled_event_types ?? number_of_event_types);
+        handledEventTypes ??= event_types;
+        var tryGetStreamDefinition = get_stream_definition_for(event_handler);
+        tryGetStreamDefinition.Success.ShouldBeTrue();
+        var streamDefinition = tryGetStreamDefinition.Result;
+        streamDefinition.Partitioned.ShouldEqual(partitioned);
+        streamDefinition.Public.ShouldEqual(public_stream);
+        streamDefinition.FilterDefinition.ShouldBeOfExactType<TypeFilterWithEventSourcePartitionDefinition>();
+        var filterDefinition = streamDefinition.FilterDefinition as TypeFilterWithEventSourcePartitionDefinition;
+        filterDefinition!.Partitioned.ShouldEqual(partitioned);
+        filterDefinition!.Public.ShouldEqual(public_stream);
+        filterDefinition!.SourceStream.ShouldEqual(StreamId.EventLog);
+        filterDefinition!.TargetStream.ShouldEqual<StreamId>(event_handler.Info.Id.EventHandler.Value);
+        filterDefinition!.Types.ShouldContainOnly(handledEventTypes);
+    }
+
+    protected static void expect_stream_processor_state(
+        IEventHandler event_handler,
+        bool implicit_filter = false,
+        bool partitioned = false,
+        int num_events_to_handle = 0,
+        failing_partitioned_state? failing_partitioned_state = null,
+        failing_unpartitioned_state? failing_unpartitioned_state = null
+        )
+    {
+        expect_filter_stream_processor_state(event_handler.Info.GetFilterStreamId(), implicit_filter);
+        expect_event_processor_stream_processor_state(event_handler.Info.GetEventProcessorStreamId(), partitioned, num_events_to_handle, failing_partitioned_state, failing_unpartitioned_state);
+    }
+
+    static void expect_filter_stream_processor_state(StreamProcessorId id, bool implicit_filter)
+    {
+        var tryGetStreamProcessorState = get_stream_processor_state_for(id);
+        tryGetStreamProcessorState.Success.ShouldEqual(!implicit_filter);
+        if (implicit_filter)
+        {
+            return;
+        }
+        var state = tryGetStreamProcessorState.Result;
+        state.Partitioned.ShouldBeFalse();
+        state.Position.Value.ShouldEqual((ulong) committed_events.Count);
+        state.ShouldBeOfExactType<StreamProcessorState>();
+        var unpartitionedState = state as StreamProcessorState;
+        unpartitionedState!.IsFailing.ShouldBeFalse();
+        unpartitionedState.ProcessingAttempts.ShouldEqual((uint)0);
+        unpartitionedState.RetryTime.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+        unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+    }
+
+    static void expect_event_processor_stream_processor_state(
+        StreamProcessorId id,
+        bool partitioned,
+        int num_events_to_handle,
+        failing_partitioned_state? failing_partitioned_state,
+        failing_unpartitioned_state? failing_unpartitioned_state
+        )
+    {
+        var tryGetStreamProcessorState = get_stream_processor_state_for(id);
+        tryGetStreamProcessorState.Success.ShouldBeTrue();
+        var state = tryGetStreamProcessorState.Result;
+        state.Partitioned.ShouldEqual(partitioned);
+        
+        if (partitioned)
+        {
+            state.Position.Value.ShouldEqual((ulong) num_events_to_handle);
+            expect_partitioned_event_processor_stream_processor_state(state, failing_partitioned_state);
+        }
+        else
+        {
+            expect_unpartitioned_event_processor_stream_processor_state(state, num_events_to_handle, failing_unpartitioned_state);
+        }
+    }
+
+    static void expect_partitioned_event_processor_stream_processor_state(
+        IStreamProcessorState state,
+        failing_partitioned_state? failing_partitioned_state)
+    {
+        state.ShouldBeOfExactType<Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState>();
+        var partitionedState = state as Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState;
+        
+        if (failing_partitioned_state is null)
+        {
+            partitionedState!.FailingPartitions.ShouldBeEmpty();
+            partitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+        }
+        else
+        {
+            partitionedState!.FailingPartitions.Keys.ShouldContainOnly(failing_partitioned_state.failing_partitions.Keys);
+            foreach (var (partition, failingState) in partitionedState!.FailingPartitions)
+            {
+                var failingPosition = failing_partitioned_state.failing_partitions[partition];
+                failingState.Position.ShouldEqual(failingPosition);
+                failingState.LastFailed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+                failingState.ProcessingAttempts.ShouldBeGreaterThanOrEqualTo(1);
+                
+            }
+        }
+    }
+    static void expect_unpartitioned_event_processor_stream_processor_state(
+        IStreamProcessorState state,
+        int num_events_to_handle,
+        failing_unpartitioned_state? failing_unpartitioned_state)
+    {
+        state.ShouldBeOfExactType<StreamProcessorState>();
+        var unpartitionedState = state as StreamProcessorState;
+        
+        if (failing_unpartitioned_state is null)
+        {
+            unpartitionedState!.IsFailing.ShouldBeFalse();
+            unpartitionedState.ProcessingAttempts.ShouldEqual((uint)0);
+            unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+            unpartitionedState.RetryTime.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+            unpartitionedState.Position.Value.ShouldEqual((ulong) num_events_to_handle);
+        }
+        else
+        {
+            unpartitionedState!.IsFailing.ShouldBeTrue();
+            unpartitionedState.Position.ShouldEqual(failing_unpartitioned_state.failing_position);
+            unpartitionedState.ProcessingAttempts.ShouldBeGreaterThanOrEqualTo(1);
+            unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+        }
+    }
 }
+record failing_partitioned_state(Dictionary<PartitionId, StreamPosition> failing_partitions);
+record failing_unpartitioned_state(StreamPosition failing_position);

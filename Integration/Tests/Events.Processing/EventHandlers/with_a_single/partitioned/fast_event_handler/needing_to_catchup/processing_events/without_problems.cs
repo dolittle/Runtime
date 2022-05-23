@@ -4,9 +4,11 @@
 using System;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.needing_to_catchup.processing_events;
@@ -25,16 +27,9 @@ class without_problems : given.single_tenant_and_event_handlers
 
     Because of = () =>
     {
-        // stop_event_handlers_after(TimeSpan.FromSeconds(10));
         run_event_handlers_until_completion_and_commit_events_after_starting_event_handlers().GetAwaiter().GetResult();
     };
 
-    It should_have_persisted_stream_definition = () => get_stream_definition_for(event_handler).Success.ShouldBeTrue();
-    It should_have_persisted_a_partitioned_stream_definition = () => get_stream_definition_for(event_handler).Result.Partitioned.ShouldBeTrue();
-    It should_have_persisted_a_non_public_stream_definition = () => get_stream_definition_for(event_handler).Result.Public.ShouldBeFalse();
-    It should_have_persisted_stream_definition_with_correct_filter_definition_type = () => get_stream_definition_for(event_handler).Result.FilterDefinition.ShouldBeOfExactType<TypeFilterWithEventSourcePartitionDefinition>();
-    It should_have_persisted_stream_definition_with_partitioned_filter_definition = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).Partitioned.ShouldBeTrue();
-    It should_have_persisted_stream_definition_with_non_public_filter_definition = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).Public.ShouldBeFalse();
-    It should_have_persisted_stream_definition_with_filter_definition_with_event_log_as_source_stream = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).SourceStream.ShouldEqual(StreamId.EventLog);
-    It should_have_persisted_stream_definition_with_filter_definition_with_correct_target_stream = () => get_filter_definition_for<TypeFilterWithEventSourcePartitionDefinition>(event_handler).SourceStream.ShouldEqual(StreamId.EventLog);
+    It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler, partitioned: true, public_stream: false, max_handled_event_types: number_of_event_types);
+    It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state(event_handler, implicit_filter: false, partitioned: true, num_events_to_handle: committed_events.Count, failing_partitioned_state: null, failing_unpartitioned_state: null);
 }
