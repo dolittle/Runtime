@@ -313,7 +313,7 @@ public class EventStore : EventStoreBase
             {
                 // Current version also fails the batch being built
                 var failed = Try.Failed(persistTask.Exception);
-                _nextBatchResult.SetResult(failed);
+                // _nextBatchResult.SetResult(failed); // TODO: What is this? Some leftover code?
                 tcs.SetResult(failed);
                 FailPipeline(Pipeline, failed);
                 Pipeline = new CommitPipeline(commit.FirstSequenceNumber);

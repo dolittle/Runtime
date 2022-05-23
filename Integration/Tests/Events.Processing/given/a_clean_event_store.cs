@@ -22,6 +22,7 @@ class a_clean_event_store : a_runtime_with_a_single_tenant
     protected static IEventStore event_store;
     protected static IEventContentConverter event_content_converter;
     protected static IStreams streams;
+    protected static IEventFetchers event_fetchers;
     protected static IResilientStreamProcessorStateRepository stream_processor_states;
     protected static IStreamDefinitionRepository stream_definition_repository;
 
@@ -31,6 +32,7 @@ class a_clean_event_store : a_runtime_with_a_single_tenant
         event_store = runtime.Host.Services.GetRequiredService<Func<TenantId, IEventStore>>()(execution_context.Tenant);
         event_content_converter = runtime.Host.Services.GetRequiredService<IEventContentConverter>();
         streams = runtime.Host.Services.GetRequiredService<Func<TenantId, IStreams>>()(execution_context.Tenant);
+        event_fetchers = runtime.Host.Services.GetRequiredService<Func<TenantId, IEventFetchers>>()(tenant);
         stream_processor_states = runtime.Host.Services.GetRequiredService<Func<TenantId, IResilientStreamProcessorStateRepository>>()(tenant);
         stream_definition_repository = runtime.Host.Services.GetRequiredService<Func<TenantId, IStreamDefinitionRepository>>()(tenant);
     };

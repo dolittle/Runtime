@@ -32,6 +32,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
+using StreamEvent = Dolittle.Runtime.Events.Processing.Contracts.StreamEvent;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.given;
@@ -47,9 +48,9 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static TaskCompletionSource dispatcher_cancellation_source;
     protected static Func<HandleEventRequest, ExecutionContext, CancellationToken, Task<EventHandlerResponse>> on_handle_event;
     protected static CommittedEvents committed_events;
-    protected static Dictionary<ScopeId, CommittedEvents> scoped_committed_events = new();
+    protected static Dictionary<ScopeId, CommittedEvents> scoped_committed_events;
     protected static IWriteEventHorizonEvents event_horizon_events_writer;
-    static int number_of_events_handled = 0;
+    static int number_of_events_handled;
     static CancellationTokenRegistration? cancel_event_handlers_registration;
     static CancellationTokenSource? cancel_event_handlers_source;
 
@@ -58,6 +59,8 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     Establish context = () =>
     {
+        number_of_events_handled = 0;
+        scoped_committed_events = new Dictionary<ScopeId, CommittedEvents>();
         committed_events = new CommittedEvents(Array.Empty<CommittedEvent>());
         dispatcher_cancellation_source = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         event_horizon_events_writer = runtime.Host.Services.GetRequiredService<Func<TenantId, IWriteEventHorizonEvents>>()(tenant);
@@ -73,10 +76,10 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         dispatcher
             .Setup(_ => _.Accept(Moq.It.IsAny<EventHandlerRegistrationResponse>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(dispatcher_cancellation_source.Task);
-        dispatcher
-            .Setup(_ => _.Call(Moq.It.IsAny<HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
-            .Returns(on_handle_event);
+        // dispatcher
+        //     .Setup(_ => _.Call(Moq.It.IsAny<HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+        //     .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
+        //     .Returns(on_handle_event);
     };
 
     Cleanup clean = () =>
@@ -88,6 +91,29 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             event_handler.Dispose();
         }
     };
+
+    static async Task commit_events(UncommittedEvents uncommitted_events)
+    {
+        var response = await event_store.Commit(uncommitted_events, Runtime.CreateExecutionContextFor(tenant)).ConfigureAwait(false);
+        var newly_committed_events = response.Events.ToCommittedEvents();
+        var all_committed_events = committed_events.ToList();
+        all_committed_events.AddRange(newly_committed_events);
+        committed_events = new CommittedEvents(all_committed_events);
+        
+    }
+
+    protected static IEnumerable<Dolittle.Runtime.Events.Store.Streams.StreamEvent> get_partitioned_events_in_stream(IEventHandler event_handler, PartitionId partition_id)
+    {
+        var fetcher = event_fetchers.GetPartitionedFetcherFor(
+            event_handler.Info.Id.Scope,
+            new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(
+                StreamId.EventLog,
+                event_handler.Info.Id.EventHandler.Value,
+                event_handler.Info.EventTypes,
+                event_handler.Info.Partitioned)), CancellationToken.None).Result;
+
+        return fetcher.FetchInPartition(partition_id, StreamPosition.Start, CancellationToken.None).Result.Result;
+    }
     
     protected static async Task commit_events_for_each_event_type(IEnumerable<(int number_of_events, EventSourceId event_source, ScopeId scope_id)> commit)
     {
@@ -102,22 +128,23 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             }));
         }
 
-        var unscoped_uncommitted_events = new UncommittedEvents(
-            CreateUncommittedEvents(commit.Where(_ => _.scope_id == ScopeId.Default).Select(_ => (_.number_of_events, _.event_source))).ToArray());
+        var unscoped_commmits = commit.Where(_ => _.scope_id == ScopeId.Default).Select(_ => (_.number_of_events, _.event_source));
+        if (unscoped_commmits.Any())
+        {
+            var unscoped_uncommitted_events = new UncommittedEvents(
+                CreateUncommittedEvents(commit.Where(_ => _.scope_id == ScopeId.Default).Select(_ => (_.number_of_events, _.event_source))).ToArray());
+            await commit_events(unscoped_uncommitted_events).ConfigureAwait(false);
+        }
+        
         var scoped_uncommitted_events = new Dictionary<ScopeId, UncommittedEvents>();
-
         foreach (var scoped_commit_group in commit.Where(_ => _.scope_id != ScopeId.Default).GroupBy(_ => _.scope_id))
         {
             var uncommitted_events = CreateUncommittedEvents(scoped_commit_group.Select(_ => (_.number_of_events, _.event_source)));
             scoped_uncommitted_events[scoped_commit_group.Key] = new UncommittedEvents(uncommitted_events.ToArray());
         }
-        var response = await event_store.Commit(unscoped_uncommitted_events, Runtime.CreateExecutionContextFor(tenant)).ConfigureAwait(false);
-        var newly_committed_events = response.Events.ToCommittedEvents();
-        var all_committed_events = committed_events.ToList();
-        all_committed_events.AddRange(newly_committed_events);
-        committed_events = new CommittedEvents(all_committed_events);
+        
 
-        foreach (var (scope, uncommittedEvents) in scoped_uncommitted_events)
+        foreach (var (scope, uncommittedEvents) in scoped_uncommitted_events.Where(_ => _.Value.HasEvents))
         {
             var committedEvents = new CommittedEvents(uncommittedEvents.Select(_ => new CommittedEvent(
                 EventLogSequenceNumber.Initial,
@@ -201,16 +228,17 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     {
         on_handle_event = (_, _, _) =>
         {
+            Console.WriteLine($"Handling event {number_of_events_handled}/{number_of_events}");
             var response = new EventHandlerResponse();
             if (number_of_events_handled >= number_of_events)
             {
+                Console.WriteLine($"Returning failed processing");
                 response.Failure = new ProcessorFailure
                 {
                     Reason = reason, 
                     Retry = retry is not null,
-                    RetryTimeout = retry?.timeout.ToDuration() ?? TimeSpan.MaxValue.ToDuration()
+                    RetryTimeout = retry?.timeout.ToDuration() ?? TimeSpan.FromSeconds(1).ToDuration()
                 };
-
             }
             return Task.FromResult(response);
         };
@@ -220,18 +248,18 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .Returns(on_handle_event);
     }
     
-    protected static void fail_for_partition(PartitionId partition, string reason, retry_failing_event? retry = default)
+    protected static void fail_for_partitions(IEnumerable<PartitionId> partitions, string reason, retry_failing_event? retry = default)
     {
         on_handle_event = (request, _, _) =>
         {
             var response = new EventHandlerResponse();
-            if (request.Event.PartitionId == partition.Value)
+            if (partitions.Select(_ => _.Value).Contains(request.Event.PartitionId))
             {
                 response.Failure = new ProcessorFailure
                 {
                     Reason = reason, 
                     Retry = retry is not null,
-                    RetryTimeout = retry?.timeout.ToDuration() ?? TimeSpan.MaxValue.ToDuration()
+                    RetryTimeout = retry?.timeout.ToDuration() ?? TimeSpan.FromSeconds(1).ToDuration()
                 };
             }
             return Task.FromResult(response);
@@ -244,8 +272,11 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     static async Task commit_after_delay(IEnumerable<(int number_of_events, EventSourceId event_source, ScopeId scope)> commit)
     {
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        await commit_events_for_each_event_type(commit);
+        if (commit.Any())
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            await commit_events_for_each_event_type(commit);
+        }
     }
 
     protected static Try<IStreamDefinition> get_stream_definition_for(IEventHandler event_handler)
@@ -258,6 +289,11 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 var tryGetDefinition = stream_definition_repository.TryGet(info.Id.Scope, info.Id.EventHandler.Value, CancellationToken.None).Result;
                 persisted_stream_definitions[info] = tryGetDefinition;
             }
+        }
+        if (!persisted_stream_definitions.ContainsKey(event_handler.Info))
+        {
+            var tryGetDefinition = stream_definition_repository.TryGet(event_handler.Info.Id.Scope, event_handler.Info.Id.EventHandler.Value, CancellationToken.None).Result;
+            persisted_stream_definitions[event_handler.Info] = tryGetDefinition;
         }
         return persisted_stream_definitions[event_handler.Info];
     }
@@ -273,6 +309,10 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 persisted_stream_processor_states[filterProcessorId] = stream_processor_states.TryGetFor(filterProcessorId,  CancellationToken.None).Result;;
                 persisted_stream_processor_states[eventProcessorId] = stream_processor_states.TryGetFor(eventProcessorId,  CancellationToken.None).Result;;
             }
+        }
+        if (!persisted_stream_processor_states.ContainsKey(stream_processor_id))
+        {
+            persisted_stream_processor_states[stream_processor_id] = stream_processor_states.TryGetFor(stream_processor_id,  CancellationToken.None).Result;;
         }
         return persisted_stream_processor_states[stream_processor_id];
     }
@@ -383,7 +423,6 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 failingState.Position.ShouldEqual(failingPosition);
                 failingState.LastFailed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
                 failingState.ProcessingAttempts.ShouldBeGreaterThanOrEqualTo(1);
-                
             }
         }
     }
