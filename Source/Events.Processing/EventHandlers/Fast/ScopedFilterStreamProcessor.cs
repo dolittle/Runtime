@@ -79,13 +79,12 @@ public class ScopedFilterStreamProcessor
         {
             await foreach (var batch in _eventLogStream.ReadAllAsync(cancellationToken))
             {
-                if (batch.From.Value != _currentState.Position.Value)
+                if (batch.MatchedEvents.Any())
                 {
-                    throw new Exception($"Expected to get event from event log at sequence number {batch.From} but expected {_currentState.Position}");
+                    var eventsAndPartitions = ConvertToEventsAndPartitions(batch.MatchedEvents);
+                    await _eventsWriter.Write(eventsAndPartitions, Identifier.ScopeId, _streamId, cancellationToken).ConfigureAwait(false);
                 }
-                var eventsAndPartitions = ConvertToEventsAndPartitions(batch.MatchedEvents);
 
-                await _eventsWriter.Write(eventsAndPartitions, Identifier.ScopeId, _streamId, cancellationToken).ConfigureAwait(false);
                 var newState = new StreamProcessorState(batch.To + 1, DateTimeOffset.UtcNow);
                 await _stateProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
                 _currentState = newState;
