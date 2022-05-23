@@ -29,7 +29,6 @@ class after_2_events : given.single_tenant_and_event_handlers
 
     Because of = () =>
     {
-        stop_event_handlers_after(TimeSpan.FromSeconds(2));
         run_event_handlers_until_completion_and_commit_events_after_starting_event_handlers(
             (2, failing_partition.Value, ScopeId.Default)).GetAwaiter().GetResult();
     };

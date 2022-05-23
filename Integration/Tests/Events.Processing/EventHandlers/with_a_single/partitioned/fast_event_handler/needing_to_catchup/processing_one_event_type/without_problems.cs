@@ -18,7 +18,6 @@ class without_problems : given.single_tenant_and_event_handlers
         {
             (4, "some_source", ScopeId.Default)
         }).GetAwaiter().GetResult();
-        complete_after_processing_number_of_events(4 + 2);
         with_event_handlers((true, 1, ScopeId.Default, true));
         event_handler = event_handlers_to_run.First();
     };
