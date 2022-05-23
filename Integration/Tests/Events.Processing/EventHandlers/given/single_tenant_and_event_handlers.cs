@@ -228,11 +228,9 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     {
         on_handle_event = (_, _, _) =>
         {
-            Console.WriteLine($"Handling event {number_of_events_handled}/{number_of_events}");
             var response = new EventHandlerResponse();
             if (number_of_events_handled >= number_of_events)
             {
-                Console.WriteLine($"Returning failed processing");
                 response.Failure = new ProcessorFailure
                 {
                     Reason = reason, 
@@ -246,6 +244,12 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .Setup(_ => _.Call(Moq.It.IsAny<HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
             .Returns(on_handle_event);
+    }
+
+    protected static IEnumerable<CommittedEvent> committed_events_for_event_types(int num_event_types)
+    {
+        var nFirstEventTypes = event_types.Take(num_event_types);
+        return committed_events.Where(_ => nFirstEventTypes.Contains(_.Type.Id));
     }
     
     protected static void fail_for_partitions(IEnumerable<PartitionId> partitions, string reason, retry_failing_event? retry = default)

@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.needing_to_catchup.processing_all_event_types.and_failing;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.processing_all_event_types.and_failing;
 
 class on_one_partition : given.single_tenant_and_event_handlers
 {
@@ -24,11 +24,6 @@ class on_one_partition : given.single_tenant_and_event_handlers
         failing_partition = "some event source";
         succeeding_partition = "some other event source";
         failure_reason = "some reason";
-        commit_events_for_each_event_type(new (int number_of_events, EventSourceId event_source, ScopeId scope_id)[]
-        {
-            (2, failing_partition.Value, ScopeId.Default),
-            (2, succeeding_partition.Value, ScopeId.Default)
-        }).GetAwaiter().GetResult();
         fail_for_partitions(new []{failing_partition}, failure_reason);
         with_event_handlers((true, number_of_event_types, ScopeId.Default, true));
         event_handler = event_handlers_to_run.First();

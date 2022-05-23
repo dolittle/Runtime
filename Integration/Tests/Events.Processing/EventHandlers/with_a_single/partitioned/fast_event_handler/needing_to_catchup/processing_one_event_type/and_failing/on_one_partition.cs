@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.needing_to_catchup.processing_all_event_types.and_failing;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.needing_to_catchup.processing_one_event_type.and_failing;
 
 class on_one_partition : given.single_tenant_and_event_handlers
 {
@@ -30,7 +30,7 @@ class on_one_partition : given.single_tenant_and_event_handlers
             (2, succeeding_partition.Value, ScopeId.Default)
         }).GetAwaiter().GetResult();
         fail_for_partitions(new []{failing_partition}, failure_reason);
-        with_event_handlers((true, number_of_event_types, ScopeId.Default, true));
+        with_event_handlers((true, 1, ScopeId.Default, true));
         event_handler = event_handlers_to_run.First();
     };
 
@@ -42,12 +42,16 @@ class on_one_partition : given.single_tenant_and_event_handlers
             (2, succeeding_partition.Value, ScopeId.Default)).GetAwaiter().GetResult();
     };
 
-    It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler, partitioned: true, public_stream: false, max_handled_event_types: number_of_event_types);
+    It should_have_persisted_correct_stream = () => expect_stream_definition(
+        event_handler,
+        partitioned: true, 
+        public_stream: false,
+        max_handled_event_types: 1);
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state(
         event_handler,
         implicit_filter: false,
         partitioned: true,
-        num_events_to_handle: committed_events.Count,
+        num_events_to_handle: committed_events_for_event_types(1).Count(),
         failing_partitioned_state: new failing_partitioned_state(new Dictionary<PartitionId, StreamPosition>{
             {
                 failing_partition,
