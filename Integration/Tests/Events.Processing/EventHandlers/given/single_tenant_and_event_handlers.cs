@@ -17,6 +17,7 @@ using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
+using Google.Protobuf.WellKnownTypes;
 using Integration.Shared;
 using Machine.Specifications;
 using Machine.Specifications.Utility;
@@ -37,12 +38,12 @@ namespace Integration.Tests.Events.Processing.EventHandlers.given;
 
 class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 {
+    protected const int number_of_event_types = 2;
     protected static IEventHandlers event_handlers;
     protected static IEventHandlerFactory event_handler_factory;
     protected static IEnumerable<IEventHandler> event_handlers_to_run;
     protected static ArtifactId[] event_types;
     protected static Mock<ReverseCallDispatcher> dispatcher;
-    protected static int number_of_event_types;
     protected static TaskCompletionSource dispatcher_cancellation_source;
     protected static Func<HandleEventRequest, ExecutionContext, CancellationToken, Task<EventHandlerResponse>> on_handle_event;
     protected static CommittedEvents committed_events;
@@ -59,7 +60,6 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     {
         committed_events = new CommittedEvents(Array.Empty<CommittedEvent>());
         dispatcher_cancellation_source = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        number_of_event_types = 2;
         event_horizon_events_writer = runtime.Host.Services.GetRequiredService<Func<TenantId, IWriteEventHorizonEvents>>()(tenant);
         event_handlers = runtime.Host.Services.GetRequiredService<IEventHandlers>();
         event_handler_factory = runtime.Host.Services.GetRequiredService<IEventHandlerFactory>();
@@ -88,27 +88,50 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             event_handler.Dispose();
         }
     };
-
-    protected static async Task<CommittedEvents> commit_events_for_each_event_type(int number_of_events, EventSourceId event_source)
+    
+    protected static async Task commit_events_for_each_event_type(IEnumerable<(int number_of_events, EventSourceId event_source, ScopeId scope_id)> commit)
     {
-        var uncommitted_events = event_types.SelectMany(event_type => Enumerable.Range(0, number_of_events)
-            .Select(_ => new UncommittedEvent(event_source, new Artifact(event_type, ArtifactGeneration.First), false, "{\"hello\": 42}")));
-        var response = await event_store.Commit(new UncommittedEvents(uncommitted_events.ToArray()), Runtime.CreateExecutionContextFor(tenant)).ConfigureAwait(false);
+        IEnumerable<UncommittedEvent> CreateUncommittedEvents(IEnumerable<(int number_of_events, EventSourceId event_source)> commit)
+        {
+            return event_types.SelectMany(event_type => commit.SelectMany(tuple =>
+            {
+                var (number_of_events, event_source) = tuple;
+
+                return Enumerable.Range(0, number_of_events)
+                    .Select(_ => new UncommittedEvent(event_source, new Artifact(event_type, ArtifactGeneration.First), false, "{\"hello\": 42}"));
+            }));
+        }
+
+        var unscoped_uncommitted_events = new UncommittedEvents(
+            CreateUncommittedEvents(commit.Where(_ => _.scope_id == ScopeId.Default).Select(_ => (_.number_of_events, _.event_source))).ToArray());
+        var scoped_uncommitted_events = new Dictionary<ScopeId, UncommittedEvents>();
+
+        foreach (var scoped_commit_group in commit.Where(_ => _.scope_id != ScopeId.Default).GroupBy(_ => _.scope_id))
+        {
+            var uncommitted_events = CreateUncommittedEvents(scoped_commit_group.Select(_ => (_.number_of_events, _.event_source)));
+            scoped_uncommitted_events[scoped_commit_group.Key] = new UncommittedEvents(uncommitted_events.ToArray());
+        }
+        var response = await event_store.Commit(unscoped_uncommitted_events, Runtime.CreateExecutionContextFor(tenant)).ConfigureAwait(false);
         var newly_committed_events = response.Events.ToCommittedEvents();
         var all_committed_events = committed_events.ToList();
         all_committed_events.AddRange(newly_committed_events);
         committed_events = new CommittedEvents(all_committed_events);
-        return newly_committed_events;
+
+        foreach (var (scope, uncommittedEvents) in scoped_uncommitted_events)
+        {
+            var committedEvents = new CommittedEvents(uncommittedEvents.Select(_ => new CommittedEvent(
+                EventLogSequenceNumber.Initial,
+                DateTimeOffset.UtcNow,
+                _.EventSource,
+                Runtime.CreateExecutionContextFor(tenant),
+                _.Type,
+                _.Public,
+                _.Content)).ToList());
+            await write_committed_events_to_scoped_event_log(committedEvents, scope).ConfigureAwait(false);
+        }
     }
-    
-    protected static async Task<CommittedEvents> commit_events_for_each_event_type_into_scope(int number_of_events, EventSourceId event_source, ScopeId scope)
-    {
-        var committed_events = await commit_events_for_each_event_type(number_of_events, event_source).ConfigureAwait(false);
-        await write_committed_events_to_scoped_event_log(committed_events, scope).ConfigureAwait(false);
-        return committed_events;
-    }
-    
-    protected static async Task write_committed_events_to_scoped_event_log(CommittedEvents committed_events, ScopeId scope)
+
+    static async Task write_committed_events_to_scoped_event_log(CommittedEvents committed_events, ScopeId scope)
     {
         foreach (var committed_event in committed_events)
         {
@@ -174,13 +197,55 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
             .Returns(on_handle_event);
     }
+    protected static void fail_after_processing_number_of_events(int number_of_events, string reason, retry_failing_event? retry = default)
+    {
+        on_handle_event = (_, _, _) =>
+        {
+            var response = new EventHandlerResponse();
+            if (number_of_events_handled >= number_of_events)
+            {
+                response.Failure = new ProcessorFailure
+                {
+                    Reason = reason, 
+                    Retry = retry is not null,
+                    RetryTimeout = retry?.timeout.ToDuration() ?? TimeSpan.MaxValue.ToDuration()
+                };
 
-    static async Task commit_after_delay(params (int number_of_events, EventSourceId event_source, ScopeId scope)[] events)
+            }
+            return Task.FromResult(response);
+        };
+        dispatcher
+            .Setup(_ => _.Call(Moq.It.IsAny<HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
+            .Returns(on_handle_event);
+    }
+    
+    protected static void fail_for_partition(PartitionId partition, string reason, retry_failing_event? retry = default)
+    {
+        on_handle_event = (request, _, _) =>
+        {
+            var response = new EventHandlerResponse();
+            if (request.Event.PartitionId == partition.Value)
+            {
+                response.Failure = new ProcessorFailure
+                {
+                    Reason = reason, 
+                    Retry = retry is not null,
+                    RetryTimeout = retry?.timeout.ToDuration() ?? TimeSpan.MaxValue.ToDuration()
+                };
+            }
+            return Task.FromResult(response);
+        };
+        dispatcher
+            .Setup(_ => _.Call(Moq.It.IsAny<HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
+            .Returns(on_handle_event);
+    }
+
+    static async Task commit_after_delay(IEnumerable<(int number_of_events, EventSourceId event_source, ScopeId scope)> commit)
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
-        await Task.WhenAll(events.Select(_ => _.scope != ScopeId.Default
-            ? commit_events_for_each_event_type_into_scope(_.number_of_events, _.event_source, _.scope)
-            : commit_events_for_each_event_type(_.number_of_events, _.event_source)));
+        await commit_events_for_each_event_type(commit);
     }
 
     protected static Try<IStreamDefinition> get_stream_definition_for(IEventHandler event_handler)
@@ -347,5 +412,8 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         }
     }
 }
+
+record retry_failing_event(TimeSpan timeout);
+
 record failing_partitioned_state(Dictionary<PartitionId, StreamPosition> failing_partitions);
 record failing_unpartitioned_state(StreamPosition failing_position);

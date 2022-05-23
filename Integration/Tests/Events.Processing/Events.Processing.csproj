@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <Folder Include="EventHandlers\with_a_single\partitioned\fast_event_handler\needing_to_catchup\given" />
+      <Folder Include="EventHandlers\with_a_single\partitioned\fast_event_handler\needing_to_catchup\processing_all_event_types\and_failing" />
       <Folder Include="EventHandlers\with_a_single\partitioned\fast_event_handler\with_implicit_filter" />
       <Folder Include="EventHandlers\with_a_single\scoped" />
     </ItemGroup>
