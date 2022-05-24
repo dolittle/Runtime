@@ -29,7 +29,9 @@ class without_problems : given.single_tenant_and_event_handlers
         partitioned: true,
         public_stream: false,
         max_handled_event_types: 1);
-    
+
+    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
+
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state(
         event_handler,
         implicit_filter: false,

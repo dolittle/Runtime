@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -21,8 +20,8 @@ using Dolittle.Runtime.Rudimentary;
 using Google.Protobuf.WellKnownTypes;
 using Integration.Shared;
 using Machine.Specifications;
-using Machine.Specifications.Utility;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Moq;
 using CommittedEvent = Dolittle.Runtime.Events.Store.CommittedEvent;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -35,6 +34,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 using StreamEvent = Dolittle.Runtime.Events.Processing.Contracts.StreamEvent;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
+using MongoStreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.given;
 
@@ -185,12 +185,6 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static Task run_event_handlers_until_completion_and_commit_events_after_starting_event_handlers(params (int number_of_events, EventSourceId event_source, ScopeId scope)[] events)
         => run_event_handlers_until_completion(post_start_task: commit_after_delay(events));
 
-    // protected static void stop_event_handlers_after(TimeSpan time_span)
-    // {
-    //     cancel_event_handlers_source = new CancellationTokenSource(time_span);
-    //     cancel_event_handlers_registration = cancel_event_handlers_source.Token.Register(() => dispatcher_cancellation_source?.SetResult());
-    // }
-
     protected static void with_event_handlers(params (bool partitioned, int max_event_types_to_filter, ScopeId scope, bool fast)[] event_handler_infos)
     {
         event_handlers_to_run = event_handler_infos.Select(_ =>
@@ -215,7 +209,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 cancel_event_handlers_registration?.Dispose();
                 cancel_event_handlers_source?.Dispose();
                 var response = callback(request);
-                cancel_event_handlers_source = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
+                cancel_event_handlers_source = new CancellationTokenSource(TimeSpan.FromMilliseconds(250));
                 cancel_event_handlers_registration = cancel_event_handlers_source.Token.Register(() => dispatcher_cancellation_source?.SetResult());
                 return Task.FromResult(response);
             });
@@ -267,7 +261,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     {
         if (commit.Any())
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromMilliseconds(250));
             await commit_events_for_each_event_type(commit);
         }
     }
@@ -309,6 +303,25 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         }
         return persisted_stream_processor_states[stream_processor_id];
     }
+
+    #region SpecHelpers
+
+    protected static void expect_number_of_filtered_events(IEventHandler event_handler, long expected_number)
+        => count_events_in_stream(event_handler, Builders<MongoStreamEvent>.Filter.Empty).ShouldEqual(expected_number);
+    
+    protected static void expect_number_of_filtered_events_with_partition(IEventHandler event_handler, long expected_number, PartitionId partition_id)
+        => count_events_in_stream(event_handler, Builders<MongoStreamEvent>.Filter.Eq(_ => _.Partition, partition_id.Value)).ShouldEqual(expected_number);
+    
+    protected static void expect_number_of_filtered_events_with_event_type(IEventHandler event_handler, long expected_number, ArtifactId event_type)
+        => count_events_in_stream(event_handler, Builders<MongoStreamEvent>.Filter.Eq(_ => _.Metadata.TypeId, event_type.Value)).ShouldEqual(expected_number);
+    
+
+    static long count_events_in_stream(IEventHandler event_handler, FilterDefinition<MongoStreamEvent> filter)
+        => streams
+            .Get(event_handler.Info.Id.Scope, event_handler.Info.Id.EventHandler.Value, CancellationToken.None)
+            .Result
+            .CountDocuments(filter, cancellationToken: CancellationToken.None);
+    
 
     protected static void expect_stream_definition(
         IEventHandler event_handler,
@@ -438,7 +451,11 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     }
 }
 
-record retry_failing_event(TimeSpan timeout);
-
 record failing_partitioned_state(Dictionary<PartitionId, StreamPosition> failing_partitions);
 record failing_unpartitioned_state(StreamPosition failing_position);
+
+    #endregion
+
+    record retry_failing_event(TimeSpan timeout);
+
+    

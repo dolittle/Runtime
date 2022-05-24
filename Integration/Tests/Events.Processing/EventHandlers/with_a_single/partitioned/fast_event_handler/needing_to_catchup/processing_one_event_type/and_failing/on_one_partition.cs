@@ -41,6 +41,7 @@ class on_one_partition : given.single_tenant_and_event_handlers
             (2, succeeding_partition.Value, ScopeId.Default)).GetAwaiter().GetResult();
     };
 
+    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
     It should_have_persisted_correct_stream = () => expect_stream_definition(
         event_handler,
         partitioned: true, 
