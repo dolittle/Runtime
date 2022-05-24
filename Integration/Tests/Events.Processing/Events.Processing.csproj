@@ -15,6 +15,8 @@
       <Folder Include="EventHandlers\with_a_single\partitioned\fast_event_handler\needing_to_catchup\given" />
       <Folder Include="EventHandlers\with_a_single\partitioned\fast_event_handler\with_implicit_filter\needing_to_catchup\given" />
       <Folder Include="EventHandlers\with_a_single\scoped" />
+      <Folder Include="EventHandlers\with_a_single\unpartitioned\fast_event_handler\needing_to_catchup\given" />
+      <Folder Include="EventHandlers\with_a_single\unpartitioned\fast_event_handler\with_implicit_filter\needing_to_catchup\given" />
     </ItemGroup>
 
 </Project>

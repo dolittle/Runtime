@@ -100,15 +100,29 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     protected static IEnumerable<Dolittle.Runtime.Events.Store.Streams.StreamEvent> get_partitioned_events_in_stream(IEventHandler event_handler, PartitionId partition_id)
     {
-        var fetcher = event_fetchers.GetPartitionedFetcherFor(
-            event_handler.Info.Id.Scope,
+        if (event_handler.Info.Partitioned)
+        {
+            var fetcher = event_fetchers.GetPartitionedFetcherFor(
+                event_handler.Info.Id.Scope,
+                new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(
+                    StreamId.EventLog,
+                    event_handler.Info.Id.EventHandler.Value,
+                    event_handler.Info.EventTypes,
+                    event_handler.Info.Partitioned)), CancellationToken.None).Result;
+
+            return fetcher.FetchInPartition(partition_id, StreamPosition.Start, CancellationToken.None).Result.Result;
+        }
+        var rangeFetcher = event_fetchers.GetRangeFetcherFor(event_handler.Info.Id.Scope,
             new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(
                 StreamId.EventLog,
                 event_handler.Info.Id.EventHandler.Value,
                 event_handler.Info.EventTypes,
                 event_handler.Info.Partitioned)), CancellationToken.None).Result;
 
-        return fetcher.FetchInPartition(partition_id, StreamPosition.Start, CancellationToken.None).Result.Result;
+        return rangeFetcher
+            .FetchRange(new StreamPositionRange(StreamPosition.Start, ulong.MaxValue), CancellationToken.None)
+            .Result
+            .Where(_ => _.Event.EventSource.Value == partition_id.Value);
     }
 
     protected static async Task commit_events_for_each_event_type(IEnumerable<(int number_of_events, EventSourceId event_source, ScopeId scope_id)> commit)
@@ -247,7 +261,9 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         setup_dispatcher_call(request =>
         {
             var response = new EventHandlerResponse();
-            if (partitions.Select(_ => _.Value).Contains(request.Event.PartitionId))
+            if (request.Event.Partitioned
+                    ? partitions.Select(_ => _.Value).Contains(request.Event.PartitionId)
+                    : partitions.Select(_ => _.Value).Contains(request.Event.Event.EventSourceId))
             {
                 response.Failure = new ProcessorFailure
                 {
