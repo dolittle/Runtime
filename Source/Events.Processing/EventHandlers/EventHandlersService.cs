@@ -94,7 +94,7 @@ public class EventHandlersService : EventHandlersBase
                 return;
             }
             using var eventHandler = _configuration.Value.Fast
-                ? _eventHandlerFactory.CreateFast(arguments, dispatcher, context.CancellationToken)
+                ? _eventHandlerFactory.CreateFast(arguments, _configuration.Value.ImplicitFilter, dispatcher, context.CancellationToken)
                 : _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken); 
 
             await _eventHandlers.RegisterAndStart(

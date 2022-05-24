@@ -45,7 +45,7 @@ public class FastEventHandler : IEventHandler
     readonly Func<CancellationToken, Task> _acceptRegistration;
     readonly Func<Failure, CancellationToken, Task> _rejectRegistration;
     readonly ExecutionContext _executionContext;
-    readonly IOptions<EventHandlersConfiguration> _configuration;
+    readonly bool _implicitFilter;
     readonly ILogger _logger;
     readonly CancellationTokenSource _cancellationTokenSource;
 
@@ -54,7 +54,7 @@ public class FastEventHandler : IEventHandler
     /// <summary>
     /// Initializes a new instance of <see cref="EventHandler"/>.
     /// </summary>
-    /// <param name="configuration">The <see cref="EventHandlersConfiguration"/>.</param>
+    /// <param name="implicitFilter">Whether filtering is implicit.</param>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
     /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
     /// <param name="filterValidationForAllTenants">The <see cref="IValidateFilterForAllTenants" /> for validating the filter definition.</param>
@@ -68,7 +68,7 @@ public class FastEventHandler : IEventHandler
     /// <param name="executionContext">The execution context for the event handler.</param>
     /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
     public FastEventHandler(
-        IOptions<EventHandlersConfiguration> configuration,
+        bool implicitFilter,
         IStreamProcessors streamProcessors,
         IFilterStreamProcessors filterStreamProcessors,
         IValidateFilterForAllTenants filterValidationForAllTenants,
@@ -82,7 +82,7 @@ public class FastEventHandler : IEventHandler
         ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
-        _configuration = configuration;
+        _implicitFilter = implicitFilter;
         _logger = logger;
         _streamProcessors = streamProcessors;
         _filterStreamProcessors = filterStreamProcessors;
@@ -212,7 +212,7 @@ public class FastEventHandler : IEventHandler
 
     async Task<bool> RegisterFilterStreamProcessor()
     {
-        if (_configuration.Value.ImplicitFilter)
+        if (_implicitFilter)
         {
             return true;
         }
@@ -319,7 +319,7 @@ public class FastEventHandler : IEventHandler
         try
         {
             var runningDispatcher = _acceptRegistration(_cancellationTokenSource.Token);
-            if (!_configuration.Value.ImplicitFilter)
+            if (!_implicitFilter)
             {
                 await FilterStreamProcessor.Initialize().ConfigureAwait(false);
             }
@@ -330,7 +330,7 @@ public class FastEventHandler : IEventHandler
                 EventProcessorStreamProcessor.Start(),
                 runningDispatcher
             };
-            if (!_configuration.Value.ImplicitFilter)
+            if (!_implicitFilter)
             {
                 tasks.Add(FilterStreamProcessor.Start());
             }
