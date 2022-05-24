@@ -29,7 +29,7 @@ namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 /// <summary>
 /// Benchmarks for Event Handlers.
 /// </summary>
-public class FastEventHandler : JobBase
+public class FastEventHandlerWithImplicitFilter : JobBase
 {
     IEventStore _eventStore;
     IEventHandlers _eventHandlers;
@@ -88,7 +88,7 @@ public class FastEventHandler : JobBase
         var eventHandlers = new List<IEventHandler>();
         eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.CreateFast(
             new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
-            false,
+            true,
             _dispatcher.Object,
             CancellationToken.None)));
         _eventHandlersToRun = eventHandlers;
@@ -136,7 +136,7 @@ public class FastEventHandler : JobBase
     /// <summary>
     /// Commits the events one-by-one in a loop.
     /// </summary>
-    [Benchmark]
+    // [Benchmark] TODO: Implicit filters does not work yet
     public Task RegisteringAndProcessing()
     {
         return Task.WhenAll(_eventHandlersToRun.Select(eventHandler => _eventHandlers.RegisterAndStart(
