@@ -14,7 +14,7 @@ class without_problems : given.single_tenant_and_event_handlers
 
     Establish context = () =>
     {
-        with_event_handlers((true, 1, ScopeId.Default, true));
+        with_event_handlers((true, 1, ScopeId.Default, true, false));
         event_handler = event_handlers_to_run.First();
     };
 

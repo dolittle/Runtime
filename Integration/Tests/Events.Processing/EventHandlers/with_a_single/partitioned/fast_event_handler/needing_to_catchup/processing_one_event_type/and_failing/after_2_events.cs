@@ -27,7 +27,7 @@ class after_2_events : given.single_tenant_and_event_handlers
             (4, failing_partition.Value, ScopeId.Default)
         }).GetAwaiter().GetResult();
         fail_after_processing_number_of_events(2, failure_reason);
-        with_event_handlers((true, 1, ScopeId.Default, true));
+        with_event_handlers((true, 1, ScopeId.Default, true, false));
         event_handler = event_handlers_to_run.First();
     };
 

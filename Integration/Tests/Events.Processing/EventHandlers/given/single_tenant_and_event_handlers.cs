@@ -125,13 +125,14 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         }
 
         var unscoped_commmits = commit.Where(_ => _.scope_id == ScopeId.Default).Select(_ => (_.number_of_events, _.event_source));
+        var tasks = new List<Task>();
         if (unscoped_commmits.Any())
         {
             var unscoped_uncommitted_events = new UncommittedEvents(
                 CreateUncommittedEvents(commit.Where(_ => _.scope_id == ScopeId.Default).Select(_ => (_.number_of_events, _.event_source))).ToArray());
-            await commit_events(unscoped_uncommitted_events).ConfigureAwait(false);
+            tasks.Add(commit_events(unscoped_uncommitted_events));
         }
-
+        
         var scoped_uncommitted_events = new Dictionary<ScopeId, UncommittedEvents>();
         foreach (var scoped_commit_group in commit.Where(_ => _.scope_id != ScopeId.Default).GroupBy(_ => _.scope_id))
         {
@@ -150,8 +151,10 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 _.Type,
                 _.Public,
                 _.Content)).ToList());
-            await write_committed_events_to_scoped_event_log(committedEvents, scope).ConfigureAwait(false);
+            tasks.Add(write_committed_events_to_scoped_event_log(committedEvents, scope));
         }
+
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     static async Task write_committed_events_to_scoped_event_log(CommittedEvents committed_events, ScopeId scope)
@@ -185,15 +188,15 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static Task run_event_handlers_until_completion_and_commit_events_after_starting_event_handlers(params (int number_of_events, EventSourceId event_source, ScopeId scope)[] events)
         => run_event_handlers_until_completion(post_start_task: commit_after_delay(events));
 
-    protected static void with_event_handlers(params (bool partitioned, int max_event_types_to_filter, ScopeId scope, bool fast)[] event_handler_infos)
+    protected static void with_event_handlers(params (bool partitioned, int max_event_types_to_filter, ScopeId scope, bool fast, bool implicitFilter)[] event_handler_infos)
     {
         event_handlers_to_run = event_handler_infos.Select(_ =>
         {
-            var (partitioned, max_event_types_to_filter, scope, fast) = _;
+            var (partitioned, max_event_types_to_filter, scope, fast, implicitFilter) = _;
             var registration_arguments = new EventHandlerRegistrationArguments(
                 Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope);
             return fast
-                ? event_handler_factory.CreateFast(registration_arguments, dispatcher.Object, CancellationToken.None)
+                ? event_handler_factory.CreateFast(registration_arguments, implicitFilter, dispatcher.Object, CancellationToken.None)
                 : event_handler_factory.Create(registration_arguments, dispatcher.Object, CancellationToken.None);
         }).ToArray();
     }

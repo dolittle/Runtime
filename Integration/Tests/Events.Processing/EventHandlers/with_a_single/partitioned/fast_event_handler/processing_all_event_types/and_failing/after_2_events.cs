@@ -23,7 +23,7 @@ class after_2_events : given.single_tenant_and_event_handlers
         failing_partition = "some event source";
         failure_reason = "some reason";
         fail_after_processing_number_of_events(2, failure_reason);
-        with_event_handlers((true, number_of_event_types, ScopeId.Default, true));
+        with_event_handlers((true, number_of_event_types, ScopeId.Default, true, false));
         event_handler = event_handlers_to_run.First();
     };
 

@@ -30,7 +30,7 @@ class on_both_partitions : given.single_tenant_and_event_handlers
             (2, second_failing_partition.Value, ScopeId.Default)
         }).GetAwaiter().GetResult();
         fail_for_partitions(new []{first_failing_partition, second_failing_partition}, failure_reason);
-        with_event_handlers((true, number_of_event_types, ScopeId.Default, true));
+        with_event_handlers((true, number_of_event_types, ScopeId.Default, true, false));
         event_handler = event_handlers_to_run.First();
     };
 

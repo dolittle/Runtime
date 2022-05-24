@@ -6,15 +6,16 @@ using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.processing_all_event_types;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.with_implicit_filter.processing_all_event_types;
 
+[Ignore("Implicit filter does not work yet with event handlers")]
 class without_problems : given.single_tenant_and_event_handlers
 {
     static IEventHandler event_handler;
 
     Establish context = () =>
     {
-        with_event_handlers((true, number_of_event_types, ScopeId.Default, true, false));
+        with_event_handlers((true, number_of_event_types, ScopeId.Default, true, true));
         event_handler = event_handlers_to_run.First();
     };
 

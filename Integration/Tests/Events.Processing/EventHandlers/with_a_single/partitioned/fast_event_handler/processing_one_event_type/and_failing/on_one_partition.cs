@@ -25,7 +25,7 @@ class on_one_partition : given.single_tenant_and_event_handlers
         succeeding_partition = "some other event source";
         failure_reason = "some reason";
         fail_for_partitions(new []{failing_partition}, failure_reason);
-        with_event_handlers((true, 1, ScopeId.Default, true));
+        with_event_handlers((true, 1, ScopeId.Default, true, false));
         event_handler = event_handlers_to_run.First();
     };
 
