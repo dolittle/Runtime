@@ -269,14 +269,12 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         return scoped_committed_events[scope_id].Where(_ => nFirstEventTypes.Contains(_.Type.Id));
     }
     
-    protected static void fail_for_partitions(IEnumerable<PartitionId> partitions, string reason, retry_failing_event? retry = default)
+    protected static void fail_for_event_sources(IEnumerable<EventSourceId> event_sources, string reason, retry_failing_event? retry = default)
     {
         setup_dispatcher_call(request =>
         {
             var response = new EventHandlerResponse();
-            if (request.Event.Partitioned
-                    ? partitions.Select(_ => _.Value).Contains(request.Event.PartitionId)
-                    : partitions.Select(_ => _.Value).Contains(request.Event.Event.EventSourceId))
+            if (event_sources.Select(_ => _.Value).Contains(request.Event.Event.EventSourceId))
             {
                 response.Failure = new ProcessorFailure
                 {
