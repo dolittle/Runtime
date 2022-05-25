@@ -15,7 +15,7 @@ class single_tenant_and_event_handlers : event_handler.given.single_tenant_and_e
         => expect_stream_processor_state_with_failure(event_handler, num_events_to_handle, null!);
     
     protected static void expect_stream_processor_state_with_failure(IEventHandler event_handler, int num_events_to_handle, failing_partitioned_state failing_partitioned_state)
-        => expect_stream_processor_state(event_handler, true, num_events_to_handle, failing_partitioned_state);
+        => expect_stream_processor_state(event_handler, true, false, num_events_to_handle, failing_partitioned_state);
     
     protected static void with_event_handlers_filtering_number_of_event_types(params int[] max_event_types_to_filter)
         => with_event_handlers_filtering_number_of_event_types(max_event_types_to_filter

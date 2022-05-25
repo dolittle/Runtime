@@ -11,11 +11,4 @@
         <ProjectReference Include="..\..\Shared\Shared.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="EventHandlers\with_a_single\scoped\partitioned\fast_event_handler\needing_to_catchup\given" />
-      <Folder Include="EventHandlers\with_a_single\scoped\partitioned\fast_event_handler\with_implicit_filter\needing_to_catchup\given" />
-      <Folder Include="EventHandlers\with_a_single\scoped\unpartitioned\fast_event_handler\needing_to_catchup\given" />
-      <Folder Include="EventHandlers\with_a_single\scoped\unpartitioned\fast_event_handler\with_implicit_filter\needing_to_catchup\given" />
-    </ItemGroup>
-
 </Project>

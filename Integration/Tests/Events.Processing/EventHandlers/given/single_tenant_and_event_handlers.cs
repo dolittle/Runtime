@@ -353,7 +353,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .CountDocuments(filter, cancellationToken: CancellationToken.None);
     
 
-    protected static void expect_stream_definition(
+    protected static void expect_correct_stream_definition(
         IEventHandler event_handler,
         bool partitioned = false,
         bool public_stream = false,
@@ -378,21 +378,23 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static void expect_stream_processor_state(
         IEventHandler event_handler,
         bool implicit_filter = false,
+        bool fast_event_handler = false,
         bool partitioned = false,
         int num_events_to_handle = 0,
         failing_partitioned_state? failing_partitioned_state = null,
         failing_unpartitioned_state? failing_unpartitioned_state = null
         )
     {
-        expect_filter_stream_processor_state(event_handler.Info.GetFilterStreamId(), implicit_filter);
+        expect_filter_stream_processor_state(event_handler.Info.GetFilterStreamId(), implicit_filter, fast_event_handler);
         expect_event_processor_stream_processor_state(event_handler.Info.GetEventProcessorStreamId(), partitioned, num_events_to_handle, failing_partitioned_state, failing_unpartitioned_state);
     }
 
-    static void expect_filter_stream_processor_state(StreamProcessorId id, bool implicit_filter)
+    static void expect_filter_stream_processor_state(StreamProcessorId id, bool implicit_filter, bool fast_event_handler)
     {
+        var isImplicit = implicit_filter && fast_event_handler;
         var tryGetStreamProcessorState = get_stream_processor_state_for(id);
-        tryGetStreamProcessorState.Success.ShouldEqual(!implicit_filter);
-        if (implicit_filter)
+        tryGetStreamProcessorState.Success.ShouldEqual(!isImplicit);
+        if (isImplicit)
         {
             return;
         }
