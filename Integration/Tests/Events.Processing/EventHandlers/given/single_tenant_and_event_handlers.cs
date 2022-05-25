@@ -50,6 +50,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static CommittedEvents committed_events;
     protected static Dictionary<ScopeId, CommittedEvents> scoped_committed_events;
     protected static IWriteEventHorizonEvents event_horizon_events_writer;
+    protected static EventLogSequenceNumber external_event_sequence_number;
     static int number_of_events_handled;
     static CancellationTokenRegistration? cancel_event_handlers_registration;
     static CancellationTokenSource? cancel_event_handlers_source;
@@ -59,6 +60,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     Establish context = () =>
     {
+        external_event_sequence_number = EventLogSequenceNumber.Initial;
         number_of_events_handled = 0;
         scoped_committed_events = new Dictionary<ScopeId, CommittedEvents>();
         committed_events = new CommittedEvents(Array.Empty<CommittedEvent>());
@@ -158,7 +160,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         foreach (var (scope, uncommittedEvents) in scoped_uncommitted_events.Where(_ => _.Value.HasEvents))
         {
             var committedEvents = new CommittedEvents(uncommittedEvents.Select(_ => new CommittedEvent(
-                EventLogSequenceNumber.Initial,
+                external_event_sequence_number = external_event_sequence_number.Value + 1,
                 DateTimeOffset.UtcNow,
                 _.EventSource,
                 Runtime.CreateExecutionContextFor(tenant),
@@ -195,14 +197,14 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             (_, _) => dispatcher.Object.Reject(new EventHandlerRegistrationResponse(), CancellationToken.None),
             CancellationToken.None)));
         tasks.Add(post_start_task ?? Task.CompletedTask);
-
+        reset_timeout_after_action(TimeSpan.FromSeconds(2));
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     protected static Task run_event_handlers_until_completion_and_commit_events_after_starting_event_handlers(params (int number_of_events, EventSourceId event_source, ScopeId scope)[] events)
         => run_event_handlers_until_completion(post_start_task: commit_after_delay(events));
 
-    protected static void with_event_handlers(params (bool partitioned, int max_event_types_to_filter, ScopeId scope, bool fast, bool implicitFilter)[] event_handler_infos)
+    protected static void with_event_handlers_filtering_number_of_event_types(params (bool partitioned, int max_event_types_to_filter, ScopeId scope, bool fast, bool implicitFilter)[] event_handler_infos)
     {
         event_handlers_to_run = event_handler_infos.Select(_ =>
         {
@@ -222,16 +224,21 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .Callback(() => Interlocked.Add(ref number_of_events_handled, 1))
             .Returns<HandleEventRequest, ExecutionContext, CancellationToken>((request, _, _) =>
             {
-                cancel_event_handlers_registration?.Unregister();
-                cancel_event_handlers_registration?.Dispose();
-                cancel_event_handlers_source?.Dispose();
                 var response = callback(request);
-                cancel_event_handlers_source = new CancellationTokenSource(TimeSpan.FromMilliseconds(250));
-                cancel_event_handlers_registration = cancel_event_handlers_source.Token.Register(() => dispatcher_cancellation_source?.SetResult());
+                reset_timeout_after_action(TimeSpan.FromMilliseconds(250));
                 return Task.FromResult(response);
             });
     }
 
+    static void reset_timeout_after_action(TimeSpan timeout)
+    {
+        cancel_event_handlers_registration?.Unregister();
+        cancel_event_handlers_registration?.Dispose();
+        cancel_event_handlers_source?.Dispose();
+        cancel_event_handlers_source = new CancellationTokenSource(timeout);
+        cancel_event_handlers_registration = cancel_event_handlers_source.Token.Register(() => dispatcher_cancellation_source?.SetResult());
+    }
+    
     protected static void fail_after_processing_number_of_events(int number_of_events, string reason, retry_failing_event? retry = default)
     {
         setup_dispatcher_call(_ =>
@@ -254,6 +261,12 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     {
         var nFirstEventTypes = event_types.Take(num_event_types);
         return committed_events.Where(_ => nFirstEventTypes.Contains(_.Type.Id));
+    }
+    
+    protected static IEnumerable<CommittedEvent> scope_events_for_event_types(ScopeId scope_id, int num_event_types)
+    {
+        var nFirstEventTypes = event_types.Take(num_event_types);
+        return scoped_committed_events[scope_id].Where(_ => nFirstEventTypes.Contains(_.Type.Id));
     }
     
     protected static void fail_for_partitions(IEnumerable<PartitionId> partitions, string reason, retry_failing_event? retry = default)

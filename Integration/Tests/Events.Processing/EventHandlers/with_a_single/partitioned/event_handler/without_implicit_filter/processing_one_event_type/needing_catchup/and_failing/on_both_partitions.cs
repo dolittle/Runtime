@@ -9,9 +9,8 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.fast_event_handler.with_implicit_filter.processing_one_event_type.and_failing;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.partitioned.event_handler.without_implicit_filter.processing_one_event_type.needing_catchup.and_failing;
 
-[Ignore("Implicit filter does not work yet with event handlers")]
 class on_both_partitions : given.single_tenant_and_event_handlers
 {
     static IEventHandler event_handler;
@@ -24,9 +23,13 @@ class on_both_partitions : given.single_tenant_and_event_handlers
         first_failing_partition = "some event source";
         second_failing_partition = "some other event source";
         failure_reason = "some reason";
+        commit_events_for_each_event_type(new (int number_of_events, EventSourceId event_source, ScopeId scope_id)[]
+        {
+            (2, first_failing_partition.Value, ScopeId.Default),
+            (2, second_failing_partition.Value, ScopeId.Default)
+        }).GetAwaiter().GetResult();
         fail_for_partitions(new []{first_failing_partition, second_failing_partition}, failure_reason);
-        with_event_handlers((true, 1, ScopeId.Default, true, true));
-        event_handler = event_handlers_to_run.First();
+        event_handler = setup_event_handler();
     };
 
     Because of = () =>
@@ -35,9 +38,8 @@ class on_both_partitions : given.single_tenant_and_event_handlers
             (2, first_failing_partition.Value, ScopeId.Default),
             (2, second_failing_partition.Value, ScopeId.Default)).GetAwaiter().GetResult();
     };
-    
-    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
 
+    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
     It should_have_persisted_correct_stream = () => expect_stream_definition(
         event_handler,
         partitioned: true, 
