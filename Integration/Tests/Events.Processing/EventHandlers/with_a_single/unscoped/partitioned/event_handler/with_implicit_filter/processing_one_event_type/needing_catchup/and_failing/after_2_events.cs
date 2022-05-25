@@ -33,17 +33,8 @@ class after_2_events : given.single_tenant_and_event_handlers
     };
 
     It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
-    It should_have_persisted_correct_stream = () => expect_stream_definition(
+    It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
+    It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(
         event_handler,
-        partitioned: true,
-        public_stream: false,
-        max_handled_event_types: 1);
-    
-    It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state(
-        event_handler,
-        implicit_filter: false,
-        partitioned: true,
-        num_events_to_handle: committed_events_for_event_types(1).Count(),
-        failing_partitioned_state: new failing_partitioned_state(new Dictionary<PartitionId, StreamPosition>{{failing_partition, 1}}),
-        failing_unpartitioned_state: null);
+        new failing_partitioned_state(new Dictionary<PartitionId, StreamPosition>{{failing_partition, 1}}));
 }
