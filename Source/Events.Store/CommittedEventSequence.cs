@@ -29,7 +29,7 @@ public abstract class CommittedEventSequence<TEvent> : EventSequence<TEvent>
         }
     }
 
-    void ThrowIfEventLogSequenceIsOutOfOrder(TEvent @event, TEvent previousEvent)
+    static void ThrowIfEventLogSequenceIsOutOfOrder(TEvent @event, TEvent previousEvent)
     {
         if (@event.EventLogSequenceNumber <= previousEvent.EventLogSequenceNumber)
         {
