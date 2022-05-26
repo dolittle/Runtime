@@ -400,7 +400,10 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         }
         var state = tryGetStreamProcessorState.Result;
         state.Partitioned.ShouldBeFalse();
-        state.Position.Value.ShouldEqual((ulong) committed_events.Count);
+        var expectedPosition = id.ScopeId == ScopeId.Default
+            ? new StreamPosition((ulong)committed_events.Count)
+            : new StreamPosition((ulong)scoped_committed_events[id.ScopeId].Count);
+        state.Position.ShouldEqual(expectedPosition);
         state.ShouldBeOfExactType<StreamProcessorState>();
         var unpartitionedState = state as StreamProcessorState;
         unpartitionedState!.IsFailing.ShouldBeFalse();

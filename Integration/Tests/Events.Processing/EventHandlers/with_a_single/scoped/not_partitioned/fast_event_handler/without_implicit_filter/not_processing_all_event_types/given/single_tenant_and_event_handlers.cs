@@ -16,7 +16,7 @@ class single_tenant_and_event_handlers : without_implicit_filter.given.single_te
     
     
     protected static void expect_stream_processor_state_without_failure(IEventHandler event_handler)
-        => expect_stream_processor_state_without_failure(event_handler, committed_events.Count);
+        => expect_stream_processor_state_without_failure(event_handler, scoped_committed_events[event_handler_scope].Count);
     
     protected static IEventHandler setup_event_handler()
     {

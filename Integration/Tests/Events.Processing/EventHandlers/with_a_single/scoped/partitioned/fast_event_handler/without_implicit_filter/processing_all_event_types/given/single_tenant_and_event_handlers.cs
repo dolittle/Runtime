@@ -21,7 +21,7 @@ class single_tenant_and_event_handlers : without_implicit_filter.given.single_te
     protected static void expect_stream_processor_state_with_failure(IEventHandler event_handler, failing_partitioned_state failing_partitioned_state)
         => expect_stream_processor_state_with_failure(
             event_handler,
-            committed_events.Count,
+            scoped_committed_events[event_handler_scope].Count,
             failing_partitioned_state);
 
     protected static IEventHandler setup_event_handler()

@@ -31,7 +31,7 @@ class after_2_events : given.single_tenant_and_event_handlers
         commit_events_after_starting_event_handler((2, failing_partition.Value));
     };
 
-    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
+    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, scope_events_for_event_types(event_handler_scope, 1).LongCount());
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(
         event_handler,
