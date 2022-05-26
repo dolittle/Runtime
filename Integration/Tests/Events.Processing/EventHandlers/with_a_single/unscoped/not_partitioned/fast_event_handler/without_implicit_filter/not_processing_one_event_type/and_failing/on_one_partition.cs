@@ -9,7 +9,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.not_partitioned.fast_event_handler.without_implicit_filter.not_processing_one_event_type.and_failing;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.not_partitioned.fast_event_handler.without_implicit_filter.processing_one_event_type.and_failing;
 
 
 class on_one_partition : given.single_tenant_and_event_handlers

@@ -5,7 +5,7 @@ using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.not_partitioned.fast_event_handler.with_implicit_filter.not_processing_one_event_type.needing_catchup;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.not_partitioned.fast_event_handler.with_implicit_filter.processing_one_event_type.needing_catchup;
 
 [Ignore("Implicit filter does not work yet with event handlers")]
 class without_problems : given.single_tenant_and_event_handlers

@@ -5,7 +5,7 @@ using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.scoped.not_partitioned.fast_event_handler.without_implicit_filter.not_processing_all_event_types;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.scoped.not_partitioned.fast_event_handler.without_implicit_filter.processing_all_event_types;
 
 
 class without_problems : given.single_tenant_and_event_handlers

@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.not_partitioned.event_handler.without_implicit_filter.not_processing_all_event_types.needing_catchup;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.not_partitioned.event_handler.without_implicit_filter.processing_all_event_types.needing_catchup;
 
 
 class without_problems : given.single_tenant_and_event_handlers
