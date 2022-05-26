@@ -225,7 +225,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .Returns<HandleEventRequest, ExecutionContext, CancellationToken>((request, _, _) =>
             {
                 var response = callback(request);
-                reset_timeout_after_action(TimeSpan.FromMilliseconds(600));
+                reset_timeout_after_action(TimeSpan.FromMilliseconds(1000));
                 return Task.FromResult(response);
             });
     }
