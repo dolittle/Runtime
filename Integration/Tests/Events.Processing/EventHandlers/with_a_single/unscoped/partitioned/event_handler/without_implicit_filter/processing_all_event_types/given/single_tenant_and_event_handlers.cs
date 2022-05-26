@@ -7,30 +7,34 @@ using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.with_implicit_filter.processing_one_event_type.given;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.without_implicit_filter.processing_all_event_types.given;
 
-class single_tenant_and_event_handlers : with_implicit_filter.given.single_tenant_and_event_handlers
+class single_tenant_and_event_handlers : without_implicit_filter.given.single_tenant_and_event_handlers
 {
-    
     protected static void expect_stream_definition(IEventHandler event_handler)
-        => expect_stream_definition(event_handler, 1);
-
+        => expect_stream_definition(event_handler, number_of_event_types);
+    
+    
     protected static void expect_stream_processor_state_without_failure(IEventHandler event_handler)
         => expect_stream_processor_state_with_failure(event_handler, null!);
     
     protected static void expect_stream_processor_state_with_failure(IEventHandler event_handler, failing_partitioned_state failing_partitioned_state)
-        => expect_stream_processor_state_with_failure(event_handler, committed_events_for_event_types(1).Count(), failing_partitioned_state);
+        => expect_stream_processor_state_with_failure(
+            event_handler,
+            committed_events.Count,
+            failing_partitioned_state);
 
     protected static IEventHandler setup_event_handler()
     {
         with_event_handlers_filtering_number_of_event_types(new[]
             {
-                1
+                number_of_event_types
             }
-            .Select(_ => (_, true))
+            .Select(_ => _)
             .ToArray());
         return event_handlers_to_run.First();
     }
+
 }
 
 

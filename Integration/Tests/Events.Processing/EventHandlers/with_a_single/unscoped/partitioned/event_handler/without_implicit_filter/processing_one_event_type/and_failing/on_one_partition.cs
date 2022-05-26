@@ -9,9 +9,9 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.with_implicit_filter.processing_one_event_type.and_failing;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.without_implicit_filter.processing_one_event_type.and_failing;
 
-[Ignore("Implicit filter does not work yet with event handlers")]
+
 class on_one_partition : given.single_tenant_and_event_handlers
 {
     static IEventHandler event_handler;

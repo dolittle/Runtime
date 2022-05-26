@@ -3,12 +3,11 @@
 
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.with_implicit_filter.processing_one_event_type;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.without_implicit_filter.processing_all_event_types;
 
-[Ignore("Implicit filter does not work yet with event handlers")]
+
 class without_problems : given.single_tenant_and_event_handlers
 {
     static IEventHandler event_handler;
@@ -18,12 +17,12 @@ class without_problems : given.single_tenant_and_event_handlers
         event_handler = setup_event_handler();
     };
 
-    Because of = () =>
-    {
-        commit_events_after_starting_event_handler((2, "some_source"));
-    };
+    Because of = () => commit_events_after_starting_event_handler((2, "some_source"));
+
+    
+    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(number_of_event_types).LongCount());
 
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
-    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
+    
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_without_failure(event_handler);
 }

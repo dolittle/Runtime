@@ -9,9 +9,9 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.with_implicit_filter.processing_one_event_type.and_failing;
+namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.without_implicit_filter.processing_all_event_types.and_failing;
 
-[Ignore("Implicit filter does not work yet with event handlers")]
+
 class on_one_partition : given.single_tenant_and_event_handlers
 {
     static IEventHandler event_handler;
@@ -32,9 +32,8 @@ class on_one_partition : given.single_tenant_and_event_handlers
     {
         commit_events_after_starting_event_handler((2, failing_partition.Value), (2, succeeding_partition.Value));
     };
-    
-    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(1).LongCount());
-    
+
+    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, committed_events_for_event_types(number_of_event_types).LongCount());
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(
         event_handler,
