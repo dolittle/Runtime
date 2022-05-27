@@ -9,7 +9,6 @@
         <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" />
         <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
         <PackageReference Include="Proto.Remote" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Remote.GrpcNet" Version="$(ProtoActorVersion)" />
         <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
         <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
         <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
