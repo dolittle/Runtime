@@ -11,6 +11,11 @@ namespace Dolittle.Runtime.EventHorizon.Configuration;
 public class ConsentConfiguration
 {
     /// <summary>
+    /// Gets or sets the consumer tenant id that the consent is given for.
+    /// </summary>
+    public Guid ConsumerTenant { get; set; }
+    
+    /// <summary>
     /// Gets or sets the stream id that the consent is given for.
     /// </summary>
     public Guid Stream { get; set; }
