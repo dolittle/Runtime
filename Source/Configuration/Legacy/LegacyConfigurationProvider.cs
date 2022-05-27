@@ -95,17 +95,21 @@ public class LegacyConfigurationProvider : ConfigurationProvider
         foreach (var microservicesForTenant in config.GetChildren())
         {
             var sectionPrefix = $"{_dolittleConfigSectionRoot}{_delimiter}tenants{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons";
-            Data.Add(sectionPrefix, null);
-            foreach (var consent in microservicesForTenant.GetChildren())
+            foreach (var consentsPerConsumerMicroservice in microservicesForTenant.GetChildren().GroupBy(_ => _["microservice"]))
             {
-                var eventHorizonMicroservicePrefix = $"{sectionPrefix}{_delimiter}{consent["microservice"]}"; 
-                Data.Add(eventHorizonMicroservicePrefix, null);
+                var consumerMicroservice = consentsPerConsumerMicroservice.Key;
+                var eventHorizonMicroservicePrefix = $"{sectionPrefix}{_delimiter}{consumerMicroservice}";
                 var consentSectionPrefix = $"{eventHorizonMicroservicePrefix}{_delimiter}consents";
-                Data.Add(consentSectionPrefix, null);
-                var consentForConsumerSectionPrefix = $"{consentSectionPrefix}{_delimiter}{consent["tenant"]}";
-                Data.Add($"{consentForConsumerSectionPrefix}{_delimiter}stream", consent["stream"]);
-                Data.Add($"{consentForConsumerSectionPrefix}{_delimiter}partition", consent["partition"]);
-                Data.Add($"{consentForConsumerSectionPrefix}{_delimiter}consent", consent["consent"]);
+                var consentsPerConsumerMicroserviceArray = consentsPerConsumerMicroservice.ToArray();
+                for (var i = 0; i < consentsPerConsumerMicroserviceArray.Length; i++)
+                {
+                    var consent = consentsPerConsumerMicroserviceArray[i];
+                    var consentPrefix = $"{consentSectionPrefix}{_delimiter}{i}";
+                    Data.Add($"{consentPrefix}{_delimiter}consumerTenant", consent["tenant"]);
+                    Data.Add($"{consentPrefix}{_delimiter}stream", consent["stream"]);
+                    Data.Add($"{consentPrefix}{_delimiter}partition", consent["partition"]);
+                    Data.Add($"{consentPrefix}{_delimiter}consent", consent["consent"]);
+                }
             }
         }
     }
