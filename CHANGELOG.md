@@ -1,3 +1,23 @@
+# [8.0.2] - 2022-5-27 [PR: #693](https://github.com/dolittle/Runtime/pull/693)
+## Summary
+
+A bug with the structure of the event horizon consent configuration restricted having multiple consents configured for the same consumer microservice and tenant.
+
+### Added
+
+- Describe the added features
+
+### Changed
+
+- When starting up the Runtime it will crash if the event store compatability version configuration is not set
+- Sets log level for proto actor framework to Warning
+
+### Fixed
+
+- An issue related to the event horzion consents configuration restricting having multiple consents set up for the same consumer microservice and tenant
+- Fixed an issue with the Dockerfiles environment variables for setting the console logger
+
+
 # [8.0.1] - 2022-4-20 [PR: #659](https://github.com/dolittle/Runtime/pull/659)
 ## Summary
 
