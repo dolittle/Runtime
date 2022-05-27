@@ -23,7 +23,7 @@ public class and_format_is_yyyy_MM_dd : all_dependencies
     Establish context = () =>
     {
         occurred_format = "yyyy-MM-dd";
-        committed_event = given.an_event.that_occurred_at(DateTimeOffset.Parse("05/01/2020"));
+        committed_event = given.an_event.that_occurred_at(DateTimeOffset.Parse("01/05/2020"));
         partition = "/(partition!";
         definition = projection_definition_builder.create()
             .with_selector(ProjectionEventSelector.Occurred(committed_event.Type.Id, occurred_format))
