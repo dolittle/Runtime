@@ -5,8 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -22,6 +24,7 @@ public class EventProcessor : IEventProcessor
     readonly IWriteEventHorizonEvents _receivedEventsWriter;
     readonly IEventProcessorPolicies _policies;
     readonly IMetricsCollector _metrics;
+    readonly EventStoreClient _eventStoreClient;
     readonly ILogger _logger;
 
     /// <summary>
@@ -32,6 +35,7 @@ public class EventProcessor : IEventProcessor
     /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
     /// <param name="policies">The <see cref="IEventProcessorPolicies" />.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
+    /// <param name="eventStoreClient">The <see cref="EventStoreClient"/>.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public EventProcessor(
         ConsentId consentId,
@@ -39,6 +43,7 @@ public class EventProcessor : IEventProcessor
         IWriteEventHorizonEvents receivedEventsWriter,
         IEventProcessorPolicies policies,
         IMetricsCollector metrics,
+        EventStoreClient eventStoreClient,
         ILogger logger)
     {
         _consentId = consentId;
@@ -48,6 +53,7 @@ public class EventProcessor : IEventProcessor
         _receivedEventsWriter = receivedEventsWriter;
         _policies = policies;
         _metrics = metrics;
+        _eventStoreClient = eventStoreClient;
         _logger = logger;
     }
 
@@ -71,12 +77,16 @@ public class EventProcessor : IEventProcessor
     {
         _metrics.IncrementTotalEventHorizonEventsProcessed();
         Log.ProcessEvent(_logger, @event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
-
         try
         {
             await _policies.WriteEvent.ExecuteAsync(
                 cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
                 cancellationToken).ConfigureAwait(false);
+            await _eventStoreClient.CommitExternal(new CommitExternalEventsRequest
+            {
+                ScopeId = Scope.ToProtobuf(),
+                Event = @event.ToProtobuf()
+            }, cancellationToken);
         }
         catch
         {

@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Domain.Tenancy;
-using Google.Protobuf.Collections;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 using Proto;
 
@@ -15,6 +16,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 // ReSharper disable once ClassNeverInstantiated.Global
 public class StreamSubscriptionActor : IActor
 {
+    readonly ScopeId _scope;
     readonly TenantId _tenantId;
     readonly ILogger<StreamSubscriptionActor> _logger;
 
@@ -22,8 +24,9 @@ public class StreamSubscriptionActor : IActor
     PID _target;
     Uuid _subscriptionId;
 
-    public StreamSubscriptionActor(TenantId tenantId, ILogger<StreamSubscriptionActor> logger)
+    public StreamSubscriptionActor(ScopeId scope, TenantId tenantId, ILogger<StreamSubscriptionActor> logger)
     {
+        _scope = scope;
         _tenantId = tenantId;
         _logger = logger;
     }
@@ -45,15 +48,13 @@ public class StreamSubscriptionActor : IActor
         _shouldIncludeEvent = CreateFilter(request.EventTypeIds);
         var fromOffset = request.FromOffset;
         var toOffset = request.CurrentHighWatermark;
-
         var catchupPid = PID.FromAddress(context.System.Address, EventStoreCatchupActor.GetActorName(_tenantId));
-
         while (fromOffset < toOffset && !context.CancellationToken.IsCancellationRequested)
         {
             try
             {
                 var response = await context.RequestAsync<EventLogCatchupResponse>(catchupPid,
-                    new EventLogCatchupRequest(fromOffset, (int)(toOffset + 1 - fromOffset)), context.CancellationToken);
+                    new EventLogCatchupRequest(request.ScopeId.ToGuid(), fromOffset, (int)(toOffset + 1 - fromOffset)), context.CancellationToken);
                 await Publish(ToSubscriptionEvent(response), context);
                 fromOffset = response.ToOffset + 1;
             }
@@ -68,7 +69,7 @@ public class StreamSubscriptionActor : IActor
         }
     }
 
-    static Func<global::Dolittle.Runtime.Events.Contracts.CommittedEvent, bool> CreateFilter(RepeatedField<Uuid> eventTypes)
+    static Func<global::Dolittle.Runtime.Events.Contracts.CommittedEvent, bool> CreateFilter(IEnumerable<Uuid> eventTypes)
     {
         var eventSet = eventTypes.Select(artifactId => artifactId).ToHashSet();
         if (!eventSet.Any())
@@ -80,8 +81,9 @@ public class StreamSubscriptionActor : IActor
         return committedEvent => eventSet.Contains(committedEvent.EventType.Id);
     }
 
-    Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context) => Publish(ToSubscriptionEvent(request), context);
-
+    Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context)
+        => Publish(ToSubscriptionEvent(request), context);
+    
     async Task Publish(SubscriptionEvents subscriptionEvent, IContext context)
     {
         while (!context.CancellationToken.IsCancellationRequested)
@@ -91,7 +93,6 @@ public class StreamSubscriptionActor : IActor
                 var response = await context.RequestAsync<SubscriptionEventsAck>(_target, subscriptionEvent, TimeSpan.FromSeconds(10));
                 if (response != null)
                 {
-                    
                     return;
                 }
             }

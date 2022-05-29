@@ -7,34 +7,39 @@ option csharp_namespace = "Dolittle.Runtime.Events.Store.Actors";
 import "Runtime/Events/EventStore.proto";
 import "Runtime/Events/Committed.proto";
 
+import "Protobuf/Failure.proto";
 import "Protobuf/Uuid.proto";
 import "Artifacts/Artifact.proto";
 
 
 message EventStoreSubscriptionRequest{
     protobuf.Uuid subscription_id = 1;
-    repeated protobuf.Uuid event_type_ids = 2;
-    string pid_id = 3;
-    string pid_address = 4;
-    uint64 from_offset = 5;
+    protobuf.Uuid scope_id = 2;
+    repeated protobuf.Uuid event_type_ids = 3;
+    string pid_id = 4;
+    string pid_address = 5;
+    uint64 from_offset = 6;
 }
 
 message StartEventStoreSubscription{
     protobuf.Uuid subscription_id = 1;
-    repeated protobuf.Uuid event_type_ids = 2;
-    string pid_id = 3;
-    string pid_address = 4;
-    uint64 from_offset = 5;
-    uint64 current_high_watermark = 6;
+    protobuf.Uuid scope_id = 2;
+    repeated protobuf.Uuid event_type_ids = 3;
+    string pid_id = 4;
+    string pid_address = 5;
+    uint64 from_offset = 6;
+    uint64 current_high_watermark = 7;
 }
 
 message EventStoreSubscriptionAck{
     protobuf.Uuid subscription_id = 1;
-    bool ok = 2;
+    protobuf.Uuid scope_id = 2;
+    bool ok = 3;
 }
 
 message CancelEventStoreSubscription{
     protobuf.Uuid subscription_id = 1;
+    protobuf.Uuid scope_id = 2;
 }
 
 message CancelEventStoreSubscriptionAck{
@@ -58,9 +63,18 @@ message SubscriptionEventsAck{
     uint64 continue_from_offset = 1;
 }
 
+message CommitExternalEventsRequest{
+    CommittedEvent event = 1;
+    protobuf.Uuid scope_id = 2;
+}
+message CommitExternalEventsResponse{
+    protobuf.Failure failure = 1;
+}
+
 service EventStore {
     rpc Commit (CommitEventsRequest) returns (CommitEventsResponse);
     rpc CommitForAggregate (CommitAggregateEventsRequest) returns (CommitAggregateEventsResponse);
+    rpc CommitExternal (CommitExternalEventsRequest) returns (CommitExternalEventsResponse);
     rpc RegisterSubscription(EventStoreSubscriptionRequest) returns (EventStoreSubscriptionAck);
     rpc CancelSubscription(CancelEventStoreSubscription) returns (CancelEventStoreSubscriptionAck);
 }

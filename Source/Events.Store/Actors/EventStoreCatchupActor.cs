@@ -11,7 +11,7 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-record EventLogCatchupRequest(EventLogSequenceNumber From, int MaxCount);
+record EventLogCatchupRequest(ScopeId Scope, EventLogSequenceNumber From, int MaxCount);
 record EventLogCatchupResponse(EventLogSequenceNumber FromOffset, EventLogSequenceNumber ToOffset, IReadOnlyCollection<Contracts.CommittedEvent> Events);
 
 public class EventStoreCatchupActor : IActor
@@ -26,7 +26,6 @@ public class EventStoreCatchupActor : IActor
         _eventsFetcher = eventsFetcher;
         _logger = logger;
     }
-
 
     public Task ReceiveAsync(IContext context)
     {
@@ -46,8 +45,7 @@ public class EventStoreCatchupActor : IActor
             return Task.CompletedTask;
         }
 
-
-        context.ReenterAfter(_eventsFetcher.FetchCommittedEvents(request.From, maxEvents, context.CancellationToken), task =>
+        context.ReenterAfter(_eventsFetcher.FetchCommittedEvents(request.Scope, request.From, maxEvents, context.CancellationToken), task =>
         {
             if (task.IsCompletedSuccessfully)
             {
