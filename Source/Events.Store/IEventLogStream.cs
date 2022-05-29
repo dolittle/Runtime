@@ -10,23 +10,31 @@ namespace Dolittle.Runtime.Events.Store;
 
 public record EventLogBatch(EventLogSequenceNumber From, EventLogSequenceNumber To, IReadOnlyList<Contracts.CommittedEvent> MatchedEvents);
 
+/// <summary>
+/// Defines the event log as something that can be subscribed to. 
+/// </summary>
 public interface IEventLogStream
 {
     /// <summary>
     /// Subscribe to the event log stream from the given offset, filtered by event types.
     /// </summary>
+    /// <param name="scope">The <see cref="ScopeId"/>.</param>
     /// <param name="from">From offset, inclusive</param>
     /// <param name="eventTypes">Included event types, min 1</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<EventLogBatch> Subscribe(EventLogSequenceNumber from, IReadOnlyCollection<ArtifactId> eventTypes, CancellationToken cancellationToken);
-    
+    ChannelReader<EventLogBatch> Subscribe(
+        ScopeId scope,
+        EventLogSequenceNumber from,
+        IReadOnlyCollection<ArtifactId> eventTypes,
+        CancellationToken cancellationToken);
+
     /// <summary>
     /// Subscribe to the complete event log stream at the given offset
     /// </summary>
-    /// <param name="from"></param>
-    /// 
+    /// <param name="scopeId">The <see cref="ScopeId"/>.</param>
+    /// <param name="from">From offset, inclusive</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<EventLogBatch> SubscribeAll(EventLogSequenceNumber from, CancellationToken cancellationToken);
+    ChannelReader<EventLogBatch> SubscribeAll(ScopeId scopeId, EventLogSequenceNumber from, CancellationToken cancellationToken);
 }

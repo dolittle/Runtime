@@ -43,20 +43,22 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     }
 
     /// <inheritdoc />
-    public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(CancellationToken cancellationToken)
+    public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken)
     {
-        return (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
+        var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+        return (ulong)await eventLog.CountDocumentsAsync(
                 _eventFilter.Empty,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedEvents> FetchCommittedEvents(EventLogSequenceNumber from, int limit, CancellationToken cancellationToken)
+    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken)
     {
         try
         {
-            var events = await _streams.DefaultEventLog
+            var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+            var events = await eventLog
                 .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(limit)
@@ -132,4 +134,9 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
     }
+    
+    Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scope, CancellationToken cancellationToken)
+        => scope == ScopeId.Default
+            ? Task.FromResult(_streams.DefaultEventLog)
+            : _streams.GetEventLog(scope, cancellationToken);
 }

@@ -16,20 +16,21 @@ public interface IFetchCommittedEvents
     /// <summary>
     /// Fetches the next <see cref="EventLogSequenceNumber"/> to use to commit an event.
     /// </summary>
+    /// <param name="scope">The <see cref="ScopeId"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the next <see cref="EventLogSequenceNumber"/> to use to commit an event.</returns>
-    Task<EventLogSequenceNumber> FetchNextSequenceNumber(CancellationToken cancellationToken);
+    Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken);
 
     /// <summary>
     /// Fetches EventLog <see cref="CommittedEvent"/>s from a given offset
     /// </summary>
+    /// <param name="scopeId">The <see cref="ScopeId"/>.</param>
     /// <param name="from">EventLogSequenceNumber to read from (inclusive)</param>
     /// <param name="limit">Max number of events to retrieve</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns></returns>
-    Task<CommittedEvents> FetchCommittedEvents(EventLogSequenceNumber from, int limit, CancellationToken cancellationToken);
+    Task<CommittedEvents> FetchCommittedEvents(ScopeId scopeId, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken);
 
-    
     /// <summary>
     /// Fetches all <see cref="CommittedAggregateEvent"/>s applied to an Event Source by an Aggregate Root.
     /// </summary>
