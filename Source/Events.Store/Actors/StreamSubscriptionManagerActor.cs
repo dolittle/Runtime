@@ -90,6 +90,7 @@ public class StreamSubscriptionManagerActor : IActor
             context.Respond(new EventStoreSubscriptionAck
             {
                 SubscriptionId = request.SubscriptionId,
+                ScopeId = request.ScopeId,
                 Ok = false
             });
             return Task.CompletedTask;

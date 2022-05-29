@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store;
 using Polly;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
@@ -14,5 +14,5 @@ public interface IEventProcessorPolicies
     /// <summary>
     /// Gets the <see cref="IAsyncPolicy"/> for writing events from the event horizon.
     /// </summary>
-    IAsyncPolicy<StreamPosition> WriteEvent { get; }
+    IAsyncPolicy<EventLogSequenceNumber> WriteEvent { get; }
 }

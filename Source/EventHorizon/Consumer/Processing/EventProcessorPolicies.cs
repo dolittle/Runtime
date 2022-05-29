@@ -20,7 +20,7 @@ public class EventProcessorPolicies : IEventProcessorPolicies
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public EventProcessorPolicies(ILogger logger)
     {
-        WriteEvent = Policy<StreamPosition>
+        WriteEvent = Policy<EventLogSequenceNumber>
             .Handle<EventStoreUnavailable>(ex =>
                 {
                     Log.EventStoreIsUnavailable(logger, ex);
@@ -30,5 +30,5 @@ public class EventProcessorPolicies : IEventProcessorPolicies
     }
 
     /// <inheritdoc />
-    public IAsyncPolicy<StreamPosition> WriteEvent { get; }
+    public IAsyncPolicy<EventLogSequenceNumber> WriteEvent { get; }
 }

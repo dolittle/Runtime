@@ -79,13 +79,21 @@ public class EventProcessor : IEventProcessor
         Log.ProcessEvent(_logger, @event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
         try
         {
-            await _policies.WriteEvent.ExecuteAsync(
+            var sequenceNumber = await _policies.WriteEvent.ExecuteAsync(
                 cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
                 cancellationToken).ConfigureAwait(false);
+            
             await _eventStoreClient.CommitExternal(new CommitExternalEventsRequest
             {
                 ScopeId = Scope.ToProtobuf(),
-                Event = @event.ToProtobuf()
+                Event = new CommittedEvent(
+                    sequenceNumber,
+                    @event.Occurred,
+                    @event.EventSource,
+                    @event.ExecutionContext,
+                    @event.Type,
+                    @event.Public,
+                    @event.Content).ToProtobuf()
             }, cancellationToken);
         }
         catch

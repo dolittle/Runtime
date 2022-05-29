@@ -4,6 +4,7 @@
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
@@ -22,6 +23,7 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
     readonly IEventFetcherPolicies _eventsFetcherPolicy;
     readonly IEventProcessorPolicies _eventProcessorPolicy;
+    readonly EventStoreClient _eventStoreClient;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
 
@@ -32,6 +34,7 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
     /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
+    /// <param name="eventStoreClient">The <see cref="EventStoreClient"/>.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public StreamProcessorFactory(
@@ -39,6 +42,7 @@ public class StreamProcessorFactory : IStreamProcessorFactory
         IWriteEventHorizonEvents eventHorizonEventsWriter,
         IEventFetcherPolicies eventsFetcherPolicy,
         IEventProcessorPolicies eventProcessorPolicy,
+        EventStoreClient eventStoreClient,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory
     )
@@ -47,6 +51,7 @@ public class StreamProcessorFactory : IStreamProcessorFactory
         _eventHorizonEventsWriter = eventHorizonEventsWriter;
         _eventsFetcherPolicy = eventsFetcherPolicy;
         _eventProcessorPolicy = eventProcessorPolicy;
+        _eventStoreClient = eventStoreClient;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
     }
@@ -66,6 +71,7 @@ public class StreamProcessorFactory : IStreamProcessorFactory
                 _eventHorizonEventsWriter,
                 _eventProcessorPolicy,
                 _metrics,
+                _eventStoreClient,
                 _loggerFactory.CreateLogger<EventProcessor>()),
             eventsFromEventHorizonFetcher,
             _streamProcessorStates,

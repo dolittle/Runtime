@@ -88,7 +88,7 @@ public class EventStore : EventStoreBase
     async Task<(PID pid, EventLogSequenceNumber nextSequenceNumber)> SpawnSubscriptionManager(ScopeId scope, CancellationToken cancellationToken)
     {
         var nextSequenceNumber = await _committedEvents.FetchNextSequenceNumber(scope, cancellationToken).ConfigureAwait(false);  
-        var props = _propsFactory.PropsFor<StreamSubscriptionManagerActor>(nextSequenceNumber, _tenantId);
+        var props = _propsFactory.PropsFor<StreamSubscriptionManagerActor>(scope, nextSequenceNumber, _tenantId);
         return (Context.Spawn(props), nextSequenceNumber);
     }
 

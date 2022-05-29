@@ -20,5 +20,5 @@ public interface IWriteEventHorizonEvents
     /// <param name="scope">The <see cref="ScopeId" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The task.</returns>
-    Task<StreamPosition> Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken);
+    Task<EventLogSequenceNumber> Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken);
 }
