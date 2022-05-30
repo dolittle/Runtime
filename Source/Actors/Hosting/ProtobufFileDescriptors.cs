@@ -11,18 +11,26 @@ using Google.Protobuf.Reflection;
 
 namespace Dolittle.Runtime.Actors.Hosting;
 
+/// <summary>
+/// Represents an implementation of <see cref="IProtobufFileDescriptors" /> 
+/// </summary>
 [Singleton]
 public class ProtobufFileDescriptors : IProtobufFileDescriptors
 {
     readonly IEnumerable<GrainAndActor> _grainsAndActors;
     
     IEnumerable<FileDescriptor> _all;
-
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProtobufFileDescriptors"/> class.
+    /// </summary>
+    /// <param name="grainsAndActors">The <see cref="IEnumerable{T}"/> of <see cref="GrainAndActor"/>.</param>
     public ProtobufFileDescriptors(IEnumerable<GrainAndActor> grainsAndActors)
     {
         _grainsAndActors = grainsAndActors;
     }
 
+    /// <inheritdoc />
     public IEnumerable<FileDescriptor> All => _all ??= FindFileDescriptors();
     
     IEnumerable<FileDescriptor> FindFileDescriptors()
