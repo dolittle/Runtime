@@ -239,7 +239,7 @@ public class EventStore : EventStoreBase
     public override async Task<CommitExternalEventsResponse> CommitExternal(CommitExternalEventsRequest request)
     {
         var scope = request.ScopeId.ToGuid();
-        if (!_streamSubscriptionManagerPids.TryGetValue(request.ScopeId.ToGuid(), out var pid))
+        if (!_streamSubscriptionManagerPids.TryGetValue(scope, out var pid))
         {
             return new CommitExternalEventsResponse{Failure = new Failure($"No active subscription for scope {scope}")};
         }
