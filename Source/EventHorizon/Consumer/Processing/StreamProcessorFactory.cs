@@ -4,7 +4,6 @@
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
@@ -20,10 +19,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 public class StreamProcessorFactory : IStreamProcessorFactory
 {
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
-    readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
+    readonly ICommitExternalEvents _externalEventsCommitter;
     readonly IEventFetcherPolicies _eventsFetcherPolicy;
-    readonly IEventProcessorPolicies _eventProcessorPolicy;
-    readonly EventStoreClient _eventStoreClient;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
 
@@ -31,27 +28,21 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     /// Initializes an instance of the <see cref="StreamProcessor" /> class.
     /// </summary>
     /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-    /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
-    /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-    /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
-    /// <param name="eventStoreClient">The <see cref="EventStoreClient"/>.</param>
+    /// <param name="externalEventsCommitter">The <see cref="ICommitExternalEvents"/></param>
+    /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}"/> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public StreamProcessorFactory(
         IResilientStreamProcessorStateRepository streamProcessorStates,
-        IWriteEventHorizonEvents eventHorizonEventsWriter,
+        ICommitExternalEvents externalEventsCommitter,
         IEventFetcherPolicies eventsFetcherPolicy,
-        IEventProcessorPolicies eventProcessorPolicy,
-        EventStoreClient eventStoreClient,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory
     )
     {
         _streamProcessorStates = streamProcessorStates;
-        _eventHorizonEventsWriter = eventHorizonEventsWriter;
+        _externalEventsCommitter = externalEventsCommitter;
         _eventsFetcherPolicy = eventsFetcherPolicy;
-        _eventProcessorPolicy = eventProcessorPolicy;
-        _eventStoreClient = eventStoreClient;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
     }
@@ -68,10 +59,8 @@ public class StreamProcessorFactory : IStreamProcessorFactory
             new EventProcessor(
                 consent,
                 subscription,
-                _eventHorizonEventsWriter,
-                _eventProcessorPolicy,
+                _externalEventsCommitter,
                 _metrics,
-                _eventStoreClient,
                 _loggerFactory.CreateLogger<EventProcessor>()),
             eventsFromEventHorizonFetcher,
             _streamProcessorStates,

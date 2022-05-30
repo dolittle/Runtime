@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -55,7 +56,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static IWriteEventHorizonEvents event_horizon_events_writer;
     protected static EventLogSequenceNumber external_event_sequence_number;
 
-    static EventStoreClient event_store_client;
+    static ICommitExternalEvents external_event_committer;
     static int number_of_events_handled;
     static CancellationTokenRegistration? cancel_event_handlers_registration;
     static CancellationTokenSource? cancel_event_handlers_source;
@@ -65,7 +66,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     Establish context = () =>
     {
-        event_store_client = runtime.Host.Services.GetRequiredService<Func<TenantId, EventStoreClient>>()(tenant);
+        external_event_committer = runtime.Host.Services.GetRequiredService<Func<TenantId, ICommitExternalEvents>>()(tenant);
         external_event_sequence_number = EventLogSequenceNumber.Initial;
         number_of_events_handled = 0;
         scoped_committed_events = new Dictionary<ScopeId, CommittedEvents>();
@@ -182,22 +183,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     static async Task write_committed_events_to_scoped_event_log(CommittedEvents committed_events, ScopeId scope)
     {
-        foreach (var committed_event in committed_events)
-        {
-            var sequenceNumber = await event_horizon_events_writer.Write(committed_event, Guid.NewGuid(), scope, CancellationToken.None).ConfigureAwait(false);
-            await event_store_client.CommitExternal(new CommitExternalEventsRequest
-            {
-                ScopeId = scope.ToProtobuf(),
-                Event = new CommittedEvent(
-                    sequenceNumber,
-                    committed_event.Occurred,
-                    committed_event.EventSource,
-                    committed_event.ExecutionContext,
-                    committed_event.Type,
-                    committed_event.Public,
-                    committed_event.Content).ToProtobuf()
-            }, CancellationToken.None);
-        }
+        await external_event_committer.Commit(committed_events, Guid.NewGuid(), scope).ConfigureAwait(false);
         if (!scoped_committed_events.TryGetValue(scope, out var previously_committed_events))
         {
             previously_committed_events = new CommittedEvents(Array.Empty<CommittedEvent>());

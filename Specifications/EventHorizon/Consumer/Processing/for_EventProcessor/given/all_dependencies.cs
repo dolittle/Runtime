@@ -20,9 +20,7 @@ public class all_dependencies
 {
     protected static ConsentId consent_id;
     protected static SubscriptionId subscription_id;
-    protected static IEventProcessorPolicies event_processor_policies;
-    protected static Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
-    protected static Mock<EventStoreClient> event_store_client;
+    protected static Mock<ICommitExternalEvents> external_events_committer;
     protected static IMetricsCollector metrics;
     protected static ILogger logger;
     protected static CommittedEvent @event;
@@ -32,7 +30,7 @@ public class all_dependencies
     Establish context = () =>
     {
         execution_context = execution_contexts.create();
-        event_processor_policies = new EventProcessorPolicies(NullLogger.Instance);
+        external_events_committer = new Mock<ICommitExternalEvents>();
         consent_id = Guid.NewGuid();
         subscription_id = new SubscriptionId(
             Guid.NewGuid(),
@@ -42,7 +40,6 @@ public class all_dependencies
             Guid.NewGuid(),
             "partition id");
         partition = "another partition id";
-        event_horizon_events_writer = new Mock<IWriteEventHorizonEvents>();
         metrics = Mock.Of<IMetricsCollector>();
         logger = NullLogger.Instance;
         @event = new CommittedEvent(
