@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,7 @@ public class ActorSystemClusterHostedService : IHostedService
     readonly ActorSystem _actorSystem;
     readonly IApplicationLifecycleHooks _shutdownHook;
     readonly ILoggerFactory _loggerFactory;
+    readonly ILogger<ActorSystemClusterHostedService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ActorSystemClusterHostedService"/>;
@@ -30,6 +32,7 @@ public class ActorSystemClusterHostedService : IHostedService
         _actorSystem = actorSystem;
         _shutdownHook = shutdownHook;
         _loggerFactory = loggerFactory;
+        _logger = loggerFactory.CreateLogger<ActorSystemClusterHostedService>();
     }
     
     /// <inheritdoc />
@@ -42,7 +45,17 @@ public class ActorSystemClusterHostedService : IHostedService
     /// <inheritdoc />
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _shutdownHook.ShutdownGracefully(cancellationToken);
-        await _actorSystem.Cluster().ShutdownAsync();
+        try
+        {
+            await _shutdownHook.ShutdownGracefully(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "An error occurred while shutting down shutdown hooks");
+        }
+        finally
+        {
+            await _actorSystem.Cluster().ShutdownAsync();
+        }
     }
 }

@@ -30,12 +30,6 @@ public class and_processing_fails_in_both_partitions : given.all_dependencies
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
         setup_event_stream(first_event, second_event);
-        events_fetcher
-            .Setup(_ => _.FetchInPartition(first_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<StreamEvent>>(first_event));
-        events_fetcher
-            .Setup(_ => _.FetchInPartition(second_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<StreamEvent>>(second_event));
     };
 
     Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();

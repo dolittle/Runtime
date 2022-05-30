@@ -43,7 +43,7 @@ public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     }
 
     /// <inheritdoc/>
-    public async Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken)
+    public async Task<EventLogSequenceNumber> Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken)
     {
         _logger.WritingEventHorizonEvent(
             @event.EventLogSequenceNumber,
@@ -67,5 +67,6 @@ public class EventHorizonEventsWriter : IWriteEventHorizonEvents
                     consentId)),
             cancellationToken).ConfigureAwait(false);
         _streamWatcher.NotifyForEvent(scope, StreamId.EventLog, writtenStreamPosition);
+        return writtenStreamPosition.Value;
     }
 }

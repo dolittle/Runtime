@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -60,7 +61,9 @@ public static class Runtime
             .AddWebHost()
             .Build();
 
+        runtimeHost.PerformBootstrap().GetAwaiter().GetResult();
         runtimeHost.Start();
+        
 
         return new RunningRuntime(runtimeHost, tenants, mongoClient, databases);
     }

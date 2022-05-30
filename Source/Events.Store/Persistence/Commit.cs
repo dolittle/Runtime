@@ -10,6 +10,10 @@ namespace Dolittle.Runtime.Events.Store.Persistence;
 /// </summary>
 /// <param name="Events">The events of the commit.</param>
 /// <param name="AggregateEvents">The aggregate events of the commit.</param>
+/// <param name="AllEvents">All committed events in order.</param>
 public record Commit(
-    IEnumerable<CommittedEvents> Events,
-    IEnumerable<CommittedAggregateEvents> AggregateEvents);
+    IReadOnlyCollection<CommittedEvents> Events,
+    IReadOnlyCollection<CommittedAggregateEvents> AggregateEvents,
+    IReadOnlyCollection<CommittedEvent> AllEvents,
+    EventLogSequenceNumber FirstSequenceNumber,
+    EventLogSequenceNumber LastSequenceNumber);

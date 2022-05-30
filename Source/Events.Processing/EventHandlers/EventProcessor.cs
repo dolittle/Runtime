@@ -80,7 +80,7 @@ public class EventProcessor : IEventProcessor
         return response switch
         {
             { Failure: null } => new SuccessfulProcessing(),
-            _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+            _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout?.ToTimeSpan() ?? TimeSpan.MaxValue)
         };
     }
 }

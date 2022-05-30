@@ -54,12 +54,9 @@ public class ValidateFilterByComparingEventTypes : ICanValidateFilterFor<TypeFil
                 new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
                 cancellationToken).ConfigureAwait(false);
 
-            if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
-            {
-                return FilterValidationResult.Failed("The new filter definition has added or removed event types that have already been filtered");
-            }
-
-            return FilterValidationResult.Succeeded();
+            return SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes)
+                ? FilterValidationResult.Failed("The new filter definition has added or removed event types that have already been filtered")
+                : FilterValidationResult.Succeeded();
         }
         catch (Exception exception)
         {
@@ -67,12 +64,12 @@ public class ValidateFilterByComparingEventTypes : ICanValidateFilterFor<TypeFil
         }
     }
 
-    bool EventTypesHaveNotChanged(ISet<ArtifactId> changedEventTypes) => !changedEventTypes.Any();
+    static bool EventTypesHaveNotChanged(ISet<ArtifactId> changedEventTypes) => !changedEventTypes.Any();
 
-    bool SourceStreamContainsChangedEventTypes(ISet<Artifact> typesInSourceStream, ISet<ArtifactId> changedEventTypes)
+    static bool SourceStreamContainsChangedEventTypes(ISet<Artifact> typesInSourceStream, ISet<ArtifactId> changedEventTypes)
         => typesInSourceStream.Any(_ => changedEventTypes.Contains(_.Id));
 
-    ISet<ArtifactId> GetChangedEventTypes(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, TypeFilterWithEventSourcePartitionDefinition registeredDefinition)
+    static ISet<ArtifactId> GetChangedEventTypes(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, TypeFilterWithEventSourcePartitionDefinition registeredDefinition)
     {
         var addedEventTypes = registeredDefinition.Types.Where(_ => !persistedDefinition.Types.Contains(_));
         var removedEventTypes = persistedDefinition.Types.Where(_ => !registeredDefinition.Types.Contains(_));

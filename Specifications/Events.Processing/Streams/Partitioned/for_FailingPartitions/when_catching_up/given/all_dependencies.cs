@@ -17,7 +17,7 @@ public class all_dependencies : for_FailingPartitions.given.an_instance_of_faili
     protected static readonly StreamPosition initial_stream_processor_position = 3;
     protected static StreamProcessorId stream_processor_id;
     protected static StreamProcessorState stream_processor_state;
-    protected static IReadOnlyList<StreamEvent> events;
+    protected static IReadOnlyList<StreamEvent> eventStream;
 
     Establish context = () =>
     {
@@ -40,12 +40,12 @@ public class all_dependencies : for_FailingPartitions.given.an_instance_of_faili
             .Setup(_ => _.FetchInPartition(Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
             .Returns<PartitionId, StreamPosition, CancellationToken>((partition, position, _) =>
             {
-                var @event = events.FirstOrDefault(_ => _.Position >= position && _.Partition == partition);
-                if (@event != default)
+                var events = eventStream.Skip((int)position.Value).Where(_ => _.Partition == partition);
+                if (events != default && events.Any())
                 {
-                    return Task.FromResult(Try<StreamEvent>.Succeeded(@event));
+                    return Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(events));
                 }
-                return Task.FromResult(Try<StreamEvent>.Failed(new Exception()));
+                return Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
     };
 }

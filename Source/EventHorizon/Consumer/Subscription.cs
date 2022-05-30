@@ -179,13 +179,9 @@ public class Subscription : ISubscription
         try
         {
             _logger.SubscriptionIsReceivingAndWriting(Identifier, consent);
-
             using var processingCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
             var connectionToStreamProcessorQueue = new AsyncProducerConsumerQueue<StreamEvent>();
-
             var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, _executionContext, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue, _processingMetrics));
-
             var tasks = new TaskGroup(
                 writeEventsStreamProcessor.StartAndWait(
                     processingCancellationToken.Token),
@@ -194,9 +190,7 @@ public class Subscription : ISubscription
                     processingCancellationToken.Token));
 
             State = SubscriptionState.Connected;
-
             await tasks.WaitForAllCancellingOnFirst(processingCancellationToken).ConfigureAwait(false);
-            
             _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent, null);
             _metrics.IncrementSubscriptionsFailedDueToReceivingOrWritingEventsCompleted();
         }

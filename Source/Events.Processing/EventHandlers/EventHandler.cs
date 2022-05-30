@@ -88,8 +88,7 @@ public class EventHandler : IEventHandler
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
     
-    /// <inheritdoc />
-    public StreamId TargetStream => _arguments.EventHandler.Value;
+    StreamId TargetStream => _arguments.EventHandler.Value;
 
     /// <inheritdoc />
     public EventHandlerInfo Info => new(
@@ -98,39 +97,31 @@ public class EventHandler : IEventHandler
         _arguments.Alias,
         _arguments.EventTypes,
         _arguments.Partitioned);
-        
-    /// <inheritdoc />
+    
     public ScopeId Scope => _arguments.Scope.Value;
-
-    /// <inheritdoc />
+    
     public EventProcessorId EventProcessor => _arguments.EventHandler.Value;
-
-    /// <inheritdoc />
+    
     public IEnumerable<ArtifactId> EventTypes => _arguments.EventTypes;
-
-    /// <inheritdoc />
+    
     public bool Partitioned => _arguments.Partitioned;
-
-    /// <inheritdoc />
+    
     public StreamDefinition FilteredStreamDefinition => new(
         new TypeFilterWithEventSourcePartitionDefinition(
             TargetStream,
             TargetStream,
             EventTypes,
             Partitioned));
-
-    /// <inheritdoc />
+    
     public TypeFilterWithEventSourcePartitionDefinition FilterDefinition => new(
         StreamId.EventLog,
         TargetStream,
         EventTypes,
         Partitioned);
 
-    /// <inheritdoc />
-    public StreamProcessor FilterStreamProcessor { get; private set; }
+    StreamProcessor FilterStreamProcessor { get; set; }
 
-    /// <inheritdoc />
-    public StreamProcessor EventProcessorStreamProcessor { get; private set; }
+    StreamProcessor EventProcessorStreamProcessor { get; set; }
 
     /// <inheritdoc />
     public Try<IDictionary<TenantId, IStreamProcessorState>> GetEventHandlerCurrentState()
@@ -185,7 +176,7 @@ public class EventHandler : IEventHandler
     /// <inheritdoc />
     public async Task RegisterAndStart()
     {
-        Log.ConnectingEventHandlerWithId(_logger, EventProcessor);
+        _logger.ConnectingEventHandlerWithId(EventProcessor);
         if (await RejectIfNonWriteableStream().ConfigureAwait(false)
             || !await RegisterFilterStreamProcessor().ConfigureAwait(false)
             || !await RegisterEventProcessorStreamProcessor().ConfigureAwait(false))

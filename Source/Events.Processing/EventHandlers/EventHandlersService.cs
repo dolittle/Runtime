@@ -1,19 +1,16 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Formats.Asn1;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Processing.Filters;
-using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
@@ -28,6 +25,7 @@ public class EventHandlersService : EventHandlersBase
     readonly IEventHandlersProtocol _eventHandlersProtocol;
     readonly IEventHandlers _eventHandlers;
     readonly IEventHandlerFactory _eventHandlerFactory;
+    readonly IOptions<EventHandlersConfiguration> _configuration;
     readonly ILogger _logger;
     readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -39,6 +37,7 @@ public class EventHandlersService : EventHandlersBase
     /// <param name="eventHandlersProtocol">The <see cref="IEventHandlersProtocol" />.</param>
     /// <param name="eventHandlers">The <see cref="IEventHandlers" />.</param>
     /// <param name="eventHandlerFactory">The <see cref="IEventHandlerFactory"/>.</param>
+    /// <param name="configuration">The <see cref="EventHandlersConfiguration"/></param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     public EventHandlersService(
         IHostApplicationLifetime hostApplicationLifetime,
@@ -46,13 +45,16 @@ public class EventHandlersService : EventHandlersBase
         IEventHandlersProtocol eventHandlersProtocol,
         IEventHandlers eventHandlers,
         IEventHandlerFactory eventHandlerFactory,
+        IOptions<EventHandlersConfiguration> configuration,
         ILoggerFactory loggerFactory)
     {
         _reverseCallServices = reverseCallServices;
         _eventHandlersProtocol = eventHandlersProtocol;
         _eventHandlers = eventHandlers;
         _eventHandlerFactory = eventHandlerFactory;
+        _configuration = configuration;
         _logger = loggerFactory.CreateLogger<EventHandlersService>();
+        
         _hostApplicationLifetime = hostApplicationLifetime;
     }
 
@@ -62,7 +64,7 @@ public class EventHandlersService : EventHandlersBase
         IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
         ServerCallContext context)
     {
-        Log.ConnectingEventHandler(_logger);
+        _logger.ConnectingEventHandler();
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
         try
         {
@@ -71,9 +73,12 @@ public class EventHandlersService : EventHandlersBase
             {
                 return;
             }
-
+            
             var (dispatcher, arguments) = connectResult.Result;
-            using var eventHandler = _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken); 
+            using var eventHandler = _configuration.Value.Fast
+                ? _eventHandlerFactory.CreateFast(arguments, _configuration.Value.ImplicitFilter, dispatcher, context.CancellationToken)
+                : _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken); 
+
             await _eventHandlers.RegisterAndStart(
                 eventHandler,
                 (failure, cancellation) => dispatcher.Reject(new EventHandlerRegistrationResponse{Failure = failure.ToProtobuf()}, cancellation),

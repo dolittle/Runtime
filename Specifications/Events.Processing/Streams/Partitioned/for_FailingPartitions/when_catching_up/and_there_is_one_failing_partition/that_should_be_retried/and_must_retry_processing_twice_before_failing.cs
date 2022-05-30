@@ -39,12 +39,22 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
 
     It should_have_retried_processing_three_times = () => event_processor.Verify(
         _ => _.Process(
-            events[(int)failing_partition(failing_partition_id).Position.Value].Event,
+            Moq.It.IsAny<CommittedEvent>(),
+            Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<string>(),
+            Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<ExecutionContext>(),
+            Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
+    
+    It should_have_retried_processing_first_event_three_times = () => event_processor.Verify(
+        _ => _.Process(
+            eventStream[(int)failing_partition(failing_partition_id).Position.Value].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
+   
 
     static FailingPartitionState failing_partition(PartitionId partition_id) => result.FailingPartitions[partition_id];
 }

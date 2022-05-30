@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
@@ -36,9 +37,8 @@ var host = Host.CreateDefaultBuilder(args)
     .Build();
 
 VerifyConfiguration(host.Services);
-
+await host.PerformBootstrap().ConfigureAwait(false);
 host.Run();
-
 
 static void VerifyConfiguration(IServiceProvider provider)
 {

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Polly;
 
@@ -19,7 +20,7 @@ public class EventProcessorPolicies : IEventProcessorPolicies
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public EventProcessorPolicies(ILogger logger)
     {
-        WriteEvent = Policy
+        WriteEvent = Policy<EventLogSequenceNumber>
             .Handle<EventStoreUnavailable>(ex =>
                 {
                     Log.EventStoreIsUnavailable(logger, ex);
@@ -29,5 +30,5 @@ public class EventProcessorPolicies : IEventProcessorPolicies
     }
 
     /// <inheritdoc />
-    public IAsyncPolicy WriteEvent { get; }
+    public IAsyncPolicy<EventLogSequenceNumber> WriteEvent { get; }
 }

@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: mithrandir
+  PRERELEASE_BRANCHES: sauron
 
 on:
   pull_request:
@@ -62,6 +62,8 @@ jobs:
           - 'Events.Store.FetchAggregateEvents'
           - 'Events.Store.Streams.StreamProcessorStateRepository'
           - 'Events.Processing.EventHandlers.EventHandler'
+          - 'Events.Processing.EventHandlers.FastEventHandler'
+#          - 'Events.Processing.EventHandlers.FastEventHandlerWithImplicitFilter'
           - 'Events.Processing.EventHandlers.Filter'
           - 'Events.Processing.Projections.Projection'
     env: 

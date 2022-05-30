@@ -45,7 +45,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
 
     It should_have_retried_processing_first_failing_partition_twice = () => event_processor.Verify(
         _ => _.Process(
-            events[0].Event,
+            eventStream[0].Event,
             first_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -54,7 +54,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
 
     It should_have_retried_processing_second_failing_partition_twice = () => event_processor.Verify(
         _ => _.Process(
-            events[1].Event,
+            eventStream[1].Event,
             second_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
