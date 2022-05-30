@@ -263,7 +263,7 @@ public class EventStore : EventStoreBase
     public override async Task RegisterSubscription(EventStoreSubscriptionRequest request, Action<EventStoreSubscriptionAck> respond, Action<string> onError)
     {
         var scope = request.ScopeId.ToGuid();
-        if (!_streamSubscriptionManagerPids.TryGetValue(request.ScopeId.ToGuid(), out var pid))
+        if (!_streamSubscriptionManagerPids.TryGetValue(scope, out var pid))
         {
             (pid, _) = await SpawnSubscriptionManager(scope, Context.CancellationToken);
             _streamSubscriptionManagerPids[scope] = pid;
