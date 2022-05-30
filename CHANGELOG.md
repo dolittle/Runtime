@@ -1,3 +1,14 @@
+# [8.1.0] - 2022-5-30 [PR: #682](https://github.com/dolittle/Runtime/pull/682)
+## Summary
+
+Extending upon the event store actors to enable us to write more efficient implementations for event handlers. This is an opt-in feature which requires the `DOLITTLE__RUNTIME__PROCESSING__EVENTHANDLERS__FAST` flag to be set to `TRUE`
+
+### Added
+
+- dolittle:runtime:processing:eventhandlers:fast configuration for enabling fast event handler implementation using actors to efficiently write events to streams
+- Integration tests for event handlers
+
+
 # [8.0.2] - 2022-5-27 [PR: #693](https://github.com/dolittle/Runtime/pull/693)
 ## Summary
 
