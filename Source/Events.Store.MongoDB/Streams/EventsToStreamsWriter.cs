@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
@@ -54,6 +56,23 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
     }
 
+    /// <inheritdoc />
+    public async Task Write(IEnumerable<(CommittedEvent, PartitionId)> events, ScopeId scope, StreamId stream, CancellationToken cancellationToken)
+    {
+        var writtenStreamPosition = await Write(
+            await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
+            _streamFilter,
+            streamPosition =>
+            {
+                return events.Select((eventAndPartition, i) =>
+                    eventAndPartition.Item1 is CommittedExternalEvent externalEvent ?
+                        _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition + (ulong)i, eventAndPartition.Item2)
+                        : _eventConverter.ToStoreStreamEvent(eventAndPartition.Item1, streamPosition + (ulong)i, eventAndPartition.Item2));
+            },
+            cancellationToken).ConfigureAwait(false);
+        _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
+    }
+
     /// <inheritdoc/>
     public async Task<StreamPosition> Write<TEvent>(
         IMongoCollection<TEvent> stream,
@@ -81,6 +100,36 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
                 },
                 cancellationToken: cancellationToken).ConfigureAwait(false);
             return streamPosition;
+        }
+        catch (MongoWaitQueueFullException ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<StreamPosition> Write<TEvent>(IMongoCollection<TEvent> stream, FilterDefinitionBuilder<TEvent> filter, Func<StreamPosition, IEnumerable<TEvent>> createStoreEvents, CancellationToken cancellationToken)
+        where TEvent : class
+    {
+        StreamPosition streamPosition = null;
+        try
+        {
+            using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await session.WithTransactionAsync(
+                async (transaction, cancellationToken) =>
+                {
+                    streamPosition = (ulong)await stream.CountDocumentsAsync(
+                        transaction,
+                        filter.Empty, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                    var eventsToWrite = createStoreEvents(streamPosition).ToArray(); 
+                    await stream.InsertManyAsync(
+                        transaction,
+                        eventsToWrite,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                    return streamPosition + (ulong)(eventsToWrite.Length - 1);
+                },
+                cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         catch (MongoWaitQueueFullException ex)
         {

@@ -195,22 +195,17 @@ public class ConsumerService : ConsumerBase
                 $"There are no consents configured for Consumer Microservice {arguments.ConsumerMicroservice}");
             return false;
         }
-        if (!eventHorizonConfiguration.Consents.TryGetValue(arguments.ConsumerTenant, out var consentConfiguration))
+        foreach (var consent in eventHorizonConfiguration.Consents)
         {
-            failureResponse = CreateNoConsentsConfiguredResponse(
-                arguments,
-                $"There are no consents configured for Consumer Tenant {arguments.ConsumerTenant}");
-            return false;
-        }
-
-        if (consentConfiguration.Partition == arguments.Partition.Value && consentConfiguration.Stream == arguments.PublicStream.Value)
-        {
-            consentId = consentConfiguration.Consent;
-            return true;
+            if (consent.ConsumerTenant == arguments.ConsumerTenant.Value && consent.Stream == arguments.PublicStream.Value && consent.Partition == arguments.Partition.Value)
+            {
+                consentId = consent.Consent;
+                return true;
+            }
         }
         failureResponse = CreateNoConsentsConfiguredResponse(
             arguments,
-            $"There are no consents configured for Public Stream {arguments.PublicStream} and Partition {arguments.Partition}");
+            $"There are no consents configured for Consumer Tenant {arguments.ConsumerTenant} from Public Stream {arguments.PublicStream} and Partition {arguments.Partition}");
         return false;
     }
 

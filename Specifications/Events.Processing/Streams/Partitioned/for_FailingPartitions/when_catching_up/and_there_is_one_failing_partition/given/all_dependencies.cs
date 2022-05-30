@@ -23,7 +23,7 @@ public class all_dependencies : when_catching_up.given.all_dependencies
         initial_failing_partition_retry_time = DateTimeOffset.UtcNow;
         failing_partition_state = new FailingPartitionState(initial_failing_partition_position, initial_failing_partition_retry_time, initial_failing_partition_reason, 1, DateTimeOffset.UtcNow);
         stream_processor_state.FailingPartitions.Add(failing_partition_id, failing_partition_state);
-        events = new[]
+        eventStream = new[]
         {
             new StreamEvent(committed_events.single(), 0, stream_id, failing_partition_id, true),
             new StreamEvent(committed_events.single(), 1, stream_id, failing_partition_id, true),

@@ -132,7 +132,6 @@ public class StreamProcessor : IDisposable
             var tasks = new TaskGroup(StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token));
             
             tasks.OnFirstTaskFailure += (_, ex) => Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
-
             await tasks.WaitForAllCancellingOnFirst(_stopAllScopedStreamProcessorsTokenSource).ConfigureAwait(false);
         }
         finally

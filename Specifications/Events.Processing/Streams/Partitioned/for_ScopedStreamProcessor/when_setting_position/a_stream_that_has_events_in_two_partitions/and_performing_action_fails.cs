@@ -33,9 +33,6 @@ public class and_performing_action_fails : all_dependencies
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
         setup_event_stream(first_event, second_event);
-        events_fetcher
-            .Setup(_ => _.FetchInPartition(first_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<StreamEvent>>(first_event));
 
         action_to_perform_before_reprocessing
             .Setup(_ => _(tenant_id, Moq.It.IsAny<CancellationToken>()))

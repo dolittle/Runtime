@@ -41,4 +41,7 @@ public class in_memory_event_to_stream_writer : IWriteEventsToStreams
 
         return Task.FromResult(true);
     }
+
+    public Task Write(IEnumerable<(CommittedEvent, PartitionId)> events, ScopeId scope, StreamId streamId, CancellationToken cancellationToken)
+        => throw new System.NotImplementedException();
 }

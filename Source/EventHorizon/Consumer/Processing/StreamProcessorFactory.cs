@@ -19,9 +19,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 public class StreamProcessorFactory : IStreamProcessorFactory
 {
     readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
-    readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
+    readonly ICommitExternalEvents _externalEventsCommitter;
     readonly IEventFetcherPolicies _eventsFetcherPolicy;
-    readonly IEventProcessorPolicies _eventProcessorPolicy;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
 
@@ -29,24 +28,21 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     /// Initializes an instance of the <see cref="StreamProcessor" /> class.
     /// </summary>
     /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-    /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
-    /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-    /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
+    /// <param name="externalEventsCommitter">The <see cref="ICommitExternalEvents"/></param>
+    /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}"/> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public StreamProcessorFactory(
         IResilientStreamProcessorStateRepository streamProcessorStates,
-        IWriteEventHorizonEvents eventHorizonEventsWriter,
+        ICommitExternalEvents externalEventsCommitter,
         IEventFetcherPolicies eventsFetcherPolicy,
-        IEventProcessorPolicies eventProcessorPolicy,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory
     )
     {
         _streamProcessorStates = streamProcessorStates;
-        _eventHorizonEventsWriter = eventHorizonEventsWriter;
+        _externalEventsCommitter = externalEventsCommitter;
         _eventsFetcherPolicy = eventsFetcherPolicy;
-        _eventProcessorPolicy = eventProcessorPolicy;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
     }
@@ -63,8 +59,7 @@ public class StreamProcessorFactory : IStreamProcessorFactory
             new EventProcessor(
                 consent,
                 subscription,
-                _eventHorizonEventsWriter,
-                _eventProcessorPolicy,
+                _externalEventsCommitter,
                 _metrics,
                 _loggerFactory.CreateLogger<EventProcessor>()),
             eventsFromEventHorizonFetcher,

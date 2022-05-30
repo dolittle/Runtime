@@ -28,9 +28,6 @@ public class and_setting_position_to_failing_event : all_dependencies
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(failure_reason)));
         setup_event_stream(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true));
-        events_fetcher
-            .Setup(_ => _.FetchInPartition(partition_id, 0, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(Try<StreamEvent>.Succeeded(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true))));
     };
 
     Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100), 0, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();

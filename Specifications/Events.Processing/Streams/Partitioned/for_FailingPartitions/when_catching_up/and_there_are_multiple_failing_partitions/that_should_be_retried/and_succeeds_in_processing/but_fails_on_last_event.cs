@@ -27,7 +27,7 @@ public class but_fails_on_last_event : given.all_dependencies
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
             .Returns<CommittedEvent, PartitionId, string, uint, ExecutionContext, CancellationToken>((@event, partition, reason, retryCount, _, _) =>
-                @event == events[2].Event ? Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)) : Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+                @event == eventStream[2].Event ? Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)) : Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
     };
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
@@ -50,7 +50,7 @@ public class but_fails_on_last_event : given.all_dependencies
 
     It should_have_first_failing_partition_process_first_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[0].Event,
+            eventStream[0].Event,
             first_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -59,7 +59,7 @@ public class but_fails_on_last_event : given.all_dependencies
 
     It should_have_second_failing_partition_process_second_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[1].Event,
+            eventStream[1].Event,
             second_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
@@ -68,7 +68,7 @@ public class but_fails_on_last_event : given.all_dependencies
 
     It should_have_first_failing_process_process_third_event_once = () => event_processor.Verify(
         _ => _.Process(
-            events[2].Event,
+            eventStream[2].Event,
             first_failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),

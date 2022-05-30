@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -20,7 +21,7 @@ public class and_format_is_yyyy_MM : all_dependencies
     Establish context = () =>
     {
         occurred_format = "yyyy-MM";
-        committed_event = given.an_event.that_occurred_at(DateTimeOffset.Parse("12/24/2025"));
+        committed_event = given.an_event.that_occurred_at(DateTimeOffset.Parse("12/24/2025", CultureInfo.InvariantCulture));
         partition = "/(partition!";
         definition = projection_definition_builder.create()
             .with_selector(ProjectionEventSelector.Occurred(committed_event.Type.Id, occurred_format))

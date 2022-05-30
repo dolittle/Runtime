@@ -33,7 +33,7 @@ public class all_dependencies : when_catching_up.given.all_dependencies
         stream_processor_state.FailingPartitions.Add(first_failing_partition_id, first_failing_partition_state);
         stream_processor_state.FailingPartitions.Add(second_failing_partition_id, second_failing_partition_state);
 
-        events = new[]
+        eventStream = new[]
         {
             new StreamEvent(committed_events.single(), 0, stream_id, first_failing_partition_id, true),
             new StreamEvent(committed_events.single(), 1, stream_id, second_failing_partition_id, true),

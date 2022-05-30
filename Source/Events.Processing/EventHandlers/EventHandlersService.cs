@@ -4,11 +4,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
@@ -22,6 +24,8 @@ public class EventHandlersService : EventHandlersBase
     readonly IInitiateReverseCallServices _reverseCallServices;
     readonly IEventHandlersProtocol _eventHandlersProtocol;
     readonly IEventHandlers _eventHandlers;
+    readonly IEventHandlerFactory _eventHandlerFactory;
+    readonly IOptions<EventHandlersConfiguration> _configuration;
     readonly ILogger _logger;
     readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -32,18 +36,25 @@ public class EventHandlersService : EventHandlersBase
     /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
     /// <param name="eventHandlersProtocol">The <see cref="IEventHandlersProtocol" />.</param>
     /// <param name="eventHandlers">The <see cref="IEventHandlers" />.</param>
+    /// <param name="eventHandlerFactory">The <see cref="IEventHandlerFactory"/>.</param>
+    /// <param name="configuration">The <see cref="EventHandlersConfiguration"/></param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     public EventHandlersService(
         IHostApplicationLifetime hostApplicationLifetime,
         IInitiateReverseCallServices reverseCallServices,
         IEventHandlersProtocol eventHandlersProtocol,
         IEventHandlers eventHandlers,
+        IEventHandlerFactory eventHandlerFactory,
+        IOptions<EventHandlersConfiguration> configuration,
         ILoggerFactory loggerFactory)
     {
         _reverseCallServices = reverseCallServices;
         _eventHandlersProtocol = eventHandlersProtocol;
         _eventHandlers = eventHandlers;
+        _eventHandlerFactory = eventHandlerFactory;
+        _configuration = configuration;
         _logger = loggerFactory.CreateLogger<EventHandlersService>();
+        
         _hostApplicationLifetime = hostApplicationLifetime;
     }
 
@@ -53,7 +64,7 @@ public class EventHandlersService : EventHandlersBase
         IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
         ServerCallContext context)
     {
-        Log.ConnectingEventHandler(_logger);
+        _logger.ConnectingEventHandler();
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
         try
         {
@@ -62,9 +73,16 @@ public class EventHandlersService : EventHandlersBase
             {
                 return;
             }
-
+            
             var (dispatcher, arguments) = connectResult.Result;
-            await _eventHandlers.RegisterAndStart(dispatcher, arguments, cts.Token).ConfigureAwait(false);
+            using var eventHandler = _configuration.Value.Fast
+                ? _eventHandlerFactory.CreateFast(arguments, _configuration.Value.ImplicitFilter, dispatcher, context.CancellationToken)
+                : _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken); 
+
+            await _eventHandlers.RegisterAndStart(
+                eventHandler,
+                (failure, cancellation) => dispatcher.Reject(new EventHandlerRegistrationResponse{Failure = failure.ToProtobuf()}, cancellation),
+                cts.Token).ConfigureAwait(false);
         }
         finally
         {

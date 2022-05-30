@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing;
@@ -19,8 +20,7 @@ public class EventProcessor : IEventProcessor
 {
     readonly ConsentId _consentId;
     readonly SubscriptionId _subscriptionId;
-    readonly IWriteEventHorizonEvents _receivedEventsWriter;
-    readonly IEventProcessorPolicies _policies;
+    readonly ICommitExternalEvents _externalEventsCommitter;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
 
@@ -29,15 +29,13 @@ public class EventProcessor : IEventProcessor
     /// </summary>
     /// <param name="consentId">THe <see cref="ConsentId" />.</param>
     /// <param name="subscription">The <see cref="Subscription" />.</param>
-    /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
-    /// <param name="policies">The <see cref="IEventProcessorPolicies" />.</param>
+    /// <param name="externalEventsCommitter">The <see cref="ICommitExternalEvents"/>.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
     public EventProcessor(
         ConsentId consentId,
         SubscriptionId subscription,
-        IWriteEventHorizonEvents receivedEventsWriter,
-        IEventProcessorPolicies policies,
+        ICommitExternalEvents externalEventsCommitter,
         IMetricsCollector metrics,
         ILogger logger)
     {
@@ -45,8 +43,7 @@ public class EventProcessor : IEventProcessor
         Scope = subscription.ScopeId;
         Identifier = subscription.ProducerTenantId.Value;
         _subscriptionId = subscription;
-        _receivedEventsWriter = receivedEventsWriter;
-        _policies = policies;
+        _externalEventsCommitter = externalEventsCommitter;
         _metrics = metrics;
         _logger = logger;
     }
@@ -71,15 +68,13 @@ public class EventProcessor : IEventProcessor
     {
         _metrics.IncrementTotalEventHorizonEventsProcessed();
         Log.ProcessEvent(_logger, @event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
-
         try
         {
-            await _policies.WriteEvent.ExecuteAsync(
-                cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
-                cancellationToken).ConfigureAwait(false);
+            await _externalEventsCommitter.Commit(new CommittedEvents(new []{@event}), _consentId, Scope).ConfigureAwait(false);
         }
-        catch
+        catch (Exception e)
         {
+            _logger.LogWarning(e, "Failed to commit external event");
             _metrics.IncrementTotalEventHorizonEventWritesFailed();
         }
         return new SuccessfulProcessing();

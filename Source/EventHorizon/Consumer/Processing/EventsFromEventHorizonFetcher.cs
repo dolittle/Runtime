@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
@@ -31,19 +32,24 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
     }
 
     /// <inheritdoc/>
-    public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
     {
         try
         {
+            //TODO: This can be improved by taking as many as possible instead of just the first
             var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
             _metrics.IncrementTotalEventsFetched();
-            return @event;
+            return new [] { @event };
         }
         catch (Exception ex)
         {
             return ex;
         }
     }
+
+    /// <inheritdoc />
+    public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
+        => new NotImplementedException("GetNextStreamPosition should never be used on this specific fetcher");
 
     /// <inheritdoc/>
     public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
