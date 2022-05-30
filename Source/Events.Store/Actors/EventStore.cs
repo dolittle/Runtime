@@ -239,7 +239,7 @@ public class EventStore : EventStoreBase
     public override async Task<CommitExternalEventsResponse> CommitExternal(CommitExternalEventsRequest request)
     {
         var scope = request.ScopeId.ToGuid();
-        if (!_streamSubscriptionManagerPids.TryGetValue(request.ScopeId.ToGuid(), out var pid))
+        if (!_streamSubscriptionManagerPids.TryGetValue(scope, out var pid))
         {
             return new CommitExternalEventsResponse{Failure = new Failure($"No active subscription for scope {scope}")};
         }
@@ -263,7 +263,7 @@ public class EventStore : EventStoreBase
     public override async Task RegisterSubscription(EventStoreSubscriptionRequest request, Action<EventStoreSubscriptionAck> respond, Action<string> onError)
     {
         var scope = request.ScopeId.ToGuid();
-        if (!_streamSubscriptionManagerPids.TryGetValue(request.ScopeId.ToGuid(), out var pid))
+        if (!_streamSubscriptionManagerPids.TryGetValue(scope, out var pid))
         {
             (pid, _) = await SpawnSubscriptionManager(scope, Context.CancellationToken);
             _streamSubscriptionManagerPids[scope] = pid;
@@ -288,7 +288,7 @@ public class EventStore : EventStoreBase
     public override Task CancelSubscription(CancelEventStoreSubscription request, Action<CancelEventStoreSubscriptionAck> respond, Action<string> onError)
     {
         var scope = request.ScopeId.ToGuid();
-        if (!_streamSubscriptionManagerPids.TryGetValue(request.ScopeId.ToGuid(), out var pid))
+        if (!_streamSubscriptionManagerPids.TryGetValue(scope, out var pid))
         {
             onError("Subscription does not exist");
             return Task.CompletedTask;
