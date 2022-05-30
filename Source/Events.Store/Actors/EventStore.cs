@@ -288,7 +288,7 @@ public class EventStore : EventStoreBase
     public override Task CancelSubscription(CancelEventStoreSubscription request, Action<CancelEventStoreSubscriptionAck> respond, Action<string> onError)
     {
         var scope = request.ScopeId.ToGuid();
-        if (!_streamSubscriptionManagerPids.TryGetValue(request.ScopeId.ToGuid(), out var pid))
+        if (!_streamSubscriptionManagerPids.TryGetValue(scope, out var pid))
         {
             onError("Subscription does not exist");
             return Task.CompletedTask;
