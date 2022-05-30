@@ -16,16 +16,39 @@ namespace Dolittle.Runtime.Actors.Hosting;
 /// </summary>
 public interface IShutdownHook
 {
+    /// <summary>
+    /// Gets a <see cref="Task"/> that completes when shutdown is triggered.
+    /// </summary>
     Task ShuttingDown { get; }
+
+    /// <summary>
+    /// Marks the shutdown.
+    /// </summary>
     void MarkCompleted();
 }
 
+/// <summary>
+/// Defines a system that knows about application lifecycle hooks.
+/// </summary>
 public interface IApplicationLifecycleHooks
 {
+    /// <summary>
+    /// Register a shutdown hook.
+    /// </summary>
+    /// <returns>The registered <see cref="IShutdownHook"/>.</returns>
     IShutdownHook RegisterShutdownHook();
+    
+    /// <summary>
+    /// Shutdown all the hooks gracefully.
+    /// </summary>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    /// <returns>A <see cref="Task"/> that is resolved when all <see cref="IShutdownHook"/> are completed.</returns>
     Task ShutdownGracefully(CancellationToken cancellationToken);
 }
 
+/// <summary>
+/// Represents an implementation of <see cref="IApplicationLifecycleHooks"/>.
+/// </summary>
 [Singleton]
 // ReSharper disable once ClassNeverInstantiated.Global
 public class ApplicationLifecycleHooks : IApplicationLifecycleHooks
@@ -34,12 +57,12 @@ public class ApplicationLifecycleHooks : IApplicationLifecycleHooks
 
     readonly TaskCompletionSource _shutdownSource = new();
     readonly ConcurrentDictionary<int, Task> _registered = new();
-
-
+    
+    /// <inheritdoc />
     public IShutdownHook RegisterShutdownHook()
     {
         var id = Interlocked.Increment(ref _i);
-        var tcs = new TaskCompletionSource();
+        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _registered.TryAdd(id, tcs.Task);
         return new ShutdownHook(() =>
         {
@@ -48,6 +71,13 @@ public class ApplicationLifecycleHooks : IApplicationLifecycleHooks
         }, _shutdownSource.Task);
     }
 
+    /// <inheritdoc />
+    public Task ShutdownGracefully(CancellationToken cancellationToken)
+    {
+        _shutdownSource.SetResult();
+        return Task.WhenAll(_registered.Values).WaitAsync(cancellationToken);
+    }
+    
     class ShutdownHook : IShutdownHook
     {
         readonly Action _onCompleted;
@@ -59,13 +89,7 @@ public class ApplicationLifecycleHooks : IApplicationLifecycleHooks
         }
 
         public Task ShuttingDown { get; }
-        public void MarkCompleted() => _onCompleted();
-    }
 
-    public Task ShutdownGracefully(CancellationToken cancellationToken)
-    {
-        _shutdownSource.SetResult();
-        
-        return Task.WhenAll(_registered.Values).WaitAsync(cancellationToken);
+        public void MarkCompleted() => _onCompleted();
     }
 }

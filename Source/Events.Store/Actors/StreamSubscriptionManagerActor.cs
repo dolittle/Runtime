@@ -19,16 +19,22 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 public class StreamSubscriptionManagerActor : IActor
 {
     readonly Props _streamSubscriptionProps;
-
     readonly Dictionary<Guid, PID> _activeSubscriptions = new();
+    readonly ScopeId _scope;
     EventLogSequenceNumber _nextSequenceNumber;
     readonly ILogger<StreamSubscriptionManagerActor> _logger;
 
-    public StreamSubscriptionManagerActor(EventLogSequenceNumber initialNextSequenceNumber, TenantId tenantId, ICreateProps propsFactory, ILogger<StreamSubscriptionManagerActor> logger)
+    public StreamSubscriptionManagerActor(
+        ScopeId scope,
+        EventLogSequenceNumber initialNextSequenceNumber,
+        TenantId tenantId,
+        ICreateProps propsFactory,
+        ILogger<StreamSubscriptionManagerActor> logger)
     {
+        _scope = scope;
         _nextSequenceNumber = initialNextSequenceNumber;
         _logger = logger;
-        _streamSubscriptionProps = propsFactory.PropsFor<StreamSubscriptionActor>(tenantId);
+        _streamSubscriptionProps = propsFactory.PropsFor<StreamSubscriptionActor>(scope, tenantId);
     }
 
     public Task ReceiveAsync(IContext context)
@@ -67,11 +73,11 @@ public class StreamSubscriptionManagerActor : IActor
             FromOffset = commit.FirstSequenceNumber,
             ToOffset = commit.LastSequenceNumber
         };
-
         foreach (var kv in _activeSubscriptions)
         {
             context.Send(kv.Value, request);
         }
+
         _nextSequenceNumber = request.ToOffset + 1;
         return Task.CompletedTask;
     }
@@ -84,6 +90,7 @@ public class StreamSubscriptionManagerActor : IActor
             context.Respond(new EventStoreSubscriptionAck
             {
                 SubscriptionId = request.SubscriptionId,
+                ScopeId = request.ScopeId,
                 Ok = false
             });
             return Task.CompletedTask;
@@ -91,7 +98,6 @@ public class StreamSubscriptionManagerActor : IActor
 
         var pid = context.Spawn(_streamSubscriptionProps);
         _activeSubscriptions[id] = pid;
-
         context.Send(pid, new StartEventStoreSubscription
         {
             EventTypeIds = { request.EventTypeIds },
@@ -99,6 +105,7 @@ public class StreamSubscriptionManagerActor : IActor
             PidId = request.PidId,
             PidAddress = request.PidAddress,
             SubscriptionId = request.SubscriptionId,
+            ScopeId = request.ScopeId,
             CurrentHighWatermark = _nextSequenceNumber
         });
         context.Respond(new EventStoreSubscriptionAck

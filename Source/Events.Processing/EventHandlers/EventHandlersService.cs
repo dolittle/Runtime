@@ -1,12 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
@@ -15,7 +12,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
-using Failure = Dolittle.Protobuf.Contracts.Failure;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
@@ -79,20 +75,6 @@ public class EventHandlersService : EventHandlersBase
             }
             
             var (dispatcher, arguments) = connectResult.Result;
-            if (arguments.Scope != ScopeId.Default && _configuration.Value.Fast)
-            {
-                var exception = new FastEventHandlerFilterNotYetSupported(arguments);
-                _logger.FastScopedEventHandlerNotSupported(exception);
-                await dispatcher.Reject(new EventHandlerRegistrationResponse
-                {
-                    Failure = new Failure
-                    {
-                        Id = Failures.Unknown.ToProtobuf(),
-                        Reason = exception.Message
-                    }
-                }, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
             using var eventHandler = _configuration.Value.Fast
                 ? _eventHandlerFactory.CreateFast(arguments, _configuration.Value.ImplicitFilter, dispatcher, context.CancellationToken)
                 : _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken); 
@@ -106,16 +88,5 @@ public class EventHandlersService : EventHandlersBase
         {
             cts.Cancel();
         }
-    }
-}
-
-/// <summary>
-/// Exception that gets thrown when attempting to register a "fast" scoped event handler. This will be removed whenever we start supporting it. 
-/// </summary>
-public class FastEventHandlerFilterNotYetSupported : Exception
-{
-    public FastEventHandlerFilterNotYetSupported(EventHandlerRegistrationArguments arguments)
-        : base($"Failed to register event handler {arguments.EventHandler} in scope {arguments.Scope} The fast event handler type is not yet supported for scoped event handlers. Either turn off fast event handlers by setting the environment variable `DOLITTLE__RUNTIME__PROCESSING__EVENTHANDLERS__FAST` to `false` or wait until a new version that supports this is released ")
-    {
     }
 }

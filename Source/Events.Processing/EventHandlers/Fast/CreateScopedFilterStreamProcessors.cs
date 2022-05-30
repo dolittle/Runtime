@@ -66,7 +66,11 @@ public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProce
         // TODO: This is not needed when using the fast event handler.
         NotifyStream(streamProcessorId.ScopeId, filterDefinition, processorState.Position);
         return _createFilterStreamProcessor(
-            _eventLogStream.Subscribe(processorState.Position.Value, new ReadOnlyCollection<ArtifactId>(filterDefinition.Types.ToList()), CancellationToken.None),
+            _eventLogStream.Subscribe(
+                streamProcessorId.ScopeId,
+                processorState.Position.Value,
+                new ReadOnlyCollection<ArtifactId>(filterDefinition.Types.ToList()),
+                CancellationToken.None),
             streamProcessorId,
             filterDefinition.Partitioned,
             unpartitionedProcessorState);

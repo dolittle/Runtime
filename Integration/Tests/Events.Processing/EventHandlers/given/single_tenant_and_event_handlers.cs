@@ -9,13 +9,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Google.Protobuf.WellKnownTypes;
 using Integration.Shared;
@@ -35,6 +38,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
 using StreamEvent = Dolittle.Runtime.Events.Processing.Contracts.StreamEvent;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using MongoStreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
+using EventHorizonConsumerProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.EventProcessor;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.given;
 
@@ -51,6 +55,8 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static Dictionary<ScopeId, CommittedEvents> scoped_committed_events;
     protected static IWriteEventHorizonEvents event_horizon_events_writer;
     protected static EventLogSequenceNumber external_event_sequence_number;
+
+    static ICommitExternalEvents external_event_committer;
     static int number_of_events_handled;
     static CancellationTokenRegistration? cancel_event_handlers_registration;
     static CancellationTokenSource? cancel_event_handlers_source;
@@ -60,12 +66,14 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     Establish context = () =>
     {
+        external_event_committer = runtime.Host.Services.GetRequiredService<Func<TenantId, ICommitExternalEvents>>()(tenant);
         external_event_sequence_number = EventLogSequenceNumber.Initial;
         number_of_events_handled = 0;
         scoped_committed_events = new Dictionary<ScopeId, CommittedEvents>();
         committed_events = new CommittedEvents(Array.Empty<CommittedEvent>());
         dispatcher_cancellation_source = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         event_horizon_events_writer = runtime.Host.Services.GetRequiredService<Func<TenantId, IWriteEventHorizonEvents>>()(tenant);
+        
         event_handlers = runtime.Host.Services.GetRequiredService<IEventHandlers>();
         event_handler_factory = runtime.Host.Services.GetRequiredService<IEventHandlerFactory>();
         event_types = Enumerable.Range(0, number_of_event_types).Select(_ => new ArtifactId(Guid.NewGuid())).ToArray();
@@ -175,10 +183,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     static async Task write_committed_events_to_scoped_event_log(CommittedEvents committed_events, ScopeId scope)
     {
-        foreach (var committed_event in committed_events)
-        {
-            await event_horizon_events_writer.Write(committed_event, Guid.NewGuid(), scope, CancellationToken.None).ConfigureAwait(false);
-        }
+        await external_event_committer.Commit(committed_events, Guid.NewGuid(), scope).ConfigureAwait(false);
         if (!scoped_committed_events.TryGetValue(scope, out var previously_committed_events))
         {
             previously_committed_events = new CommittedEvents(Array.Empty<CommittedEvent>());

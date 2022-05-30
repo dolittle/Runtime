@@ -55,7 +55,7 @@ class batch : given.a_clean_event_store
         {
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             response_before_subscribe = event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
-            var subscribedEvents = event_log_stream.SubscribeAll(0, cts.Token).ReadAllAsync().ToListAsync();
+            var subscribedEvents = event_log_stream.SubscribeAll(ScopeId.Default, 0, cts.Token).ReadAllAsync().ToListAsync();
             response_after_subscribe = event_store.Commit(uncommitted_events_after_subscribe, execution_context).GetAwaiter().GetResult();
             all_committed_events = response_before_subscribe.Events.Concat(response_after_subscribe.Events).ToList();
             all_subscription_batch_results = subscribedEvents.GetAwaiter().GetResult();

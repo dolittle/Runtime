@@ -20,6 +20,9 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store;
 
+/// <summary>
+/// Represents an implementation of <see cref="IEventLogStream"/>.
+/// </summary>
 [Singleton, PerTenant]
 public class EventLogStream : IEventLogStream
 {
@@ -34,25 +37,34 @@ public class EventLogStream : IEventLogStream
         _createProps = createProps;
     }
 
-    public ChannelReader<EventLogBatch> Subscribe(EventLogSequenceNumber from, IReadOnlyCollection<ArtifactId> eventTypes, CancellationToken cancellationToken)
+    public ChannelReader<EventLogBatch> Subscribe(
+        ScopeId scope,
+        EventLogSequenceNumber from,
+        IReadOnlyCollection<ArtifactId> eventTypes,
+        CancellationToken cancellationToken)
     {
         if (!eventTypes.Any())
         {
             throw new ArgumentException("No event types passed");
         }
 
-        return StartSubscription(from, eventTypes, cancellationToken);
+        return StartSubscription(scope, from, eventTypes, cancellationToken);
     }
 
-    public ChannelReader<EventLogBatch> SubscribeAll(EventLogSequenceNumber from, CancellationToken cancellationToken) =>
-        StartSubscription(from, ImmutableList<ArtifactId>.Empty, cancellationToken);
+    public ChannelReader<EventLogBatch> SubscribeAll(
+        ScopeId scope,
+        EventLogSequenceNumber from,
+        CancellationToken cancellationToken) =>
+        StartSubscription(scope, from, ImmutableList<ArtifactId>.Empty, cancellationToken);
 
-    ChannelReader<EventLogBatch> StartSubscription(EventLogSequenceNumber from, IReadOnlyCollection<ArtifactId> eventTypes, CancellationToken cancellationToken)
+    ChannelReader<EventLogBatch> StartSubscription(
+        ScopeId scope,
+        EventLogSequenceNumber from,
+        IReadOnlyCollection<ArtifactId> eventTypes,
+        CancellationToken cancellationToken)
     {
         var channel = Channel.CreateBounded<EventLogBatch>(ChannelSize);
-
-        _actorSystem.Root.Spawn(_createProps.PropsFor<EventLogStreamActor>(channel.Writer, from, eventTypes, cancellationToken));
-
+        _actorSystem.Root.Spawn(_createProps.PropsFor<EventLogStreamActor>(channel.Writer, scope, from, eventTypes, cancellationToken));
         return channel.Reader;
     }
 }
@@ -68,9 +80,16 @@ public class EventLogStreamActor : IActor
     readonly EventStoreClient _eventStoreClient;
     readonly ILogger<EventLogStreamActor> _logger;
     readonly Uuid _subscriptionId;
+    readonly Uuid _scope;
 
-    public EventLogStreamActor(ChannelWriter<EventLogBatch> channelWriter, EventLogSequenceNumber nextOffset, IReadOnlyCollection<ArtifactId> eventTypeIds,
-        EventStoreClient eventStoreClient, ILogger<EventLogStreamActor> logger, CancellationToken cancellationToken)
+    public EventLogStreamActor(
+        ChannelWriter<EventLogBatch> channelWriter,
+        ScopeId scope,
+        EventLogSequenceNumber nextOffset,
+        IReadOnlyCollection<ArtifactId> eventTypeIds,
+        EventStoreClient eventStoreClient,
+        ILogger<EventLogStreamActor> logger,
+        CancellationToken cancellationToken)
     {
         _channelWriter = channelWriter;
         _nextOffset = nextOffset;
@@ -79,6 +98,7 @@ public class EventLogStreamActor : IActor
         _logger = logger;
         _cancellationToken = cancellationToken;
         _subscriptionId = Guid.NewGuid().ToProtobuf();
+        _scope = scope.ToProtobuf();
     }
 
     public Task ReceiveAsync(IContext context)
@@ -98,7 +118,10 @@ public class EventLogStreamActor : IActor
         {
             _nextOffset = request.ToOffset + 1;
             Ack(_nextOffset, context);
-            await _channelWriter.WriteAsync(new EventLogBatch(request.FromOffset, request.ToOffset, request.Events), _cancellationToken);
+            await _channelWriter.WriteAsync(new EventLogBatch(
+                request.FromOffset,
+                request.ToOffset,
+                request.Events), _cancellationToken).ConfigureAwait(false);
         }
         else
         {
@@ -119,7 +142,7 @@ public class EventLogStreamActor : IActor
         await _eventStoreClient.CancelSubscription(new CancelEventStoreSubscription
         {
             SubscriptionId = _subscriptionId
-        }, CancellationTokens.FromSeconds(5));
+        }, CancellationTokens.FromSeconds(5)).ConfigureAwait(false);
     }
 
     async Task OnStarted(IContext context)
@@ -130,9 +153,10 @@ public class EventLogStreamActor : IActor
             EventTypeIds = { _eventTypes.Select(it => it.ToProtobuf()) },
             PidAddress = context.Self.Address,
             PidId = context.Self.Id,
+            ScopeId = _scope,
             SubscriptionId = _subscriptionId
         };
-        await _eventStoreClient.RegisterSubscription(eventStoreSubscriptionRequest, _cancellationToken);
-        context.ReenterAfterCancellation(_cancellationToken, () => { context.Stop(context.Self); });
+        await _eventStoreClient.RegisterSubscription(eventStoreSubscriptionRequest, _cancellationToken).ConfigureAwait(false);
+        context.ReenterAfterCancellation(_cancellationToken, () => context.Stop(context.Self));
     }
 }
