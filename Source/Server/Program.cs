@@ -38,9 +38,7 @@ var host = Host.CreateDefaultBuilder(args)
 
 VerifyConfiguration(host.Services);
 await host.PerformBootstrap().ConfigureAwait(false);
-
 host.Run();
-
 
 static void VerifyConfiguration(IServiceProvider provider)
 {
