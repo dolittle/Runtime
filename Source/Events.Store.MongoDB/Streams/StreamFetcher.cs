@@ -155,11 +155,11 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     {
         try
         {
-            var maxNumEvents = range.Length;
             return _collection.Find(
                     _filter.Gte(_sequenceNumberExpression, range.From.Value)
                     & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                .Project(_eventToStreamEvent).ToAsyncEnumerable(cancellationToken);
+                .Project(_eventToStreamEvent)
+                .ToAsyncEnumerable(cancellationToken);
         }
         catch (MongoWaitQueueFullException ex)
         {
