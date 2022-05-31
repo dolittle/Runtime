@@ -12,6 +12,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 using System.Linq;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
+using Dolittle.Runtime.MongoDB;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 
@@ -148,20 +149,17 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<StreamEvent>> FetchRange(
+    public IAsyncEnumerable<StreamEvent> FetchRange(
         StreamPositionRange range,
         CancellationToken cancellationToken)
     {
         try
         {
             var maxNumEvents = range.Length;
-            var events = await _collection.Find(
+            return _collection.Find(
                     _filter.Gte(_sequenceNumberExpression, range.From.Value)
                     & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                .Project(_eventToStreamEvent)
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
-            return events.ToArray();
+                .Project(_eventToStreamEvent).ToAsyncEnumerable(cancellationToken);
         }
         catch (MongoWaitQueueFullException ex)
         {
