@@ -16,7 +16,7 @@ public class and_fetching_the_source_stream_events_fails : given.all_dependencie
     {
         events_from_event_log_fetcher
             .Setup(_ => _.FetchRange(new StreamPositionRange(StreamPosition.Start, 10), cancellation_token))
-            .Returns(Task.FromException<IEnumerable<StreamEvent>>(new Exception()));
+            .Throws(new Exception());
     };
 
     static FilterValidationResult result;
