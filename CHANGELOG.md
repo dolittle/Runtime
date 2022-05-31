@@ -1,3 +1,13 @@
+# [8.1.1] - 2022-5-31 [PR: #695](https://github.com/dolittle/Runtime/pull/695)
+## Summary
+
+The filter validator for public filters would take the whole event log into memory and compare filtered streams in memory. This could cause OutOfMemoryException if the event log is big enough
+
+### Fixed
+
+- Fixes `OutOfMemoryException` caused by filter validator for public filters.
+
+
 # [8.1.0] - 2022-5-30 [PR: #682](https://github.com/dolittle/Runtime/pull/682)
 ## Summary
 
