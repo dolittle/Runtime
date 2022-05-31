@@ -16,7 +16,7 @@ public class and_fetching_the_old_stream_events_fails : given.all_dependencies
     {
         events_from_filtered_stream_fetcher
             .Setup(_ => _.FetchRange(new StreamPositionRange(StreamPosition.Start, ulong.MaxValue), cancellation_token))
-            .Returns(Task.FromException<IEnumerable<StreamEvent>>(new Exception()));
+            .Throws(new Exception());
     };
 
     static FilterValidationResult result;

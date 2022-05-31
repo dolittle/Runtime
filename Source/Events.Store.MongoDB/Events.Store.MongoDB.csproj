@@ -15,6 +15,7 @@
         <ProjectReference Include="../Artifacts/Artifacts.csproj" />
         <ProjectReference Include="../EventHorizon/EventHorizon.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
+        <ProjectReference Include="../MongoDB/MongoDB.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
         <ProjectReference Include="../Aggregates/Aggregates.csproj" />
     </ItemGroup>

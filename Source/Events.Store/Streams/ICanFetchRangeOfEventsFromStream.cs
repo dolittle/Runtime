@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Events.Store.Streams;
 
@@ -13,10 +12,10 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 public interface ICanFetchRangeOfEventsFromStream
 {
     /// <summary>
-    /// Fetch a range of events in an incluse <see cref="StreamPositionRange" /> in a <see cref="StreamId">stream</see>.
+    /// Fetch a range of events in an include <see cref="StreamPositionRange" /> in a <see cref="StreamId">stream</see>.
     /// </summary>
     /// <param name="range">The <see cref="StreamPositionRange" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>The <see cref="IEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
-    Task<IEnumerable<StreamEvent>> FetchRange(StreamPositionRange range, CancellationToken cancellationToken);
+    /// <returns>The <see cref="IAsyncEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
+    IAsyncEnumerable<StreamEvent> FetchRange(StreamPositionRange range, CancellationToken cancellationToken);
 }

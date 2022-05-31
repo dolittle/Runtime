@@ -128,10 +128,12 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 event_handler.Info.Id.EventHandler.Value,
                 event_handler.Info.EventTypes,
                 event_handler.Info.Partitioned)), CancellationToken.None).Result;
-
+        
         return rangeFetcher
             .FetchRange(new StreamPositionRange(StreamPosition.Start, ulong.MaxValue), CancellationToken.None)
-            .Result
+            .ToListAsync()
+            .GetAwaiter()
+            .GetResult()
             .Where(_ => _.Event.EventSource.Value == partition_id.Value);
     }
 
