@@ -39,7 +39,14 @@ public class GeneratedTenantFactoryRegistrationSource : IRegistrationSource
             {
                 var provider = providers.ForTenant(tenant);
                 var resolver = provider.GetRequiredService(tenantDelegateToResolve) as Delegate;
-                return resolver?.DynamicInvoke(arguments); //TODO: Null check?
+                try
+                {
+                    return resolver?.DynamicInvoke(arguments); //TODO: Null check?
+                }
+                catch (Exception e)
+                {
+                    throw new FailedToResolveServiceForTenant(tenant, resolvedType, e);
+                }
             };
 
         var generatedDelegateParameters = parameters.Select(_ => Expression.Parameter(_.ParameterType, _.Name)).ToList();
