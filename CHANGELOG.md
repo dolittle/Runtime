@@ -1,3 +1,13 @@
+# [8.1.2] - 2022-6-1 [PR: #696](https://github.com/dolittle/Runtime/pull/696)
+## Summary
+
+When a service for a specific tenant failed to be resolved the exception wasn't particularly helpful.
+
+### Changed
+
+- A more helpful exception is thrown when failing to resolve a tenant specific service
+
+
 # [8.1.1] - 2022-5-31 [PR: #695](https://github.com/dolittle/Runtime/pull/695)
 ## Summary
 
