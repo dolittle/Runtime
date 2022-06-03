@@ -74,6 +74,7 @@ public class CommitBuilder : ICanBuildABatch<Commit>
             _committedEvents.Add(committedEvents);
             _orderedEvents.AddRange(committedEvents);
             _nextSequenceNumber = nextSequenceNumber;
+            eventsToBeCommitted = committedEvents;
             return true;
         }
         catch (Exception ex)

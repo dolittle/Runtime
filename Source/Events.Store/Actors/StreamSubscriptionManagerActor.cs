@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -21,31 +22,40 @@ public class StreamSubscriptionManagerActor : IActor
     readonly Props _streamSubscriptionProps;
     readonly Dictionary<Guid, PID> _activeSubscriptions = new();
     readonly ScopeId _scope;
-    EventLogSequenceNumber _nextSequenceNumber;
+    readonly TenantId _tenantId;
+    readonly IFetchCommittedEvents _committedEvents;
     readonly ILogger<StreamSubscriptionManagerActor> _logger;
 
+    EventLogSequenceNumber _nextSequenceNumber;
     public StreamSubscriptionManagerActor(
         ScopeId scope,
-        EventLogSequenceNumber initialNextSequenceNumber,
         TenantId tenantId,
+        IFetchCommittedEvents committedEvents,
         ICreateProps propsFactory,
         ILogger<StreamSubscriptionManagerActor> logger)
     {
         _scope = scope;
-        _nextSequenceNumber = initialNextSequenceNumber;
+        _tenantId = tenantId;
+        _committedEvents = committedEvents;
         _logger = logger;
-        _streamSubscriptionProps = propsFactory.PropsFor<StreamSubscriptionActor>(scope, tenantId);
+        _streamSubscriptionProps = propsFactory.PropsFor<StreamSubscriptionActor>(scope);
     }
 
     public Task ReceiveAsync(IContext context)
     {
         return context.Message switch
         {
+            Started => OnStarted(context.CancellationToken),
             EventStoreSubscriptionRequest request => OnEventStoreSubscriptionRequest(request, context),
             CancelEventStoreSubscription request => OnCancelEventStoreSubscription(request, context),
             Commit request => OnCommit(request, context),
             _ => Task.CompletedTask
         };
+    }
+
+    async Task OnStarted(CancellationToken cancellationToken)
+    {
+        _nextSequenceNumber = await _committedEvents.FetchNextSequenceNumber(_scope, cancellationToken).ConfigureAwait(false);
     }
 
     Task OnCancelEventStoreSubscription(CancelEventStoreSubscription request, IContext context)

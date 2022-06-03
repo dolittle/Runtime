@@ -190,7 +190,8 @@ public class Committer : IActor
 
             _aggregateCommitInFlight.Remove(aggregate);
             _aggregateRootVersionCache[aggregate] = batchedEvents.Item[^1].AggregateRootVersion + 1;
-            return RespondWithEvents(batchedEvents.Item.ToProtobuf());
+            var events = batchedEvents.Item.ToProtobuf();
+            return RespondWithEvents(events);
         });
 
         return Task.CompletedTask;

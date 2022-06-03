@@ -20,8 +20,8 @@ public class EventStoreCouldNotBeStarted : Exception
     /// <param name="error">The error that caused it.</param>
     /// <param name="configuredTenants">The currently configured tenants.</param>
     public EventStoreCouldNotBeStarted(TenantId tenant, Exception error, IEnumerable<TenantId> configuredTenants)
-        : base($"Failed to start Event Store virtual actor for tenant {tenant}. This might be caused by a missing or bad configuration." +
-            $"Please check that 'resources' and 'tenants' are correctly configured." +
+        : base($"Failed to start Event Store virtual actor for tenant {tenant}. This might be caused by a missing or bad configuration. " +
+            $"Please check that 'resources' and 'tenants' are correctly configured. " +
             $"These are the tenants that the Runtime knows about: {string.Join(", ", configuredTenants)}", error)
     {
     }

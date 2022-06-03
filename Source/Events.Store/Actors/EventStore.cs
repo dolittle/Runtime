@@ -77,14 +77,13 @@ public class EventStore : EventStoreBase
     bool TrySpawnSubscriptionManager(ScopeId scope, out PID pid, out Exception error)
         => Context.TrySpawnNamed(_propsFactory.PropsFor<StreamSubscriptionManagerActor>(scope), $"stream-subscription-manager" , out pid, out error);
 
-    
     /// <inheritdoc />
     public override Task Commit(CommitEventsRequest request, Action<CommitEventsResponse> respond, Action<string> onError)
     {
-        return ForwardToCommitter<CommitEventsRequest, CommitEventsResponse>(request, RespondWithEvents, RespondWithFailure);
-        Task RespondWithEvents(CommitEventsResponse response)
+        return ForwardToCommitter<CommitEventsRequest, CommitEventsResponse>(request, Respond, RespondWithFailure);
+        Task Respond(CommitEventsResponse response)
         {
-            respond(new CommitEventsResponse { Events = {response.Events} });
+            respond(response);
             return Task.CompletedTask;
         }
         Task RespondWithFailure(Failure failure)
@@ -97,10 +96,10 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override Task CommitForAggregate(CommitAggregateEventsRequest request, Action<CommitAggregateEventsResponse> respond, Action<string> onError)
     {
-        return ForwardToCommitter<CommitAggregateEventsRequest, CommitAggregateEventsResponse>(request, RespondWithEvents, RespondWithFailure);
-        Task RespondWithEvents(CommitAggregateEventsResponse response)
+        return ForwardToCommitter<CommitAggregateEventsRequest, CommitAggregateEventsResponse>(request, Respond, RespondWithFailure);
+        Task Respond(CommitAggregateEventsResponse response)
         {
-            respond(new CommitAggregateEventsResponse { Events = response.Events });
+            respond(response);
             return Task.CompletedTask;
         }
         Task RespondWithFailure(Failure failure)
