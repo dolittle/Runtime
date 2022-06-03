@@ -69,7 +69,6 @@ public class EventStore : EventStoreBase
             _startupFailure = new EventStoreCouldNotBeStarted(_tenant, error, _tenants.All).ToFailure();
             return Task.CompletedTask;
         }
-        _streamSubscriptionManagerPIDs[ScopeId.Default] = eventLogSubscriptionPid;
         if (!Context.TrySpawnNamed(_propsFactory.PropsFor<Committer>(), "committer", out _committer, out error))
         {
             _failedToStart = true;
@@ -79,9 +78,16 @@ public class EventStore : EventStoreBase
         Context.Send(_committer, new Committer.EventLogSubscriptionManagerSpawned(eventLogSubscriptionPid));
         return Task.CompletedTask;
     }
-    
+
     bool TrySpawnSubscriptionManager(ScopeId scope, out PID pid, out Exception error)
-        => Context.TrySpawnNamed(_propsFactory.PropsFor<StreamSubscriptionManagerActor>(scope), $"stream-subscription-manager" , out pid, out error);
+    {
+        if (!Context.TrySpawnNamed(_propsFactory.PropsFor<StreamSubscriptionManagerActor>(scope), $"{scope}-stream-subscription-manager", out pid, out error))
+        {
+            return false;
+        }
+        _streamSubscriptionManagerPIDs[scope] = pid;
+        return true;
+    }
 
     /// <inheritdoc />
     public override Task Commit(CommitEventsRequest request, Action<CommitEventsResponse> respond, Action<string> onError)
@@ -174,7 +180,6 @@ public class EventStore : EventStoreBase
                 onError(error.Message);
                 return Task.CompletedTask;
             }
-            _streamSubscriptionManagerPIDs[scope] = pid;
         }
         
         Context.RequestReenter(pid, request, (Task<EventStoreSubscriptionAck> task) =>
