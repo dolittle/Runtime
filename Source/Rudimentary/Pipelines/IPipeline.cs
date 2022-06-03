@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Rudimentary.Pipelines;
 public interface IPipeline<TBatchItem, TBatch> : ICanGetNextReadyBatch<TBatch>
 {
     /// <summary>
-    /// Gets the batch size.
+    /// Gets the batch size of the pipeline.
     /// </summary>
     public int BatchSize { get; }
 

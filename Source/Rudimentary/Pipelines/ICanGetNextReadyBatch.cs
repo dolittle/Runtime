@@ -18,4 +18,10 @@ public interface ICanGetNextReadyBatch<TBatch>
     /// <param name="readyBatch">The next <see cref="ReadyBatch{TBatch}"/>.</param>
     /// <returns>True if there was a ready batch, false if not.</returns>
     bool TryGetNextBatch([NotNullWhen(true)] out ReadyBatch<TBatch> readyBatch);
+    
+    /// <summary>
+    /// Fails all ready batches.
+    /// </summary>
+    /// <param name="failure">The failure.</param>
+    void EmptyAllWithFailure(Exception failure);
 }

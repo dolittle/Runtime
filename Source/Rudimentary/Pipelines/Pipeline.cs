@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Rudimentary.Pipelines;
 
@@ -12,18 +10,8 @@ namespace Dolittle.Runtime.Rudimentary.Pipelines;
 /// </summary>
 /// <typeparam name="TBatchItem">The <see cref="Type"/> of items to include in the batch.</typeparam>
 /// <typeparam name="TBatch">The <see cref="Type"/> of the batch.</typeparam>
-public class Pipeline<TBatchItem, TBatch> : IPipeline<TBatchItem, TBatch>
+public class Pipeline<TBatchItem, TBatch> : Pipeline<TBatchItem, TBatch, ICanAddToABatch<TBatchItem, TBatch>>
 {
-    readonly Func<TBatch, ICanAddToABatch<TBatchItem, TBatch>> _createBatchBuilderFromPreviousBatch;
-    readonly Channel<ReadyBatch<TBatch>> _preparedBatches = Channel.CreateUnbounded<ReadyBatch<TBatch>>(new UnboundedChannelOptions
-    {
-        SingleReader = true,
-        SingleWriter = true
-    });
-
-    ICanAddToABatch<TBatchItem, TBatch> _batchBuilder;
-    TaskCompletionSource<Try> _completionSource;
-    
     /// <summary>
     /// Initializes a new instance of the <see cref="Pipeline{TBatchItem,TBatch}"/> class.
     /// </summary>
@@ -34,12 +22,10 @@ public class Pipeline<TBatchItem, TBatch> : IPipeline<TBatchItem, TBatch>
         int batchSize,
         ICanAddToABatch<TBatchItem, TBatch> initialBatchBuilder,
         Func<TBatch, ICanAddToABatch<TBatchItem, TBatch>> createBatchBuilderFromPreviousBatch)
+        : base(new PipelineReadyBatchAggregator<TBatch, ICanAddToABatch<TBatchItem, TBatch>>(batchSize, initialBatchBuilder, createBatchBuilderFromPreviousBatch))
     {
-        BatchSize = batchSize;
-        _createBatchBuilderFromPreviousBatch = createBatchBuilderFromPreviousBatch;
-        _batchBuilder = initialBatchBuilder;
-        _completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
     }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Pipeline{TBatchItem,TBatch}"/> class.
     /// </summary>
@@ -50,6 +36,28 @@ public class Pipeline<TBatchItem, TBatch> : IPipeline<TBatchItem, TBatch>
         Func<ICanAddToABatch<TBatchItem, TBatch>> createBatchBuilder)
         : this(batchSize, createBatchBuilder(), _ => createBatchBuilder())
     { }
+}
+
+/// <summary>
+/// Represents an implementation of <see cref="IPipeline{TBatchItem,TBatch}"/>.
+/// </summary>
+/// <typeparam name="TBatchItem">The <see cref="Type"/> of items to include in the batch.</typeparam>
+/// <typeparam name="TBatch">The <see cref="Type"/> of the batch.</typeparam>
+/// <typeparam name="TBatchBuilder">The <see cref="Type"/> of the batch builder</typeparam>
+public class Pipeline<TBatchItem, TBatch, TBatchBuilder> : IPipeline<TBatchItem, TBatch>
+    where TBatchBuilder : ICanAddToABatch<TBatchItem, TBatch>
+{
+    readonly IPipelineReadyBatchAggregator<TBatch, TBatchBuilder> _aggregator;
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Pipeline{TBatchItem,TBatch}"/> class.
+    /// </summary>
+    /// <param name="aggregator">The pipeline ready batch aggregator.</param>
+    public Pipeline(IPipelineReadyBatchAggregator<TBatch, TBatchBuilder> aggregator)
+    {
+        _aggregator = aggregator;
+        BatchSize = _aggregator.BatchSize;
+    }
 
     /// <inheritdoc />
     public int BatchSize { get; }
@@ -58,48 +66,20 @@ public class Pipeline<TBatchItem, TBatch> : IPipeline<TBatchItem, TBatch>
     public bool TryAdd(TBatchItem item, out BatchedItem<TBatchItem> batchedItem, out Exception error)
     {
         batchedItem = default;
-        if (!_batchBuilder.TryAddToBatch(item, out error))
-        {
-            return false;
-        }
-        var tcs = _completionSource;
-        ReplaceBatchIfFull();
-        batchedItem = new BatchedItem<TBatchItem>(item, tcs.Task);
-        return true;
+        error = default;
+        var succeeded = _aggregator.TryAddToBatch(
+            (builder, tcs) => !builder.TryAddToBatch(item, out var error)
+                ? (false, (null, error))
+                : (true, (new BatchedItem<TBatchItem>(item, tcs.Task), error)),
+            out var itemAndError);
+        (batchedItem, error) = itemAndError;
+        return succeeded;
     }
 
     /// <inheritdoc />
     public bool TryGetNextBatch(out ReadyBatch<TBatch> readyBatch)
-    {
-        if (_preparedBatches.Reader.TryRead(out readyBatch))
-        {
-            return true;
-        }
+        => _aggregator.TryGetNextBatch(out readyBatch);
 
-        if (_batchBuilder.BatchIsEmpty)
-        {
-            return false;
-        }
-        readyBatch = BuildAndReplaceCurrentBatch();
-        return true;
-    }
-    
-    void ReplaceBatchIfFull()
-    {
-        if (_batchBuilder.Count < BatchSize)
-        {
-            return;
-        }
-        var batch = BuildAndReplaceCurrentBatch();
-        _preparedBatches.Writer.TryWrite(batch);
-    }
-
-    ReadyBatch<TBatch> BuildAndReplaceCurrentBatch()
-    {
-        var batch = _batchBuilder.Build();
-        var tcs = _completionSource;
-        _batchBuilder = _createBatchBuilderFromPreviousBatch(batch);
-        _completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
-        return new ReadyBatch<TBatch>(batch, tcs);
-    }
+    public void EmptyAllWithFailure(Exception failure)
+        => _aggregator.EmptyAllWithFailure(failure);
 }
