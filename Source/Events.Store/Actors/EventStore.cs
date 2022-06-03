@@ -27,7 +27,7 @@ public class EventStore : EventStoreBase
 {
     public static readonly Failure EventStoreShuttingDown = new EventStoreUnavailable("Runtime shutting down").ToFailure();
     
-    readonly TenantId _tenantId;
+    readonly TenantId _tenant;
     readonly ICreateProps _propsFactory;
     readonly ITenants _tenants;
     readonly ILogger<EventStore> _logger;
@@ -48,7 +48,7 @@ public class EventStore : EventStoreBase
     public EventStore(IContext context, TenantId tenantId, ICreateProps propsFactory, ITenants tenants, ILogger<EventStore> logger)
         : base(context)
     {
-        _tenantId = tenantId;
+        _tenant = tenantId;
         _propsFactory = propsFactory;
         _tenants = tenants;
         _logger = logger;
@@ -57,17 +57,23 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override Task OnStarted()
     {
+        if (!_tenants.All.Contains(_tenant))
+        {
+            _failedToStart = true;
+            _startupFailure = new TenantNotConfigured(_tenant, _tenants.All).ToFailure();
+            return Task.CompletedTask;
+        }
         if (!TrySpawnSubscriptionManager(ScopeId.Default, out var eventLogSubscriptionPid, out var error))
         {
             _failedToStart = true;
-            _startupFailure = new EventStoreCouldNotBeStarted(_tenantId, error, _tenants.All).ToFailure();
+            _startupFailure = new EventStoreCouldNotBeStarted(_tenant, error, _tenants.All).ToFailure();
             return Task.CompletedTask;
         }
         _streamSubscriptionManagerPIDs[ScopeId.Default] = eventLogSubscriptionPid;
         if (!Context.TrySpawnNamed(_propsFactory.PropsFor<Committer>(), "committer", out _committer, out error))
         {
             _failedToStart = true;
-            _startupFailure = new EventStoreCouldNotBeStarted(_tenantId, error, _tenants.All).ToFailure();
+            _startupFailure = new EventStoreCouldNotBeStarted(_tenant, error, _tenants.All).ToFailure();
             return Task.CompletedTask;
         }
         Context.Send(_committer, new Committer.EventLogSubscriptionManagerSpawned(eventLogSubscriptionPid));

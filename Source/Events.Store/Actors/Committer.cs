@@ -244,7 +244,7 @@ public class Committer : IActor
             _readyToSend = true;
             if (persistTask.IsCompletedSuccessfully)
             {
-                batchToSend.Completion.SetResult(Try.Succeeded());
+                batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
                 TrySendBatch(context);
             }
