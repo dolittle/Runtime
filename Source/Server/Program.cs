@@ -18,19 +18,22 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+var configBuilder = new ConfigurationBuilder();
+configBuilder.AddJsonFile("appsettings.json");
+configBuilder.AddJsonFile("runtime.json");
+configBuilder.AddLegacyDolittleFiles();
+configBuilder.AddEnvironmentVariables();
+configBuilder.AddCommandLine(args);
+var config = configBuilder.Build();
+
+
+
 var host = Host.CreateDefaultBuilder(args)
     .UseDolittleServices()
-    .ConfigureHostConfiguration(configuration =>
-    {
-        configuration.AddJsonFile("appsettings.json");
-        configuration.AddJsonFile("runtime.json");
-        configuration.AddLegacyDolittleFiles();
-        configuration.AddEnvironmentVariables();
-        configuration.AddCommandLine(args);
-    })
+    .ConfigureHostConfiguration(configuration => configuration.AddConfiguration(config))
+    .ConfigureOpenTelemetry(config)
     .AddActorSystem()
     .AddMetrics()
-    .ConfigureServices(services => services.AddTracing())
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)
     .AddGrpcHost(EndpointVisibility.Management)
