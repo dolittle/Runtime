@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Proto;
 
 namespace Dolittle.Runtime.Actors;
@@ -26,7 +27,38 @@ public static class ContextExtensions
     
     public static bool TrySpawnPrefix(this IContext context, Props props, string prefix, Action<IContext> callback, [NotNullWhen(true)] out PID pid, [NotNullWhen(false)] out Exception error)
         => TrySpawn(() => context.SpawnPrefix(props, prefix, callback), out pid, out error);
-    
+
+    public static void SafeReenterAfter<T>(this IContext context, Task<T> target, Func<Task<T>, Task> action, Func<Exception, Task<T>, Task> onError)
+    {
+        context.ReenterAfter(target, completedTask =>
+        {
+            try
+            {
+                return action(completedTask);
+            }
+            catch (Exception e)
+            {
+                return onError(e, completedTask);
+            }
+        });
+    }
+
+    public static void SafeReenterAfter<T>(this IContext context, Task<T> target, Func<T, Task> onSuccess, Func<Exception, Task<T>, Task> onError)
+    {
+        context.ReenterAfter(target, completedTask =>
+        {
+            try
+            {
+                return completedTask.IsCompletedSuccessfully
+                    ? onSuccess(completedTask.Result)
+                    : onError(completedTask.Exception, completedTask);
+            }
+            catch (Exception e)
+            {
+                return onError(e, completedTask);
+            }
+        });
+    }
 
     static bool TrySpawn(Func<PID> spawn, [NotNullWhen(true)] out PID pid, [NotNullWhen(false)] out Exception error)
     {

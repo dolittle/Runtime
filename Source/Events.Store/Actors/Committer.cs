@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
@@ -104,9 +105,13 @@ public class Committer : IActor
             return RespondWithFailure(error.ToFailure());
         }
         TrySendBatch(context);
-        context.ReenterAfter(batchedEvents.Completed, task => TryGetFailure(task, out var failure)
-            ? RespondWithFailure(failure)
-            : RespondWithEvents(batchedEvents.Item.ToProtobuf()));
+
+        context.SafeReenterAfter(
+            batchedEvents.Completed,
+            result => !result.Success
+                ? RespondWithFailure(result.Exception.ToFailure())
+                : RespondWithEvents(batchedEvents.Item.ToProtobuf()),
+            (error, _) => RespondWithFailure(error.ToFailure()));
 
         return Task.CompletedTask;
 
@@ -141,22 +146,24 @@ public class Committer : IActor
             return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
         }
         
-        context.ReenterAfter(GetAggregateRootVersion(aggregate, context.CancellationToken), getAggregateRootVersionTask =>
-        {
-            if (!getAggregateRootVersionTask.IsCompletedSuccessfully)
+        context.SafeReenterAfter(
+            GetAggregateRootVersion(aggregate, context.CancellationToken),
+            currentAggregateRootVersion =>
             {
-                _aggregateCommitInFlight.Remove(aggregate);
-                return RespondWithFailure(getAggregateRootVersionTask.Exception.ToFailure());
-            }
-
-            var currentAggregateRootVersion = getAggregateRootVersionTask.Result;
-            _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
-            return CommitForAggregate(context, request, aggregate, currentAggregateRootVersion, respond);
-        });
+                _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
+                return CommitForAggregate(context, request, aggregate, currentAggregateRootVersion, respond);
+            },
+            (ex, _) => RespondWithFailureAndClearInFlight(aggregate, ex.ToFailure()));
         return Task.CompletedTask;
 
         Task RespondWithFailure(Failure failure)
         {
+            respond(new CommitAggregateEventsResponse { Failure = failure });
+            return Task.CompletedTask;
+        }
+        Task RespondWithFailureAndClearInFlight(Aggregate aggregate, Failure failure)
+        {
+            _aggregateCommitInFlight.Remove(aggregate);
             respond(new CommitAggregateEventsResponse { Failure = failure });
             return Task.CompletedTask;
         }
@@ -181,18 +188,21 @@ public class Committer : IActor
         }
         
         TrySendBatch(context);
-        context.ReenterAfter(batchedEvents.Completed, task =>
-        {
-            if (TryGetFailure(task, out var failure))
+        context.SafeReenterAfter(
+            batchedEvents.Completed,
+            result =>
             {
-                return RespondWithFailureAndClearInFlight(failure);
-            }
+                if (!result.Success)
+                {
+                    return RespondWithFailureAndClearInFlight(result.Exception.ToFailure());
+                }
 
-            _aggregateCommitInFlight.Remove(aggregate);
-            _aggregateRootVersionCache[aggregate] = batchedEvents.Item[^1].AggregateRootVersion + 1;
-            var events = batchedEvents.Item.ToProtobuf();
-            return RespondWithEvents(events);
-        });
+                _aggregateCommitInFlight.Remove(aggregate);
+                _aggregateRootVersionCache[aggregate] = batchedEvents.Item[^1].AggregateRootVersion + 1;
+                var events = batchedEvents.Item.ToProtobuf();
+                return RespondWithEvents(events);
+            },
+            (ex, _) => RespondWithFailureAndClearInFlight(ex.ToFailure()));
 
         return Task.CompletedTask;
 
@@ -211,8 +221,7 @@ public class Committer : IActor
             return Task.CompletedTask;
         }
     }
-    
-    
+
     bool CannotProcessCommit(out Dolittle.Protobuf.Contracts.Failure? failure)
     {
         failure = default;
@@ -266,22 +275,4 @@ public class Committer : IActor
 
     Task<AggregateRootVersion> GetAggregateRootVersion(Aggregate aggregate, CancellationToken cancellationToken)
         => _aggregateRootVersions.FetchVersionFor(aggregate.EventSourceId, aggregate.AggregateRoot, cancellationToken);
-    
-    static bool TryGetFailure(Task<Try> task, [NotNullWhen(true)] out Failure? failure)
-    {
-        if (!task.IsCompletedSuccessfully)
-        {
-            failure = task.Exception!.ToProtobuf();
-            return true;
-        }
-
-        if (!task.Result.Success)
-        {
-            failure = task.Result.Exception.ToFailure();
-            return true;
-        }
-
-        failure = default;
-        return false;
-    }
 }
