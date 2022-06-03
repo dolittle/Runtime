@@ -7,24 +7,21 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Rudimentary.Pipelines;
 
 namespace Dolittle.Runtime.Events.Store.Persistence;
 
 /// <summary>
 /// Represents a builder for a <see cref="Commit"/>.
 /// </summary>
-public class CommitBuilder
+public class CommitBuilder : ICanBuildABatch<Commit>
 {
     readonly List<CommittedEvents> _committedEvents = new();
     readonly List<CommittedAggregateEvents> _committedAggregateEvents = new();
-    readonly Dictionary<Aggregate, AggregateRootVersionRange> _aggregates = new();
+    readonly HashSet<Aggregate> _aggregates = new();
     EventLogSequenceNumber _nextSequenceNumber;
     readonly List<CommittedEvent> _orderedEvents = new();
     readonly EventLogSequenceNumber _initialSequenceNumber;
-
-    public IReadOnlyList<CommittedEvent> AllEvents => _orderedEvents;
-    public int Count => _orderedEvents.Count;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitBuilder"/> class.
@@ -35,19 +32,31 @@ public class CommitBuilder
         _initialSequenceNumber = nextSequenceNumber;
         _nextSequenceNumber = nextSequenceNumber;
     }
+    
+    /// <summary>
+    /// The number of items in the batch.
+    /// </summary>
+    public int Count => _orderedEvents.Count;
 
     /// <summary>
     /// Gets a value indicating whether the commit has events.
     /// </summary>
     public bool HasCommits => _committedEvents.Count > 0 || _committedAggregateEvents.Count > 0;
 
+    /// <inheritdoc />
+    public bool BatchIsEmpty => !HasCommits;
+
     /// <summary>
     /// Try to add unto the <see cref="Commit"/> the events from a <see cref="CommitEventsRequest"/>.
     /// </summary>
     /// <param name="request">The <see cref="CommitEventsRequest"/>.</param>
-    /// <returns>The <see cref="Try{TResult}"/> with the builder for continuation.</returns>
-    public Try<CommittedEvents> TryAddEventsFrom(CommitEventsRequest request)
+    /// <param name="eventsToBeCommitted">The events to be committed.</param>
+    /// <param name="error">The error that occurred.</param>
+    /// <returns>True if it successfully added the events, false if not.</returns>
+    public bool TryAddEventsFrom(CommitEventsRequest request, out CommittedEvents eventsToBeCommitted, out Exception error)
     {
+        eventsToBeCommitted = default;
+        error = default;
         try
         {
             var nextSequenceNumber = _nextSequenceNumber;
@@ -65,11 +74,12 @@ public class CommitBuilder
             _committedEvents.Add(committedEvents);
             _orderedEvents.AddRange(committedEvents);
             _nextSequenceNumber = nextSequenceNumber;
-            return committedEvents;
+            return true;
         }
         catch (Exception ex)
         {
-            return ex;
+            error = ex;
+            return false;
         }
     }
 
@@ -77,9 +87,13 @@ public class CommitBuilder
     /// Try to add unto the <see cref="Commit"/> the events from a <see cref="CommitAggregateEventsRequest"/>.
     /// </summary>
     /// <param name="request">The <see cref="CommitAggregateEventsRequest"/>.</param>
-    /// <returns>The <see cref="Try{TResult}"/> with the builder for continuation.</returns>
-    public Try<CommittedAggregateEvents> TryAddEventsFrom(CommitAggregateEventsRequest request)
+    /// <param name="eventsToBeCommitted">The events to be committed.</param>
+    /// <param name="error">The error that occurred.</param>
+    /// <returns>True if it successfully added the events, false if not.</returns>
+    public bool TryAddEventsFrom(CommitAggregateEventsRequest request, out CommittedAggregateEvents eventsToBeCommitted, out Exception error)
     {
+        eventsToBeCommitted = default;
+        error = default;
         try
         {
             var nextSequenceNumber = _nextSequenceNumber;
@@ -102,40 +116,36 @@ public class CommitBuilder
                     _.Public,
                     _.Content)).ToList());
 
-            if (!TryAddCommittedAggregateEvents(committedEvents, out var error))
+            if (!TryAddCommittedAggregateEvents(committedEvents, out error))
             {
-                return error;
+                return false;
             }
 
             _orderedEvents.AddRange(committedEvents);
-
-
             _nextSequenceNumber = nextSequenceNumber;
-            return committedEvents;
+            eventsToBeCommitted = committedEvents;
+            return true;
         }
         catch (Exception ex)
         {
-            return ex;
+            error = ex;
+            return false;
         }
     }
-
-    /// <summary>
-    /// Builds the <see cref="Commit"/> with the next <see cref="EventLogSequenceNumber"/>.
-    /// </summary>
-    /// <returns>A tuple of the built <see cref="Commit"/> and the next <see cref="EventLogSequenceNumber"/>.</returns>
-    public (Commit Commit, EventLogSequenceNumber NextSequenceNumber) Build()
-        => (new Commit(_committedEvents, _committedAggregateEvents, _orderedEvents, _initialSequenceNumber, _nextSequenceNumber - 1), _nextSequenceNumber);
+    
+    /// <inheritdoc />
+    public Commit Build() => new (_committedEvents, _committedAggregateEvents, _orderedEvents, _initialSequenceNumber, _nextSequenceNumber - 1);
 
     bool TryAddCommittedAggregateEvents(CommittedAggregateEvents events, out Exception error)
     {
         error = default;
         var aggregate = new Aggregate(events.AggregateRoot, events.EventSource);
-        if (_aggregates.ContainsKey(new Aggregate(events.AggregateRoot, events.EventSource)))
+        if (_aggregates.Contains(aggregate))
         {
             error = new EventsForAggregateAlreadyAddedToCommit(aggregate);
             return false;
         }
-
+        _aggregates.Add(aggregate);
         _committedAggregateEvents.Add(events);
         return true;
 

@@ -1,94 +1,78 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Channels;
-using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Rudimentary.Pipelines;
 
 namespace Dolittle.Runtime.Events.Store.Persistence;
 
-class CommitPipeline
+public class CommitPipeline : ICanGetNextReadyBatch<Commit>
 {
+    /// <summary>
+    /// Creates a new <see cref="CommitPipeline"/> using the given <see cref="EventLogSequenceNumber"/> as the initial sequence number.
+    /// </summary>
+    /// <param name="sequenceNumber">The initial <see cref="EventLogSequenceNumber"/> of the first event to be added to the <see cref="CommitPipeline"/>.</param>
+    /// <returns>The created <see cref="CommitPipeline"/>.</returns>
+    public static CommitPipeline NewFromEventLogSequenceNumber(EventLogSequenceNumber sequenceNumber) => new(new PipelineReadyBatchAggregator<Commit, CommitBuilder>(
+        BatchSize,
+        new CommitBuilder(sequenceNumber),
+        commit => new CommitBuilder(commit.LastSequenceNumber + 1)));
+    
     const int BatchSize = 1000;
-
-    CommitBuilder _currentBuilder;
-    TaskCompletionSource<Try> _completionSource;
-
-    readonly Channel<(Commit, TaskCompletionSource<Try>)> _preparedBatches = Channel.CreateUnbounded<(Commit, TaskCompletionSource<Try>)>(new UnboundedChannelOptions
+    readonly IPipelineReadyBatchAggregator<Commit, CommitBuilder> _aggregator;
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CommitPipeline"/> class.
+    /// </summary>
+    /// <param name="aggregator">The <see cref="IPipelineReadyBatchAggregator{TBatch,TBatchBuilder}"/>.</param>
+    public CommitPipeline(IPipelineReadyBatchAggregator<Commit, CommitBuilder> aggregator)
     {
-        SingleReader = true,
-        SingleWriter = true
-    });
-
-    public CommitPipeline(EventLogSequenceNumber nextSequenceNumber)
-    {
-        _currentBuilder = new CommitBuilder(nextSequenceNumber);
-        _completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _aggregator = aggregator;
     }
 
-    public Try<(CommittedEvents,Task<Try>)> TryAddEventsFrom(CommitEventsRequest request)
+    /// <summary>
+    /// Tries to add events from <see cref="CommitEventsRequest"/> into a batch.
+    /// </summary>
+    /// <param name="request">The <see cref="CommitEventsRequest"/>.</param>
+    /// <param name="batchedEvents">The <see cref="BatchedItem{TItem}"/> batched events.</param>
+    /// <param name="error">The error that may occur.</param>
+    /// <returns>True if successfully added to batch, false if not.</returns>
+    public bool TryAddEventsFrom(CommitEventsRequest request, [NotNullWhen(true)]out BatchedItem<CommittedEvents> batchedEvents, [NotNullWhen(false)]out Exception error)
     {
-        var result = _currentBuilder.TryAddEventsFrom(request);
-        if (result.Success)
-        {
-            var tcs = _completionSource;
-            ReplaceBatchIfFull();
-            return (result, tcs.Task);
-        }
-
-        return result.Exception;
+        var succeeded = _aggregator.TryAddToBatch(
+            (builder, tcs) => !builder.TryAddEventsFrom(request, out var eventsToBeCommitted, out var error)
+                ? (false, (null, error))
+                : (true, (new BatchedItem<CommittedEvents>(eventsToBeCommitted, tcs.Task), error)),
+            out var eventsOrError);
+        (batchedEvents, error) = eventsOrError;
+        return succeeded;
     }
 
-    public Try<(CommittedAggregateEvents,Task<Try>)> TryAddEventsFrom(CommitAggregateEventsRequest request)
+    /// <summary>
+    /// Tries to add events from <see cref="CommitAggregateEventsRequest"/> into a batch.
+    /// </summary>
+    /// <param name="request">The <see cref="CommitAggregateEventsRequest"/>.</param>
+    /// <param name="batchedEvents">The <see cref="BatchedItem{TItem}"/> batched events.</param>
+    /// <param name="error">The error that may occur.</param>
+    /// <returns>True if successfully added to batch, false if not.</returns>
+    public bool TryAddEventsFrom(CommitAggregateEventsRequest request, [NotNullWhen(true)]out BatchedItem<CommittedAggregateEvents> batchedEvents, [NotNullWhen(false)]out Exception error)
     {
-        var result = _currentBuilder.TryAddEventsFrom(request);
-        if (result.Success)
-        {
-            var tcs = _completionSource;
-            ReplaceBatchIfFull();
-            return (result, tcs.Task);
-        }
-
-        return result.Exception;
+        var succeeded = _aggregator.TryAddToBatch(
+            (builder, tcs) => !builder.TryAddEventsFrom(request, out var eventsToBeCommitted, out var error)
+                ? (false, (null, error))
+                : (true, (new BatchedItem<CommittedAggregateEvents>(eventsToBeCommitted, tcs.Task), error)),
+            out var eventsOrError);
+        (batchedEvents, error) = eventsOrError;
+        return succeeded;
     }
 
-    void ReplaceBatchIfFull()
-    {
-        if (_currentBuilder.Count < BatchSize) return;
-        var commitAndTask = BuildAndReplaceCurrentBatch();
-        _preparedBatches.Writer.TryWrite(commitAndTask);
-    }
+    /// <inheritdoc />
+    public bool TryGetNextBatch([NotNullWhen(true)] out ReadyBatch<Commit> batch)
+        => _aggregator.TryGetNextBatch(out batch);
 
-    (Commit, TaskCompletionSource<Try>) BuildAndReplaceCurrentBatch()
-    {
-        var (commit, nextEventLogSequenceNumber) = _currentBuilder.Build();
-        var tcs = _completionSource;
-        _currentBuilder = new CommitBuilder(nextEventLogSequenceNumber);
-        _completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
-        return (commit, tcs);
-    }
-
-    public bool TryGetNextCommit([NotNullWhen(true)] out Commit commit, [NotNullWhen(true)] out TaskCompletionSource<Try> taskCompletionSource)
-    {
-        if (_preparedBatches.Reader.TryRead(out var tuple))
-        {
-            commit = tuple.Item1;
-            taskCompletionSource = tuple.Item2;
-            return true;
-        }
-
-        if (_currentBuilder.HasCommits)
-        {
-            var (builtCommit, tcs) = BuildAndReplaceCurrentBatch();
-            commit = builtCommit;
-            taskCompletionSource = tcs;
-            return true;
-        }
-
-        commit = default;
-        taskCompletionSource = default;
-        return false;
-    }
+    /// <inheritdoc />
+    public void EmptyAllWithFailure(Exception failure)
+        => _aggregator.EmptyAllWithFailure(failure);
 }
