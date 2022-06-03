@@ -28,16 +28,7 @@ public static class EventStoreExtensions
             EventType = _.Type.ToProtobuf(),
             EventSourceId = _.EventSource
         }));
-        var response = await eventStore.CommitEvents(request, CancellationToken.None);
-        if (response is null)
-        {
-            throw new TimeoutException();
-        }
-        if (response.Failure != default)
-        {
-            throw new Exception(response.Failure.Reason);
-        }
-
+        var response = await eventStore.CommitEvents(request, CancellationToken.None).ConfigureAwait(false);
         return response;
     }
     public static async Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)

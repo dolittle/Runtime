@@ -1,11 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
+using Microsoft.Extensions.DependencyInjection;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 
@@ -26,6 +29,20 @@ class an_event : given.a_clean_event_store
             event_to_commit
         };
     };
+    
+    [Tags("IntegrationTest")]
+    class for_a_tenant_that_is_not_configured
+    {
+        static UncommittedEvents uncommitted_events;
+        static CommitEventsResponse response;
+        
+
+        Establish context = () => uncommitted_events = new UncommittedEvents(uncommitted_events_list);
+        
+        Because of = () => response = event_store.Commit(uncommitted_events, execution_context with {Tenant = "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579"}).GetAwaiter().GetResult();
+
+        It should_fail = () => response.Failure.ShouldNotBeNull();
+    }
     
     [Tags("IntegrationTest")]
     class not_for_aggregate
