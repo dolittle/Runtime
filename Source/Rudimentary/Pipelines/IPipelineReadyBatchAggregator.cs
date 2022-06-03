@@ -9,6 +9,9 @@ namespace Dolittle.Runtime.Rudimentary.Pipelines;
 /// <summary>
 /// Defines a system that aggregates batches.
 /// </summary>
+/// <remarks>
+/// This interface defines an aggregator that can only be used safely in a single-threaded context.
+/// </remarks>
 /// <typeparam name="TBatch">The <see cref="Type"/> of the batch.</typeparam>
 /// <typeparam name="TBatchBuilder">The <see cref="Type"/> of the batch builder.</typeparam>
 public interface IPipelineReadyBatchAggregator<TBatch, out TBatchBuilder> : ICanGetNextReadyBatch<TBatch>
