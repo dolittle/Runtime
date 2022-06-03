@@ -18,7 +18,6 @@ public class CreateProps : ICreateProps
     /// Initializes a new instance of the <see cref="CreateProps"/> class.
     /// </summary>
     /// <param name="serviceProvider">The tenant specific service provider.</param>
-    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     public CreateProps(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
