@@ -7,6 +7,7 @@ using Dolittle.Runtime.DependencyInversion.Scoping;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB;
 
@@ -29,6 +30,7 @@ public class DatabaseConnection : IDatabaseConnection
             Servers = config.Servers.Select(_ => MongoServerAddress.Parse(_)),
             GuidRepresentation = GuidRepresentation.Standard,
             MaxConnectionPoolSize = config.MaxConnectionPoolSize,
+            ClusterConfigurator = cb => cb.Subscribe(new DiagnosticsActivityEventSubscriber())
         };
 
         MongoClient = new MongoClient(settings.Freeze());
