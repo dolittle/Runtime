@@ -92,12 +92,7 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override Task Commit(CommitEventsRequest request, Action<CommitEventsResponse> respond, Action<string> onError)
     {
-        return ForwardToCommitter<CommitEventsRequest, CommitEventsResponse>(request, Respond, RespondWithFailure);
-        Task Respond(CommitEventsResponse response)
-        {
-            respond(response);
-            return Task.CompletedTask;
-        }
+        return ForwardToCommitter<CommitEventsRequest, CommitEventsResponse>(RespondWithFailure);
         Task RespondWithFailure(Failure failure)
         {
             respond(new CommitEventsResponse { Failure = failure });
@@ -108,12 +103,7 @@ public class EventStore : EventStoreBase
     /// <inheritdoc />
     public override Task CommitForAggregate(CommitAggregateEventsRequest request, Action<CommitAggregateEventsResponse> respond, Action<string> onError)
     {
-        return ForwardToCommitter<CommitAggregateEventsRequest, CommitAggregateEventsResponse>(request, Respond, RespondWithFailure);
-        Task Respond(CommitAggregateEventsResponse response)
-        {
-            respond(response);
-            return Task.CompletedTask;
-        }
+        return ForwardToCommitter<CommitAggregateEventsRequest, CommitAggregateEventsResponse>(RespondWithFailure);
         Task RespondWithFailure(Failure failure)
         {
             respond(new CommitAggregateEventsResponse { Failure = failure });
@@ -121,18 +111,13 @@ public class EventStore : EventStoreBase
         }
     }
 
-    Task ForwardToCommitter<TRequest, TResponse>(
-        TRequest request,
-        Func<TResponse, Task> respondSuccess,
-        Func<Failure, Task> respondFailure)
+    Task ForwardToCommitter<TRequest, TResponse>(Func<Failure, Task> respondFailure)
     {
         if (_failedToStart)
         {
             return respondFailure(_startupFailure);
         }
-        Context.RequestReenter(_committer!, request!, (Task<TResponse> task) => !task.IsCompletedSuccessfully
-            ? respondFailure(task.Exception.ToFailure())
-            : respondSuccess(task.Result), Context.CancellationToken);
+        Context.Forward(_committer!);
         return Task.CompletedTask;
     }
 
