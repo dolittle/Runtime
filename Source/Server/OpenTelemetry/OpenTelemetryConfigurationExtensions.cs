@@ -11,7 +11,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Proto.OpenTelemetry;
 
-namespace Dolittle.Runtime.Server.Tracing;
+namespace Dolittle.Runtime.Server.OpenTelemetry;
 
 public static class OpenTelemetryConfigurationExtensions
 {
@@ -39,10 +39,16 @@ public static class OpenTelemetryConfigurationExtensions
         }
 
         var resourceBuilder = ResourceBuilder.CreateDefault().AddService(configuration.ServiceName);
-        
-        if (configuration.Logging) builder.AddOpenTelemetryLogging(resourceBuilder, otlpEndpoint);
 
-        if (configuration.Tracing) builder.AddOpenTelemetryTracing(resourceBuilder, otlpEndpoint);
+        if (configuration.Logging)
+        {
+            builder.AddOpenTelemetryLogging(resourceBuilder, otlpEndpoint);
+        }
+
+        if (configuration.Tracing)
+        {
+            builder.AddOpenTelemetryTracing(resourceBuilder, otlpEndpoint);
+        }
 
         return builder;
     }

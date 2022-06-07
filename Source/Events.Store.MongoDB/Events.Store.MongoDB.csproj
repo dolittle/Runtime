@@ -9,7 +9,7 @@
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
-        <PackageReference Include="MongoDB.Driver.Core.Extensions.OpenTelemetry" Version="1.0.0" />
+        <PackageReference Include="MongoDB.Driver.Core.Extensions.OpenTelemetry" Version="$(MongoDBOpenTelemetryVersion)" />
     </ItemGroup>
 
     <ItemGroup>
