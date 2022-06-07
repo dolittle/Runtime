@@ -117,7 +117,7 @@ public class EventStore : EventStoreBase
         {
             return respondFailure(_startupFailure);
         }
-        Context.Request(_committer!, request, Context.Sender);
+        Context.Request(_committer!, request!, Context.Sender);
         return Task.CompletedTask;
     }
 
