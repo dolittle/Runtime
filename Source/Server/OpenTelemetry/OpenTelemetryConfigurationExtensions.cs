@@ -72,6 +72,7 @@ public static class OpenTelemetryConfigurationExtensions
                 builder.SetResourceBuilder(resourceBuilder)
                     .AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
+                    .AddMongoDBInstrumentation()
                     .AddGrpcClientInstrumentation()
                     .AddProtoActorInstrumentation()
                     .AddOtlpExporter(options => { options.Endpoint = otlpEndpoint; });

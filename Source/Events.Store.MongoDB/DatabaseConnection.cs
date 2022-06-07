@@ -13,6 +13,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB;
 
@@ -43,6 +44,7 @@ public class DatabaseConnection : IDatabaseConnection
             Servers = config.Servers.Select(MongoServerAddress.Parse),
             GuidRepresentation = GuidRepresentation.Standard,
             MaxConnectionPoolSize = config.MaxConnectionPoolSize,
+            ClusterConfigurator = cb => cb.Subscribe(new DiagnosticsActivityEventSubscriber())
         };
 
         MongoClient = new MongoClient(settings.Freeze());
