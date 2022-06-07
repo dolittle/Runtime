@@ -38,7 +38,7 @@ public static class OpenTelemetryConfigurationExtensions
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }
 
-        var resourceBuilder = ResourceBuilder.CreateDefault().AddService(configuration.ServiceName ?? "dolittle-runtime");
+        var resourceBuilder = ResourceBuilder.CreateDefault().AddService(configuration.ServiceName);
         
         if (configuration.Logging) builder.AddOpenTelemetryLogging(resourceBuilder, otlpEndpoint);
 

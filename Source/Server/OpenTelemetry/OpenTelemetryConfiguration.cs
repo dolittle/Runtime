@@ -12,9 +12,9 @@ public class OpenTelemetryConfiguration
     /// OTLP reporting endpoint
     /// </summary>
     public string Endpoint { get; set; }
-    public string ServiceName { get; set; }
+    
+    public string ServiceName { get; set; } = "dolittle-runtime";
     
     public bool Logging { get; set; } = true;
     public bool Tracing { get; set; } = true;
-    public bool Metrics { get; set; } = true;
 }
