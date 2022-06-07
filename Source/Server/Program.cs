@@ -55,7 +55,7 @@ static void VerifyConfiguration(IServiceProvider provider)
     }
     catch (Exception e)
     {
-        logger.LogWarning(e, "It seems like the Runtime is missing its 'tenants' configuration. Without any tenants the Runtime will no function properly.");
+        logger.LogError(e, "It seems like the Runtime is missing its 'tenants' configuration. Without any tenants the Runtime will no function properly.");
         throw;
     }
     try
