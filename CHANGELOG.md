@@ -1,3 +1,29 @@
+# [8.2.0] - 2022-6-8 [PR: #698](https://github.com/dolittle/Runtime/pull/698)
+## Summary
+
+Adds support for publishing OpenTelemetry traces and logs via OTLP. Logs are correlated with traces with both spanId & traceId.
+
+## Configuration
+
+Requires `DOLITTLE__RUNTIME__OPENTELEMETRY__ENDPOINT` to be set, and supports disabling logs or traces individually.
+
+```csharp
+[Configuration("opentelemetry")]
+public class OpenTelemetryConfiguration
+{
+    /// <summary>
+    /// OTLP reporting endpoint
+    /// </summary>
+    public string Endpoint { get; set; }
+    
+    public string ServiceName { get; set; } = "dolittle-runtime";
+    
+    public bool Logging { get; set; } = true;
+    public bool Tracing { get; set; } = true;
+}
+```
+
+
 # [8.1.2] - 2022-6-1 [PR: #696](https://github.com/dolittle/Runtime/pull/696)
 ## Summary
 
