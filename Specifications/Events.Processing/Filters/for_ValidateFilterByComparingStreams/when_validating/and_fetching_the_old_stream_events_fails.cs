@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         {
             events_from_filtered_stream_fetcher
                 .Setup(_ => _.FetchRange(new StreamPositionRange(StreamPosition.Start, ulong.MaxValue), cancellation_token))
-                .Returns(Task.FromException<IEnumerable<StreamEvent>>(new Exception()));
+                .Throws(new Exception());
         };
 
         static FilterValidationResult result;

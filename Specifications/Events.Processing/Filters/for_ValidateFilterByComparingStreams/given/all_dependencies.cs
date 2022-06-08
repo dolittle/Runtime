@@ -53,12 +53,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             events_in_event_log = new List<StreamEvent>();
             events_in_filtered_stream = new List<StreamEvent>();
 
-            events_from_event_log_fetcher
-                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), cancellation_token))
-                .Returns<StreamPositionRange, CancellationToken>((range, _) => Task.FromResult(events_in_event_log.Where(_ => _.Position >= range.From && _.Position < range.From + range.Length)));
-            events_from_filtered_stream_fetcher
-                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), cancellation_token))
-                .Returns<StreamPositionRange, CancellationToken>((range, _) => Task.FromResult(events_in_filtered_stream.Where(_ => _.Position >= range.From && _.Position < range.From + range.Length)));
+            // events_from_event_log_fetcher
+            //     .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), cancellation_token))
+            //     .Returns<StreamPositionRange, CancellationToken>((range, _) => Task.FromResult(events_in_event_log.Where(_ => _.Position >= range.From && _.Position < range.From + range.Length)));
+            // events_from_filtered_stream_fetcher
+            //     .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), cancellation_token))
+            //     .Returns<StreamPositionRange, CancellationToken>((range, _) => Task.FromResult(events_in_filtered_stream.Where(_ => _.Position >= range.From && _.Position < range.From + range.Length)));
 
             events_fetchers
                 .Setup(_ => _.GetRangeFetcherFor(scope_id, new EventLogStreamDefinition(), cancellation_token))

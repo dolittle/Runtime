@@ -24,8 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Initializes a new instance of the <see cref="ValidateFilterByComparingStreams"/> class.
         /// </summary>
         /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
-        public ValidateFilterByComparingStreams(
-            IEventFetchers eventFetchers)
+        public ValidateFilterByComparingStreams(IEventFetchers eventFetchers)
         {
             _eventFetchers = eventFetchers;
         }
@@ -37,67 +36,76 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             try
             {
                 var streamDefinition = new StreamDefinition(filter.Definition);
-                var streamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-                var sourceStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(
+                var oldStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
+                var eventLogFetcher = await _eventFetchers.GetRangeFetcherFor(
                     filter.Scope,
                     new EventLogStreamDefinition(),
                     cancellationToken).ConfigureAwait(false);
-                var oldStream = await streamEventsFetcher.FetchRange(
+                var oldStream = oldStreamEventsFetcher.FetchRange(
                     new StreamPositionRange(StreamPosition.Start, ulong.MaxValue),
-                    cancellationToken)
-                    .ConfigureAwait(false);
-                var sourceStreamEvents = await sourceStreamEventsFetcher.FetchRange(
-                        new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
-                        cancellationToken)
-                        .ConfigureAwait(false);
-                var newStream = new List<StreamEvent>();
-                var streamPosition = 0;
-                foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
+                    cancellationToken);
+                var eventLogStream = eventLogFetcher.FetchRange(
+                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
+                    cancellationToken);
+                await using var oldStreamEnumerator = oldStream.GetAsyncEnumerator(cancellationToken);
+                var newStreamPosition = 0;
+                await foreach (var eventFromEventLog in eventLogStream.WithCancellation(cancellationToken))
                 {
-                    var processingResult = await filter.Filter(@event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
-                    if (processingResult is FailedFiltering failedResult)
+                    var filteringResult = await filter.Filter(eventFromEventLog.Event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
+                    if (filteringResult is FailedFiltering failedResult)
                     {
                         return FilterValidationResult.Failed(failedResult.FailureReason);
                     }
-                    if (processingResult.IsIncluded)
+                    if (!filteringResult.IsIncluded)
                     {
-                        newStream.Add(new StreamEvent(
-                            @event,
-                            new StreamPosition((ulong)streamPosition++),
-                            filter.Definition.TargetStream,
-                            processingResult.Partition,
-                            streamDefinition.Partitioned));
+                        continue;
+                    }
+                    if (!await oldStreamEnumerator.MoveNextAsync())
+                    {
+                        return FilterValidationResult.Failed("The number of events included in the new stream generated from the filter does not match the old stream");
+                    }
+                    var oldStreamEvent = oldStreamEnumerator.Current;
+                    var filteredEvent = new StreamEvent(
+                        eventFromEventLog.Event,
+                        new StreamPosition((ulong) newStreamPosition++),
+                        filter.Definition.TargetStream,
+                        filteringResult.Partition,
+                        streamDefinition.Partitioned);
+                    if (EventsAreNotEqual(filter.Definition, filteredEvent, oldStreamEvent, out var failedValidation))
+                    {
+                        return failedValidation;
                     }
                 }
 
-                var oldStreamList = oldStream.ToList();
-                if (newStream.Count != oldStreamList.Count)
+                if (await oldStreamEnumerator.MoveNextAsync())
                 {
-                    return FilterValidationResult.Failed($"The number of events included in the new stream generated from the filter does not match the old stream.");
-                }
-
-                for (var i = 0; i < newStream.Count; i++)
-                {
-                    var newEvent = newStream[i];
-                    var oldEvent = oldStreamList[i];
-
-                    if (newEvent.Event.EventLogSequenceNumber != oldEvent.Event.EventLogSequenceNumber)
-                    {
-                        return FilterValidationResult.Failed($"Event in new stream at position {i} is event {newEvent.Event.EventLogSequenceNumber} while the event in the old stream is event {oldEvent.Event.EventLogSequenceNumber}");
-                    }
-
-                    if (filter.Definition.Partitioned && newEvent.Partition != oldEvent.Partition)
-                    {
-                        return FilterValidationResult.Failed($"Event in new stream at position {i} has is in partition {newEvent.Partition} while the event in the old stream is in partition {oldEvent.Partition}");
-                    }
+                    return FilterValidationResult.Failed("The number of events included in the new stream generated from the filter does not match the old stream");
                 }
 
                 return FilterValidationResult.Succeeded();
+                
             }
             catch (Exception exception)
             {
                 return FilterValidationResult.Failed(exception.Message);
             }
+        }
+
+        static bool EventsAreNotEqual(IFilterDefinition filterDefinition, StreamEvent newEvent, StreamEvent oldEvent, out FilterValidationResult failedResult)
+        {
+            failedResult = default;
+            if (newEvent.Event.EventLogSequenceNumber != oldEvent.Event.EventLogSequenceNumber)
+            {
+                failedResult = FilterValidationResult.Failed($"Event in new stream at position {newEvent.Position} is event {newEvent.Event.EventLogSequenceNumber} while the event in the old stream is event {oldEvent.Event.EventLogSequenceNumber}");
+                return true;
+            }
+
+            if (filterDefinition.Partitioned && newEvent.Partition != oldEvent.Partition)
+            {
+                failedResult =  FilterValidationResult.Failed($"Event in new stream at position {newEvent.Position} has is in partition {newEvent.Partition} while the event in the old stream is in partition {oldEvent.Partition}");
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -11,6 +11,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 using System.Linq;
+using MongoDB.Driver.Core.Operations;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
@@ -130,24 +131,38 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<StreamEvent>> FetchRange(
+        public async IAsyncEnumerable<StreamEvent> FetchRange(
             StreamPositionRange range,
             CancellationToken cancellationToken)
         {
+            IAsyncCursor<StreamEvent> cursor = default;
             try
             {
-                var maxNumEvents = range.Length;
-                var events = await _collection.Find(
+                cursor = await _collection.Find(
                         _filter.Gte(_sequenceNumberExpression, range.From.Value)
-                            & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Project(_eventToStreamEvent)
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
-                return events.ToArray();
+                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
+                    .Project(_eventToStreamEvent).ToCursorAsync(cancellationToken).ConfigureAwait(false);
+
+                while (await cursor.MoveNextAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    foreach (var streamEvent in cursor.Current)
+                    {
+                        yield return streamEvent;
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }
             }
-            catch (MongoWaitQueueFullException ex)
+            // catch (MongoWaitQueueFullException ex)
+            // {
+            //     throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            // }
+            finally
             {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+                if (cursor is AsyncCursor<StreamEvent> asyncCursor)
+                {
+                    await asyncCursor.CloseAsync(cancellationToken).ConfigureAwait(false);
+                }
+                cursor?.Dispose();
             }
         }
 

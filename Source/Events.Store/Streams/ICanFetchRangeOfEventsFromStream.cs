@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// </summary>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="IEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
-        Task<IEnumerable<StreamEvent>> FetchRange(StreamPositionRange range, CancellationToken cancellationToken);
+        /// <returns>The <see cref="IAsyncEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
+        IAsyncEnumerable<StreamEvent> FetchRange(StreamPositionRange range, CancellationToken cancellationToken);
     }
 }
