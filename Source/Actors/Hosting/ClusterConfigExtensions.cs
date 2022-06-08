@@ -9,6 +9,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Proto;
 using Proto.Cluster;
+using Proto.OpenTelemetry;
 
 namespace Dolittle.Runtime.Actors.Hosting;
 
@@ -59,7 +60,10 @@ public static class ClusterConfigExtensions
             grainAndActor.Actor,
             grainAndActor.IsPerTenant
                 ? GetTenantGrainFactory(grainAndActor, provider)
-                : GetGrainFactory(grainAndActor, provider)) as IActor).WithClusterRequestDeduplication(TimeSpan.FromSeconds(60));
+                : GetGrainFactory(grainAndActor, provider)) as IActor)
+            .WithTracing()
+            .WithClusterRequestDeduplication(TimeSpan.FromSeconds(60)
+            );
 
     static object GetGrainFactory(GrainAndActor grainAndActor, IServiceProvider provider)
         => provider.GetRequiredService(typeof(Func<,,>).MakeGenericType(

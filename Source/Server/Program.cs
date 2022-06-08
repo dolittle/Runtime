@@ -8,6 +8,7 @@ using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Metrics.Hosting;
+using Dolittle.Runtime.Server.OpenTelemetry;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
@@ -17,16 +18,20 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+var configBuilder = new ConfigurationBuilder();
+configBuilder.AddJsonFile("appsettings.json");
+configBuilder.AddJsonFile("runtime.json");
+configBuilder.AddLegacyDolittleFiles();
+configBuilder.AddEnvironmentVariables();
+configBuilder.AddCommandLine(args);
+var config = configBuilder.Build();
+
+
+
 var host = Host.CreateDefaultBuilder(args)
     .UseDolittleServices()
-    .ConfigureHostConfiguration(configuration =>
-    {
-        configuration.AddJsonFile("appsettings.json");
-        configuration.AddJsonFile("runtime.json");
-        configuration.AddLegacyDolittleFiles();
-        configuration.AddEnvironmentVariables();
-        configuration.AddCommandLine(args);
-    })
+    .ConfigureHostConfiguration(configuration => configuration.AddConfiguration(config))
+    .ConfigureOpenTelemetry(config)
     .AddActorSystem()
     .AddMetrics()
     .AddGrpcHost(EndpointVisibility.Private)

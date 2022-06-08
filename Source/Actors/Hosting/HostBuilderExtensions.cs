@@ -6,11 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Proto;
 using Proto.Cluster;
+using Proto.Remote;
 using Proto.Cluster.Partition;
 using Proto.Cluster.Testing;
 using Proto.DependencyInjection;
-using Proto.Remote;
+using Proto.OpenTelemetry;
 using Proto.Remote.GrpcNet;
+
 
 namespace Dolittle.Runtime.Actors.Hosting;
 
@@ -36,5 +38,6 @@ public static class HostBuilderExtensions
                         new TestProvider(new TestProviderOptions(), new InMemAgent()),
                         new PartitionIdentityLookup())
                     .WithDiscoveredClusterKinds(provider)))
+            .AddSingleton(provider => provider.GetRequiredService<ActorSystem>().Root.WithTracing())
             .AddSingleton(provider => provider.GetRequiredService<ActorSystem>().Cluster()));
 }

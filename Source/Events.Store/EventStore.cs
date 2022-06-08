@@ -10,6 +10,7 @@ using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Microsoft.Extensions.Logging;
+using Proto;
 
 namespace Dolittle.Runtime.Events.Store;
 
@@ -20,6 +21,7 @@ public class EventStore : IEventStore
 {
     readonly Func<TenantId, EventStoreClient> _getEventStoreClient;
     readonly Func<TenantId, IFetchCommittedEvents> _getCommittedEventsFetcher;
+    readonly IRootContext _rootContext;
     readonly ILogger _logger;
 
     /// <summary>
@@ -27,11 +29,14 @@ public class EventStore : IEventStore
     /// </summary>
     /// <param name="getEventStoreClient">The factory to use to get the <see cref="EventStoreActor"/> client.</param>
     /// <param name="logger">The logger to use for logging.</param>
-    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher)
+    /// <param name="getCommittedEventsFetcher"></param>
+    /// <param name="rootContext">Proto root context. Allows middleware to be used</param>
+    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, IRootContext rootContext)
     {
         _getEventStoreClient = getEventStoreClient;
         _logger = logger;
         _getCommittedEventsFetcher = getCommittedEventsFetcher;
+        _rootContext = rootContext;
     }
 
     /// <inheritdoc />
@@ -41,7 +46,7 @@ public class EventStore : IEventStore
         //Log.EventsSuccessfullyCommitted(_logger))
         //Log.ErrorCommittingEvents(_logger, exception));
         return _getEventStoreClient(GetTenantFrom(request.CallContext))
-            .Commit(request, cancellationToken);
+            .Commit(request, _rootContext, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -51,7 +56,7 @@ public class EventStore : IEventStore
         //Log.AggregateEventsSuccessfullyCommitted(_logger))
         //Log.ErrorCommittingAggregateEvents(_logger, exception));
         return _getEventStoreClient(GetTenantFrom(request.CallContext))
-            .CommitForAggregate(request, cancellationToken);
+            .CommitForAggregate(request, _rootContext, cancellationToken);
     }
     
     /// <inheritdoc />
