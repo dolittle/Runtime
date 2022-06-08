@@ -1,3 +1,12 @@
+# [6.2.2] - 2022-68
+## Summary
+
+Back porting of public filter `OutOfMemoryException` fix
+
+### Fixed
+
+- Fixes a problem with the public filter where it could throw an `OutOfMemoryException` if the event log was big enough
+
 # [6.2.1] - 2022-5-3
 ## Summary
 
