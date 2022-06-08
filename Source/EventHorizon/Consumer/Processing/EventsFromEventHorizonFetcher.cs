@@ -44,6 +44,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
                 return ex;
             }
         }
+        
+        /// <inheritdoc />
+        public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
+            => new NotImplementedException("GetNextStreamPosition should never be used on this specific fetcher");
 
         /// <inheritdoc/>
         public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)

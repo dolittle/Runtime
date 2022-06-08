@@ -1,3 +1,12 @@
+# [6.2.1] - 2022-5-3
+## Summary
+
+Back porting of readiness health checks to v6 Runtime
+
+### Fixed
+
+- Fixes a problem with the event horizon producer where it will continuously poll a public stream for an event that is not present
+
 # [6.2.0] - 2022-3-15 
 ## Summary
 
