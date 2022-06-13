@@ -24,7 +24,7 @@ ENV DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION="V7"
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
-COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
+COPY --from=dotnet-build /app/Source/Server/runtime.json ./runtime.json
 
 # Install MongoDB dependencies
 RUN apt-get update \
