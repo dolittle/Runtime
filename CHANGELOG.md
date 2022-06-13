@@ -1,3 +1,14 @@
+# [8.2.1] - 2022-6-13 [PR: #697](https://github.com/dolittle/Runtime/pull/697)
+## Summary
+
+Fixes an issue where Event Store would end up in an endless restarting loop when missing configuration when committing events.
+
+### Fixed
+
+- More friendly errors are logged when getting event store with missing or bad config
+- Commits will get a response and not hang whenever the event store fails
+
+
 # [8.2.0] - 2022-6-8 [PR: #698](https://github.com/dolittle/Runtime/pull/698)
 ## Summary
 
