@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Configuration;
 
 /// <summary>
 /// Represents an implementation of <see cref="ConfigurationProvider"/> that provides Dolittle configurations
-/// from the legacy .dolittle folder configuration files.
+/// from a unified configuration json file.
 /// </summary>
 public class RuntimeConfigurationProvider : JsonConfigurationProvider
 {
@@ -21,8 +21,7 @@ public class RuntimeConfigurationProvider : JsonConfigurationProvider
     /// </summary>
     public RuntimeConfigurationProvider(JsonConfigurationSource source)
         : base(source)
-    {
-    }
+    { }
 
 
     /// <inheritdoc />

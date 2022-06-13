@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration.Json;
 namespace Dolittle.Runtime.Configuration;
 
 /// <summary>
-/// Represents an implementation of <see cref="IConfigurationSource"/> for the legacy Dolittle microservice configuration files under the .dolittle folder.
+/// Represents an implementation of <see cref="IConfigurationSource"/> for the unified Dolittle microservice configuration file called `runtime.json`.
 /// </summary>
 public class RuntimeConfigurationSource : IConfigurationSource
 {
