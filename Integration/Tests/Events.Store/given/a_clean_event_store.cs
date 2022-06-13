@@ -26,7 +26,7 @@ class a_clean_event_store : a_runtime_with_a_single_tenant
 
     Establish context = () =>
     {
-        event_store = runtime.Host.Services.GetRequiredService<Func<TenantId, IEventStore>>()(execution_context.Tenant);
+        event_store = runtime.Host.Services.GetRequiredService<IEventStore>();
         event_content_converter = runtime.Host.Services.GetRequiredService<IEventContentConverter>();
         streams = runtime.Host.Services.GetRequiredService<Func<TenantId, IStreams>>()(execution_context.Tenant);
         aggregate_roots = runtime.Host.Services.GetRequiredService<Func<TenantId, IAggregateRoots>>()(execution_context.Tenant);

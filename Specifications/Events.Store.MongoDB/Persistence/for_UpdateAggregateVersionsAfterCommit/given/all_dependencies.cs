@@ -4,7 +4,6 @@
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using Dolittle.Artifacts.Contracts;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Events.Contracts;
@@ -68,14 +67,13 @@ public class all_dependencies
                 Public = false,
                 EventType = new Runtime.Artifacts.Artifact(aggregate_root_id, ArtifactGeneration.First).ToProtobuf()
             }, num_events));
-            var tryAdd = commit_builder.TryAddEventsFrom(request);
-            if (!tryAdd.Success)
+            if (!commit_builder.TryAddEventsFrom(request, out var events, out var error))
             {
-                throw tryAdd.Exception;
+                throw error;
             }
         }
 
-        return commit_builder.Build().Commit;
+        return commit_builder.Build();
     }
 
     protected static void verify_updated_aggregate_root_version_for(

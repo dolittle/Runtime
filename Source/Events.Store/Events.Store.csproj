@@ -19,7 +19,7 @@
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Grpc.Tools" Version="2.45.0">
+        <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

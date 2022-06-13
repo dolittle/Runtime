@@ -66,7 +66,7 @@ public class ApplicationLifecycleHooks : IApplicationLifecycleHooks
         _registered.TryAdd(id, tcs.Task);
         return new ShutdownHook(() =>
         {
-            tcs.SetResult();
+            tcs.TrySetResult();
             _registered.Remove(id, out _);
         }, _shutdownSource.Task);
     }

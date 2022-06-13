@@ -8,7 +8,8 @@
         <CoverletVersion>3.1.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
-        <GrpcVersion>2.43.0</GrpcVersion>
+        <GrpcVersion>2.46.0</GrpcVersion>
+        <GrpcToolsVersion>2.46.3</GrpcToolsVersion>
         <MachineSpecificationsRunnerVersion>2.10.2</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
         <McMasterVersion>3.1.0</McMasterVersion>
@@ -23,7 +24,7 @@
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>5.0.2</PrometheusVersion>
-        <ProtoActorVersion>0.32.0</ProtoActorVersion>
+        <ProtoActorVersion>0.33.1-alpha.0.13</ProtoActorVersion>
         <ProtobufVersion>3.19.4</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
