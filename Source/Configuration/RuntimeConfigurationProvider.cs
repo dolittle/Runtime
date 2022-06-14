@@ -22,13 +22,6 @@ public class RuntimeConfigurationProvider : JsonConfigurationProvider
     { }
 
     /// <inheritdoc />
-    public override void Load()
-    {
-        base.Load();
-        AddPrefixToDataKeys();
-    }
-
-    /// <inheritdoc />
     public override void Load(Stream stream)
     {
         base.Load(stream);
