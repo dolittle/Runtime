@@ -14,9 +14,6 @@ namespace Dolittle.Runtime.Configuration.Legacy;
 /// </summary>
 public class LegacyConfigurationProvider : ConfigurationProvider
 {
-    static readonly string _delimiter = ConfigurationPath.KeyDelimiter;
-    static readonly string _dolittleConfigSectionRoot = $"dolittle{_delimiter}runtime";
-
     readonly IFileProvider _fileProvider;
 
     /// <summary>
@@ -49,7 +46,7 @@ public class LegacyConfigurationProvider : ConfigurationProvider
                 MapIntoRoot("endpoints", config);
                 break;
             case "metrics.json":
-                MapIntoRoot($"endpoints{_delimiter}metrics", config);
+                MapIntoRoot(ConfigurationPath.Combine("endpoints", "metrics"), config);
                 break;
             case "platform.json":
                 MapIntoRoot("platform", config);
@@ -71,7 +68,7 @@ public class LegacyConfigurationProvider : ConfigurationProvider
 
     void MapIntoRoot(string sectionRoot, IConfiguration config)
     {
-        foreach (var kvp in GetData($"{_dolittleConfigSectionRoot}{_delimiter}{sectionRoot}", config))
+        foreach (var kvp in GetData(Constants.CombineWithDolittleConfigRoot(sectionRoot), config))
         {
             Data.Add(kvp);
         }
@@ -82,7 +79,7 @@ public class LegacyConfigurationProvider : ConfigurationProvider
         foreach (var resourceForTenant in config.GetChildren().Select(_ => config.GetSection(_.Key)))
         {
             foreach (var kvp in GetData(
-                         $"{_dolittleConfigSectionRoot}{_delimiter}tenants{_delimiter}{resourceForTenant.Key}{_delimiter}resources",
+                         Constants.CombineWithDolittleConfigRoot("tenants", resourceForTenant.Key, "resources"),
                          resourceForTenant))
             {
                 Data.Add(kvp);
@@ -94,21 +91,21 @@ public class LegacyConfigurationProvider : ConfigurationProvider
     {
         foreach (var microservicesForTenant in config.GetChildren())
         {
-            var sectionPrefix = $"{_dolittleConfigSectionRoot}{_delimiter}tenants{_delimiter}{microservicesForTenant.Key}{_delimiter}eventHorizons";
+            var sectionPrefix = Constants.CombineWithDolittleConfigRoot("tenants",microservicesForTenant.Key, "eventHorizons");
             foreach (var consentsPerConsumerMicroservice in microservicesForTenant.GetChildren().GroupBy(_ => _["microservice"]))
             {
                 var consumerMicroservice = consentsPerConsumerMicroservice.Key;
-                var eventHorizonMicroservicePrefix = $"{sectionPrefix}{_delimiter}{consumerMicroservice}";
-                var consentSectionPrefix = $"{eventHorizonMicroservicePrefix}{_delimiter}consents";
+                var eventHorizonMicroservicePrefix = ConfigurationPath.Combine(sectionPrefix, consumerMicroservice);
+                var consentSectionPrefix = ConfigurationPath.Combine(eventHorizonMicroservicePrefix, "consents");
                 var consentsPerConsumerMicroserviceArray = consentsPerConsumerMicroservice.ToArray();
                 for (var i = 0; i < consentsPerConsumerMicroserviceArray.Length; i++)
                 {
                     var consent = consentsPerConsumerMicroserviceArray[i];
-                    var consentPrefix = $"{consentSectionPrefix}{_delimiter}{i}";
-                    Data.Add($"{consentPrefix}{_delimiter}consumerTenant", consent["tenant"]);
-                    Data.Add($"{consentPrefix}{_delimiter}stream", consent["stream"]);
-                    Data.Add($"{consentPrefix}{_delimiter}partition", consent["partition"]);
-                    Data.Add($"{consentPrefix}{_delimiter}consent", consent["consent"]);
+                    var consentPrefix = ConfigurationPath.Combine(consentSectionPrefix, $"{i}");
+                    Data.Add(ConfigurationPath.Combine(consentPrefix, "consumerTenant"), consent["tenant"]);
+                    Data.Add(ConfigurationPath.Combine(consentPrefix, "stream"), consent["stream"]);
+                    Data.Add(ConfigurationPath.Combine(consentPrefix, "partition"), consent["partition"]);
+                    Data.Add(ConfigurationPath.Combine(consentPrefix, "consent"), consent["consent"]);
                 }
             }
         }
@@ -119,12 +116,12 @@ public class LegacyConfigurationProvider : ConfigurationProvider
         var data = new List<KeyValuePair<string, string>>();
         foreach (var section in config.GetChildren())
         {
-            data.Add(new KeyValuePair<string, string>($"{rootPath}{_delimiter}{section.Key}", section.Value));
+            data.Add(new KeyValuePair<string, string>(ConfigurationPath.Combine(rootPath, section.Key), section.Value));
             foreach (var subSection in section.GetChildren())
             {
-                
-                data.Add(new KeyValuePair<string, string>($"{rootPath}{_delimiter}{section.Key}{_delimiter}{subSection.Key}", subSection.Value));
-                data.AddRange(GetData($"{rootPath}{_delimiter}{section.Key}{_delimiter}{subSection.Key}", subSection));
+                var subRoot = ConfigurationPath.Combine(rootPath, section.Key, subSection.Key);
+                data.Add(new KeyValuePair<string, string>(subRoot, subSection.Value));
+                data.AddRange(GetData(subRoot, subSection));
             }
         }
         return data;

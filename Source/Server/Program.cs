@@ -25,10 +25,7 @@ using Microsoft.Extensions.Options;
 var configBuilder = new ConfigurationBuilder();
 configBuilder.AddJsonFile("appsettings.json");
 configBuilder.AddRuntimeFile();
-if (Directory.Exists(".dolittle"))
-{
-    configBuilder.AddLegacyDolittleFiles();
-}
+configBuilder.AddLegacyDolittleFiles();
 configBuilder.AddEnvironmentVariables();
 configBuilder.AddCommandLine(args);
 var config = configBuilder.Build();

@@ -18,6 +18,7 @@ public class RuntimeConfigurationSource : IConfigurationSource
         {
             Optional = true,
             Path = "runtime.json",
+            ReloadOnChange = true
         };
         source.EnsureDefaults(builder);
         source.ResolveFileProvider();
