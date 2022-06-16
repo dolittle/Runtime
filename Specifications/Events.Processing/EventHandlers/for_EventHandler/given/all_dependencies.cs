@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.Artifacts;
@@ -51,6 +52,7 @@ public class all_dependencies
     protected static Version version = Version.NotSet;
     protected static Environment environment = Environment.Production;
     protected static CorrelationId correlation_id = Guid.Parse("720040db-3a60-4755-8d77-31ba4895be46");
+    protected static SpanId span_id = ActivitySpanId.CreateRandom();
     protected static Claims claims = Claims.Empty;
     protected static CultureInfo culture_info = CultureInfo.InvariantCulture;
 
@@ -74,6 +76,7 @@ public class all_dependencies
             version,
             environment,
             correlation_id,
+            span_id,
             claims,
             culture_info);
 

@@ -81,7 +81,7 @@ public static class Runtime
     /// <param name="tenant">The <see cref="TenantId"/> to create an execution context for.</param>
     /// <returns>The newly created <see cref="Dolittle.Runtime.Execution.ExecutionContext"/>.</returns>
     public static Dolittle.Runtime.Execution.ExecutionContext CreateExecutionContextFor(TenantId tenant)
-        => new(_microserviceId, tenant, Version.NotSet, _environment, CorrelationId.New(), Claims.Empty, CultureInfo.InvariantCulture);
+        => new(_microserviceId, tenant, Version.NotSet, _environment, Guid.NewGuid(), SpanId.Empty, Claims.Empty, CultureInfo.InvariantCulture);
     
     static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string> configuration, int numberOfTenants)
     {

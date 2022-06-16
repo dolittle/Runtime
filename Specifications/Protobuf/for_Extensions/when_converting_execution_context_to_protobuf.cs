@@ -26,6 +26,7 @@ public class when_converting_execution_context_to_protobuf
             version,
             Environment.Development,
             Guid.NewGuid(),
+            SpanId.Empty,
             new Claims(new[]
             {
                 new Claim("First", "FirstValue", "FirstType"),

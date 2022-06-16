@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -42,6 +43,7 @@ public class the_service
             Version.NotSet,
             "some env",
             "f6d7d582-81f1-4f37-acc8-f21324280c9a",
+            ActivitySpanId.CreateRandom(),
             Claims.Empty,
             CultureInfo.InvariantCulture);
         cancellation_token = CancellationToken.None;

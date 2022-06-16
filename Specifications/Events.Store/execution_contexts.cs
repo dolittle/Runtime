@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
@@ -17,6 +18,7 @@ public static class execution_contexts
             Version.NotSet,
             "",
             Guid.NewGuid(),
+            ActivitySpanId.CreateRandom(),
             Claims.Empty,
             CultureInfo.InvariantCulture);
 }
