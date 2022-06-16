@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Dolittle.Runtime.Execution;
 using Machine.Specifications;
 
@@ -11,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_ExecutionContext;
 public class when_creating
 {
     static Guid correlation;
-    static string span;
+    static byte[] span;
     static Guid microservice;
     static Guid tenant;
     static Version version;
@@ -22,7 +23,7 @@ public class when_creating
     Establish context = () =>
     {
         correlation = Guid.Parse("8d42c5d0-1753-4d88-9228-837ddc64d416");
-        span = SpanId.EmptyHexString;
+        ActivitySpanId.CreateRandom().CopyTo(span);
         microservice = Guid.Parse("5586f689-407b-49cf-ac2e-fd12ceeccd83");
         tenant = Guid.Parse("5c9dfb13-8599-4211-8eec-9d5f3d808d1b");
         version = new Version(62007350, 808463667, 41937649, 1632080924, "Something very random");
