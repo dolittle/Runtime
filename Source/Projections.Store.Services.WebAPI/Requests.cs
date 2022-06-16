@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Dolittle.Runtime.Events.Store;
@@ -17,6 +18,7 @@ public record ExecutionContext(
     Version Version,
     string Environment,
     Guid CorrelationId,
+    string SpanId,
     Claim[] Claims)
 {
     public RuntimeExecutionContext ToExecutionContext()
@@ -26,6 +28,7 @@ public record ExecutionContext(
             Version,
             Environment,
             CorrelationId,
+            ActivitySpanId.CreateFromString(SpanId),
             new Claims(Claims),
             CultureInfo.InvariantCulture);
     public static ExecutionContext From(RuntimeExecutionContext executionContext)
@@ -35,6 +38,7 @@ public record ExecutionContext(
             executionContext.Version,
             executionContext.Environment,
             executionContext.CorrelationId,
+            executionContext.SpanId.Value.ToHexString(),
             executionContext.Claims.ToArray());
 }
 

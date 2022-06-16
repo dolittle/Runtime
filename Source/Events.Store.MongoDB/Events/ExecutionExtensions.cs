@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
@@ -22,6 +23,7 @@ public static class ExecutionExtensions
             executionContext.Version.ToVersion(),
             executionContext.Environment,
             executionContext.Correlation,
+            ActivitySpanId.CreateFromString(executionContext.SpanId),
             executionContext.Claims.ToClaims(),
             CultureInfo.InvariantCulture);
 
@@ -33,6 +35,7 @@ public static class ExecutionExtensions
     public static ExecutionContext ToStoreRepresentation(this Execution.ExecutionContext executionContext) =>
         new(
             executionContext.CorrelationId,
+            executionContext.SpanId.Value.ToHexString(),
             executionContext.Microservice,
             executionContext.Tenant,
             executionContext.Version.ToStoreRepresentation(),

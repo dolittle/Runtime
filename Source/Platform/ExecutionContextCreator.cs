@@ -25,13 +25,14 @@ public class ExecutionContextCreator : ICreateExecutionContexts
     }
 
     /// <inheritdoc />
-    public ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, Claims claims)
+    public ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, SpanId spanId, Claims claims)
         => new(
             _configuration.MicroserviceID,
             tenant,
             version,
             _configuration.Environment,
             correlation,
+            spanId,
             claims,
             CultureInfo.InvariantCulture);
 
