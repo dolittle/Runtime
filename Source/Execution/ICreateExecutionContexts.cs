@@ -18,9 +18,10 @@ public interface ICreateExecutionContexts
     /// <param name="tenant">The tenant to use in the created execution context.</param>
     /// <param name="version">The version to use in the created execution context.</param>
     /// <param name="correlation">The correlation to use in the created execution context.</param>
+    /// <param name="spanId">The span to use in the created execution context.</param>
     /// <param name="claims">The claims to use in the created execution context.</param>
     /// <returns>A new <see cref="ExecutionContext"/> with the specified fields.</returns>
-    ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, Claims claims);
+    ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, SpanId spanId, Claims claims);
 
     /// <summary>
     /// Tries to create a new <see cref="ExecutionContext"/> from the requested <see cref="ExecutionContext"/>.

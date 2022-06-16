@@ -16,10 +16,11 @@ public record ExecutionContext(
     Version Version,
     Environment Environment,
     CorrelationId CorrelationId,
+    SpanId SpanId,
     Claims Claims,
     CultureInfo CultureInfo)
 {
     /// <inheritdoc/>
-    public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Claims: {Claims} CultureInfo: {CultureInfo}";
+    public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Correlation: {SpanId.Value} Claims: {Claims} CultureInfo: {CultureInfo}";
 
 }
