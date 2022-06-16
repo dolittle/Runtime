@@ -21,6 +21,6 @@ public record ExecutionContext(
     CultureInfo CultureInfo)
 {
     /// <inheritdoc/>
-    public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Correlation: {SpanId.Value} Claims: {Claims} CultureInfo: {CultureInfo}";
+    public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Span: {SpanId.Value} Claims: {Claims} CultureInfo: {CultureInfo}";
 
 }

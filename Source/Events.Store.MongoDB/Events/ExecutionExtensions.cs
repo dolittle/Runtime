@@ -37,11 +37,11 @@ public static class ExecutionExtensions
     /// <returns>Converted <see cref="ExecutionContext" />.</returns>
     public static ExecutionContext ToStoreRepresentation(this Execution.ExecutionContext executionContext)
     {
-        var span = new Span<byte>();
+        var span = new byte[8];
         executionContext.SpanId.Value.CopyTo(span);
         return new ExecutionContext(
             executionContext.CorrelationId,
-            span.ToArray(),
+            span,
             executionContext.Microservice,
             executionContext.Tenant,
             executionContext.Version.ToStoreRepresentation(),

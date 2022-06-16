@@ -32,7 +32,7 @@ public static class ExecutionExtensions
         };
         if (executionContext.SpanId != SpanId.Empty)
         {
-            var span = new Span<byte>();
+            var span = new byte[8];
             executionContext.SpanId.Value.CopyTo(span);
             message.SpanId = ByteString.CopyFrom(span);
         }
