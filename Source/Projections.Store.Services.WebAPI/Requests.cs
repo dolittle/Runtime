@@ -28,7 +28,7 @@ public record ExecutionContext(
             Version,
             Environment,
             CorrelationId,
-            ActivitySpanId.CreateFromString(SpanId),
+            SpanId.All(_ => _ == '0') ? Execution.SpanId.Empty : ActivitySpanId.CreateFromString(SpanId),
             new Claims(Claims),
             CultureInfo.InvariantCulture);
     public static ExecutionContext From(RuntimeExecutionContext executionContext)

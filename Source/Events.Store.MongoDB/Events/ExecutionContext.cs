@@ -25,7 +25,7 @@ public class ExecutionContext
     /// <param name="version">The version.</param>
     /// <param name="environment">The environment.</param>
     /// <param name="claims">The claims.</param>
-    public ExecutionContext(Guid correlation, string span, Guid microservice, Guid tenant, Version version, string environment, IEnumerable<Claim> claims)
+    public ExecutionContext(Guid correlation, byte[] span, Guid microservice, Guid tenant, Version version, string environment, IEnumerable<Claim> claims)
     {
         Correlation = correlation;
         SpanId = span;
@@ -44,8 +44,8 @@ public class ExecutionContext
     /// <summary>
     /// Gets or sets the span id 16 character hex string.
     /// </summary>
-    [BsonDefaultValue(Runtime.Execution.SpanId.EmptyHexString)]
-    public string SpanId { get; set; }
+    [BsonDefaultValue(new byte[]{0,0,0,0,0,0,0,0})]
+    public byte[] SpanId { get; set; }
 
     /// <summary>
     /// Gets or sets the producer <see cref="Microservice"/>.
