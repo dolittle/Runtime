@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 
 static partial class Log
 {
-    [LoggerMessage(0, LogLevel.Debug, "Event Store is unavailable")]
+    [LoggerMessage(0, LogLevel.Warning, "Event Store is unavailable")]
     internal static partial void EventStoreIsUnavailable(ILogger logger, EventStoreUnavailable ex);
 
     [LoggerMessage(0, LogLevel.Warning, "Stream Processor not starting because cancellation was requested for subscription {SubscriptionId}")]

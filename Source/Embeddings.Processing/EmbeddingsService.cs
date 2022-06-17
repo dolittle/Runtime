@@ -94,7 +94,8 @@ public class EmbeddingsService : EmbeddingsBase
         {
             return;
         }
-        var (dispatcher, arguments) = connection.Result;
+        using var dispatcher = connection.Result.dispatcher;
+        var arguments = connection.Result.arguments;
 
         var tryCreateExecutionContext = _executionContextCreator.TryCreateUsing(arguments.ExecutionContext);
         if (!tryCreateExecutionContext.Success)

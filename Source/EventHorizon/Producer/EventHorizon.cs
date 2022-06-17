@@ -179,8 +179,9 @@ public class EventHorizon : IDisposable
                         CurrentPosition = streamEvent.Position + 1;
                     }
                 }
-                catch (EventStoreUnavailable)
+                catch (EventStoreUnavailable e)
                 {
+                    _logger.LogWarning(e, "Event Store unavailable. Waiting 1 second");
                     await Task.Delay(1000).ConfigureAwait(false);
                 }
             }
