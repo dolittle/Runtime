@@ -44,7 +44,7 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "{StreamProcessorId} for tenant {TenantId} failed")]
     internal static partial void StreamProcessingForTenantFailed(ILogger logger, Exception ex, IStreamProcessorId streamProcessorId, TenantId tenantId);
 
-    [LoggerMessage(0, LogLevel.Debug, "Event Store is unavailable")]
+    [LoggerMessage(0, LogLevel.Warning, "Event Store is unavailable")]
     internal static partial void EventStoreUnavailable(ILogger logger, EventStoreUnavailable ex);
     
     [LoggerMessage(0, LogLevel.Warning, "Could not persist stream processor state to the event store, will retry in one second.")]
