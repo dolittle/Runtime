@@ -46,24 +46,34 @@ namespace Dolittle.Runtime.Services
             where TRuntimeConnectArguments : class
         {
             var dispatcher = _reverseCallDispatchers.GetFor(runtimeStream, clientStream, context, protocol);
-            _logger.LogTrace("Waiting for connection arguments");
-            if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
+            try
             {
-                _logger.LogWarning(_argumentsNotReceived);
-                await dispatcher.Reject(protocol.CreateFailedConnectResponse(_argumentsNotReceived), cancellationToken).ConfigureAwait(false);
-                return new ConnectArgumentsNotReceived();
-            }
-            _logger.LogTrace("Received connection arguments");
+                _logger.LogTrace("Waiting for connection arguments");
+                if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
+                {
+                    _logger.LogWarning(_argumentsNotReceived);
+                    await dispatcher.Reject(protocol.CreateFailedConnectResponse(_argumentsNotReceived), cancellationToken).ConfigureAwait(false);
+                    dispatcher.Dispose();
+                    return new ConnectArgumentsNotReceived();
+                }
+                _logger.LogTrace("Received connection arguments");
 
-            var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
-            var validationResult = protocol.ValidateConnectArguments(connectArguments);
-            if (!validationResult.Success)
-            {
+                var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
+                var validationResult = protocol.ValidateConnectArguments(connectArguments);
+                if (validationResult.Success)
+                {
+                    return (dispatcher, connectArguments);
+                }
                 _logger.LogTrace("Connection arguments were not valid");
+                await dispatcher.Reject(protocol.CreateFailedConnectResponse(validationResult.FailureReason), cancellationToken).ConfigureAwait(false);
+                dispatcher.Dispose();
                 return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
             }
-
-            return (dispatcher, connectArguments);
+            catch
+            {
+                dispatcher.Dispose();
+                throw;
+            }
         }
     }
 }

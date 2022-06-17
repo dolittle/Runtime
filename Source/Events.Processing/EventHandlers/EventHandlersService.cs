@@ -88,7 +88,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     return;
                 }
-                var (dispatcher, arguments) = connectResult.Result;
+                
+                using var dispatcher = connectResult.Result.dispatcher;
+                var arguments = connectResult.Result.arguments;
                 _logger.SettingExecutionContext(arguments.ExecutionContext);
                 _executionContextManager.CurrentFor(arguments.ExecutionContext);
 

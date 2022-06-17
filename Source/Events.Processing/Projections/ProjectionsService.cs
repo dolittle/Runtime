@@ -105,7 +105,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             {
                 return;
             }
-            var (dispatcher, arguments) = tryConnect.Result;
+            using var dispatcher = tryConnect.Result.dispatcher;
+            var arguments = tryConnect.Result.arguments;
             _logger.ReceivedProjection(arguments);
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);

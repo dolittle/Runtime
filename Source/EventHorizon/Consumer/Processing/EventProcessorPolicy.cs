@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
                 .Handle<EventStoreUnavailable>(
                     _ =>
                     {
-                        _logger.LogDebug(_, "Event Store is unavailable");
+                        _logger.LogWarning(_, "Event Store is unavailable");
                         return true;
                     })
                 .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));

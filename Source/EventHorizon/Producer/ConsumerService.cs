@@ -112,8 +112,12 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 _protocol,
                 token).ConfigureAwait(false);
 
-            if (!tryConnect.Success) return;
-            var (dispatcher, arguments) = tryConnect.Result;
+            if (!tryConnect.Success)
+            {
+                return;
+            }
+            using var dispatcher = tryConnect.Result.dispatcher;
+            var arguments = tryConnect.Result.arguments;
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
             _metrics.IncrementTotalIncomingSubscriptions();
@@ -281,8 +285,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
                         streamPosition = streamEvent.Position + 1;
                     }
-                    catch (EventStoreUnavailable)
+                    catch (EventStoreUnavailable e)
                     {
+                        _logger.LogWarning(e, "Event Store is unavailable. Waiting 1 second");
                         await Task.Delay(1000).ConfigureAwait(false);
                     }
                 }

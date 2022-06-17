@@ -108,7 +108,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 cts.Token).ConfigureAwait(false);
 
             if (!tryConnect.Success) return;
-            var (dispatcher, arguments) = tryConnect.Result;
+            using var dispatcher = tryConnect.Result.dispatcher;
+            var arguments = tryConnect.Result.arguments;
 
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
@@ -145,7 +146,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 cts.Token).ConfigureAwait(false);
 
             if (!tryConnect.Success) return;
-            var (dispatcher, arguments) = tryConnect.Result;
+            using var dispatcher = tryConnect.Result.dispatcher;
+            var arguments = tryConnect.Result.arguments;
 
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
@@ -182,7 +184,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 cts.Token).ConfigureAwait(false);
 
             if (!tryConnect.Success) return;
-            var (dispatcher, arguments) = tryConnect.Result;
+            using var dispatcher = tryConnect.Result.dispatcher;
+            var arguments = tryConnect.Result.arguments;
 
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);

@@ -90,7 +90,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
             {
                 return;
             }
-            var (dispatcher, arguments) = connection.Result;
+            using var dispatcher = connection.Result.dispatcher;
+            var arguments = connection.Result.arguments;
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
             if (_embeddingProcessors.HasEmbeddingProcessors(arguments.Definition.Embedding))
