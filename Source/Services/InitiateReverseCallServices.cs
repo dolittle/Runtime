@@ -47,24 +47,36 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
         where TRuntimeConnectArguments : class
     {
         var dispatcher = _reverseCallDispatchers.GetFor(runtimeStream, clientStream, context, protocol);
-        Log.WaitingForConnectionArguments(_logger);
-        if (!await dispatcher.ReceiveArguments(cancellationToken, notValidateExecutionContext).ConfigureAwait(false))
+        try
         {
-            Log.ConnectionArgumentsNotReceived(_logger);
-            await dispatcher.Reject(protocol.CreateFailedConnectResponse(ArgumentsNotReceivedResponse), cancellationToken).ConfigureAwait(false);
-            return new ConnectArgumentsNotReceived();
-        }
-        Log.ReceivedConnectionArguments(_logger);
+            Log.WaitingForConnectionArguments(_logger);
+            if (!await dispatcher.ReceiveArguments(cancellationToken, notValidateExecutionContext).ConfigureAwait(false))
+            {
+                Log.ConnectionArgumentsNotReceived(_logger);
+                await dispatcher.Reject(protocol.CreateFailedConnectResponse(ArgumentsNotReceivedResponse), cancellationToken).ConfigureAwait(false);
+                dispatcher.Dispose();
+                return new ConnectArgumentsNotReceived();
+            }
+            
+            Log.ReceivedConnectionArguments(_logger);
+            var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
+            var validationResult = protocol.ValidateConnectArguments(connectArguments);
+            if (validationResult.Success)
+            {
+                return (dispatcher, connectArguments);
+            }
 
-        var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
-        var validationResult = protocol.ValidateConnectArguments(connectArguments);
-        if (validationResult.Success)
-        {
-            return (dispatcher, connectArguments);
+            Log.ReceivedInvalidConnectionArguments(_logger);
+            await dispatcher.Reject(protocol.CreateFailedConnectResponse(validationResult.FailureReason), cancellationToken).ConfigureAwait(false);
+            dispatcher.Dispose();
+            return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
         }
-        Log.ReceivedInvalidConnectionArguments(_logger);
-        await dispatcher.Reject(protocol.CreateFailedConnectResponse(validationResult.FailureReason), cancellationToken).ConfigureAwait(false);
-        return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
+        catch
+        {
+            dispatcher.Dispose();
+            throw;
+        }
+        
 
     }
 }

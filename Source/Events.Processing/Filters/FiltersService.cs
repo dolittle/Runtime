@@ -137,7 +137,8 @@ public class FiltersService : FiltersBase
         {
             return;
         }
-        var (dispatcher, arguments) = tryConnect.Result;
+        using var dispatcher = tryConnect.Result.dispatcher;
+        var arguments = tryConnect.Result.arguments;
         var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
         if (!createExecutionContext.Success)
         {
@@ -184,7 +185,8 @@ public class FiltersService : FiltersBase
         {
             return;
         }
-        var (dispatcher, arguments) = tryConnect.Result;
+        using var dispatcher = tryConnect.Result.dispatcher;
+        var arguments = tryConnect.Result.arguments;
         var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
         if (!createExecutionContext.Success)
         {
@@ -232,7 +234,8 @@ public class FiltersService : FiltersBase
         {
             return;
         }
-        var (dispatcher, arguments) = tryConnect.Result;
+        using var dispatcher = tryConnect.Result.dispatcher;
+        var arguments = tryConnect.Result.arguments;
         var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
         if (!createExecutionContext.Success)
         {
