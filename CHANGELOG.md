@@ -1,3 +1,15 @@
+# [8.2.2] - 2022-6-17 [PR: #701](https://github.com/dolittle/Runtime/pull/701)
+## Summary
+
+### Changed
+
+- Log warning instead of debug when event store is unavailable
+
+### Fixed
+
+- Dispose correctly of reverse call dispatcher
+
+
 # [8.2.1] - 2022-6-13 [PR: #697](https://github.com/dolittle/Runtime/pull/697)
 ## Summary
 

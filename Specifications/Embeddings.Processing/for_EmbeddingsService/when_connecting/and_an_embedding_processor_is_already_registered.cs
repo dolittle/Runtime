@@ -60,7 +60,8 @@ public class and_an_embedding_processor_is_already_registered : given.all_depend
             IsAny<CancellationToken>()),
         Once);
 
-
+    It should_dispose_reverse_call_dispathcer = () => dispatcher.Verify(_ => _.Dispose(), AtLeastOnce);
+    
     It should_not_persist_definition = () => embedding_definition_persister.Verify(_ => _.TryPersist(embedding_definition, IsAny<CancellationToken>()), Never);
     It should_not_do_anything_else_with_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_check_whether_embedding_is_already_registered = () => embedding_processors.Verify(_ => _.HasEmbeddingProcessors(embedding_id), Once);
