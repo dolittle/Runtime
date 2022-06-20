@@ -1,3 +1,13 @@
+# [8.3.0] - 2022-6-20 [PR: #700](https://github.com/dolittle/Runtime/pull/700)
+## Summary
+
+To enable tracing of events we need to carry along a span id in the execution context.
+
+### Added
+
+- Span ID to the execution context
+
+
 # [8.2.2] - 2022-6-17 [PR: #701](https://github.com/dolittle/Runtime/pull/701)
 ## Summary
 
