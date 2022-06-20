@@ -1,0 +1,34 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
+
+namespace Dolittle.Runtime.Configuration;
+
+/// <summary>
+/// Represents an implementation of <see cref="IConfigurationSource"/> for the unified Dolittle microservice configuration file called `runtime.json`.
+/// </summary>
+public class RuntimeJsonFileConfigurationSource : IConfigurationSource
+{
+    /// <inheritdoc /> 
+    public IConfigurationProvider Build(IConfigurationBuilder builder)
+    {
+        IFileProvider? legacyFilesProvider = null;
+        if (Directory.Exists(".dolittle"))
+        {
+            legacyFilesProvider = new PhysicalFileProvider(Path.GetFullPath(".dolittle"));
+        }
+
+        return new RuntimeFileConfigurationProvider(new PhysicalFileInfo(new FileInfo(Path.GetFullPath("runtime.json"))), legacyFilesProvider, (builder, file) =>
+        {
+            if (file.Exists)
+            {
+                builder.AddJsonFile(file.PhysicalPath);
+            }
+            return builder.Build();
+        });
+    }
+}

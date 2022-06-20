@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Linq;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.Configuration;
-using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Metrics.Hosting;
@@ -24,8 +22,7 @@ using Microsoft.Extensions.Options;
 
 var configBuilder = new ConfigurationBuilder();
 configBuilder.AddJsonFile("appsettings.json");
-configBuilder.AddRuntimeFile();
-configBuilder.AddLegacyDolittleFiles();
+configBuilder.AddDolittleFiles();
 configBuilder.AddEnvironmentVariables();
 configBuilder.AddCommandLine(args);
 var config = configBuilder.Build();

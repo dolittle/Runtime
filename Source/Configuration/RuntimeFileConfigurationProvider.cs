@@ -1,44 +1,58 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
-namespace Dolittle.Runtime.Configuration.Legacy;
+namespace Dolittle.Runtime.Configuration;
 
 /// <summary>
 /// Represents an implementation of <see cref="ConfigurationProvider"/> that provides Dolittle configurations
-/// from the legacy .dolittle folder configuration files.
+/// from a unified configuration json file.
 /// </summary>
-public class LegacyConfigurationProvider : ConfigurationProvider
+public class RuntimeFileConfigurationProvider : ConfigurationProvider
 {
-    readonly IFileProvider _fileProvider;
+    readonly IFileInfo _runtimeConfigFile;
+    readonly IFileProvider? _legacyFilesProvider;
+    readonly Func<IConfigurationBuilder, IFileInfo, IConfigurationRoot> _buildConfigurationFromFile;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LegacyConfigurationProvider"/> class.
+    /// Initializes a new instance of the <see cref="RuntimeFileConfigurationProvider"/> class.
     /// </summary>
-    /// <param name="fileProvider"></param>
-    public LegacyConfigurationProvider(IFileProvider fileProvider)
+    /// <param name="runtimeConfigFile"></param>
+    /// <param name="legacyFilesProvider"></param>
+    /// <param name="buildConfigurationFromFile"></param>
+    public RuntimeFileConfigurationProvider(IFileInfo runtimeConfigFile, IFileProvider? legacyFilesProvider, Func<IConfigurationBuilder, IFileInfo, IConfigurationRoot> buildConfigurationFromFile)
     {
-        _fileProvider = fileProvider;
+        _runtimeConfigFile = runtimeConfigFile;
+        _legacyFilesProvider = legacyFilesProvider;
+        _buildConfigurationFromFile = buildConfigurationFromFile;
     }
-
 
     /// <inheritdoc />
     public override void Load()
     {
-        foreach (var file in _fileProvider.GetDirectoryContents("/"))
-        {
-            var fileBuilder = new ConfigurationBuilder();
-            fileBuilder.AddJsonFile(_fileProvider, file.Name, false, false);
-            var configuration = fileBuilder.Build();
-            MapDolittleFile(file.Name, configuration); 
-        }
+        MapRuntimeConfigFile();
+        MapLegacyDolittleFiles();
     }
 
-    void MapDolittleFile(string file, IConfiguration config)
+    void MapRuntimeConfigFile()
+    {
+        AddAllFromMap(GetData(Constants.DolittleConfigSectionRoot, _buildConfigurationFromFile(new ConfigurationBuilder(), _runtimeConfigFile)));
+    }
+    
+    void MapLegacyDolittleFiles()
+    {
+        foreach (var file in _legacyFilesProvider?.GetDirectoryContents("/") ?? Enumerable.Empty<IFileInfo>())
+        {
+            MapLegacyDolittleFile(file.Name, _buildConfigurationFromFile(new ConfigurationBuilder(), file));
+        }
+    }
+    void MapLegacyDolittleFile(string file, IConfiguration config)
     {
         switch (file)
         {
@@ -51,13 +65,14 @@ public class LegacyConfigurationProvider : ConfigurationProvider
             case "platform.json":
                 MapIntoRoot("platform", config);
                 break;
-            case "tenants.json":
-                MapIntoRoot("tenants", config);
-                break;
             case "microservices.json":
                 MapIntoRoot("microservices", config);
                 break;
             case "resources.json":
+                foreach (var key in Data.Keys.Where(_ => _.StartsWith(Constants.CombineWithDolittleConfigRoot("tenants"), StringComparison.InvariantCulture)))
+                {
+                    Data.Remove(key);
+                }
                 MapResources(config);
                 break;
             case "event-horizon-consents.json":
@@ -66,12 +81,17 @@ public class LegacyConfigurationProvider : ConfigurationProvider
         }
     }
 
-    void MapIntoRoot(string sectionRoot, IConfiguration config)
+    void AddAllFromMap(IEnumerable<KeyValuePair<string, string>> map)
     {
-        foreach (var kvp in GetData(Constants.CombineWithDolittleConfigRoot(sectionRoot), config))
+        foreach (var kvp in map)
         {
             Data.Add(kvp);
         }
+    }
+    
+    void MapIntoRoot(string sectionRoot, IConfiguration config)
+    {
+        AddAllFromMap(GetData(Constants.CombineWithDolittleConfigRoot(sectionRoot), config));
     }
     
     void MapResources(IConfiguration config)
@@ -91,7 +111,7 @@ public class LegacyConfigurationProvider : ConfigurationProvider
     {
         foreach (var microservicesForTenant in config.GetChildren())
         {
-            var sectionPrefix = Constants.CombineWithDolittleConfigRoot("tenants",microservicesForTenant.Key, "eventHorizons");
+            var sectionPrefix = Constants.CombineWithDolittleConfigRoot("tenants", microservicesForTenant.Key, "eventHorizons");
             foreach (var consentsPerConsumerMicroservice in microservicesForTenant.GetChildren().GroupBy(_ => _["microservice"]))
             {
                 var consumerMicroservice = consentsPerConsumerMicroservice.Key;

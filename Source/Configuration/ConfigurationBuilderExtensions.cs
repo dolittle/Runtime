@@ -11,10 +11,10 @@ namespace Dolittle.Runtime.Configuration;
 public static class ConfigurationBuilderExtensions
 {
     /// <summary>
-    /// Adds the <see cref="RuntimeConfigurationSource"/> <see cref="IConfigurationSource"/> to the <see cref="IConfigurationBuilder"/>.
+    /// Adds the <see cref="RuntimeJsonFileConfigurationSource"/> <see cref="IConfigurationSource"/> to the <see cref="IConfigurationBuilder"/>.
     /// </summary>
     /// <param name="builder">The <see cref="IConfigurationBuilder"/>.</param>
     /// <returns>Tbe builder for continuation.</returns>
-    public static IConfigurationBuilder AddRuntimeFile(this IConfigurationBuilder builder)
-        => builder.Add(new RuntimeConfigurationSource());
+    public static IConfigurationBuilder AddDolittleFiles(this IConfigurationBuilder builder)
+        => builder.Add(new RuntimeJsonFileConfigurationSource());
 }
