@@ -18,7 +18,7 @@ public record ExecutionContext(
     Version Version,
     string Environment,
     Guid CorrelationId,
-    string SpanId,
+    string? SpanId,
     Claim[] Claims)
 {
     public RuntimeExecutionContext ToExecutionContext()
@@ -28,7 +28,7 @@ public record ExecutionContext(
             Version,
             Environment,
             CorrelationId,
-            SpanId.All(_ => _ == '0') ? Execution.SpanId.Empty : ActivitySpanId.CreateFromString(SpanId),
+            string.IsNullOrEmpty(SpanId) || SpanId.All(_ => _ == '0') ? null : ActivitySpanId.CreateFromString(SpanId),
             new Claims(Claims),
             CultureInfo.InvariantCulture);
     public static ExecutionContext From(RuntimeExecutionContext executionContext)
@@ -38,7 +38,7 @@ public record ExecutionContext(
             executionContext.Version,
             executionContext.Environment,
             executionContext.CorrelationId,
-            executionContext.SpanId.Value.ToHexString(),
+            executionContext.SpanId?.ToHexString(),
             executionContext.Claims.ToArray());
 }
 

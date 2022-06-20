@@ -52,7 +52,7 @@ public class all_dependencies
     protected static Version version = Version.NotSet;
     protected static Environment environment = Environment.Production;
     protected static CorrelationId correlation_id = Guid.Parse("720040db-3a60-4755-8d77-31ba4895be46");
-    protected static SpanId span_id = ActivitySpanId.CreateRandom();
+    protected static ActivitySpanId span_id = ActivitySpanId.CreateRandom();
     protected static Claims claims = Claims.Empty;
     protected static CultureInfo culture_info = CultureInfo.InvariantCulture;
 

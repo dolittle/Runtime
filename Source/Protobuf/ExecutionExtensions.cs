@@ -30,7 +30,7 @@ public static class ExecutionExtensions
             Environment = executionContext.Environment.Value,
             Version = executionContext.Version.ToProtobuf()
         };
-        if (executionContext.SpanId != SpanId.Empty)
+        if (executionContext.SpanId.HasValue)
         {
             var span = new byte[8];
             executionContext.SpanId.Value.CopyTo(span);
@@ -53,7 +53,7 @@ public static class ExecutionExtensions
             executionContext.Version.ToVersion(),
             executionContext.Environment,
             executionContext.CorrelationId.ToGuid(),
-            executionContext.HasSpanId ? ActivitySpanId.CreateFromBytes(executionContext.SpanId.Span) : SpanId.Empty,
+            executionContext.HasSpanId ? ActivitySpanId.CreateFromBytes(executionContext.SpanId.Span) : default,
             executionContext.Claims.ToClaims(),
             CultureInfo.InvariantCulture);
 }

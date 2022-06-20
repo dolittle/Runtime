@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Platform;
@@ -25,7 +26,7 @@ public class ExecutionContextCreator : ICreateExecutionContexts
     }
 
     /// <inheritdoc />
-    public ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, SpanId spanId, Claims claims)
+    public ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, ActivitySpanId? spanId, Claims claims)
         => new(
             _configuration.MicroserviceID,
             tenant,

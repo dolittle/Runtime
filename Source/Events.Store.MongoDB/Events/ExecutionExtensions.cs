@@ -26,7 +26,7 @@ public static class ExecutionExtensions
             executionContext.Version.ToVersion(),
             executionContext.Environment,
             executionContext.Correlation,
-            executionContext.SpanId == default || executionContext.SpanId.Length == 0 ? SpanId.Empty : ActivitySpanId.CreateFromBytes(executionContext.SpanId),
+            EmptyStoredSpanId(executionContext.SpanId) ? null : ActivitySpanId.CreateFromBytes(executionContext.SpanId),
             executionContext.Claims.ToClaims(),
             CultureInfo.InvariantCulture);
 
@@ -38,7 +38,7 @@ public static class ExecutionExtensions
     public static ExecutionContext ToStoreRepresentation(this Execution.ExecutionContext executionContext)
     {
         var span = new byte[8];
-        executionContext.SpanId.Value.CopyTo(span);
+        executionContext.SpanId?.CopyTo(span);
         return new ExecutionContext(
             executionContext.CorrelationId,
             span,
@@ -48,4 +48,6 @@ public static class ExecutionExtensions
             executionContext.Environment,
             executionContext.Claims.ToStoreRepresentation());
     }
+
+    static bool EmptyStoredSpanId(byte[] spanId) => spanId == null || spanId.Length == 0 || spanId.All(_ => _ == byte.MinValue);
 }

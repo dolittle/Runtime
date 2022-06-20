@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -16,7 +17,7 @@ public record ExecutionContext(
     Version Version,
     Environment Environment,
     CorrelationId CorrelationId,
-    SpanId SpanId,
+    ActivitySpanId? SpanId,
     Claims Claims,
     CultureInfo CultureInfo)
 {
