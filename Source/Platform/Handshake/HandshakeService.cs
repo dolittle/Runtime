@@ -3,11 +3,13 @@
 
 using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Diagnostics.OpenTelemetry;
 using Dolittle.Runtime.Handshake.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using static Dolittle.Runtime.Handshake.Contracts.Handshake;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
 using Failure = Dolittle.Protobuf.Contracts.Failure;
@@ -23,6 +25,7 @@ public class HandshakeService : HandshakeBase
     readonly IResolvePlatformEnvironment _platformEnvironment;
     readonly IRequestConverter _requestConverter;
     readonly IVerifyContractsCompatibility _contractsCompatibility;
+    readonly IOptions<OpenTelemetryConfiguration> _openTelemetryConfig;
     readonly ILogger _logger;
     
     readonly Version _runtimeVersion;
@@ -34,16 +37,19 @@ public class HandshakeService : HandshakeBase
     /// <param name="platformEnvironment">The <see cref="IResolvePlatformEnvironment"/> to use for resolving the current Runtime environment.</param>
     /// <param name="requestConverter">The <see cref="IRequestConverter"/> to use to parse incoming requests.</param>
     /// <param name="contractsCompatibility">The <see cref="IVerifyContractsCompatibility"/> to use to compare Contracts versions.</param>
+    /// <param name="openTelemetryConfig">The <see cref="openTelemetryConfig"/>.</param>
     /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
     public HandshakeService(
         IResolvePlatformEnvironment platformEnvironment,
         IRequestConverter requestConverter,
         IVerifyContractsCompatibility contractsCompatibility,
+        IOptions<OpenTelemetryConfiguration> openTelemetryConfig,
         ILogger logger)
     {
         _platformEnvironment = platformEnvironment;
         _requestConverter = requestConverter;
         _contractsCompatibility = contractsCompatibility;
+        _openTelemetryConfig = openTelemetryConfig;
         _logger = logger;
 
         _runtimeVersion = VersionInfo.CurrentVersion;
@@ -90,7 +96,8 @@ public class HandshakeService : HandshakeBase
                 parsedRequest.Attempt,
                 parsedRequest.TimeSpent);
 
-            return new HandshakeResponse
+            var otlpConfig = _openTelemetryConfig.Value;
+            var response = new HandshakeResponse
             {
                 RuntimeVersion = _runtimeVersion.ToProtobuf(),
                 ContractsVersion = _runtimeContractsVersion.ToProtobuf(),
@@ -102,6 +109,13 @@ public class HandshakeService : HandshakeBase
                 MicroserviceName = platformEnvironment.MicroserviceName.Value,
                 EnvironmentName = platformEnvironment.Environment.Value,
             };
+
+            if (otlpConfig.Tracing && !string.IsNullOrEmpty(otlpConfig.Endpoint))
+            {
+                response.OtlpEndpoint = otlpConfig.Endpoint;
+            }
+
+            return response;
         }
         catch (Exception ex)
         {

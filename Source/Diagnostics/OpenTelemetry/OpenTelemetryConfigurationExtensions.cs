@@ -11,7 +11,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Proto.OpenTelemetry;
 
-namespace Dolittle.Runtime.Server.OpenTelemetry;
+namespace Dolittle.Runtime.Diagnostics.OpenTelemetry;
 
 public static class OpenTelemetryConfigurationExtensions
 {

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
 using Machine.Specifications;
@@ -26,6 +27,7 @@ public class when_converting_execution_context_to_protobuf
             version,
             Environment.Development,
             Guid.NewGuid(),
+            ActivitySpanId.CreateRandom(),
             new Claims(new[]
             {
                 new Claim("First", "FirstValue", "FirstType"),
@@ -41,4 +43,5 @@ public class when_converting_execution_context_to_protobuf
     It should_hold_the_correct_version = () => result.Version.ToVersion().ShouldEqual(execution_context.Version);
     It should_hold_the_correct_correlation_id = () => result.CorrelationId.ToGuid().ShouldEqual(execution_context.CorrelationId.Value);
     It should_hold_the_correct_claims = () => result.Claims.ToClaims().ShouldEqual(execution_context.Claims);
+    It should_hold_the_correct_span_id = () => ActivitySpanId.CreateFromBytes(result.SpanId.Span).ShouldEqual(execution_context.SpanId!.Value);
 }

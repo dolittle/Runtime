@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Rudimentary;
@@ -18,9 +19,10 @@ public interface ICreateExecutionContexts
     /// <param name="tenant">The tenant to use in the created execution context.</param>
     /// <param name="version">The version to use in the created execution context.</param>
     /// <param name="correlation">The correlation to use in the created execution context.</param>
+    /// <param name="spanId">The span to use in the created execution context.</param>
     /// <param name="claims">The claims to use in the created execution context.</param>
     /// <returns>A new <see cref="ExecutionContext"/> with the specified fields.</returns>
-    ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, Claims claims);
+    ExecutionContext CreateFor(TenantId tenant, Version version, CorrelationId correlation, ActivitySpanId? spanId, Claims claims);
 
     /// <summary>
     /// Tries to create a new <see cref="ExecutionContext"/> from the requested <see cref="ExecutionContext"/>.

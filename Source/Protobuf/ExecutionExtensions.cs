@@ -1,8 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
+using Google.Protobuf;
 using ExecutionContextContract = Dolittle.Execution.Contracts.ExecutionContext;
 
 namespace Dolittle.Runtime.Protobuf;
@@ -27,6 +30,12 @@ public static class ExecutionExtensions
             Environment = executionContext.Environment.Value,
             Version = executionContext.Version.ToProtobuf()
         };
+        if (executionContext.SpanId.HasValue)
+        {
+            var span = new byte[8];
+            executionContext.SpanId.Value.CopyTo(span);
+            message.SpanId = ByteString.CopyFrom(span);
+        }
         message.Claims.AddRange(executionContext.Claims.ToProtobuf());
 
         return message;
@@ -44,6 +53,7 @@ public static class ExecutionExtensions
             executionContext.Version.ToVersion(),
             executionContext.Environment,
             executionContext.CorrelationId.ToGuid(),
+            executionContext.HasSpanId ? ActivitySpanId.CreateFromBytes(executionContext.SpanId.Span) : null,
             executionContext.Claims.ToClaims(),
             CultureInfo.InvariantCulture);
 }

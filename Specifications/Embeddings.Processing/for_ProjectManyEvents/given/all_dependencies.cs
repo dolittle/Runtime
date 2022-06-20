@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.Artifacts;
@@ -35,6 +36,7 @@ public class all_dependencies
             new Version(9, 8, 7),
             "production",
             Guid.Parse("28f65310-4902-4331-a373-9be8f9668b75"),
+            ActivitySpanId.CreateRandom(),
             Claims.Empty,
             CultureInfo.InvariantCulture);
         event_type = new Artifact(Guid.Parse("f323d03b-4ba9-4a06-823f-c2f82fa5fc89"), ArtifactGeneration.First);

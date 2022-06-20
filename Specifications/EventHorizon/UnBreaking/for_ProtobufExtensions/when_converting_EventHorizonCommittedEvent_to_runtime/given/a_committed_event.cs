@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Artifacts.Contracts;
 using Dolittle.Runtime.EventHorizon.Contracts;
@@ -30,6 +31,7 @@ public class a_committed_event
                 Version.NotSet, 
                 Environment.Development,
                 "141e5e37-4d58-4e23-a69b-124eb7b5b9de",
+                ActivitySpanId.CreateRandom(),
                 Claims.Empty,
                 CultureInfo.InvariantCulture).ToProtobuf(),
             EventSourceId = "an event source",

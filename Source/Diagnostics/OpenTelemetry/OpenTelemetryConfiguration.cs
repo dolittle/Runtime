@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Server.OpenTelemetry;
+namespace Dolittle.Runtime.Diagnostics.OpenTelemetry;
 
 [Configuration("opentelemetry")]
 public class OpenTelemetryConfiguration

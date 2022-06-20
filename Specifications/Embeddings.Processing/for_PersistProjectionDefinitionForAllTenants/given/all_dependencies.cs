@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -34,6 +35,7 @@ public class all_dependencies
             Version.NotSet,
             "env",
             "d5d48a8c-e638-414d-92da-1b6862c8d0e2",
+            ActivitySpanId.CreateRandom(),
             Claims.Empty,
             System.Globalization.CultureInfo.InvariantCulture);
         get_definitions = tenant => embedding_definitions_per_tenant[tenant].Object;

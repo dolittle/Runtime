@@ -21,7 +21,6 @@ public record CorrelationId(Guid Value) : ConceptAs<Guid>(Value)
     /// </summary>
     public static readonly CorrelationId System = Guid.Parse("868ff40f-a133-4d0f-bfdd-18d726181e01");
 
-
     /// <summary>
     /// Implicitly converts a <see cref="Guid" /> to an instance of <see cref="CorrelationId" />.
     /// </summary>
@@ -34,9 +33,4 @@ public record CorrelationId(Guid Value) : ConceptAs<Guid>(Value)
     /// <param name="value">The value to initialize the <see cref="CorrelationId" /> with.</param>
     public static implicit operator CorrelationId(string value) => new(Guid.Parse(value));
 
-    /// <summary>
-    /// Creates a new <see cref="CorrelationId" /> with a generated Guid value.
-    /// </summary>
-    /// <returns>A <see cref="CorrelationId" /> initialized with a random Guid value.</returns>
-    public static CorrelationId New() => Guid.NewGuid();
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Execution;
@@ -33,6 +34,7 @@ public class all_dependencies
             Version.NotSet,
             Environment.Development, 
             "4502e066-13e1-4cbf-b92e-d5de6faf58f5",
+            ActivitySpanId.CreateRandom(),
             Claims.Empty,
             CultureInfo.InvariantCulture);
 

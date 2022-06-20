@@ -7,9 +7,9 @@ using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.Configuration.Legacy;
 using Dolittle.Runtime.DependencyInversion.Building;
+using Dolittle.Runtime.Diagnostics.OpenTelemetry;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Metrics.Hosting;
-using Dolittle.Runtime.Server.OpenTelemetry;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
@@ -27,8 +27,6 @@ configBuilder.AddLegacyDolittleFiles();
 configBuilder.AddEnvironmentVariables();
 configBuilder.AddCommandLine(args);
 var config = configBuilder.Build();
-
-
 
 var host = Host.CreateDefaultBuilder(args)
     .UseDolittleServices()

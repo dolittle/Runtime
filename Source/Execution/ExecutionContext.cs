@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -16,10 +17,11 @@ public record ExecutionContext(
     Version Version,
     Environment Environment,
     CorrelationId CorrelationId,
+    ActivitySpanId? SpanId,
     Claims Claims,
     CultureInfo CultureInfo)
 {
     /// <inheritdoc/>
-    public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Claims: {Claims} CultureInfo: {CultureInfo}";
+    public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Span: {(SpanId.HasValue ? SpanId.Value : "NotSet")} Claims: {Claims} CultureInfo: {CultureInfo}";
 
 }

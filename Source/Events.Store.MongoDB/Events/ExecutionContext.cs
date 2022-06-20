@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Execution;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
 
@@ -17,14 +19,16 @@ public class ExecutionContext
     /// Initializes a new instance of the <see cref="ExecutionContext"/> class.
     /// </summary>
     /// <param name="correlation">The correlation.</param>
+    /// <param name="span">The 16 character hex string span id.</param>
     /// <param name="microservice">The microservice.</param>
     /// <param name="tenant">The tenant.</param>
     /// <param name="version">The version.</param>
     /// <param name="environment">The environment.</param>
     /// <param name="claims">The claims.</param>
-    public ExecutionContext(Guid correlation, Guid microservice, Guid tenant, Version version, string environment, IEnumerable<Claim> claims)
+    public ExecutionContext(Guid correlation, byte[] span, Guid microservice, Guid tenant, Version version, string environment, IEnumerable<Claim> claims)
     {
         Correlation = correlation;
+        SpanId = span;
         Microservice = microservice;
         Tenant = tenant;
         Version = version;
@@ -36,6 +40,12 @@ public class ExecutionContext
     /// Gets or sets the <see cref="CorrelationId"/>.
     /// </summary>
     public Guid Correlation { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the span id 16 character hex string.
+    /// </summary>
+    [BsonDefaultValue(new byte[]{0,0,0,0,0,0,0,0})]
+    public byte[] SpanId { get; set; }
 
     /// <summary>
     /// Gets or sets the producer <see cref="Microservice"/>.

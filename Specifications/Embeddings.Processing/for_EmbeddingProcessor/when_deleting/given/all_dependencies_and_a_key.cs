@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
@@ -44,6 +45,7 @@ public class all_dependencies_and_a_key : for_EmbeddingProcessor.given.all_depen
                 new Version(1, 2, 3),
                 "production",
                 Guid.Parse("99004ad1-0cbb-48b0-8e43-796e9c7c45a0"),
+                ActivitySpanId.CreateRandom(),
                 Claims.Empty,
                 CultureInfo.InvariantCulture),
             new Artifact("37e282a0-5597-4829-9508-3204f3adb92e", ArtifactGeneration.First),
