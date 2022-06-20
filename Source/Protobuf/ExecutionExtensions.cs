@@ -53,7 +53,7 @@ public static class ExecutionExtensions
             executionContext.Version.ToVersion(),
             executionContext.Environment,
             executionContext.CorrelationId.ToGuid(),
-            executionContext.HasSpanId ? ActivitySpanId.CreateFromBytes(executionContext.SpanId.Span) : default,
+            executionContext.HasSpanId ? ActivitySpanId.CreateFromBytes(executionContext.SpanId.Span) : null,
             executionContext.Claims.ToClaims(),
             CultureInfo.InvariantCulture);
 }
