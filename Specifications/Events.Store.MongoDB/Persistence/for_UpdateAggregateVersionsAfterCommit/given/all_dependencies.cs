@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -36,6 +37,7 @@ public class all_dependencies
             Version.NotSet,
             Environment.Development, 
             "61603e6d-4582-4e3b-a5ff-e3a868dbfa6d",
+            ActivitySpanId.CreateRandom(),
             Claims.Empty, 
             CultureInfo.InvariantCulture);
         session = new Mock<IClientSessionHandle>();

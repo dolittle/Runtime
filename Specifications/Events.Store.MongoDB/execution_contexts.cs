@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Execution;
@@ -21,6 +22,7 @@ public static class execution_contexts
             new Version(873112588, 241520971, 367002811, 1885758720, "something very random"),
             "somethign also very random",
             Guid.Parse("2fd440e7-84c6-4f88-a5f3-f8b5a038464f"),
+            ActivitySpanId.CreateRandom(),
             new Claims(new[] { new Execution.Claim("some very random name", "some very random value", "some very random value type") }),
             CultureInfo.InvariantCulture);
 }

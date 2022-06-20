@@ -70,7 +70,8 @@ public class ProjectionsService : ProjectionsBase
         {
             return;
         }
-        var (dispatcher, arguments) = tryConnect.Result;
+        using var dispatcher = tryConnect.Result.dispatcher;
+        var arguments = tryConnect.Result.arguments;
         var executionContext = arguments.ExecutionContext;
         var definition = arguments.ProjectionDefinition;
 

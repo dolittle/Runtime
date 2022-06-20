@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,6 +66,7 @@ public class all_dependencies
             Version.NotSet,
             "Environment",
             "14d2ce96-ada9-4446-8abb-6e12a49afd39",
+            ActivitySpanId.CreateRandom(),
             Execution.Claims.Empty,
             CultureInfo.InvariantCulture);
         execution_context_creator = new Mock<ICreateExecutionContexts>();
