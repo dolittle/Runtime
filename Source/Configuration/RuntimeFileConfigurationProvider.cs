@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
@@ -49,33 +50,33 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
     {
         foreach (var file in _legacyFilesProvider?.GetDirectoryContents("/") ?? Enumerable.Empty<IFileInfo>())
         {
-            MapLegacyDolittleFile(file.Name, _buildConfigurationFromFile(new ConfigurationBuilder(), file));
+            MapLegacyDolittleFile(Path.GetFileNameWithoutExtension(file.Name), _buildConfigurationFromFile(new ConfigurationBuilder(), file));
         }
     }
-    void MapLegacyDolittleFile(string file, IConfiguration config)
+    void MapLegacyDolittleFile(string fileNameWithoutExtension, IConfiguration config)
     {
-        switch (file)
+        switch (fileNameWithoutExtension)
         {
-            case "endpoints.json":
+            case "endpoints":
                 MapIntoRoot("endpoints", config);
                 break;
-            case "metrics.json":
+            case "metrics":
                 MapIntoRoot(ConfigurationPath.Combine("endpoints", "metrics"), config);
                 break;
-            case "platform.json":
+            case "platform":
                 MapIntoRoot("platform", config);
                 break;
-            case "microservices.json":
+            case "microservices":
                 MapIntoRoot("microservices", config);
                 break;
-            case "resources.json":
+            case "resources":
                 foreach (var key in Data.Keys.Where(_ => _.StartsWith(Constants.CombineWithDolittleConfigRoot("tenants"), StringComparison.InvariantCulture)))
                 {
                     Data.Remove(key);
                 }
                 MapResources(config);
                 break;
-            case "event-horizon-consents.json":
+            case "event-horizon-consents":
                 MapEventHorizonConsents(config);
                 break;
         }
