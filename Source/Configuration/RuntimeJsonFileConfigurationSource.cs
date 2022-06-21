@@ -9,7 +9,7 @@ using Microsoft.Extensions.FileProviders.Physical;
 namespace Dolittle.Runtime.Configuration;
 
 /// <summary>
-/// Represents an implementation of <see cref="IConfigurationSource"/> for the unified Dolittle microservice configuration file called `runtime.json`.
+/// Represents an implementation of <see cref="IConfigurationSource"/> for the Dolittle microservice configuration from the unified file `runtime.json`, and the legacy files in the `.dolittle` directory.
 /// </summary>
 public class RuntimeJsonFileConfigurationSource : IConfigurationSource
 {
