@@ -102,7 +102,7 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
     
     void MapResources(IConfiguration config)
     {
-        foreach (var key in Data.Keys.Where(_ => _.StartsWith(Constants.CombineWithDolittleConfigRoot("tenants"), StringComparison.InvariantCulture)))
+        foreach (var key in Data.Keys.Where(_ => _.StartsWith(Constants.CombineWithDolittleConfigRoot("tenants"), StringComparison.InvariantCulture)).ToArray())
         {
             Data.Remove(key);
         }
