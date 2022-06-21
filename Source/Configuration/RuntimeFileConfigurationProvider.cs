@@ -86,18 +86,8 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
     {
         foreach (var (key, value) in map)
         {
-            AddOrReplace(key, value);
+            Data[key] = value;
         }
-    }
-
-    void AddOrReplace(string key, string value)
-    {
-        if (Data.TryAdd(key, value))
-        {
-            return;
-        }
-        Data.Remove(key);
-        Data.Add(key, value);
     }
     
     void MapIntoRoot(string sectionRoot, IConfiguration config)
