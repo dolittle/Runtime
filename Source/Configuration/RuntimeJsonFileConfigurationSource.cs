@@ -16,13 +16,15 @@ public class RuntimeJsonFileConfigurationSource : IConfigurationSource
     /// <inheritdoc /> 
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
+        var runtimeConfigFile = new PhysicalFileInfo(new FileInfo(Path.GetFullPath("runtime.json")));
+
         IFileProvider? legacyFilesProvider = null;
         if (Directory.Exists(".dolittle"))
         {
             legacyFilesProvider = new PhysicalFileProvider(Path.GetFullPath(".dolittle"));
         }
 
-        return new RuntimeFileConfigurationProvider(new PhysicalFileInfo(new FileInfo(Path.GetFullPath("runtime.json"))), legacyFilesProvider, (builder, file) =>
+        return new RuntimeFileConfigurationProvider(runtimeConfigFile, legacyFilesProvider, (builder, file) =>
         {
             if (file.Exists)
             {
