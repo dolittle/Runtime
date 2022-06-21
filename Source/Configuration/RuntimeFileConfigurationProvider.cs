@@ -17,40 +17,49 @@ namespace Dolittle.Runtime.Configuration;
 /// </summary>
 public class RuntimeFileConfigurationProvider : ConfigurationProvider
 {
-    readonly IFileInfo _runtimeConfigFile;
-    readonly IFileProvider? _legacyFilesProvider;
-    readonly Func<IConfigurationBuilder, IFileInfo, IConfigurationRoot> _buildConfigurationFromFile;
+    readonly IFileProvider _dolittleConfigurationFilesProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RuntimeFileConfigurationProvider"/> class.
     /// </summary>
-    /// <param name="runtimeConfigFile"></param>
-    /// <param name="legacyFilesProvider"></param>
-    /// <param name="buildConfigurationFromFile"></param>
-    public RuntimeFileConfigurationProvider(IFileInfo runtimeConfigFile, IFileProvider? legacyFilesProvider, Func<IConfigurationBuilder, IFileInfo, IConfigurationRoot> buildConfigurationFromFile)
+    /// <param name="dolittleConfigurationFilesProvider"></param>
+    public RuntimeFileConfigurationProvider(IFileProvider dolittleConfigurationFilesProvider)
     {
-        _runtimeConfigFile = runtimeConfigFile;
-        _legacyFilesProvider = legacyFilesProvider;
-        _buildConfigurationFromFile = buildConfigurationFromFile;
+        _dolittleConfigurationFilesProvider = dolittleConfigurationFilesProvider;
     }
 
     /// <inheritdoc />
     public override void Load()
     {
-        MapRuntimeConfigFile();
-        MapLegacyDolittleFiles();
+        var files = _dolittleConfigurationFilesProvider.GetDirectoryContents("/");
+        var runtimeConfigFile = files.SingleOrDefault(file => Path.GetFileNameWithoutExtension(file.Name) == "runtime");
+        if (runtimeConfigFile is not null)
+        {
+            MapRuntimeConfigFile(runtimeConfigFile);
+        }
+        MapLegacyDolittleFiles(files);
     }
 
-    void MapRuntimeConfigFile()
+    static IConfigurationRoot BuildConfigFromFile(IFileInfo file)
     {
-        AddAllFromMap(GetData(Constants.DolittleConfigSectionRoot, _buildConfigurationFromFile(new ConfigurationBuilder(), _runtimeConfigFile)));
+        var builder = new ConfigurationBuilder();
+        if (file.Exists)
+        {
+            builder.AddYamlFile(file.PhysicalPath);
+        }
+        return builder.Build();
+    }
+
+    void MapRuntimeConfigFile(IFileInfo file)
+    {
+        SetAllFromMap(GetData(Constants.DolittleConfigSectionRoot, BuildConfigFromFile(file)));
     }
     
-    void MapLegacyDolittleFiles()
+    void MapLegacyDolittleFiles(IEnumerable<IFileInfo> files)
     {
-        foreach (var file in _legacyFilesProvider?.GetDirectoryContents("/") ?? Enumerable.Empty<IFileInfo>())
+        foreach (var file in files)
         {
-            MapLegacyDolittleFile(Path.GetFileNameWithoutExtension(file.Name), _buildConfigurationFromFile(new ConfigurationBuilder(), file));
+            MapLegacyDolittleFile(Path.GetFileNameWithoutExtension(file.Name), BuildConfigFromFile(file));
         }
     }
     void MapLegacyDolittleFile(string fileNameWithoutExtension, IConfiguration config)
@@ -70,10 +79,6 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
                 MapIntoRoot("microservices", config);
                 break;
             case "resources":
-                foreach (var key in Data.Keys.Where(_ => _.StartsWith(Constants.CombineWithDolittleConfigRoot("tenants"), StringComparison.InvariantCulture)))
-                {
-                    Data.Remove(key);
-                }
                 MapResources(config);
                 break;
             case "event-horizon-consents":
@@ -82,7 +87,7 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
         }
     }
 
-    void AddAllFromMap(IEnumerable<KeyValuePair<string, string>> map)
+    void SetAllFromMap(IEnumerable<KeyValuePair<string, string>> map)
     {
         foreach (var (key, value) in map)
         {
@@ -92,14 +97,18 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
     
     void MapIntoRoot(string sectionRoot, IConfiguration config)
     {
-        AddAllFromMap(GetData(Constants.CombineWithDolittleConfigRoot(sectionRoot), config));
+        SetAllFromMap(GetData(Constants.CombineWithDolittleConfigRoot(sectionRoot), config));
     }
     
     void MapResources(IConfiguration config)
     {
+        foreach (var key in Data.Keys.Where(_ => _.StartsWith(Constants.CombineWithDolittleConfigRoot("tenants"), StringComparison.InvariantCulture)))
+        {
+            Data.Remove(key);
+        }
         foreach (var resourceForTenant in config.GetChildren().Select(_ => config.GetSection(_.Key)))
         {
-            AddAllFromMap(GetData(
+            SetAllFromMap(GetData(
                 Constants.CombineWithDolittleConfigRoot("tenants", resourceForTenant.Key, "resources"),
                 resourceForTenant));
         }
@@ -120,10 +129,10 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
                 {
                     var consent = consentsPerConsumerMicroserviceArray[i];
                     var consentPrefix = ConfigurationPath.Combine(consentSectionPrefix, $"{i}");
-                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "consumerTenant"), consent["tenant"]);
-                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "stream"), consent["stream"]);
-                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "partition"), consent["partition"]);
-                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "consent"), consent["consent"]);
+                    Data[ConfigurationPath.Combine(consentPrefix, "consumerTenant")] = consent["tenant"];
+                    Data[ConfigurationPath.Combine(consentPrefix, "stream")] = consent["stream"];
+                    Data[ConfigurationPath.Combine(consentPrefix, "partition")] = consent["partition"];
+                    Data[ConfigurationPath.Combine(consentPrefix, "consent")] = consent["consent"];
                 }
             }
         }

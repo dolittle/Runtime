@@ -24,4 +24,12 @@
         <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".dolittle\runtime.yml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
