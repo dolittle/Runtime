@@ -84,10 +84,20 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
 
     void AddAllFromMap(IEnumerable<KeyValuePair<string, string>> map)
     {
-        foreach (var kvp in map)
+        foreach (var (key, value) in map)
         {
-            Data.Add(kvp);
+            AddOrReplace(key, value);
         }
+    }
+
+    void AddOrReplace(string key, string value)
+    {
+        if (Data.TryAdd(key, value))
+        {
+            return;
+        }
+        Data.Remove(key);
+        Data.Add(key, value);
     }
     
     void MapIntoRoot(string sectionRoot, IConfiguration config)
@@ -99,12 +109,9 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
     {
         foreach (var resourceForTenant in config.GetChildren().Select(_ => config.GetSection(_.Key)))
         {
-            foreach (var kvp in GetData(
-                         Constants.CombineWithDolittleConfigRoot("tenants", resourceForTenant.Key, "resources"),
-                         resourceForTenant))
-            {
-                Data.Add(kvp);
-            }
+            AddAllFromMap(GetData(
+                Constants.CombineWithDolittleConfigRoot("tenants", resourceForTenant.Key, "resources"),
+                resourceForTenant));
         }
     }
 
@@ -123,10 +130,10 @@ public class RuntimeFileConfigurationProvider : ConfigurationProvider
                 {
                     var consent = consentsPerConsumerMicroserviceArray[i];
                     var consentPrefix = ConfigurationPath.Combine(consentSectionPrefix, $"{i}");
-                    Data.Add(ConfigurationPath.Combine(consentPrefix, "consumerTenant"), consent["tenant"]);
-                    Data.Add(ConfigurationPath.Combine(consentPrefix, "stream"), consent["stream"]);
-                    Data.Add(ConfigurationPath.Combine(consentPrefix, "partition"), consent["partition"]);
-                    Data.Add(ConfigurationPath.Combine(consentPrefix, "consent"), consent["consent"]);
+                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "consumerTenant"), consent["tenant"]);
+                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "stream"), consent["stream"]);
+                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "partition"), consent["partition"]);
+                    AddOrReplace(ConfigurationPath.Combine(consentPrefix, "consent"), consent["consent"]);
                 }
             }
         }
