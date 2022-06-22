@@ -9,6 +9,7 @@ endpoints:
     port: 9700
   web:
     port: 8001
+
 platform:
   applicationName: "[Not Set]"
   applicationID: 4fe9492c-1d19-4e6b-be72-03208789906e
@@ -17,7 +18,9 @@ platform:
   customerName: "[Not Set]"
   customerID: ca900ec9-bae8-462e-b262-fa3efc825ca8
   environment: Development
-  microservices: {}
+
+microservices: {}
+
 tenants:
   445f8ea8-1a6f-40d7-b2fc-796dba92dc44:
     resources:
