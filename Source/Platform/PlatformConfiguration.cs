@@ -9,19 +9,27 @@ namespace Dolittle.Runtime.Platform;
 /// <summary>
 /// Represents the configuration of the Runtime context from the Platform.
 /// </summary>
-/// <param name="CustomerID">The unique identifier of the customer the Runtime is executing for.</param>
-/// <param name="ApplicationID">The unique identifier of the application the Runtime is executing for.</param>
-/// <param name="MicroserviceID">The unique identifier of the microservice the Runtime is executing for.</param>
-/// <param name="CustomerName">The name of the customer the Runtime is executing for.</param>
-/// <param name="ApplicationName">The name of the application the Runtime is executing for.</param>
-/// <param name="MicroserviceName">The name of the microservice the Runtime is executing for.</param>
-/// <param name="Environment">The name of the environment the Runtime is executing for.</param>
 [Configuration("platform")]
-public record PlatformConfiguration(
-    CustomerId CustomerID,
-    ApplicationId ApplicationID,
-    MicroserviceId MicroserviceID,
-    CustomerName CustomerName,
-    ApplicationName ApplicationName,
-    MicroserviceName MicroserviceName,
-    Environment Environment);
+public class PlatformConfiguration
+{
+    /// <summary>The unique identifier of the customer the Runtime is executing for.</summary>
+    public CustomerId CustomerID { get; init; } = CustomerId.NotSet;
+
+    /// <summary>The unique identifier of the application the Runtime is executing for.</summary>
+    public ApplicationId ApplicationID { get; init; } = ApplicationId.NotSet;
+
+    /// <summary>The unique identifier of the microservice the Runtime is executing for.</summary>
+    public MicroserviceId MicroserviceID { get; init; } = MicroserviceId.NotSet;
+
+    /// <summary>The name of the customer the Runtime is executing for.</summary>
+    public CustomerName CustomerName { get; init; } = CustomerName.NotSet;
+
+    /// <summary>The name of the application the Runtime is executing for.</summary>
+    public ApplicationName ApplicationName { get; init; } = ApplicationName.NotSet;
+
+    /// <summary>The name of the microservice the Runtime is executing for.</summary>
+    public MicroserviceName MicroserviceName { get; init; } = MicroserviceName.NotSet;
+
+    /// <summary>The name of the environment the Runtime is executing for.</summary>
+    public Environment Environment { get; init; } = Environment.Development;
+}
