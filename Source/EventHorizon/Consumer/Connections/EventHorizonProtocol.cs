@@ -6,18 +6,18 @@ using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Services.Clients;
 using Dolittle.Services.Contracts;
 using Grpc.Core;
-using Client = Dolittle.Runtime.EventHorizon.Contracts.Consumer.ConsumerClient;
+using ConsumerClient = Dolittle.Runtime.EventHorizon.Contracts.Consumer.ConsumerClient;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
 
 /// <summary>
 /// Represents an implementation of the event horizon reverse call protocol.
 /// </summary>
-public class EventHorizonProtocol : IReverseCallClientProtocol<Client, EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>
+public class EventHorizonProtocol : IReverseCallClientProtocol<ConsumerClient, EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>
 {
 
     /// <inheritdoc/>
-    public AsyncDuplexStreamingCall<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage> Call(Client client, CallOptions callOptions)
+    public AsyncDuplexStreamingCall<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage> Call(ConsumerClient client, CallOptions callOptions)
         => client.Subscribe(callOptions);
 
     /// <inheritdoc/>
