@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
 /// <summary>
 /// Represents an event stored in a stream in the MongoDB event store.
 /// </summary>
-public class StreamEvent
+public class StreamEvent : IStoredEvent
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamEvent"/> class.
@@ -76,4 +76,18 @@ public class StreamEvent
     /// Gets or sets the domain specific event data.
     /// </summary>
     public BsonDocument Content { get; set; }
+
+    
+    /// <inheritdoc/>
+    public EventLogSequenceNumber GetEventLogSequenceNumber()
+        => Metadata.EventLogSequenceNumber;
+
+    /// <inheritdoc/>
+    public bool IsTheSameAs(IStoredEvent otherEvent)
+        => GetEventLogSequenceNumber().Equals(otherEvent.GetEventLogSequenceNumber())
+            && otherEvent is StreamEvent streamEvent
+            && Metadata.TypeId == streamEvent.Metadata.TypeId
+            && Metadata.TypeGeneration == streamEvent.Metadata.TypeGeneration
+            && Metadata.EventSource == streamEvent.Metadata.EventSource
+            && Partition == streamEvent.Partition;
 }

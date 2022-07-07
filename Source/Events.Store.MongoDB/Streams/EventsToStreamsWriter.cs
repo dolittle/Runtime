@@ -24,6 +24,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     readonly IStreams _streams;
     readonly IEventConverter _eventConverter;
     readonly IStreamEventWatcher _streamWatcher;
+    readonly IGetUniqueEventsToWrite _uniqueEventsToWriteGetter;
     readonly ILogger _logger;
 
     /// <summary>
@@ -32,12 +33,14 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
+    /// <param name="uniqueEventsToWriteGetter">The <see cref="IGetUniqueEventsToWrite"/>.</param>
     /// <param name="logger">An <see cref="ILogger"/>.</param>
-    public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger logger)
+    public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, IGetUniqueEventsToWrite uniqueEventsToWriteGetter, ILogger logger)
     {
         _streams = streams;
         _eventConverter = eventConverter;
         _streamWatcher = streamWatcher;
+        _uniqueEventsToWriteGetter = uniqueEventsToWriteGetter;
         _logger = logger;
     }
 
@@ -45,32 +48,52 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
     {
         _logger.WritingEventToStream(@event.EventLogSequenceNumber, stream, scope);
-        var writtenStreamPosition = await Write(
-            await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
-            _streamFilter,
-            streamPosition =>
-                @event is CommittedExternalEvent externalEvent ?
-                    _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition, partition)
-                    : _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
-            cancellationToken).ConfigureAwait(false);
-        _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
+        var collection = await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var writtenStreamPosition = await Write(
+                collection,
+                _streamFilter,
+                streamPosition =>
+                    @event is CommittedExternalEvent externalEvent ?
+                        _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition, partition)
+                        : _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
+                cancellationToken).ConfigureAwait(false);
+            _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
+
+        }
+        catch (MongoDuplicateKeyException)
+        {
+            var lastStoredEvent = await collection
+                .Find(_streamFilter.Empty)
+                .Sort(Builders<Events.StreamEvent>.Sort.Descending(_ => _.StreamPosition))
+                .Limit(1)
+                .SingleAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc />
     public async Task Write(IEnumerable<(CommittedEvent, PartitionId)> events, ScopeId scope, StreamId stream, CancellationToken cancellationToken)
     {
-        var writtenStreamPosition = await Write(
-            await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
-            _streamFilter,
-            streamPosition =>
-            {
-                return events.Select((eventAndPartition, i) =>
-                    eventAndPartition.Item1 is CommittedExternalEvent externalEvent ?
-                        _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition + (ulong)i, eventAndPartition.Item2)
-                        : _eventConverter.ToStoreStreamEvent(eventAndPartition.Item1, streamPosition + (ulong)i, eventAndPartition.Item2));
-            },
-            cancellationToken).ConfigureAwait(false);
-        _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
+        try
+        {
+            var writtenStreamPosition = await Write(
+                await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
+                _streamFilter,
+                streamPosition =>
+                {
+                    return events.Select((eventAndPartition, i) =>
+                        eventAndPartition.Item1 is CommittedExternalEvent externalEvent ?
+                            _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition + (ulong)i, eventAndPartition.Item2)
+                            : _eventConverter.ToStoreStreamEvent(eventAndPartition.Item1, streamPosition + (ulong)i, eventAndPartition.Item2));
+                },
+                cancellationToken).ConfigureAwait(false);
+            _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
+        }
+        catch (MongoDuplicateKeyException e)
+        {
+            
+        }
     }
 
     /// <inheritdoc/>
@@ -79,18 +102,19 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         FilterDefinitionBuilder<TEvent> filter,
         Func<StreamPosition, TEvent> createStoreEvent,
         CancellationToken cancellationToken)
-        where TEvent : class
+        where TEvent : IStoredEvent
     {
         StreamPosition streamPosition = null;
         try
         {
-            using var session = await _streams.StartSessionAsync().ConfigureAwait(false);
+            using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             await session.WithTransactionAsync(
                 async (transaction, cancellationToken) =>
                 {
-                    streamPosition = (ulong)await stream.CountDocumentsAsync(
+                    streamPosition = (ulong) await stream.CountDocumentsAsync(
                         transaction,
-                        filter.Empty).ConfigureAwait(false);
+                        filter.Empty,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
 
                     await stream.InsertOneAsync(
                         transaction,
@@ -109,7 +133,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
 
     /// <inheritdoc />
     public async Task<StreamPosition> Write<TEvent>(IMongoCollection<TEvent> stream, FilterDefinitionBuilder<TEvent> filter, Func<StreamPosition, IEnumerable<TEvent>> createStoreEvents, CancellationToken cancellationToken)
-        where TEvent : class
+        where TEvent : IStoredEvent
     {
         StreamPosition streamPosition = null;
         try
@@ -118,16 +142,23 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             return await session.WithTransactionAsync(
                 async (transaction, cancellationToken) =>
                 {
-                    streamPosition = (ulong)await stream.CountDocumentsAsync(
+                    streamPosition = (ulong) await stream.CountDocumentsAsync(
                         transaction,
                         filter.Empty, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                    var eventsToWrite = createStoreEvents(streamPosition).ToArray(); 
-                    await stream.InsertManyAsync(
-                        transaction,
-                        eventsToWrite,
-                        cancellationToken: cancellationToken).ConfigureAwait(false);
-                    return streamPosition + (ulong)(eventsToWrite.Length - 1);
+                    var eventsToWrite = createStoreEvents(streamPosition).ToArray();
+                    try
+                    {
+                        await stream.InsertManyAsync(
+                            transaction,
+                            eventsToWrite,
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (MongoDuplicateKeyException)
+                    {
+                        
+                    }
+                    return streamPosition + (ulong) (eventsToWrite.Length - 1);
                 },
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
@@ -136,4 +167,38 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
     }
+
+    async Task WriteEvents<TEvent>(IMongoCollection<TEvent> stream, IReadOnlyList<TEvent> eventsToWrite, IClientSessionHandle transaction, CancellationToken cancellationToken)
+        where TEvent : IStoredEvent
+    {
+        Task WriteToCollection(IReadOnlyList<TEvent> events) => events.Count switch
+        {
+            0 => Task.CompletedTask,
+            1 => stream.InsertOneAsync(transaction, events[0], cancellationToken: cancellationToken),
+            _ => stream.InsertManyAsync(transaction, events, cancellationToken: cancellationToken)
+        };
+        
+        try
+        {
+            await WriteToCollection(eventsToWrite).ConfigureAwait(false);
+        }
+        catch (MongoDuplicateKeyException)
+        {
+            var storedEvents = await GetStoredEvents(stream, eventsToWrite, transaction, cancellationToken).ConfigureAwait(false);
+            if (!_uniqueEventsToWriteGetter.TryGet(eventsToWrite, storedEvents, out eventsToWrite, out var duplicateEventLogSequenceNumber))
+            {
+                throw new EventWithEventLogSequenceNumberAlreadyExistsInStream(duplicateEventLogSequenceNumber, stream.CollectionNamespace.CollectionName);
+            }
+            await WriteToCollection(eventsToWrite).ConfigureAwait(false);
+        }
+    }
+
+    static Task<List<TEvent>> GetStoredEvents<TEvent>(IMongoCollection<TEvent> stream, IReadOnlyList<TEvent> eventsToWrite, IClientSessionHandle transaction, CancellationToken cancellationToken)
+        where TEvent : IStoredEvent
+        => stream
+            .Find(Builders<TEvent>.Filter.Gte(_ => _.GetEventLogSequenceNumber().Value, eventsToWrite[0].GetEventLogSequenceNumber().Value)
+                    & Builders<TEvent>.Filter.Lte(_ => _.GetEventLogSequenceNumber().Value, eventsToWrite[^1].GetEventLogSequenceNumber().Value))
+            .SortByDescending(_ => _.GetEventLogSequenceNumber().Value)
+            .Limit(eventsToWrite.Count)
+            .ToListAsync(cancellationToken);
 }
