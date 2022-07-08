@@ -66,5 +66,4 @@ public static class a_stream_event
 
         public static implicit operator Events.StreamEvent(builder builder) => builder.build();
     }
-    
 }
