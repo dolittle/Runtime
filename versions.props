@@ -21,7 +21,7 @@
         <MongoDBOpenTelemetryVersion>1.0.0</MongoDBOpenTelemetryVersion>
         <MoqVersion>4.13.*</MoqVersion>
         <NetEscapadesYaml>2.2.0</NetEscapadesYaml>
-        <NewtonsoftVersion>12.0.3</NewtonsoftVersion>
+        <NewtonsoftVersion>13.0.1</NewtonsoftVersion>
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>5.0.2</PrometheusVersion>
