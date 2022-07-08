@@ -79,41 +79,62 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             1 => stream.InsertOneAsync(transaction, events[0], cancellationToken: cancellationToken),
             _ => stream.InsertManyAsync(transaction, events, cancellationToken: cancellationToken)
         };
-        
+
         try
         {
             using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            return await session.WithTransactionAsync(
-                async (transaction, cancellationToken) =>
-                {
-                    var streamPosition = (ulong) await stream.CountDocumentsAsync(
-                        transaction,
-                        Builders<TEvent>.Filter.Empty,
-                        cancellationToken: cancellationToken).ConfigureAwait(false);
-                    var eventsToWrite = createEventsToWrite(streamPosition).ToList();
-                    try
-                    {
-                        await WriteToCollection(eventsToWrite, transaction, cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (MongoDuplicateKeyException) when (typeof(TEvent) == typeof(Events.StreamEvent))
-                    {
-                        var streamEventsToWrite = eventsToWrite.Cast<Events.StreamEvent>().ToList(); 
-                        var storedEvents = await GetStoredEventStreamHeadOfStreamToWrite((IMongoCollection<Events.StreamEvent>)stream, streamEventsToWrite, transaction, cancellationToken).ConfigureAwait(false);
-                        if (!CheckIfStoredEventsIsPrefixOfEventsToWrite(streamEventsToWrite, storedEvents))
-                        {
-                            throw;
-                        }
-
-                        eventsToWrite = eventsToWrite.Skip(storedEvents.Count).ToList();
-                        await WriteToCollection(eventsToWrite, transaction, cancellationToken).ConfigureAwait(false);
-                    }
-                    return streamPosition + (ulong) (eventsToWrite.Count - 1);
-                },
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+            try
+            {
+                session.StartTransaction();
+                var streamPosition = (ulong) await stream.CountDocumentsAsync(
+                    session,
+                    Builders<TEvent>.Filter.Empty,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                var eventsToWrite = createEventsToWrite(streamPosition).ToList();
+                await WriteToCollection(eventsToWrite, session, cancellationToken).ConfigureAwait(false);
+                await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
+                return streamPosition + (ulong) (eventsToWrite.Count - 1);
+            }
+            catch
+            {
+                await session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
         }
         catch (MongoWaitQueueFullException ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+        catch (Exception ex) when (typeof(TEvent) == typeof(Events.StreamEvent) && (ex is MongoDuplicateKeyException || (ex is MongoBulkWriteException bulkException && bulkException.Message.Contains("duplicate key error"))))
+        {
+            using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            try
+            {
+                session.StartTransaction();
+                var streamPosition = (ulong) await stream.CountDocumentsAsync(
+                    session,
+                    Builders<TEvent>.Filter.Empty,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                var eventsToWrite = createEventsToWrite(streamPosition).ToList();
+                var streamEventsToWrite = eventsToWrite.Cast<Events.StreamEvent>().ToList();
+                var storedEvents = await GetStoredEventStreamHeadOfStreamToWrite((IMongoCollection<Events.StreamEvent>) stream, streamEventsToWrite, session, cancellationToken).ConfigureAwait(false);
+        
+                if (!CheckIfStoredEventsIsPrefixOfEventsToWrite(streamEventsToWrite, storedEvents))
+                {
+                    throw;
+                }
+        
+                eventsToWrite = eventsToWrite.Skip(storedEvents.Count).ToList();
+                await WriteToCollection(eventsToWrite, session, cancellationToken).ConfigureAwait(false);
+        
+                await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
+                return streamPosition + (ulong) (eventsToWrite.Count - 1);
+            }
+            catch
+            {
+                await session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
         }
     }
 

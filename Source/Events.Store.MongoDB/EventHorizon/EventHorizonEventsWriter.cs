@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 /// </summary>
 public class EventHorizonEventsWriter : IWriteEventHorizonEvents
 {
-    readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
     readonly IStreams _streams;
     readonly IWriteEventsToStreamCollection _eventsToStreamsWriter;
     readonly IEventConverter _eventConverter;

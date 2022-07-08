@@ -33,7 +33,6 @@ public class EventsToPublicStreamsWriter : IWriteEventsToPublicStreams
     /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreamCollection" />.</param>
     /// <param name="eventConverter">THe <see cref="IEventConverter" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
-    /// <param name="logger">The <see cref="ILogger" />.</param>
     public EventsToPublicStreamsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, IStreamEventWatcher streamWatcher)
     {
         _streamWatcher = streamWatcher;
