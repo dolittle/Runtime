@@ -1,3 +1,18 @@
+# [8.4.0] - 2022-7-8 [PR: #699](https://github.com/dolittle/Runtime/pull/699)
+## Summary
+
+Adds support for a unified json configuration file called `runtime.json` but stil supports the old legacy configuration files under the .dolittle folder. Legacy configurations under the .dolittle folder will overwrite configurations provided in the `runtime.json` configuration file
+
+### Added
+
+- Configuration provider for a `runtime.json` file
+- A default `runtime.json` file for default config similar to what we had before under the .dolittle folder
+
+### Deprecated
+
+- Configuration files under the .dolittle folder
+
+
 # [8.3.0] - 2022-6-20 [PR: #700](https://github.com/dolittle/Runtime/pull/700)
 ## Summary
 
