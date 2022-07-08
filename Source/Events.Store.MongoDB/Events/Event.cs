@@ -75,8 +75,8 @@ public class Event : IStoredEvent
     /// <inheritdoc/>
     public bool IsTheSameAs(IStoredEvent otherEvent)
         => GetEventLogSequenceNumber().Equals(otherEvent.GetEventLogSequenceNumber())
-            && otherEvent is StreamEvent streamEvent
-            && Metadata.TypeId == streamEvent.Metadata.TypeId
-            && Metadata.TypeGeneration == streamEvent.Metadata.TypeGeneration
-            && Metadata.EventSource == streamEvent.Metadata.EventSource;
+            && otherEvent is Event otherEventLogEvent
+            && Metadata.TypeId == otherEventLogEvent.Metadata.TypeId
+            && Metadata.TypeGeneration == otherEventLogEvent.Metadata.TypeGeneration
+            && Metadata.EventSource == otherEventLogEvent.Metadata.EventSource;
 }
