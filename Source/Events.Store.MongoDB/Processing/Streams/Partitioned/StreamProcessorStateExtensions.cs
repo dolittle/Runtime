@@ -1,5 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using runtime = Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned;
