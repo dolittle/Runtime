@@ -144,23 +144,6 @@ public class EventHandler : IEventHandler
         {
             return ex;
         }
-
-        async Task ValidateFilter()
-        {
-            _logger.ValidatingFilter(FilterDefinition.TargetStream);
-            var filterValidationResults = await _filterValidator.Validate(GetFilterProcessor, _cancellationTokenSource.Token).ConfigureAwait(false);
-
-            if (filterValidationResults.Any(_ => !_.Value.Succeeded))
-            {
-                var firstFailedValidation = filterValidationResults.First(_ => !_.Value.Succeeded).Value;
-                _logger.FilterValidationFailed(FilterDefinition.TargetStream, firstFailedValidation.FailureReason);
-                throw new FilterValidationFailed(FilterDefinition.TargetStream, firstFailedValidation.FailureReason);
-            }
-
-            var filteredStreamDefinition = new StreamDefinition(FilterDefinition);
-            _logger.PersistingStreamDefinition(filteredStreamDefinition.StreamId);
-            await _streamDefinitions.Persist(Scope, filteredStreamDefinition, _cancellationTokenSource.Token).ConfigureAwait(false);
-        }
     }
 
     /// <inheritdoc/>
