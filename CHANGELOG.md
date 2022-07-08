@@ -1,3 +1,13 @@
+# [8.4.1] - 2022-7-8 [PR: #704](https://github.com/dolittle/Runtime/pull/704)
+## Summary
+
+There could occur an issue when a filter would try to write the same event to a stream multiple times. To fix this we catch the duplicate key exception and tries to figure out which events to write.
+
+### Fixed
+
+- Issue where filter tries to write the same event to a stream forever
+
+
 # [8.4.0] - 2022-7-8 [PR: #699](https://github.com/dolittle/Runtime/pull/699)
 ## Summary
 
