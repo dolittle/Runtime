@@ -3,31 +3,30 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing;
+
+/// <summary>
+/// Defines the processing result.
+/// </summary>
+public interface IProcessingResult
 {
     /// <summary>
-    /// Defines the processing result.
+    /// Gets a value indicating whether processing succeeded.
     /// </summary>
-    public interface IProcessingResult
-    {
-        /// <summary>
-        /// Gets a value indicating whether processing succeeded.
-        /// </summary>
-        bool Succeeded { get; }
+    bool Succeeded { get; }
 
-        /// <summary>
-        /// Gets the reason for why processing failed.
-        /// </summary>
-        string FailureReason { get; }
+    /// <summary>
+    /// Gets the reason for why processing failed.
+    /// </summary>
+    string FailureReason { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether to retry processing.
-        /// </summary>
-        bool Retry { get; }
+    /// <summary>
+    /// Gets a value indicating whether to retry processing.
+    /// </summary>
+    bool Retry { get; }
 
-        /// <summary>
-        /// Gets the retry timeout <see cref="TimeSpan" />.
-        /// </summary>
-        TimeSpan RetryTimeout { get; }
-    }
+    /// <summary>
+    /// Gets the retry timeout <see cref="TimeSpan" />.
+    /// </summary>
+    TimeSpan RetryTimeout { get; }
 }

@@ -5,7 +5,7 @@ weight: 10
 repository: https://github.com/dolittle/Runtime
 ---
 
-In event-driven systems it is usually not enough to just say that an [Event]({{< ref "events.md" >}}) occurred. You'd expect that something should happen as a result of that event occurring as well.
+In event-sourced systems it is usually not enough to just say that an [Event]({{< ref "events.md" >}}) occurred. You'd expect that something should happen as a result of that event occurring as well.
 
 In the [Runtime]({{< ref "overview.md" >}}) we can register 2 different processors that can process events; [Event Handlers]({{< ref "#event-handlers">}}) and [Filters]({{< ref "#filters">}}).
 They take in a [Stream]({{< ref "streams" >}}) of events as an input and does something to each individual event.
@@ -43,11 +43,35 @@ The event handler is a combination of a filter and an event processor. It is ide
 
 The event handler's filter is filtering events based on the [`EventType`]({{< ref "events.md#event-type" >}}) that the event handler handles.
 
-Event handlers can be either partitioned or unpartitioned. Partitioned event handlers uses, by default, the [`EventSourceId`]({{< ref "event_sourcing.md#event-source-id" >}}) of each event as the partition id. The filter follows the same rules [for streams]({{< ref "streams#rules" >}}) as other filters.
+Event handlers can be either partitioned or unpartitioned. Partitioned event handlers uses, by default, the [`EventSourceId`]({{< ref "event_sourcing#event-source-id" >}}) of each event as the partition id. The filter follows the same rules [for streams]({{< ref "streams#rules" >}}) as other filters.
 
+## Changes to event handlers
 
-{{< alert title="Changing event handlers" color="warning" >}}
-The event handler registration fails if your event handler suddenly stops handling an event type that it has already handled, or starts handling a new event type that has already occurred in the event log.
+As event handlers create a stream based on the types of events they handles, they have to uphold the [rules of streams]({{< ref "streams#rules" >}}). Every time an event handler is registered the Runtime will check that these rules are upheld and that the event handlers definition wouldn't invalidate the already existing stream. Most common ways of breaking the rules are:
+
+- The event handler stops handling an event type that it has already handled. This would mean that events would have to be _removed_ from the stream, breaking the _append-only_ rule.
+
+![Event Handler creates an invalid stream by removing an already handled event type](/images/concepts/eventhandler_removed.png)
+- The event handler starts handling a new event type that has already occurred in the event log. This would mean changing the _ordering_ of events in the streams and break the _append-only_ rule.
+
+![Event Handler creates an invalid stream by adding a new event type](/images/concepts/eventhandler_added.png)
+
+It is possible to add a new type of event into the handler if it doesn't invalidate the stream. For example, you can add a new event type to the handler if it hasn't ever been committed _before_ any of the other types of events into the [event log]({{< ref "event_store#event-log" >}}).
+
+### Replaying events
+
+An event handler is meant to handle each events only once, however if you for some reason need to "replay" or "re-handle" all or some of the events for an event handler, you can use the [Dolittle CLI]({{< ref "docs/reference/cli" >}}) to initiate this while the microservice is running.
+
+The replay does not allow you to change what event types the event handler handles. To do this, you need to change the event handlers `EventHandlerId`. This registers a completely new event handler with the Runtime, and a completely new stream is created. This way no old streams are invalidated.
+
+If you want to have an event handler for read models which replays all of its events whenever it changes, try using [Projections]({{< ref "projections" >}}) instead, as they are designed to allow frequent changes.
+
+{{< alert title="Idempotence" color="warning" >}}
+As creating a new event handler will handle all of its events, it's very important to take care of the handle methods side effects. For example, if the handler sends out emails those emails would be resent.
+{{< /alert >}}
+
+{{< alert title="New functionality" color="info" >}}
+The replay functionality was added in version 7.1.0 of the Runtime, so you'll need a version newer than that to replay Event Handler events.
 {{< /alert >}}
 
 ## Multi-tenancy

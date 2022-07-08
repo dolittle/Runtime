@@ -4,19 +4,18 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
+namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents;
+
+public class when_creating_with_an_out_of_order_event_log_sequence_number : given.events_and_an_artifact
 {
-    public class when_creating_with_an_out_of_order_event_log_sequence_number : given.events_and_an_artifact
-    {
-        static CommittedAggregateEvent out_of_order_event;
-        static CommittedAggregateEvents events;
-        static Exception exception;
+    static CommittedAggregateEvent out_of_order_event;
+    static CommittedAggregateEvents events;
+    static Exception exception;
 
-        Establish context = () => out_of_order_event = new CommittedAggregateEvent(aggregate_artifact, aggregate_version_after, 0, DateTimeOffset.UtcNow, event_source_id, execution_contexts.create(), event_b_artifact, is_public, "wrong");
+    Establish context = () => out_of_order_event = new CommittedAggregateEvent(aggregate_artifact, aggregate_version_after, 0, DateTimeOffset.UtcNow, event_source_id, execution_contexts.create(), event_b_artifact, is_public, "wrong");
 
-        Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, new[] { event_one, event_two, event_three, out_of_order_event }));
+    Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, new[] { event_one, event_two, event_three, out_of_order_event }));
 
-        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventLogSequenceIsOutOfOrder>();
-        It should_not_be_created = () => events.ShouldBeNull();
-    }
+    It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventLogSequenceIsOutOfOrder>();
+    It should_not_be_created = () => events.ShouldBeNull();
 }

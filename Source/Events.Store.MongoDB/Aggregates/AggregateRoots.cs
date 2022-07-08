@@ -4,106 +4,119 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
+namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
+
+/// <summary>
+/// Represents an implementation of <see cref="IAggregateRoots" />.
+/// </summary>
+[PerTenant]
+public class AggregateRoots : IAggregateRoots
 {
+    readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
+    readonly UpdateDefinitionBuilder<AggregateRoot> _update = Builders<AggregateRoot>.Update;
+    readonly IAggregatesCollection _aggregates;
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IAggregateRoots" />.
+    /// Initializes a new instance of the <see cref="AggregateRoots"/> class.
     /// </summary>
-    public class AggregateRoots : IAggregateRoots
+    /// <param name="aggregates">The <see cref="IAggregatesCollection" />.</param>
+    /// <param name="logger">The <see cref="ILogger" />.</param>
+    public AggregateRoots(IAggregatesCollection aggregates, ILogger logger)
     {
-        readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
-        readonly UpdateDefinitionBuilder<AggregateRoot> _update = Builders<AggregateRoot>.Update;
-        readonly IAggregatesCollection _aggregates;
-        readonly ILogger _logger;
+        _aggregates = aggregates;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AggregateRoots"/> class.
-        /// </summary>
-        /// <param name="aggregates">The <see cref="IAggregatesCollection" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public AggregateRoots(IAggregatesCollection aggregates, ILogger logger)
+    /// <inheritdoc/>
+    public Task<AggregateRoot> IncrementVersionFor(
+        IClientSessionHandle transaction,
+        EventSourceId eventSource,
+        ArtifactId aggregateRoot,
+        AggregateRootVersion expectedVersion,
+        AggregateRootVersion nextVersion,
+        CancellationToken cancellationToken)
+    {
+        _logger.IncrementingVersionForAggregate(aggregateRoot, eventSource);
+        ThrowIfNextVersionIsNotGreaterThanExpectedVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
+
+        if (expectedVersion == AggregateRootVersion.Initial)
         {
-            _aggregates = aggregates;
-            _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public Task<AggregateRoot> IncrementVersionFor(
-            IClientSessionHandle transaction,
-            EventSourceId eventSource,
-            ArtifactId aggregateRoot,
-            AggregateRootVersion expectedVersion,
-            AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken)
-        {
-            _logger.IncrementingVersionForAggregate(aggregateRoot, eventSource);
-            ThrowIfNextVersionIsNotGreaterThanExpectedVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
-
-            if (expectedVersion == AggregateRootVersion.Initial)
-            {
-                return WriteFirstAggregateRootDocument(
-                    transaction,
-                    eventSource,
-                    aggregateRoot,
-                    expectedVersion,
-                    nextVersion,
-                    cancellationToken);
-            }
-            else
-            {
-                return UpdateExistingAggregateRootDocument(
-                    transaction,
-                    eventSource,
-                    aggregateRoot,
-                    expectedVersion,
-                    nextVersion,
-                    cancellationToken);
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<AggregateRootVersion> FetchVersionFor(
-            IClientSessionHandle transaction,
-            EventSourceId eventSource,
-            ArtifactId aggregateRoot,
-            CancellationToken cancellationToken)
-        {
-            _logger.FetchingVersionFor(aggregateRoot, eventSource);
-            var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
-                & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
-            var aggregateDocuments = await _aggregates.Aggregates.Find(
+            return WriteFirstAggregateRootDocument(
                 transaction,
-                eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
-
-            return aggregateDocuments.Count switch
-            {
-                0 => AggregateRootVersion.Initial,
-                1 => aggregateDocuments[0].Version,
-                _ => throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot),
-            };
+                eventSource,
+                aggregateRoot,
+                expectedVersion,
+                nextVersion,
+                cancellationToken);
         }
-
-        async Task<AggregateRoot> WriteFirstAggregateRootDocument(
-            IClientSessionHandle transaction,
-            EventSourceId eventSource,
-            ArtifactId aggregateRoot,
-            AggregateRootVersion expectedVersion,
-            AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken)
+        else
         {
-            try
-            {
-                var aggregateRootDocument = new AggregateRoot(eventSource, aggregateRoot, nextVersion);
-                await _aggregates.Aggregates.InsertOneAsync(
-                    transaction,
-                    aggregateRootDocument,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                return aggregateRootDocument;
-            }
-            catch (MongoDuplicateKeyException)
+            return UpdateExistingAggregateRootDocument(
+                transaction,
+                eventSource,
+                aggregateRoot,
+                expectedVersion,
+                nextVersion,
+                cancellationToken);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<AggregateRootVersion> FetchVersionFor(
+        EventSourceId eventSource,
+        ArtifactId aggregateRoot,
+        CancellationToken cancellationToken)
+    {
+        _logger.FetchingVersionFor(aggregateRoot, eventSource);
+        var eqFilter = _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
+            & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
+        var aggregateDocuments = await _aggregates.Aggregates
+            .Find(eqFilter)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return aggregateDocuments.Count switch
+        {
+            0 => AggregateRootVersion.Initial,
+            1 => aggregateDocuments[0].Version,
+            _ => throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot),
+        };
+    }
+
+    async Task<AggregateRoot> WriteFirstAggregateRootDocument(
+        IClientSessionHandle transaction,
+        EventSourceId eventSource,
+        ArtifactId aggregateRoot,
+        AggregateRootVersion expectedVersion,
+        AggregateRootVersion nextVersion,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var aggregateRootDocument = new AggregateRoot(eventSource, aggregateRoot, nextVersion);
+            await _aggregates.Aggregates.InsertOneAsync(
+                transaction,
+                aggregateRootDocument,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+            return aggregateRootDocument;
+        }
+        catch (MongoDuplicateKeyException)
+        {
+            var currentVersion = await FetchVersionFor(
+                eventSource,
+                aggregateRoot,
+                cancellationToken).ConfigureAwait(false);
+            throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
+        }
+        catch (MongoWriteException exception)
+        {
+            if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
             {
                 var currentVersion = await FetchVersionFor(
                     eventSource,
@@ -111,9 +124,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     cancellationToken).ConfigureAwait(false);
                 throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
             }
-            catch (MongoWriteException exception)
+
+            throw;
+        }
+        catch (MongoBulkWriteException exception)
+        {
+            foreach (var error in exception.WriteErrors)
             {
-                if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                if (error.Category == ServerErrorCategory.DuplicateKey)
                 {
                     var currentVersion = await FetchVersionFor(
                         eventSource,
@@ -121,85 +139,55 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                         cancellationToken).ConfigureAwait(false);
                     throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
                 }
-
-                throw;
             }
-            catch (MongoBulkWriteException exception)
-            {
-                foreach (var error in exception.WriteErrors)
-                {
-                    if (error.Category == ServerErrorCategory.DuplicateKey)
-                    {
-                        var currentVersion = await FetchVersionFor(
-                            eventSource,
-                            aggregateRoot,
-                            cancellationToken).ConfigureAwait(false);
-                        throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
-                    }
-                }
 
-                throw;
-            }
+            throw;
         }
+    }
 
-        async Task<AggregateRoot> UpdateExistingAggregateRootDocument(
-            IClientSessionHandle transaction,
-            EventSourceId eventSource,
-            ArtifactId aggregateRoot,
-            AggregateRootVersion expectedVersion,
-            AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken)
+    async Task<AggregateRoot> UpdateExistingAggregateRootDocument(
+        IClientSessionHandle transaction,
+        EventSourceId eventSource,
+        ArtifactId aggregateRoot,
+        AggregateRootVersion expectedVersion,
+        AggregateRootVersion nextVersion,
+        CancellationToken cancellationToken)
+    {
+        var aggregateRootFilter =
+            _filter.EqStringOrGuid(_ => _.EventSource, eventSource.Value)
+            & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value)
+            & _filter.Eq(_ => _.Version, expectedVersion.Value);
+
+        var updateDefinition = _update.Set(_ => _.Version, nextVersion.Value);
+        var result = await _aggregates.Aggregates.UpdateOneAsync(
+            transaction,
+            aggregateRootFilter,
+            updateDefinition,
+            new UpdateOptions { IsUpsert = false },
+            cancellationToken).ConfigureAwait(false);
+
+        if (result.ModifiedCount == 0)
         {
-            var aggregateRootFilter =
-                _filter.Eq(_ => _.EventSource, eventSource.Value)
-                    & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value)
-                    & _filter.Eq(_ => _.Version, expectedVersion.Value);
-
-            var updateDefinition = _update.Set(_ => _.Version, nextVersion.Value);
-            var result = await _aggregates.Aggregates.UpdateOneAsync(
-                transaction,
-                aggregateRootFilter,
-                updateDefinition,
-                new UpdateOptions { IsUpsert = false },
+            var currentVersion = await FetchVersionFor(
+                eventSource,
+                aggregateRoot,
                 cancellationToken).ConfigureAwait(false);
-
-            if (result.ModifiedCount == 0)
-            {
-                var currentVersion = await FetchVersionFor(
-                    transaction,
-                    eventSource,
-                    aggregateRoot,
-                    cancellationToken).ConfigureAwait(false);
-                throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
-            }
-
-            if (result.ModifiedCount > 1) throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
-            return new AggregateRoot(eventSource, aggregateRoot, nextVersion);
+            throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
         }
 
-        async Task<AggregateRootVersion> FetchVersionFor(
-            EventSourceId eventSource,
-            ArtifactId aggregateRoot,
-            CancellationToken cancellationToken)
+        if (result.ModifiedCount > 1)
         {
-            var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
-                & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
-            var aggregateDocuments = await _aggregates.Aggregates.Find(eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
-
-            return aggregateDocuments.Count switch
-            {
-                0 => AggregateRootVersion.Initial,
-                1 => aggregateDocuments[0].Version,
-                _ => throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot),
-            };
+            throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
         }
+        return new AggregateRoot(eventSource, aggregateRoot, nextVersion);
+    }
 
-        void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
+
+    static void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
+    {
+        if (nextVersion <= expectedVersion)
         {
-            if (nextVersion <= expectedVersion)
-            {
-                throw new NextAggregateRootVersionMustBeGreaterThanCurrentVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
-            }
+            throw new NextAggregateRootVersionMustBeGreaterThanCurrentVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
         }
     }
 }

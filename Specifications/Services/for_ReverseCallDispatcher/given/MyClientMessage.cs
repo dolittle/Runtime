@@ -5,29 +5,28 @@ using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
+
+public class MyClientMessage : IMessage
 {
-    public class MyClientMessage : IMessage
+    public MyResponse Response { get; set; }
+
+    public MyConnectArguments Arguments { get; set; }
+
+    public Pong Pong { get; set; }
+
+    public MessageDescriptor Descriptor => throw new System.NotImplementedException();
+
+    public int CalculateSize()
     {
-        public MyResponse Response { get; set; }
+        return 0;
+    }
 
-        public MyConnectArguments Arguments { get; set; }
+    public void MergeFrom(CodedInputStream input)
+    {
+    }
 
-        public Pong Pong { get; set; }
-
-        public MessageDescriptor Descriptor => throw new System.NotImplementedException();
-
-        public int CalculateSize()
-        {
-            return 0;
-        }
-
-        public void MergeFrom(CodedInputStream input)
-        {
-        }
-
-        public void WriteTo(CodedOutputStream output)
-        {
-        }
+    public void WriteTo(CodedOutputStream output)
+    {
     }
 }

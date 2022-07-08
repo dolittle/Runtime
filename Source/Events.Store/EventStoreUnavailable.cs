@@ -3,21 +3,29 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Exception that gets thrown when the <see cref="IEventStore"/> is unavailable.
+/// </summary>
+public class EventStoreUnavailable : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when the <see cref="IEventStore"/> is unavailable.
+    /// Initializes a new instance of the <see cref="EventStoreUnavailable"/> class.
     /// </summary>
-    public class EventStoreUnavailable : Exception
+    /// <param name="cause">The cause of why the event store is unavailable.</param>
+    /// <param name="innerException">The inner <see cref="Exception"/>.</param>
+    public EventStoreUnavailable(string cause, Exception innerException)
+        : base(cause, innerException)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventStoreUnavailable"/> class.
-        /// </summary>
-        /// <param name="cause">The cause of why the event store is unavailable.</param>
-        /// <param name="innerException">The inner <see cref="Exception"/>.</param>
-        public EventStoreUnavailable(string cause, Exception innerException)
-            : base(cause, innerException)
-        {
-        }
+    }
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EventStoreUnavailable"/> class.
+    /// </summary>
+    /// <param name="cause">The cause of why the event store is unavailable.</param>
+    public EventStoreUnavailable(string cause)
+        : base(cause)
+    {
     }
 }

@@ -1,24 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
-    <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Actors/Actors.csproj" />
+        <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Bootstrap/Bootstrap.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../Artifacts/Artifacts.csproj" />
-    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
-    <ProjectReference Include="../Execution/Execution.csproj" />
-    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
-    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
-    <ProjectReference Include="../Services/Services.csproj" />
-    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
+        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
+    </ItemGroup>
 
+    <ItemGroup>
+        <Protobuf Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." GrpcServices="None" />
+        <ProtoGrain Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." />
+    </ItemGroup>
 </Project>

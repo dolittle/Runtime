@@ -28,7 +28,7 @@ The consumer sets up the subscription and will keep asking the producer for even
 
 ### Subscription
 
-A subscription is setup by the [consumer]({{< ref "#consumer" >}}) to receive events from a [producer]({{< ref "producer" >}}). Additionally the consumer has to add the producer to its [`microservices.json`]({{< ref "docs/reference/runtime/configuration#microservicesjson" >}}).
+A subscription is setup by the [consumer]({{< ref "#consumer" >}}) to receive events from a [producer]({{< ref "#producer" >}}). Additionally the consumer has to add the producer to its [`microservices.json`]({{< ref "docs/reference/runtime/configuration#microservicesjson" >}}).
 
 This is a simplified structure of a `Subscription` in the [consumer]({{< ref "#consumer" >}}).
 
@@ -38,14 +38,14 @@ Subscription {
     MicroserviceId Guid
     TenantId Guid
     PublicStreamId Guid
-    PartitionId Guid
+    PartitionId string
     // the consumers scoped event log 
     ScopeId Guid
 }
 ```
 
 {{< alert title="Multiple subscriptions to same scope" color="warning" >}}
-If multiple subscriptions route to the same [scoped event log]({{< ref "event_log#scope" >}}), the ordering of the events cannot be guaranteed. There is no way to know in which order the subscriber receives the events from multiple producers as they are all independent of each other.
+If multiple subscriptions route to the same [scoped event log]({{< ref "event_store#scope" >}}), the ordering of the events cannot be guaranteed. There is no way to know in which order the subscriber receives the events from multiple producers as they are all independent of each other.
 {{< /alert >}}
 
 ## Event migration

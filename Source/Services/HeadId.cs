@@ -4,17 +4,16 @@
 using System;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents the id of a head.
+/// </summary>
+public record HeadId(Guid Value) : ConceptAs<Guid>(Value)
 {
     /// <summary>
-    /// Represents the id of a head.
+    /// Implicitly convert <see cref="Guid" /> to <see cref="HeadId" />.
     /// </summary>
-    public record HeadId(Guid Value) : ConceptAs<Guid>(Value)
-    {
-        /// <summary>
-        /// Implicitly convert <see cref="Guid" /> to <see cref="HeadId" />.
-        /// </summary>
-        /// <param name="id">The id.</param>
-        public static implicit operator HeadId(Guid id) => new(id);
-    }
+    /// <param name="id">The id.</param>
+    public static implicit operator HeadId(Guid id) => new(id);
 }

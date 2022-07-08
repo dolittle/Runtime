@@ -1,41 +1,56 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationRequest,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
-                                    Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
+using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
+namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+/// <summary>
+/// Defines a system that knows about event handlers.
+/// </summary>
+public interface IEventHandlers
 {
     /// <summary>
-    /// Defines a system for holding all current event
+    /// Gets information about all currently registered Event Handlers
     /// </summary>
-    public interface IEventHandlers
-    {
-        /// <summary>
-        /// Gets all the registered event handlers for a specific.
-        /// </summary>
-        IEnumerable<EventHandler> All { get; }
+    IEnumerable<EventHandlerInfo> All { get; }
 
-        /// <summary>
-        /// Register an <see cref="EventHandler"/>.
-        /// </summary>
-        /// <param name="dispatcher">The <see cref="ReverseCallDispatcherType"/> for calling back to the client.</param>
-        /// <param name="arguments">The incoming <see cref="EventHandlerRegistrationArguments">arguments</see>.</param>
-        /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
-        Task<EventHandler> Register(ReverseCallDispatcherType dispatcher, EventHandlerRegistrationArguments arguments, CancellationToken cancellationToken);
+    /// <summary>
+    /// Gets the current state of an Event Handler for all tenants.
+    /// </summary>
+    /// <param name="eventHandlerId">The <see cref="EventHandlerId"/>.</param>
+    /// <returns>The current states of the Event Handler.</returns>
+    Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId);
 
-        /// <summary>
-        /// Register an <see cref="EventHandler"/>.
-        /// </summary>
-        /// <param name="eventHandler"><see cref="EventHandler"/> to register.</param>
-        void Unregister(EventHandler eventHandler);
-    }
+    /// <summary>
+    /// Registers and starts an Event Handler for all tenants.
+    /// </summary>
+    /// <param name="eventHandler">The event handler to to register and start.</param>
+    /// <param name="onFailure">The <see cref="Func{T}"/> callback for failures.</param>
+    /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
+    /// <returns>A <see cref="Task"/> that represents the asynchronous processing operation.</returns>
+    Task RegisterAndStart(IEventHandler eventHandler, Func<Failure, CancellationToken, Task> onFailure, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Reprocesses all events for an event handler from a <see cref="StreamPosition" /> for a tenant.
+    /// </summary>
+    /// <param name="eventHandlerId">The <see cref="EventHandlerId"/> of the identifying the event handler.</param>
+    /// <param name="tenant">The <see cref="TenantId"/>.</param>
+    /// <param name="position">The <see cref="StreamPosition" />.</param>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+    Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position);
+        
+    /// <summary>
+    /// Reprocesses all the events for an event handler for all tenants.
+    /// </summary>
+    /// <param name="eventHandlerId">The <see cref="EventHandlerId"/> of the identifying the event handler.</param>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+    Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId);
+    
 }

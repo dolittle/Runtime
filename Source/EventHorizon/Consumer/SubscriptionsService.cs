@@ -3,83 +3,97 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.EventHorizon.Contracts.Subscriptions;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Services.Hosting;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.EventHorizon.Consumer;
+
+/// <summary>
+/// Represents the implementation of <see creF="FiltersBase"/>.
+/// </summary>
+[PrivateService]
+public class SubscriptionsService : SubscriptionsBase
 {
-    /// <summary>
-    /// Represents the implementation of <see creF="FiltersBase"/>.
-    /// </summary>
-    [Singleton]
-    public class SubscriptionsService : SubscriptionsBase
-    {
-        readonly FactoryFor<ISubscriptions> _getSubscriptions;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly IMetricsCollector _metrics;
-        readonly ILogger _logger;
+    readonly ICreateExecutionContexts _executionContextCreator;
+    readonly Func<TenantId, ISubscriptions> _getSubscriptionsFor;
+    readonly IMetricsCollector _metrics;
+    readonly ILogger _logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
-        /// </summary>
-        /// <param name="getSubscriptions">The <see cref="FactoryFor{T}" /> <see cref="ISubscriptions" />.</param>
-        /// <param name="metrics">The system for capturing metrics.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public SubscriptionsService(
-            FactoryFor<ISubscriptions> getSubscriptions,
-            IExecutionContextManager executionContextManager,
-            IMetricsCollector metrics,
-            ILogger logger)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
+    /// </summary>
+    /// <param name="executionContextCreator">The execution context creator to use for verifying incoming execution contexts.</param>
+    /// <param name="getSubscriptionsFor">The factory to use to create an <see cref="ISubscriptions"/> for a tenant.</param>
+    /// <param name="metrics">The system for capturing metrics.</param>
+    /// <param name="logger">The logger to use for logging.</param>
+    public SubscriptionsService(
+        ICreateExecutionContexts executionContextCreator,
+        Func<TenantId, ISubscriptions> getSubscriptionsFor,
+        IMetricsCollector metrics,
+        ILogger logger)
+    {
+        _executionContextCreator = executionContextCreator;
+        _getSubscriptionsFor = getSubscriptionsFor;
+        _metrics = metrics;
+        _logger = logger;
+    }
+
+    /// <inheritdoc/>
+    public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
+    {
+        var createExecutionContext = _executionContextCreator.TryCreateUsing(subscriptionRequest.CallContext.ExecutionContext);
+        if (!createExecutionContext.Success)
         {
-            _executionContextManager = executionContextManager;
-            _metrics = metrics;
-            _getSubscriptions = getSubscriptions;
-            _logger = logger;
+            return new Contracts.SubscriptionResponse
+            {
+                Failure = new Dolittle.Protobuf.Contracts.Failure
+                {
+                    Id = FailureId.Other.ToProtobuf(),
+                    Reason = $"Failed to create event horizon subscription because execution context was invalid: {createExecutionContext.Exception.Message}",
+                }
+            };
         }
 
-        /// <inheritdoc/>
-        public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
+        var executionContext = createExecutionContext.Result;
+        
+        var subscription = new SubscriptionId(
+            executionContext.Tenant,
+            subscriptionRequest.MicroserviceId.ToGuid(),
+            subscriptionRequest.TenantId.ToGuid(),
+            subscriptionRequest.ScopeId.ToGuid(),
+            subscriptionRequest.StreamId.ToGuid(),
+            subscriptionRequest.PartitionId);
+        
+        try
         {
-            _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
-            var subscription = new SubscriptionId(
-                subscriptionRequest.CallContext.ExecutionContext.TenantId.ToGuid(),
-                subscriptionRequest.MicroserviceId.ToGuid(),
-                subscriptionRequest.TenantId.ToGuid(),
-                subscriptionRequest.ScopeId.ToGuid(),
-                subscriptionRequest.StreamId.ToGuid(),
-                subscriptionRequest.PartitionId.ToGuid());
-            try
-            {
-                _metrics.IncrementTotalSubscriptionsInitiatedFromHead();
-                _logger.IncomingSubscripton(subscription);
+            _metrics.IncrementTotalSubscriptionsInitiatedFromHead();
+            _logger.IncomingSubscripton(subscription);
 
-                var subscriptionResponse = await _getSubscriptions().Subscribe(subscription).ConfigureAwait(false);
+            var subscriptionResponse = await _getSubscriptionsFor(executionContext.Tenant).Subscribe(subscription, executionContext).ConfigureAwait(false);
 
-                return subscriptionResponse switch
-                {
-                    { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
-                    _ => new Contracts.SubscriptionResponse { ConsentId = subscriptionResponse.ConsentId.ToProtobuf() },
-                };
-            }
-            catch (TaskCanceledException)
+            return subscriptionResponse switch
             {
-                return new Contracts.SubscriptionResponse { Failure = new Failure(SubscriptionFailures.SubscriptionCancelled, "Event Horizon subscription was cancelled") };
-            }
-            catch (Exception exception)
+                { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
+                _ => new Contracts.SubscriptionResponse { ConsentId = subscriptionResponse.ConsentId.ToProtobuf() },
+            };
+        }
+        catch (TaskCanceledException)
+        {
+            return new Contracts.SubscriptionResponse { Failure = new Failure(SubscriptionFailures.SubscriptionCancelled, "Event Horizon subscription was cancelled") };
+        }
+        catch (Exception exception)
+        {
+            if (!context.CancellationToken.IsCancellationRequested)
             {
-                if (!context.CancellationToken.IsCancellationRequested)
-                {
-                    _logger.ErrorWhileSubscribing(subscription, exception);
-                }
+                _logger.ErrorWhileSubscribing(subscription, exception);
+            }
 
-                return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };
-            }
+            return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };
         }
     }
 }

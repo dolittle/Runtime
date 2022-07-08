@@ -4,13 +4,12 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dolittle.Runtime.Projections.Store.MongoDB.State
+namespace Dolittle.Runtime.Projections.Store.MongoDB.State;
+
+public class Projection
 {
-    public class Projection
-    {
-        [BsonId]
-        public string Key { get; set; }
-        public BsonDocument Content { get; set; }
-        public string ContentRaw { get; set; }
-    }
+    [BsonId]
+    public string Key { get; set; }
+    public BsonDocument Content { get; set; }
+    public string ContentRaw { get; set; }
 }

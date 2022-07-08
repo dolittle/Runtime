@@ -3,55 +3,53 @@
 
 using System;
 using System.Reflection;
-using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Represents an implementation of <see cref="IClientManager"/>.
+/// </summary>
+public class ClientManager : IClientManager
 {
+    readonly IChannels _channels;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IClientManager"/>.
+    /// Initializes a new instance of the <see cref="ClientManager"/> class.
     /// </summary>
-    public class ClientManager : IClientManager
+    /// <param name="channels"><see cref="IChannels"/> to get <see cref="CallInvoker"/> from.</param>
+    public ClientManager(IChannels channels)
     {
-        readonly ICallInvokerManager _callInvokerManager;
+        _channels = channels;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ClientManager"/> class.
-        /// </summary>
-        /// <param name="callInvokerManager"><see cref="ICallInvokerManager"/> to get <see cref="CallInvoker"/> from.</param>
-        public ClientManager(ICallInvokerManager callInvokerManager)
+    /// <inheritdoc/>
+    public ClientBase Get(Type type, string host, int port)
+    {
+        ThrowIfTypeDoesNotImplementClientBase(type);
+        var constructor = type.GetConstructor(new[] { typeof(ChannelBase) });
+        ThrowIfMissingExpectedConstructorClientType(type, constructor);
+
+        return constructor.Invoke(new[] { _channels.GetFor(host, port) }) as ClientBase;
+    }
+
+    /// <inheritdoc/>
+    public TClient Get<TClient>(string host, int port)
+        where TClient : ClientBase => Get(typeof(TClient), host, port) as TClient;
+
+    static void ThrowIfTypeDoesNotImplementClientBase(Type type)
+    {
+        if (!typeof(ClientBase).IsAssignableFrom(type))
         {
-            _callInvokerManager = callInvokerManager;
+            throw new TypeDoesNotImplementClientBase(type);
         }
+    }
 
-        /// <inheritdoc/>
-        public ClientBase Get(Type type, string host = default, int port = default)
+    static void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
+    {
+        if (constructor == null)
         {
-            ThrowIfTypeDoesNotImplementClientBase(type);
-            var constructor = type.GetConstructor(new[] { typeof(CallInvoker) });
-            ThrowIfMissingExpectedConstructorClientType(type, constructor);
-
-            return constructor.Invoke(new[] { _callInvokerManager.GetFor(type, host, port) }) as ClientBase;
-        }
-
-        /// <inheritdoc/>
-        public TClient Get<TClient>(string host = default, int port = default)
-            where TClient : ClientBase => Get(typeof(TClient), host, port) as TClient;
-
-        void ThrowIfTypeDoesNotImplementClientBase(Type type)
-        {
-            if (!type.Implements(typeof(ClientBase)))
-            {
-                throw new TypeDoesNotImplementClientBase(type);
-            }
-        }
-
-        void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
-        {
-            if (constructor == null)
-            {
-                throw new MissingExpectedConstructorForClientType(type);
-            }
+            throw new MissingExpectedConstructorForClientType(type);
         }
     }
 }

@@ -3,23 +3,22 @@
 
 using System;
 using System.Collections.ObjectModel;
-using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Domain.Tenancy;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_initializing
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_initializing;
+
+public class twice : given.all_dependencies
 {
-    public class twice : given.all_dependencies
+    static Exception exception;
+
+    Establish context = () =>
     {
-        static Exception exception;
+        tenants.SetupGet(_ => _.All).Returns(new ObservableCollection<TenantId>(new[] { new TenantId(Guid.NewGuid()) }));
+        stream_processor.Initialize().GetAwaiter().GetResult();
+    };
 
-        Establish context = () =>
-        {
-            tenants.SetupGet(_ => _.All).Returns(new ObservableCollection<TenantId>(new[] { new TenantId(Guid.NewGuid()) }));
-            stream_processor.Initialize().GetAwaiter().GetResult();
-        };
+    Because of = () => exception = Catch.Exception(() => stream_processor.Initialize().GetAwaiter().GetResult());
 
-        Because of = () => exception = Catch.Exception(() => stream_processor.Initialize().GetAwaiter().GetResult());
-
-        It should_fail_because_it_is_already_initialized = () => exception.ShouldBeOfExactType<StreamProcessorAlreadyInitialized>();
-    }
+    It should_fail_because_it_is_already_initialized = () => exception.ShouldBeOfExactType<StreamProcessorAlreadyInitialized>();
 }

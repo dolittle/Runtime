@@ -4,24 +4,23 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartitionedStreamProcessor.when_failing
+namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartitionedStreamProcessor.when_failing;
+
+public class and_retry_time_is_in_the_future
 {
-    public class and_retry_time_is_in_the_future
+    static TimeToRetryForUnpartitionedStreamProcessor time_to_retry_getter;
+    static StreamProcessorState state;
+    static bool success;
+    static TimeSpan time_to_retry;
+
+    Establish context = () =>
     {
-        static TimeToRetryForUnpartitionedStreamProcessor time_to_retry_getter;
-        static StreamProcessorState state;
-        static bool success;
-        static TimeSpan time_to_retry;
+        time_to_retry_getter = new TimeToRetryForUnpartitionedStreamProcessor();
+        state = new StreamProcessorState(0, "reason", DateTimeOffset.UtcNow.AddSeconds(60), 0, DateTimeOffset.UtcNow, true);
+    };
 
-        Establish context = () =>
-        {
-            time_to_retry_getter = new TimeToRetryForUnpartitionedStreamProcessor();
-            state = new StreamProcessorState(0, "reason", DateTimeOffset.UtcNow.AddSeconds(60), 0, DateTimeOffset.UtcNow, true);
-        };
+    Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
 
-        Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
-
-        It should_get_it = () => success.ShouldBeTrue();
-        It should_retry_in_the_future = () => time_to_retry.ShouldBeGreaterThan(TimeSpan.Zero);
-    }
+    It should_get_it = () => success.ShouldBeTrue();
+    It should_retry_in_the_future = () => time_to_retry.ShouldBeGreaterThan(TimeSpan.Zero);
 }

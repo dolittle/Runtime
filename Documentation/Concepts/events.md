@@ -47,7 +47,7 @@ This is a simplified structure of the main parts of an event. For the Runtime, t
 Event {
     Content object
     EventLogSequenceNumber int
-    EventSourceId Guid
+    EventSourceId string
     Public bool
     EventType {
         EventTypeId Guid
@@ -68,12 +68,13 @@ This is the events position in the [Event Log]({{< ref "event_store#event-log" >
 
 ### `EventSourceId`
 
-`EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it for [partitioning]({{< ref "streams.md#partitions" >}}).
+`EventSourceId` represents the source of the event like a "primary key" in a traditional database. The value of the event source id is simply a string, and we don't enforce any particular rules or restrictions on the event source id.
+By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it for [partitioning]({{< ref "streams.md#partitions" >}}).
 
 ### Public vs. Private
 There is a basic distinction between private events and public events. In much the same way that you would not grant access to other applications to your internal database, you do not allow other applications to receive any of your private events.
 
-Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
+Private events are only accessible within a single [Tenant]({{< ref "tenants" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
 
 Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "streams" >}}) through a [public filter]({{< ref "event_handlers_and_filters#public-filter" >}})for other microservices to consume. Your [public event streams]({{< ref "streams#public-vs-private-streams" >}}) essentially form a public API for the other microservices to subscribe to.
 

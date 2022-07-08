@@ -3,19 +3,17 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Projections.Store.Definition
+namespace Dolittle.Runtime.Projections.Store.Definition;
+
+/// <summary>
+/// Represents the projection key selector expression used to point to a property as the key.
+/// </summary>
+/// <param name="Value">The key selector expression as a string.</param>
+public record KeySelectorExpression(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents the projection key selector expression used to point to a property as the key.
+    /// Implicit operator from string.
     /// </summary>
-    /// <param name="Value">The key selector expression as a string.</param>
-    /// <typeparam name="string">The type of the concept.</typeparam>
-    public record KeySelectorExpression(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicit operator from string.
-        /// </summary>
-        /// <param name="key">The projection key.</param>
-        public static implicit operator KeySelectorExpression(string key) => new(key);
-    }
+    /// <param name="key">The projection key.</param>
+    public static implicit operator KeySelectorExpression(string key) => new(key);
 }

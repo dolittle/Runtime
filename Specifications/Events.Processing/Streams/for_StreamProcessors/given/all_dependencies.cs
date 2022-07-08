@@ -1,35 +1,37 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.DependencyInversion;
+using System;
+using System.Threading;
+using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.given
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.given;
+
+public class all_dependencies
 {
-    public class all_dependencies
-    {
-        protected static Mock<IPerformActionOnAllTenants> on_all_tenants;
-        protected static NullLoggerFactory logger_factory;
-        protected static Mock<FactoryFor<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
-        protected static Mock<IExecutionContextManager> execution_context_manager;
-        protected static IStreamProcessors stream_processors;
+    protected static NullLoggerFactory logger_factory;
+    protected static Mock<Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor>> create_stream_processor;
+    protected static Mock<ICreateExecutionContexts> execution_context_creator;
+    protected static IStreamProcessors stream_processors;
 
-        Establish context = () =>
-        {
-            get_scoped_stream_processors_creator = new Mock<FactoryFor<ICreateScopedStreamProcessors>>();
-            on_all_tenants = new Mock<IPerformActionOnAllTenants>();
-            logger_factory = new NullLoggerFactory();
-            execution_context_manager = new Mock<IExecutionContextManager>();
-            stream_processors = new StreamProcessors(
-                on_all_tenants.Object,
-                get_scoped_stream_processors_creator.Object,
-                execution_context_manager.Object,
-                logger_factory);
-        };
-    }
+    Establish context = () =>
+    {
+        create_stream_processor = new Mock<Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor>>();
+        logger_factory = new NullLoggerFactory();
+        execution_context_creator = new Mock<ICreateExecutionContexts>();
+        execution_context_creator
+            .Setup(_ => _.TryCreateUsing(Moq.It.IsAny<ExecutionContext>()))
+            .Returns<ExecutionContext>(_ => _);
+        stream_processors = new StreamProcessors(
+            create_stream_processor.Object,
+            execution_context_creator.Object,
+            Mock.Of<ILogger>());
+    };
 }

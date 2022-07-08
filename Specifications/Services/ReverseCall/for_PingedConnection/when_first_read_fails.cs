@@ -6,32 +6,31 @@ using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
+namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection;
+
+public class when_first_read_fails : all_dependencies
 {
-    public class when_first_read_fails : all_dependencies
+    static Exception exception;
+    static Scenario scenario;
+
+    Establish context = () =>
     {
-        static Exception exception;
-        static Scenario scenario;
+        exception = new Exception();
 
-        Establish context = () =>
+        scenario = Scenario.New(_ =>
         {
-            exception = new();
+            _.Receive.Exception(exception).AtTime(10);
+        });
+    };
 
-            scenario = Scenario.New(_ =>
-            {
-                _.Receive.Exception(exception).AtTime(10);
-            });
-        };
+    Because of = () => scenario.Simulate(
+        request_id,
+        server_call_context,
+        message_converter.Object,
+        metrics,
+        logger_factory);
 
-        Because of = () => scenario.Simulate(
-            request_id,
-            server_call_context,
-            message_converter.Object,
-            metrics,
-            logger_factory);
-
-        It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
-        It should_have_passed_along_the_read_exception = () => scenario.RuntimeStreamMoveNextException.ShouldEqual(exception);
-        It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
-    }
+    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
+    It should_have_passed_along_the_read_exception = () => scenario.RuntimeStreamMoveNextException.ShouldEqual(exception);
+    It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
 }

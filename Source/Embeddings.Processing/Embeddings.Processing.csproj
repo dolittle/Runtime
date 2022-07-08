@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props" />
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Embeddings.Processing</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Embeddings.Processing</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+    <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
+    <ProjectReference Include="../Embeddings.Store/Embeddings.Store.csproj" />
+    <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+  </ItemGroup>
+</Project>

@@ -8,62 +8,75 @@ using Dolittle.Runtime.Rudimentary;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents an implementation of <see cref="IInitiateReverseCallServices" />.
+/// </summary>
+public class InitiateReverseCallServices : IInitiateReverseCallServices
 {
+    const string ArgumentsNotReceivedResponse = "Connection arguments were not received";
+    readonly IReverseCallDispatchers _reverseCallDispatchers;
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IInitiateReverseCallServices" />.
+    /// Initializes a new instance of the <see cref="InitiateReverseCallServices" >/ class.
     /// </summary>
-    public class InitiateReverseCallServices : IInitiateReverseCallServices
+    /// <param name="reverseCallDispatchers"></param>
+    /// <param name="logger"></param>
+    public InitiateReverseCallServices(IReverseCallDispatchers reverseCallDispatchers, ILogger logger)
     {
-        static readonly string _argumentsNotReceived = "Connection arguments were not received";
-        readonly IReverseCallDispatchers _reverseCallDispatchers;
-        readonly ILogger _logger;
+        _reverseCallDispatchers = reverseCallDispatchers;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InitiateReverseCallServices" >/ class.
-        /// </summary>
-        /// <param name="reverseCallDispatchers"></param>
-        /// <param name="logger"></param>
-        public InitiateReverseCallServices(IReverseCallDispatchers reverseCallDispatchers, ILogger logger)
+    /// <inheritdoc/>
+    public async Task<Try<(IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> dispatcher, TRuntimeConnectArguments arguments)>> Connect<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse, TRuntimeConnectArguments>(
+        IAsyncStreamReader<TClientMessage> runtimeStream,
+        IServerStreamWriter<TServerMessage> clientStream,
+        ServerCallContext context,
+        IReverseCallServiceProtocol<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse, TRuntimeConnectArguments> protocol,
+        CancellationToken cancellationToken,
+        bool notValidateExecutionContext = false)
+        where TClientMessage : IMessage, new()
+        where TServerMessage : IMessage, new()
+        where TConnectArguments : class
+        where TConnectResponse : class
+        where TRequest : class
+        where TResponse : class
+        where TRuntimeConnectArguments : class
+    {
+        var dispatcher = _reverseCallDispatchers.GetFor(runtimeStream, clientStream, context, protocol);
+        try
         {
-            _reverseCallDispatchers = reverseCallDispatchers;
-            _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public async Task<Try<(IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> dispatcher, TRuntimeConnectArguments arguments)>> Connect<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse, TRuntimeConnectArguments>(
-                IAsyncStreamReader<TClientMessage> runtimeStream,
-                IServerStreamWriter<TServerMessage> clientStream,
-                ServerCallContext context,
-                IReverseCallServiceProtocol<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse, TRuntimeConnectArguments> protocol,
-                CancellationToken cancellationToken)
-            where TClientMessage : IMessage, new()
-            where TServerMessage : IMessage, new()
-            where TConnectArguments : class
-            where TConnectResponse : class
-            where TRequest : class
-            where TResponse : class
-            where TRuntimeConnectArguments : class
-        {
-            var dispatcher = _reverseCallDispatchers.GetFor(runtimeStream, clientStream, context, protocol);
-            _logger.LogTrace("Waiting for connection arguments");
-            if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
+            Log.WaitingForConnectionArguments(_logger);
+            if (!await dispatcher.ReceiveArguments(cancellationToken, notValidateExecutionContext).ConfigureAwait(false))
             {
-                _logger.LogWarning(_argumentsNotReceived);
-                await dispatcher.Reject(protocol.CreateFailedConnectResponse(_argumentsNotReceived), cancellationToken).ConfigureAwait(false);
-                return false;
+                Log.ConnectionArgumentsNotReceived(_logger);
+                await dispatcher.Reject(protocol.CreateFailedConnectResponse(ArgumentsNotReceivedResponse), cancellationToken).ConfigureAwait(false);
+                dispatcher.Dispose();
+                return new ConnectArgumentsNotReceived();
             }
-            _logger.LogTrace("Received connection arguments");
-
+            
+            Log.ReceivedConnectionArguments(_logger);
             var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
             var validationResult = protocol.ValidateConnectArguments(connectArguments);
-            if (!validationResult.Success)
+            if (validationResult.Success)
             {
-                _logger.LogTrace("Connection arguments were not valid");
-                return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
+                return (dispatcher, connectArguments);
             }
 
-            return (dispatcher, connectArguments);
+            Log.ReceivedInvalidConnectionArguments(_logger);
+            await dispatcher.Reject(protocol.CreateFailedConnectResponse(validationResult.FailureReason), cancellationToken).ConfigureAwait(false);
+            dispatcher.Dispose();
+            return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
         }
+        catch
+        {
+            dispatcher.Dispose();
+            throw;
+        }
+        
+
     }
 }

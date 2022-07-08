@@ -4,29 +4,28 @@
 using System;
 using System.Linq;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
-{
-    /// <summary>
-    /// Represents an implementation of <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.
-    /// </summary>
-    public class TimeToRetryForPartitionedStreamProcessor : ICanGetTimeToRetryFor<StreamProcessorState>
-    {
-        /// <inheritdoc/>
-        public bool TryGetTimespanToRetry(StreamProcessorState streamProcessorState, out TimeSpan timeToRetry)
-        {
-            timeToRetry = TimeSpan.MaxValue;
-            var failingStates = streamProcessorState.FailingPartitions;
-            if (failingStates.Count > 0)
-            {
-                var earliestRetryTime = failingStates.Min(_ => _.Value.RetryTime);
-                timeToRetry = RetryTimeIsInThePast(earliestRetryTime) ? TimeSpan.Zero : earliestRetryTime.Subtract(DateTimeOffset.UtcNow);
-                return true;
-            }
+namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 
-            return false;
+/// <summary>
+/// Represents an implementation of <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.
+/// </summary>
+public class TimeToRetryForPartitionedStreamProcessor : ICanGetTimeToRetryFor<StreamProcessorState>
+{
+    /// <inheritdoc/>
+    public bool TryGetTimespanToRetry(StreamProcessorState streamProcessorState, out TimeSpan timeToRetry)
+    {
+        timeToRetry = TimeSpan.MaxValue;
+        var failingStates = streamProcessorState.FailingPartitions;
+        if (failingStates.Count > 0)
+        {
+            var earliestRetryTime = failingStates.Min(_ => _.Value.RetryTime);
+            timeToRetry = RetryTimeIsInThePast(earliestRetryTime) ? TimeSpan.Zero : earliestRetryTime.Subtract(DateTimeOffset.UtcNow);
+            return true;
         }
 
-        bool RetryTimeIsInThePast(DateTimeOffset retryTime)
-            => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
+        return false;
     }
+
+    bool RetryTimeIsInThePast(DateTimeOffset retryTime)
+        => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
 }

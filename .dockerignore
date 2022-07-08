@@ -2,12 +2,10 @@
 **/obj
 Schemas
 Samples
-Packages
 Documentation
-Build
-Artifacts
-Benchmark
+Benchmarks
 Diagrams
 .vscode
 **/node_modules
 **/wwwroot
+.github

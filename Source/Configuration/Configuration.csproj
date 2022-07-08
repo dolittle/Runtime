@@ -1,18 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
-  <PropertyGroup>
-    <RootNamespace>Dolittle.Runtime.Configuration</RootNamespace>
-    <AssemblyName>Dolittle.Runtime.Configuration</AssemblyName>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../Booting/Booting.csproj" />
-    <ProjectReference Include="../Collections/Collections.csproj" />
-    <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
-    <ProjectReference Include="../Immutability/Immutability.csproj" />
-    <ProjectReference Include="../Reflection/Reflection.csproj" />
-    <ProjectReference Include="../Types/Types.csproj" />
-  </ItemGroup>
-
+    <PropertyGroup>
+        <RootNamespace>Dolittle.Runtime.Configuration</RootNamespace>
+        <AssemblyName>Dolittle.Runtime.Configuration</AssemblyName>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Autofac" Version="$(AutofacVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="NetEscapades.Configuration.Yaml" Version="$(NetEscapadesYaml)" />
+        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
+    </ItemGroup>
 </Project>

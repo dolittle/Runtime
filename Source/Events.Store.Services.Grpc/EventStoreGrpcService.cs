@@ -1,89 +1,44 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.ObjectModel;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Contracts;
+using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventStore;
 
-namespace Dolittle.Runtime.Events.Store.Services.Grpc
+namespace Dolittle.Runtime.Events.Store.Services.Grpc;
+
+/// <summary>
+/// Represents the implementation of <see cref="EventStoreBase"/>.
+/// </summary>
+[PrivateService]
+public class EventStoreGrpcService : EventStoreBase
 {
+    readonly IEventStore _eventStore;
+    readonly IFetchCommittedEvents _committedEventsFetcher;
+
     /// <summary>
-    /// Represents the implementation of.
+    /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
-    public class EventStoreGrpcService : EventStoreBase
+    /// <param name="eventStore">The event store to use.</param>
+    /// <param name="committedEventsReader"></param>
+    public EventStoreGrpcService(IEventStore eventStore)
     {
-        readonly IEventStoreService _eventStoreService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
-        /// </summary>
-        /// <param name="eventStoreService"><see cref="IEventStoreService"/>.</param>
-        public EventStoreGrpcService(
-            IEventStoreService eventStoreService)
-        {
-            _eventStoreService = eventStoreService;
-        }
-
-        /// <inheritdoc/>
-        public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
-        {
-            var response = new Contracts.CommitEventsResponse();
-            var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId.ToGuid(), new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
-            var commitResult = await _eventStoreService.TryCommit(
-                new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
-                request.CallContext.ExecutionContext.ToExecutionContext(),
-                context.CancellationToken).ConfigureAwait(false);
-
-            if (commitResult.Success)
-                response.Events.AddRange(commitResult.Result.ToProtobuf());
-            else
-                response.Failure = commitResult.Exception.ToFailure();
-
-            return response;
-        }
-
-        /// <inheritdoc/>
-        public override async Task<Contracts.CommitAggregateEventsResponse> CommitForAggregate(Contracts.CommitAggregateEventsRequest request, ServerCallContext context)
-        {
-            var response = new Contracts.CommitAggregateEventsResponse();
-            EventSourceId eventSourceId = request.Events.EventSourceId.ToGuid();
-            var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
-
-            var commitResult = await _eventStoreService.TryCommitForAggregate(
-                new UncommittedAggregateEvents(
-                    eventSourceId,
-                    new Artifact(request.Events.AggregateRootId.ToGuid(), ArtifactGeneration.First),
-                    request.Events.ExpectedAggregateRootVersion,
-                    new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
-                request.CallContext.ExecutionContext.ToExecutionContext(),
-                context.CancellationToken).ConfigureAwait(false);
-            if (commitResult.Success)
-                response.Events = commitResult.Result.ToProtobuf();
-            else
-                response.Failure = commitResult.Exception.ToFailure();
-
-            return response;
-        }
-
-        /// <inheritdoc/>
-        public override async Task<Contracts.FetchForAggregateResponse> FetchForAggregate(Contracts.FetchForAggregateRequest request, ServerCallContext context)
-        {
-            var response = new Contracts.FetchForAggregateResponse();
-            var fetchResult = await _eventStoreService.TryFetchForAggregate(
-                request.Aggregate.AggregateRootId.ToGuid(),
-                request.Aggregate.EventSourceId.ToGuid(),
-                request.CallContext.ExecutionContext.ToExecutionContext(),
-                context.CancellationToken).ConfigureAwait(false);
-            if (fetchResult.Success)
-                response.Events = fetchResult.Result.ToProtobuf();
-            else
-                response.Failure = fetchResult.Exception.ToFailure();
-
-            return response;
-        }
+        _eventStore = eventStore;
     }
+
+    /// <inheritdoc/>
+    public override Task<CommitEventsResponse> Commit(CommitEventsRequest request, ServerCallContext context)
+        => _eventStore.CommitEvents(request, context.CancellationToken);
+
+    /// <inheritdoc/>
+    public override Task<CommitAggregateEventsResponse> CommitForAggregate(CommitAggregateEventsRequest request, ServerCallContext context)
+        => _eventStore.CommitAggregateEvents(request, context.CancellationToken);
+
+    /// <inheritdoc/>
+    public override Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, ServerCallContext context)
+        => _eventStore.FetchAggregateEvents(request, context.CancellationToken);
 }

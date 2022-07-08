@@ -28,7 +28,7 @@ There are rules on streams to maintain [idempotency](https://en.wikipedia.org/wi
 
 If we dive deeper into event streams we'll see that we have two types of streams in the Runtime; partitioned and unpartitioned streams.
 
-A partitioned stream is a stream that is split into chunks. These chunks are uniquely identified by a `PartitionId` (GUID). Each item in a partitioned stream can only belong to a single partition.
+A partitioned stream is a stream that is split into chunks. These chunks are uniquely identified by a `PartitionId` (string). Each item in a partitioned stream can only belong to a single partition.
 
 An unpartitioned stream only has one chunk with a `PartitionId` of `00000000-0000-0000-0000-000000000000`.
 

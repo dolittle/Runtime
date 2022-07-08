@@ -3,10 +3,9 @@
 
 using System;
 
-namespace Dolittle.Runtime.Rudimentary.given
+namespace Dolittle.Runtime.Rudimentary.given;
+
+public record GuidConcept(Guid value) : ConceptAs<Guid>(value)
 {
-    public record GuidConcept(Guid value) : ConceptAs<Guid>(value)
-    {
-        public static implicit operator GuidConcept(Guid value) => new(value);
-    }
+    public static implicit operator GuidConcept(Guid value) => new(value);
 }

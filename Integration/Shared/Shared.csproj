@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Integration.Shared</AssemblyName>
+        <RootNamespace>Integration.Shared</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../../Source/Server/Server.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
+        <PackageReference Include="Moq" Version="$(MoqVersion)" />
+    </ItemGroup>
+</Project>

@@ -5,26 +5,25 @@ using System;
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoot
+namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoot;
+
+public class when_creating_aggregate_root
 {
-    public class when_creating_aggregate_root
+    static EventSourceId event_source;
+    static ArtifactId aggregate_type;
+    static AggregateRootVersion version;
+    static AggregateRoot aggregate_root;
+
+    Establish context = () =>
     {
-        static EventSourceId event_source;
-        static ArtifactId aggregate_type;
-        static AggregateRootVersion version;
-        static AggregateRoot aggregate_root;
+        event_source = "a970569d-event-source-b608d25d38cb";
+        aggregate_type = Guid.Parse("4c95bbef-ce78-4ffe-b1aa-36e7ad7fa6c5");
+        version = random.aggregate_root_version;
+    };
 
-        Establish context = () =>
-        {
-            event_source = Guid.Parse("a970569d-497e-463d-8174-b608d25d38cb");
-            aggregate_type = Guid.Parse("4c95bbef-ce78-4ffe-b1aa-36e7ad7fa6c5");
-            version = random.aggregate_root_version;
-        };
+    Because of = () => aggregate_root = new AggregateRoot(event_source, aggregate_type, version);
 
-        Because of = () => aggregate_root = new AggregateRoot(event_source, aggregate_type, version);
-
-        It should_have_the_correct_event_source = () => aggregate_root.EventSource.ShouldEqual(event_source.Value);
-        It should_have_the_correct_aggregate_type = () => aggregate_root.AggregateType.ShouldEqual(aggregate_type.Value);
-        It should_have_the_correct_version = () => aggregate_root.Version.ShouldEqual(version.Value);
-    }
+    It should_have_the_correct_event_source = () => aggregate_root.EventSource.ShouldEqual(event_source.Value);
+    It should_have_the_correct_aggregate_type = () => aggregate_root.AggregateType.ShouldEqual(aggregate_type.Value);
+    It should_have_the_correct_version = () => aggregate_root.Version.ShouldEqual(version.Value);
 }

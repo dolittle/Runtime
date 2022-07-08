@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Actors</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Actors</RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Remote" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.OpenTelemetry" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+    </ItemGroup>
+    
+</Project>

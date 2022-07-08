@@ -3,34 +3,33 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Rudimentary.given
+namespace Dolittle.Runtime.Rudimentary.given;
+
+public class concepts
 {
-    public class concepts
+    protected static StringConcept first_string;
+    protected static StringConcept second_string;
+    protected static StringConcept same_value_as_second_string;
+    protected static StringConcept string_is_empty;
+    protected static StringConcept string_is_null;
+    protected static StringConcept string_value_is_null;
+    protected static IntConcept value_as_an_int;
+    protected static LongConcept value_as_a_long;
+    protected static InheritingFromLongConcept value_as_a_long_inherited;
+    protected static InheritingFromLongConcept empty_long_value;
+
+    Establish context = () =>
     {
-        protected static StringConcept first_string;
-        protected static StringConcept second_string;
-        protected static StringConcept same_value_as_second_string;
-        protected static StringConcept string_is_empty;
-        protected static StringConcept string_is_null;
-        protected static StringConcept string_value_is_null;
-        protected static IntConcept value_as_an_int;
-        protected static LongConcept value_as_a_long;
-        protected static InheritingFromLongConcept value_as_a_long_inherited;
-        protected static InheritingFromLongConcept empty_long_value;
+        first_string = "first";
+        second_string = "second";
+        same_value_as_second_string = "second";
+        string_is_empty = string.Empty;
+        string_is_null = null;
+        string_value_is_null = new StringConcept(null);
 
-        Establish context = () =>
-        {
-            first_string = "first";
-            second_string = "second";
-            same_value_as_second_string = "second";
-            string_is_empty = string.Empty;
-            string_is_null = null;
-            string_value_is_null = new StringConcept(null);
-
-            value_as_a_long = 1;
-            value_as_an_int = 1;
-            value_as_a_long_inherited = 1;
-            empty_long_value = 0;
-        };
-    }
+        value_as_a_long = 1;
+        value_as_an_int = 1;
+        value_as_a_long_inherited = 1;
+        empty_long_value = 0;
+    };
 }

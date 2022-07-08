@@ -7,53 +7,57 @@ using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents an implementation of <see cref="IReverseCallDispatchers"/>.
+/// </summary>
+public class ReverseCallDispatchers : IReverseCallDispatchers
 {
+    readonly IIdentifyRequests _requestIdentifier;
+    readonly ICreateExecutionContexts _executionContextCreator;
+    readonly IMetricsCollector _metricsCollector;
+    readonly ILoggerFactory _loggerFactory;
+    readonly IKeepConnectionsAlive _pingedConnectionFactory;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IReverseCallDispatchers"/>.
+    /// Initializes a new instance of the <see cref="ReverseCallDispatchers"/> class.
     /// </summary>
-    public class ReverseCallDispatchers : IReverseCallDispatchers
+    /// <param name="requestIdentifier">The <see cref="IIdentifyRequests"/> for identifying requests.</param>
+    /// <param name="executionContextCreator">The <see cref="ICreateExecutionContexts"/> to use.</param>
+    /// <param name="metricsCollector">The <see cref="IMetricsCollector"/>.</param>
+    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
+    /// <param name="pingedConnectionFactory">The <see cref="IKeepConnectionsAlive"/> for creating pinged connections.</param>
+    public ReverseCallDispatchers(
+        IIdentifyRequests requestIdentifier,
+        ICreateExecutionContexts executionContextCreator,
+        IMetricsCollector metricsCollector,
+        ILoggerFactory loggerFactory,
+        IKeepConnectionsAlive pingedConnectionFactory)
     {
-        readonly IIdentifyRequests _requestIdentifier;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerFactory _loggerFactory;
-        readonly IKeepConnectionsAlive _pingedConnectionFactory;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReverseCallDispatchers"/> class.
-        /// </summary>
-        /// <param name="requestIdentifier">The <see cref="IIdentifyRequests"/> for identifying requests.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
-        /// <param name="pingedConnectionFactory">The <see cref="IKeepConnectionsAlive"/> for creating pinged connections.</param>
-        public ReverseCallDispatchers(
-            IIdentifyRequests requestIdentifier,
-            IExecutionContextManager executionContextManager,
-            ILoggerFactory loggerFactory,
-            IKeepConnectionsAlive pingedConnectionFactory)
-        {
-            _requestIdentifier = requestIdentifier;
-            _executionContextManager = executionContextManager;
-            _loggerFactory = loggerFactory;
-            _pingedConnectionFactory = pingedConnectionFactory;
-        }
-
-        /// <inheritdoc/>
-        public IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> GetFor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-            IAsyncStreamReader<TClientMessage> clientStream,
-            IServerStreamWriter<TServerMessage> serverStream,
-            ServerCallContext context,
-            IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter)
-            where TClientMessage : IMessage, new()
-            where TServerMessage : IMessage, new()
-            where TConnectArguments : class
-            where TConnectResponse : class
-            where TRequest : class
-            where TResponse : class
-            => new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                _pingedConnectionFactory.CreatePingedReverseCallConnection(_requestIdentifier.GetRequestIdFor(context), clientStream, serverStream, context, messageConverter),
-                messageConverter,
-                _executionContextManager,
-                _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
+        _requestIdentifier = requestIdentifier;
+        _executionContextCreator = executionContextCreator;
+        _metricsCollector = metricsCollector;
+        _loggerFactory = loggerFactory;
+        _pingedConnectionFactory = pingedConnectionFactory;
     }
+
+    /// <inheritdoc/>
+    public IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> GetFor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+        IAsyncStreamReader<TClientMessage> clientStream,
+        IServerStreamWriter<TServerMessage> serverStream,
+        ServerCallContext context,
+        IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter)
+        where TClientMessage : IMessage, new()
+        where TServerMessage : IMessage, new()
+        where TConnectArguments : class
+        where TConnectResponse : class
+        where TRequest : class
+        where TResponse : class
+        => new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+            _pingedConnectionFactory.CreatePingedReverseCallConnection(_requestIdentifier.GetRequestIdFor(context), clientStream, serverStream, context, messageConverter),
+            messageConverter,
+            _executionContextCreator,
+            _metricsCollector,
+            _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
 }

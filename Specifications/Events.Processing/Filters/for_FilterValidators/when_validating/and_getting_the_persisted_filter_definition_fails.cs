@@ -3,23 +3,24 @@
 
 using System;
 using System.Threading.Tasks;
+using Autofac;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating
+namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating;
+
+public class and_getting_the_persisted_filter_definition_fails : given.all_dependencies
 {
-    public class and_getting_the_persisted_filter_definition_fails : given.all_dependencies
+    Establish context = () =>
     {
-        Establish context = () =>
-        {
-            filter_definitions
-                .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
-                .Returns(Task.FromResult(new Try<IFilterDefinition>(false, null, new Exception())));
-        };
+        filter_definitions
+            .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
+            .Returns(Task.FromResult(Try<IFilterDefinition>.Failed(new Exception())));
+    };
 
-        static FilterValidationResult result;
-        Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
-        It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
-    }
+    static FilterValidationResult result;
+    Because of = () => result = filter_validators_with_services(_ => _.RegisterInstance(filter_validator.Object)).Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
+    It should_fail_validation = () => result.Success.ShouldBeFalse();
 }

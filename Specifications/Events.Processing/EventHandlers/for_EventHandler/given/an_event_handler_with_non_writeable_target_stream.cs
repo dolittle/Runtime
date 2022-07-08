@@ -3,34 +3,49 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Processing.Contracts;
+using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
+using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given
+namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given;
+
+public class an_event_handler_with_non_writeable_target_stream : all_dependencies
 {
-    public class an_event_handler_with_non_writeable_target_stream : all_dependencies
+    protected static EventHandler event_handler;
+    protected static Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> filter_processor;
+    protected static Mock<IEventProcessor> event_processor;
+    
+    Establish context = () =>
     {
-        protected static EventHandler event_handler;
+        arguments = new EventHandlerRegistrationArguments(
+            execution_context,
+            StreamId.EventLog.Value,
+            Array.Empty<ArtifactId>(),
+            false,
+            scope,
+            "alias");
 
-        Establish context = () =>
-        {
-            arguments = new(
-                 execution_context,
-                 StreamId.EventLog.Value,
-                 Array.Empty<ArtifactId>(),
-                 false,
-                 scope);
-
-            event_handler = new EventHandler(
-                stream_processors.Object,
-                filter_validation.Object,
-                stream_definitions.Object,
-                reverse_call_dispatcher.Object,
-                arguments,
-                factory_for_stream_writer,
-                logger_factory.Object,
-                cancellation_token
-            );
-        };
-    }
+        filter_processor = new Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
+        event_processor = new Mock<IEventProcessor>();
+        event_handler = new EventHandler(
+            stream_processors.Object,
+            filter_validation.Object,
+            stream_definitions.Object,
+            arguments,
+            tenant => filter_processor.Object,
+            tenant => event_processor.Object,
+            cancellation => reverse_call_dispatcher.Object.Accept(new EventHandlerRegistrationResponse(), cancellation),
+            (failure, cancellation) => reverse_call_dispatcher.Object.Reject(new EventHandlerRegistrationResponse
+            {
+                Failure = failure.ToProtobuf()
+            }, cancellation),
+            logger_factory.CreateLogger<EventHandler>(),
+            execution_context,
+            cancellation_token);
+    };
 }

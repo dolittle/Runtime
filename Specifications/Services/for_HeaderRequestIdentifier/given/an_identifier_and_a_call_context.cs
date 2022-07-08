@@ -4,18 +4,17 @@
 using Grpc.Core;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.for_HeaderRequestIdentifier.given
+namespace Dolittle.Runtime.Services.for_HeaderRequestIdentifier.given;
+
+public class an_identifier_and_a_call_context
 {
-    public class an_identifier_and_a_call_context
+    protected static HeaderRequestIdentifier identifier;
+    protected static ServerCallContext call_context;
+
+    Establish context = () =>
     {
-        protected static HeaderRequestIdentifier identifier;
-        protected static ServerCallContext call_context;
+        identifier = new HeaderRequestIdentifier();
 
-        Establish context = () =>
-        {
-            identifier = new HeaderRequestIdentifier();
-
-            call_context = new MockServerCallContext();
-        };
-    }
+        call_context = new MockServerCallContext();
+    };
 }

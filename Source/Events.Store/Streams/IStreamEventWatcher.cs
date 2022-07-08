@@ -1,12 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Defines a system that can watch a stream of events.
+/// </summary>
+public interface IStreamEventWatcher : INotifyOfStreamEvents, IWaitForEventInStream, IWaitForEventsToBeAppendedToStream, INotifyOfPublicStreamEvents, IWaitForEventInPublicStream
 {
-    /// <summary>
-    /// Defines a system that can watch a stream of events.
-    /// </summary>
-    public interface IStreamEventWatcher : INotifyOfStreamEvents, IWaitForEventInStream, INotifyOfPublicStreamEvents, IWaitForEventInPublicStream
-    {
-    }
 }

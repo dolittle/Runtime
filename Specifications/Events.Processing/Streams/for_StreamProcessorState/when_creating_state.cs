@@ -5,20 +5,19 @@ using System;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState;
+
+public class when_creating_state
 {
-    public class when_creating_state
+    static StreamPosition stream_position;
+    static StreamProcessorState state;
+
+    Establish context = () =>
     {
-        static StreamPosition stream_position;
-        static StreamProcessorState state;
+        stream_position = 0;
+    };
 
-        Establish context = () =>
-        {
-            stream_position = 0;
-        };
+    Because of = () => state = new StreamProcessorState(stream_position, DateTimeOffset.UtcNow);
 
-        Because of = () => state = new StreamProcessorState(stream_position, DateTimeOffset.UtcNow);
-
-        It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
-    }
+    It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
 }

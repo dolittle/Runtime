@@ -2,74 +2,76 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading.Tasks;
-using Dolittle.Runtime.Hosting.Microsoft;
-using Microsoft.AspNetCore.Hosting;
+using System.Linq;
+using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Bootstrap.Hosting;
+using Dolittle.Runtime.Configuration;
+using Dolittle.Runtime.DependencyInversion.Building;
+using Dolittle.Runtime.Diagnostics.OpenTelemetry;
+using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
+using Dolittle.Runtime.Metrics.Hosting;
+using Dolittle.Runtime.Server.Web;
+using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Services.Hosting;
+using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace Dolittle.Runtime.Server
+var configBuilder = new ConfigurationBuilder();
+configBuilder.AddJsonFile("appsettings.json");
+configBuilder.AddDolittleFiles();
+configBuilder.AddEnvironmentVariables();
+configBuilder.AddCommandLine(args);
+var config = configBuilder.Build();
+
+var host = Host.CreateDefaultBuilder(args)
+    .UseDolittleServices()
+    .ConfigureHostConfiguration(configuration => configuration.AddConfiguration(config))
+    .ConfigureOpenTelemetry(config)
+    .AddActorSystem()
+    .AddMetrics()
+    .AddGrpcHost(EndpointVisibility.Private)
+    .AddGrpcHost(EndpointVisibility.Public)
+    .AddGrpcHost(EndpointVisibility.Management)
+    .AddMetricsHost()
+    .AddWebHost()
+    .Build();
+
+VerifyConfiguration(host.Services);
+await host.PerformBootstrap().ConfigureAwait(false);
+host.Run();
+
+static void VerifyConfiguration(IServiceProvider provider)
 {
-    static class Program
+    var logger = provider.GetRequiredService<ILogger<Program>>();
+    try
     {
-        /// <summary>
-        /// Main method.
-        /// </summary>
-        /// <param name="args">Arguments for the process.</param>
-        public static async Task Main(string[] args)
+        var config = provider.GetRequiredService<IOptions<TenantsConfiguration>>();
+        if (!config.Value.Any())
         {
-            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptions;
-
-            await CreateHostBuilder(args)
-                .Build()
-                .RunAsync().ConfigureAwait(false);
+            logger.LogWarning("No tenants are configured in the Runtime. Without any tenants the Runtime will no function properly.");
         }
-
-        /// <summary>
-        /// Create a host builder.
-        /// </summary>
-        /// <param name="args">Arguments for the process.</param>
-        /// <returns>Host builder to build and run.</returns>
-        public static IHostBuilder CreateHostBuilder(string[] args)
+    }
+    catch (Exception e)
+    {
+        logger.LogError(e, "It seems like the Runtime is missing its 'tenants' configuration. Without any tenants the Runtime will no function properly.");
+        throw;
+    }
+    try
+    {
+        var config = provider.GetRequiredService<IOptions<EventStoreBackwardsCompatibilityConfiguration>>();
+        if (config.Value.Version != EventStoreBackwardsCompatibleVersion.V6 && config.Value.Version != EventStoreBackwardsCompatibleVersion.V7)
         {
-            var appConfig = new ConfigurationBuilder()
-                                    .AddJsonFile("appsettings.json")
-                                    .Build();
-
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(config => config.AddConfiguration(appConfig))
-                .UseDolittle()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder
-                        .UseStartup<Startup>();
-                });
+            throw new Exception("Event Store Backwards Compatability Version needs to be set to either 'V6' or 'V7'");
         }
-
-        static void UnhandledExceptions(object sender, UnhandledExceptionEventArgs args)
-        {
-            if (args.ExceptionObject is Exception exception)
-            {
-                Console.WriteLine("************ BEGIN UNHANDLED EXCEPTION ************");
-                PrintExceptionInfo(exception);
-
-                while (exception.InnerException != null)
-                {
-                    Console.WriteLine("\n------------ BEGIN INNER EXCEPTION ------------");
-                    PrintExceptionInfo(exception.InnerException);
-                    exception = exception.InnerException;
-                    Console.WriteLine("------------ END INNER EXCEPTION ------------\n");
-                }
-
-                Console.WriteLine("************ END UNHANDLED EXCEPTION ************ ");
-            }
-        }
-
-        static void PrintExceptionInfo(Exception exception)
-        {
-            Console.WriteLine($"Exception type: {exception.GetType().FullName}");
-            Console.WriteLine($"Exception message: {exception.Message}");
-            Console.WriteLine($"Stack Trace: {exception.StackTrace}");
-        }
+    }
+    catch (Exception e)
+    {
+        logger.LogCritical(e, @"Cannot start Runtime because it is missing the event store backwards compatability configuration.
+Make sure that the dolittle:runtime:eventStore:backwardsCompatibility configuration is provided by setting the 'DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION' environment variable to either V6 (store PartitionId and EventSourceId as Guid) or V7 (store PartitionId and EventSourceId as string)");
+        throw;
     }
 }

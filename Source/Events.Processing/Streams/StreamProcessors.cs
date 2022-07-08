@@ -1,99 +1,114 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
-using Dolittle.Runtime.DependencyInversion;
+using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Tenancy;
+using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Represents an implementation of <see cref="IStreamProcessors" />.
+/// </summary>
+[Singleton]
+public class StreamProcessors : IStreamProcessors
 {
+    readonly Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> _createStreamProcessor;
+    readonly ICreateExecutionContexts _executionContextCreator;
+    readonly ILogger _logger;
+    readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors = new();
+
     /// <summary>
-    /// Represents an implementation of <see cref="IStreamProcessors" />.
+    /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
     /// </summary>
-    [Singleton]
-    public class StreamProcessors : IStreamProcessors
+    public StreamProcessors(
+        Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> createStreamProcessor,
+        ICreateExecutionContexts executionContextCreator,
+        ILogger logger)
     {
-        readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
-        readonly IPerformActionOnAllTenants _onAllTenants;
-        readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerFactory _loggerFactory;
-        readonly ILogger _logger;
+        _createStreamProcessor = createStreamProcessor;
+        _executionContextCreator = executionContextCreator;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
-        /// </summary>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="getScopedStreamProcessorsCreator">The <see cref="FactoryFor{T}" /> <see cref="ICreateScopedStreamProcessors" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
-        public StreamProcessors(
-            IPerformActionOnAllTenants onAllTenants,
-            FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
-            IExecutionContextManager executionContextManager,
-            ILoggerFactory loggerFactory)
+    /// <inheritdoc />
+    public Try<StreamProcessor> TryCreateAndRegister(
+        ScopeId scopeId,
+        EventProcessorId eventProcessorId,
+        IStreamDefinition sourceStreamDefinition,
+        Func<TenantId, IEventProcessor> getEventProcessor,
+        ExecutionContext executionContext,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            _onAllTenants = onAllTenants;
-            _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
-            _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
-            _executionContextManager = executionContextManager;
-            _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<StreamProcessors>();
-        }
-
-        /// <inheritdoc />
-        public bool TryRegister(
-            ScopeId scopeId,
-            EventProcessorId eventProcessorId,
-            IStreamDefinition sourceStreamDefinition,
-            FactoryFor<IEventProcessor> getEventProcessor,
-            CancellationToken cancellationToken,
-            out StreamProcessor streamProcessor)
-        {
-            streamProcessor = default;
+            var createExecutionContext = _executionContextCreator.TryCreateUsing(executionContext);
+            if (!createExecutionContext.Success)
+            {
+                // TODO: Logging
+                return createExecutionContext.Exception;
+            }
+            
             var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
-                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
-                return false;
+                Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
+                return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
-
-            streamProcessor = new StreamProcessor(
+            
+            var streamProcessor = _createStreamProcessor(
                 streamProcessorId,
-                _onAllTenants,
                 sourceStreamDefinition,
-                getEventProcessor,
                 () => Unregister(streamProcessorId),
-                _getScopedStreamProcessorsCreator,
-                _executionContextManager,
-                _loggerFactory.CreateLogger<StreamProcessor>(),
+                getEventProcessor,
+                createExecutionContext.Result,
                 cancellationToken);
+            
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
-                streamProcessor = default;
-                return false;
+                Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
+                return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
 
-            _logger.StreamProcessorSuccessfullyRegistered(streamProcessorId);
-            return true;
+            Log.StreamProcessorSuccessfullyRegistered(_logger, streamProcessorId);
+            return streamProcessor;
         }
-
-        void Unregister(StreamProcessorId id)
+        catch (Exception ex)
         {
-            StreamProcessor existing;
-            do
-            {
-                _streamProcessors.TryRemove(id, out existing);
-            }
-            while (existing != default);
-            _logger.StreamProcessorUnregistered(id);
+            return ex;
         }
+
+    }
+    /// <inheritdoc />
+    public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position)
+        => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
+            ? streamProcessor.SetToPosition(tenant, position)
+            : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegistered(streamProcessorId));
+
+    /// <inheritdoc />
+    public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId)
+        => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
+            ? Try<IDictionary<TenantId, Try<StreamPosition>>>.Succeeded(await streamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false))
+            : new StreamProcessorNotRegistered(streamProcessorId); 
+
+    void Unregister(StreamProcessorId id)
+    {
+        StreamProcessor existing;
+        do
+        {
+            _streamProcessors.TryRemove(id, out existing);
+        }
+        while (existing != default);
+        Log.StreamProcessorUnregistered(_logger, id);
     }
 }

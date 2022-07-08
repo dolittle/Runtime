@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+  <Import Project="../../default.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Projections.Store.Services.Grpc</AssemblyName>
@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+    <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
     <ProjectReference Include="../Projections.Store.Services/Projections.Store.Services.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
     <ProjectReference Include="../Services/Services.csproj" />

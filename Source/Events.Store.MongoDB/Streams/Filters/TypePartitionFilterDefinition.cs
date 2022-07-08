@@ -8,33 +8,32 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+
+/// <summary>
+/// Represents a persisted <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
+/// </summary>
+public class TypePartitionFilterDefinition : AbstractFilterDefinition
 {
     /// <summary>
-    /// Represents a persisted <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
+    /// Initializes a new instance of the <see cref="TypePartitionFilterDefinition"/> class.
     /// </summary>
-    public class TypePartitionFilterDefinition : AbstractFilterDefinition
+    /// <param name="types">The event artifact types.</param>
+    public TypePartitionFilterDefinition(IEnumerable<Guid> types)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypePartitionFilterDefinition"/> class.
-        /// </summary>
-        /// <param name="types">The event artifact types.</param>
-        public TypePartitionFilterDefinition(IEnumerable<Guid> types)
-        {
-            Types = types;
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ArtifactId"> types</see> that this definition filters on.
-        /// </summary>
-        public IEnumerable<Guid> Types { get; set; }
-
-        /// <inheritdoc/>
-        public override IFilterDefinition AsRuntimeRepresentation(Guid streamId, bool partitioned, bool @public) =>
-            new TypeFilterWithEventSourcePartitionDefinition(
-                StreamId.EventLog,
-                streamId,
-                Types.Select(_ => new ArtifactId(_)),
-                partitioned);
+        Types = types;
     }
+
+    /// <summary>
+    /// Gets or sets the <see cref="ArtifactId"> types</see> that this definition filters on.
+    /// </summary>
+    public IEnumerable<Guid> Types { get; set; }
+
+    /// <inheritdoc/>
+    public override IFilterDefinition AsRuntimeRepresentation(Guid streamId, bool partitioned, bool @public) =>
+        new TypeFilterWithEventSourcePartitionDefinition(
+            StreamId.EventLog,
+            streamId,
+            Types.Select(_ => new ArtifactId(_)),
+            partitioned);
 }

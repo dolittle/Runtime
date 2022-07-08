@@ -1,25 +1,19 @@
-# DotNet Source - filtered
-
-FROM alpine AS dotnet-source
-ARG CONFIGURATION=Release
-WORKDIR /app
-COPY Source ./Source/
 
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS dotnet-build
-ARG CONFIGURATION=Release
-WORKDIR /app
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:6.0 AS dotnet-build
+SHELL ["/bin/bash", "-c"]
+ARG VERSION
+ARG TARGETARCH
 
-COPY default.props ./
-COPY versions.props ./
-COPY Runtime.sln ./
-COPY --from=dotnet-source /app/Source ./Source/
-
-COPY Specifications ./Specifications/
+COPY default.props /app/
+COPY versions.props /app/
+COPY Runtime.sln /app/
+COPY Source /app/Source/
+COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c ${CONFIGURATION} -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
 # Web Build
 FROM node:14.2.0 AS web-build
@@ -33,25 +27,16 @@ RUN yarn
 RUN yarn build
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
-ARG CONFIGURATION=Release
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+SHELL ["/bin/bash", "-c"]
 
-RUN echo Configuration = $CONFIGURATION
-
-RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
-    apt-get install -y --no-install-recommends unzip procps curl && \
-    rm -rf /var/lib/apt/lists/* \
-    ; fi
-
-RUN if [ "$CONFIGURATION" = "Debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
-RUN apt-get update && apt-get install -y libc-dev
+ENV Logging__Console__FormatterName=""
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
-COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
 COPY --from=web-build /app/Source/Management.Web/wwwroot ./wwwroot
+COPY Docker/Production/.dolittle ./.dolittle
 
-EXPOSE 81
-EXPOSE 9700
+EXPOSE 9700 50052 50053 51052
 
 ENTRYPOINT ["dotnet", "Dolittle.Runtime.Server.dll"]

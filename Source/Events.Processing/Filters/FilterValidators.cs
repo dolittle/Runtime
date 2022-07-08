@@ -6,202 +6,158 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Types;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters;
+
+/// <summary>
+/// Represents an implementation of <see cref="IFilterValidators" />.
+/// </summary>
+[Singleton, PerTenant]
+public class FilterValidators : IFilterValidators
 {
+    readonly TenantId _tenant;
+    readonly IStreamProcessorStateRepository _streamProcessorStates;
+    readonly IFilterDefinitions _filterDefinitions;
+    readonly ICompareFilterDefinitions _definitionComparer;
+    readonly IServiceProvider _serviceProvider;
+    readonly ILogger _logger;
 
     /// <summary>
-    /// Represents an implementation of <see cref="IFilterValidators" />.
+    /// Initializes a new instance of the <see cref="FilterValidators"/> class.
     /// </summary>
-    [Singleton]
-    public class FilterValidators : IFilterValidators
+    /// <param name="tenant">The current tenant.</param>
+    /// <param name="streamProcessorStates">The stream processor state repository to use to get the current state of the filter to validate.</param>
+    /// <param name="filterDefinitions">The filter definitions to use to get the persisted definition of the filter to validate..</param>
+    /// <param name="definitionComparer">The filter definition comparer to use to compare the filters.</param>
+    /// <param name="serviceProvider">The service provider used to resolve the filter validator for a type of filter.</param>
+    /// <param name="logger">The logger to use for logging.</param>
+    public FilterValidators(
+        TenantId tenant,
+        IStreamProcessorStateRepository streamProcessorStates,
+        IFilterDefinitions filterDefinitions,
+        ICompareFilterDefinitions definitionComparer,
+        IServiceProvider serviceProvider,
+        ILogger logger)
     {
-        readonly ITypeFinder _typeFinder;
-        readonly IContainer _container;
-        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
-        readonly FactoryFor<IFilterDefinitions> _getFilterDefinitions;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly ICompareFilterDefinitions _definitionComparer;
-        readonly ILogger _logger;
-        readonly IDictionary<Type, Type> _filterDefinitionToValidatorMap = new Dictionary<Type, Type>();
+        _tenant = tenant;
+        _streamProcessorStates = streamProcessorStates;
+        _filterDefinitions = filterDefinitions;
+        _definitionComparer = definitionComparer;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilterValidators"/> class.
-        /// </summary>
-        /// <param name="typeFinder">The <see cref="ITypeFinder" />.</param>
-        /// <param name="container">The <see cref="IContainer" />.</param>
-        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository"/>.</param>
-        /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitions" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="definitionComparer">The <see cref="ICompareFilterDefinitions" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public FilterValidators(
-            ITypeFinder typeFinder,
-            IContainer container,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-            FactoryFor<IFilterDefinitions> getFilterDefinitions,
-            IExecutionContextManager executionContextManager,
-            ICompareFilterDefinitions definitionComparer,
-            ILogger logger)
+    /// <inheritdoc/>
+    public async Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
+        where TDefinition : IFilterDefinition
+    {
+        var tryGetProcessorState = await _streamProcessorStates
+            .TryGetFor(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!StreamProcessorHasProcessedEvents(tryGetProcessorState, out var validationResult, out var lastUnprocessedEvent))
         {
-            _typeFinder = typeFinder;
-            _container = container;
-            _getStreamProcessorStates = getStreamProcessorStates;
-            _getFilterDefinitions = getFilterDefinitions;
-            _executionContextManager = executionContextManager;
-            _definitionComparer = definitionComparer;
-            _logger = logger;
-            PopulateFilterValidatorMap();
+            return validationResult;
         }
 
-        /// <inheritdoc/>
-        public async Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
-            where TDefinition : IFilterDefinition
+        _logger.TryGetFilterDefinition(filter.Identifier, _tenant);
+        var tryGetFilterDefinition = await _filterDefinitions.TryGetFromStream(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
+
+        if (!FilterDefinitionHasBeenPersisted(tryGetFilterDefinition, out var persistedDefinition, out validationResult))
         {
-            var tryGetProcessorState = await _getStreamProcessorStates()
-                .TryGetFor(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!StreamProcessorHasProcessedEvents(tryGetProcessorState, out var validationResult, out var lastUnprocessedEvent))
-            {
-                return validationResult;
-            }
-
-            _logger.TryGetFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
-            var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
-
-            if (!FilterDefinitionHasBeenPersisted(tryGetFilterDefinition, out var persistedDefinition, out validationResult))
-            {
-                _logger.NoPersistedFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
-                return validationResult;
-            }
-
-            var definitionResult = _definitionComparer.DefinitionsAreEqual(persistedDefinition, filter.Definition);
-            if (!definitionResult.Succeeded)
-            {
-                return definitionResult;
-            }
-
-            if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
-            {
-                return new FilterValidationResult("Filter definition type has changed");
-            }
-
-            _logger.FindingFilterValidator(filter.Identifier);
-            if (!TryGetValidatorFor<TDefinition>(out var validator))
-            {
-                return new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}");
-            }
-
-            _logger.ValidatingFilter(filter.Identifier);
-            return await validator.Validate((TDefinition)persistedDefinition, filter, lastUnprocessedEvent, cancellationToken).ConfigureAwait(false);
+            _logger.NoPersistedFilterDefinition(filter.Identifier, _tenant);
+            return validationResult;
         }
 
-        bool StreamProcessorHasProcessedEvents(Try<IStreamProcessorState> tryGetState, out FilterValidationResult validationResult, out StreamPosition lastUnprocessedEvent)
+        var definitionResult = _definitionComparer.DefinitionsAreEqual(persistedDefinition, filter.Definition);
+        if (!definitionResult.Success)
         {
-            if (tryGetState.HasException)
-            {
-                validationResult = new FilterValidationResult(tryGetState.Exception.Message);
-                lastUnprocessedEvent = default;
-                return false;
-            }
-
-            if (!tryGetState.Success)
-            {
-                validationResult = new FilterValidationResult();
-                lastUnprocessedEvent = default;
-                return false;
-            }
-
-            lastUnprocessedEvent = tryGetState.Result.Position;
-
-            if (lastUnprocessedEvent == StreamPosition.Start)
-            {
-                validationResult = new FilterValidationResult();
-                return false;
-            }
-
-            validationResult = default;
-            return true;
+            return definitionResult;
         }
 
-        bool FilterDefinitionHasBeenPersisted(Try<IFilterDefinition> tryGetFilterDefinition, out IFilterDefinition persistedDefinition, out FilterValidationResult validationResult)
+        if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
         {
-            if (tryGetFilterDefinition.HasException)
-            {
-                persistedDefinition = default;
-                validationResult = new FilterValidationResult(tryGetFilterDefinition.Exception.Message);
-                return false;
-            }
-
-            if (!tryGetFilterDefinition.Success)
-            {
-                persistedDefinition = default;
-                validationResult = new FilterValidationResult();
-                return false;
-            }
-
-            persistedDefinition = tryGetFilterDefinition.Result;
-            validationResult = default;
-            return true;
+            return FilterValidationResult.Failed("Filter definition type has changed");
         }
 
-        bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persitedDefiniton, TDefinition registeredDefinition)
-            => persitedDefiniton.GetType() != registeredDefinition.GetType();
-
-        void PopulateFilterValidatorMap()
+        _logger.FindingFilterValidator(filter.Identifier);
+        if (!TryGetValidatorFor<TDefinition>(out var validator))
         {
-            _typeFinder.FindMultiple<IFilterDefinition>().ForEach(filterDefinitionType =>
-            {
-                if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
-                {
-                    _logger.FoundValidatorForFilter(filterDefinitionType, validatorType);
-                    _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
-                }
-            });
+            return FilterValidationResult.Failed($"No available filter validator for type {filter.Definition.GetType()}");
         }
 
-        bool TryGetValidatorTypeFor(Type filterDefinitionType, out Type validatorType)
-        {
-            var implementations = _typeFinder.FindMultiple(typeof(ICanValidateFilterFor<>).MakeGenericType(filterDefinitionType));
-            if (implementations.Any())
-            {
-                if (implementations.Count() > 1)
-                {
-                    _logger.MultipleValidatorsForFilter(
-                        filterDefinitionType,
-                        implementations);
-                }
+        _logger.ValidatingFilter(filter.Identifier);
+        return await validator.Validate((TDefinition)persistedDefinition, filter, lastUnprocessedEvent, cancellationToken).ConfigureAwait(false);
+    }
 
-                validatorType = implementations.First();
+    bool TryGetValidatorFor<TDefinition>(out ICanValidateFilterFor<TDefinition> validator)
+        where TDefinition : IFilterDefinition
+    {
+        validator = default;
+        var validators = _serviceProvider.GetRequiredService<IList<ICanValidateFilterFor<TDefinition>>>();
+
+        switch (validators.Count)
+        {
+            case < 1:
+                return false;
+            case > 1:
+                _logger.MultipleValidatorsForFilter(typeof(TDefinition), validators.Select(_ => _.GetType()));
+                return false;
+            default:
+                validator = validators[0];
+                _logger.FoundValidatorForFilter(typeof(TDefinition), validator.GetType());
                 return true;
-            }
-
-            validatorType = null;
-            return false;
-        }
-
-        bool TryGetValidatorFor<TDefinition>(out ICanValidateFilterFor<TDefinition> validator)
-            where TDefinition : IFilterDefinition
-        {
-            if (_filterDefinitionToValidatorMap.TryGetValue(typeof(TDefinition), out var validatorType))
-            {
-                validator = _container.Get(validatorType) as ICanValidateFilterFor<TDefinition>;
-                return true;
-            }
-
-            validator = null;
-            return false;
         }
     }
+
+    static bool StreamProcessorHasProcessedEvents(Try<IStreamProcessorState> tryGetState, out FilterValidationResult validationResult, out StreamPosition lastUnprocessedEvent)
+    {
+        if (!tryGetState.Success)
+        {
+            validationResult = tryGetState.Exception is StreamProcessorStateDoesNotExist
+                ? FilterValidationResult.Succeeded()
+                : FilterValidationResult.Failed(tryGetState.Exception.Message);
+            lastUnprocessedEvent = default;
+            return false;
+        }
+
+        lastUnprocessedEvent = tryGetState.Result.Position;
+
+        if (lastUnprocessedEvent == StreamPosition.Start)
+        {
+            validationResult = FilterValidationResult.Succeeded();
+            return false;
+        }
+
+        validationResult = default;
+        return true;
+    }
+
+    static bool FilterDefinitionHasBeenPersisted(Try<IFilterDefinition> tryGetFilterDefinition, out IFilterDefinition persistedDefinition, out FilterValidationResult validationResult)
+    {
+        if (!tryGetFilterDefinition.Success)
+        {
+            validationResult = tryGetFilterDefinition.Exception is StreamDefinitionDoesNotExist
+                ? FilterValidationResult.Succeeded()
+                : FilterValidationResult.Failed(tryGetFilterDefinition.Exception.Message);
+            persistedDefinition = default;
+            return false;
+        }
+
+        persistedDefinition = tryGetFilterDefinition.Result;
+        validationResult = default;
+        return true;
+    }
+
+    static bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persistedDefinition, TDefinition registeredDefinition)
+        => persistedDefinition.GetType() != registeredDefinition.GetType();
 }

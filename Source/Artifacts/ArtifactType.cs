@@ -4,18 +4,17 @@
 using System;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Artifacts
+namespace Dolittle.Runtime.Artifacts;
+
+/// <summary>
+/// Represents the concept of a type of <see cref="Artifact"/>.
+/// </summary>
+public record ArtifactType(Guid Value) : ConceptAs<Guid>(Value)
 {
     /// <summary>
-    /// Represents the concept of a type of <see cref="Artifact"/>.
+    /// Implicitly converts from a <see cref="Guid"/> to an <see cref="ArtifactType"/>.
     /// </summary>
-    public record ArtifactType(Guid Value) : ConceptAs<Guid>(Value)
-    {
-        /// <summary>
-        /// Implicitly converts from a <see cref="Guid"/> to an <see cref="ArtifactType"/>.
-        /// </summary>
-        /// <param name="id">The <see cref="Guid"/> representation.</param>
-        /// <returns>The converted <see cref="ArtifactType"/>.</returns>
-        public static implicit operator ArtifactType(Guid id) => new(id);
-    }
+    /// <param name="id">The <see cref="Guid"/> representation.</param>
+    /// <returns>The converted <see cref="ArtifactType"/>.</returns>
+    public static implicit operator ArtifactType(Guid id) => new(id);
 }

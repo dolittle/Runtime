@@ -6,182 +6,224 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Tenancy;
+using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Tenancy;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Represents a system for working with all the <see cref="AbstractScopedStreamProcessor" /> registered for <see cref="ITenants.All" />.
+/// </summary>
+public class StreamProcessor : IDisposable
 {
+    readonly StreamProcessorId _identifier;
+    readonly IStreamDefinition _streamDefinition;
+    readonly IPerformActionsForAllTenants _forAllTenants;
+    readonly Func<TenantId, IEventProcessor> _createEventProcessorFor;
+    readonly Func<TenantId, ICreateScopedStreamProcessors> _getCreateScopedStreamProcessors;
+    readonly Action _unregister;
+    readonly ILogger _logger;
+    readonly ExecutionContext _executionContext;
+    readonly CancellationTokenSource _stopAllScopedStreamProcessorsTokenSource;
+    readonly Dictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new();
+    bool _initialized;
+    bool _started;
+    bool _disposed;
+
     /// <summary>
-    /// Represents a system for working with all the <see cref="AbstractScopedStreamProcessor" /> registered for <see cref="ITenants.All" />.
+    /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
     /// </summary>
-    public class StreamProcessor : IDisposable
-    {       
-        readonly StreamProcessorId _identifier;
-        readonly IPerformActionOnAllTenants _onAllTenants;
-        readonly IStreamDefinition _streamDefinition;
-        readonly FactoryFor<IEventProcessor> _getEventProcessor;
-        readonly Action _unregister;
-        readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly ILogger<StreamProcessor> _logger;
-        readonly CancellationTokenSource _stopAllScopedStreamProcessorsTokenSource;
-        bool _initialized;
-        bool _started;
-        bool _disposed;
+    /// <param name="streamProcessorId">The identifier of the stream processor.</param>
+    /// <param name="streamDefinition">The definition of the stream the processor should process events from.</param>
+    /// <param name="forAllTenants">The performer to use to create scoped stream processors for all tenants.</param>
+    /// <param name="createEventProcessorFor">The factory to use to create an event processor per tenant.</param>
+    /// <param name="getCreateScopedStreamProcessors">The factory to us to get the scoped stream processor creator per tenant.</param>
+    /// <param name="unregister">The callback to call to unregister the stream processor when it completes or fails.</param>
+    /// <param name="logger">The logger to use for logging.</param>
+    /// <param name="executionContext">The execution context to run the processor in.</param>
+    /// <param name="cancellationToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
+    public StreamProcessor(
+        StreamProcessorId streamProcessorId,
+        IStreamDefinition streamDefinition,
+        IPerformActionsForAllTenants forAllTenants,
+        Action unregister,
+        Func<TenantId, IEventProcessor> createEventProcessorFor,
+        Func<TenantId, ICreateScopedStreamProcessors> getCreateScopedStreamProcessors,
+        ILogger logger,
+        ExecutionContext executionContext,
+        CancellationToken cancellationToken)
+    {
+        _identifier = streamProcessorId;
+        _forAllTenants = forAllTenants;
+        _streamDefinition = streamDefinition;
+        _createEventProcessorFor = createEventProcessorFor;
+        _getCreateScopedStreamProcessors = getCreateScopedStreamProcessors;
+        _unregister = unregister;
+        _logger = logger;
+        _executionContext = executionContext;
+        _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
-        /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
-        /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> that returns an <see cref="IEventProcessor" />.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
-        /// <param name="getScopedStreamProcessorsCreator">The <see cref="ICreateScopedStreamProcessors" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        public StreamProcessor(
-            StreamProcessorId streamProcessorId,
-            IPerformActionOnAllTenants onAllTenants,
-            IStreamDefinition streamDefinition,
-            FactoryFor<IEventProcessor> getEventProcessor,
-            Action unregister,
-            FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
-            IExecutionContextManager executionContextManager,
-            ILogger<StreamProcessor> logger,
-            CancellationToken cancellationToken)
+    /// <summary>
+    /// Gets all current <see cref="IStreamProcessorState"/> states. 
+    /// </summary>
+    /// <returns>The <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
+    public Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates()
+        => _initialized
+            ? _streamProcessors.ToDictionary(_ => _.Key, _ => _.Value.GetCurrentState())
+            : new StreamProcessorNotInitialized(_identifier);
+
+    /// <summary>
+    /// Initializes the stream processor.
+    /// </summary>
+    /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
+    public async Task Initialize()
+    {
+        Log.InitializingStreamProcessor(_logger, _identifier);
+
+        _stopAllScopedStreamProcessorsTokenSource.Token.ThrowIfCancellationRequested();
+        if (_initialized)
         {
-            _identifier = streamProcessorId;
-            _onAllTenants = onAllTenants;
-            _streamDefinition = streamDefinition;
-            _getEventProcessor = getEventProcessor;
-            _unregister = unregister;
-            _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
-            _executionContextManager = executionContextManager;
-            _logger = logger;
-            _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            throw new StreamProcessorAlreadyInitialized(_identifier);
+        }
+        _initialized = true;
+
+        await _forAllTenants.PerformAsync(async (tenant, _) =>
+        {
+            var eventProcessor = _createEventProcessorFor(tenant);
+            var scopedStreamProcessorsCreator = _getCreateScopedStreamProcessors(tenant);
+            
+            var scopedStreamProcessor = await scopedStreamProcessorsCreator.Create(
+                _streamDefinition,
+                _identifier,
+                eventProcessor,
+                _executionContext,
+                _stopAllScopedStreamProcessorsTokenSource.Token).ConfigureAwait(false);
+            
+            _streamProcessors.Add(tenant, scopedStreamProcessor);
+        }).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Starts the stream processing for all tenants.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public async Task Start()
+    {
+        Log.StartingStreamProcessor(_logger, _identifier);
+
+        if (!_initialized)
+        {
+            throw new StreamProcessorNotInitialized(_identifier);
         }
 
-        /// <summary>
-        /// Gets the <see cref="AbstractScopedStreamProcessor"/> per <see cref="TenantId"/>.
-        /// </summary>
-        public IDictionary<TenantId, AbstractScopedStreamProcessor> StreamProcessorsPerTenant { get; } = new Dictionary<TenantId, AbstractScopedStreamProcessor>();
-
-        /// <summary>
-        /// Initializes the stream processor.
-        /// </summary>
-        /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
-        public async Task Initialize()
+        if (_started)
         {
-            _logger.InitializingStreamProcessor(_identifier);
-
-            _stopAllScopedStreamProcessorsTokenSource.Token.ThrowIfCancellationRequested();
-            if (_initialized)
-            {
-                throw new StreamProcessorAlreadyInitialized(_identifier);
-            }
-            _initialized = true;
-
-            await _onAllTenants.PerformAsync(async tenant =>
-                {
-                    var scopedStreamProcessorsCreators = _getScopedStreamProcessorsCreator();
-                    var scopedStreamProcessor = await scopedStreamProcessorsCreators.Create(
-                        _streamDefinition,
-                        _identifier,
-                        _getEventProcessor(),
-                        _stopAllScopedStreamProcessorsTokenSource.Token).ConfigureAwait(false);
-                    StreamProcessorsPerTenant.Add(tenant, scopedStreamProcessor);
-                }).ConfigureAwait(false);
+            throw new StreamProcessorAlreadyProcessingStream(_identifier);
         }
 
-        /// <summary>
-        /// Starts the stream processing for all tenants.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task Start()
+        _started = true;
+        try
         {
-            _logger.StartingStreamProcessor(_identifier);
+            var tasks = new TaskGroup(StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token));
+            
+            tasks.OnFirstTaskFailure += (_, ex) => Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
+            await tasks.WaitForAllCancellingOnFirst(_stopAllScopedStreamProcessorsTokenSource).ConfigureAwait(false);
+        }
+        finally
+        {
+            _unregister();
+        }
+    }
 
-            if (!_initialized)
-            {
-                throw new StreamProcessorNotInitialized(_identifier);
-            }
+    /// <summary>
+    /// Sets the position of the stream processor for a tenant.
+    /// </summary>
+    /// <param name="tenant">The <see cref="TenantId"/>.</param>
+    /// <param name="position">The <see cref="StreamPosition" />.</param>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+    public Task<Try<StreamPosition>> SetToPosition(TenantId tenant, StreamPosition position)
+        => PerformActionAndSetToPosition(tenant, position, (_, _) => Task.FromResult(Try.Succeeded()));
 
-            if (_started)
-            {
-                throw new StreamProcessorAlreadyProcessingStream(_identifier);
-            }
+    /// <summary>
+    /// Sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
+    /// </summary>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+    public Task<IDictionary<TenantId, Try<StreamPosition>>> SetToInitialPositionForAllTenants()
+        => PerformActionAndSetToInitialPositionForAllTenants((_, _) => Task.FromResult(Try.Succeeded()));
 
-            _started = true;
-            try
-            {
-                var tasks = StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token);
-                await Task.WhenAny(tasks).ConfigureAwait(false);
-                if (TryGetException(tasks, out var ex))
-                {
-                    _logger.ScopedStreamProcessorFailed(ex, _identifier);
-                }
+    /// <summary>
+    /// Performs an action, then sets the position of the stream processor for a tenant.
+    /// </summary>
+    /// <param name="tenant">The <see cref="TenantId"/>.</param>
+    /// <param name="position">The <see cref="StreamPosition" />.</param>
+    /// <param name="action">The action to perform before setting the position.</param>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+    public Task<Try<StreamPosition>> PerformActionAndSetToPosition(TenantId tenant, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> action)
+        => _streamProcessors.TryGetValue(tenant, out var streamProcessor)
+            ? streamProcessor.PerformActionAndReprocessEventsFrom(position, action)
+            : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
+    
+    /// <summary>
+    /// Performs an action, then sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
+    /// </summary>
+    /// <param name="action">The action to perform before setting the position.</param>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+    public async Task<IDictionary<TenantId, Try<StreamPosition>>> PerformActionAndSetToInitialPositionForAllTenants(Func<TenantId, CancellationToken, Task<Try>> action)
+    {
+        var tasks = _streamProcessors
+            .ToDictionary(_ => _.Key, _ => _.Value.PerformActionAndReprocessEventsFrom(StreamPosition.Start, action));
 
-                _stopAllScopedStreamProcessorsTokenSource.Cancel();
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-            }
-            finally
+        var result = new Dictionary<TenantId, Try<StreamPosition>>();
+
+        foreach (var (tenant, task) in tasks)
+        {
+            result.Add(tenant, await task.ConfigureAwait(false));
+        }
+
+        return result;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Dispose the object.
+    /// </summary>
+    /// <param name="disposing">Whether to dispose managed state.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _stopAllScopedStreamProcessorsTokenSource.Cancel();
+            _stopAllScopedStreamProcessorsTokenSource.Dispose();
+
+            if (!_started)
             {
                 _unregister();
             }
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Dispose the object.
-        /// </summary>
-        /// <param name="disposing">Whether to dispose managed state.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-
-            if (disposing)
-            {
-                _stopAllScopedStreamProcessorsTokenSource.Cancel();
-                _stopAllScopedStreamProcessorsTokenSource.Dispose();
-
-                if (!_started)
-                {
-                    _unregister();
-                }
-            }
-
-            _disposed = true;
-        }
-
-        IEnumerable<Task> StartScopedStreamProcessors(CancellationToken cancellationToken) => StreamProcessorsPerTenant.Select(
-            _ => Task.Run(async () =>
-                {
-                    (var tenant, var streamProcessor) = _;
-                    _executionContextManager.CurrentFor(tenant);
-                    await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
-                }, cancellationToken)).ToList();
-
-        static bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
-        {
-            exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
-            if (exception != default)
-            {
-                while (exception.InnerException != null) exception = exception.InnerException;
-            }
-
-            return exception != default;
-        }
+        _disposed = true;
     }
+
+    IEnumerable<Task> StartScopedStreamProcessors(CancellationToken cancellationToken) => _streamProcessors.Select(
+        _ => Task.Run(async () =>
+        {
+            var (_, streamProcessor) = _;
+            await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
+        }, cancellationToken)).ToList();
 }

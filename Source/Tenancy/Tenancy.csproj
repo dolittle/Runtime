@@ -1,16 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Tenancy</AssemblyName>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../Configuration/Configuration.csproj" />
-    <ProjectReference Include="../Execution/Execution.csproj" />
-    <ProjectReference Include="../Types/Types.csproj" />
-    <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Tenancy</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Tenancy</RootNamespace>
+    </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="../Configuration/Configuration.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+    </ItemGroup>
 </Project>

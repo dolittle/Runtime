@@ -11,42 +11,41 @@ using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterProcessor.given
+namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterProcessor.given;
+
+public class a_public_event_filter
 {
-    public class a_public_event_filter
+    protected static readonly CommittedEvent a_public_event =
+        new(
+            EventLogSequenceNumber.Initial,
+            DateTimeOffset.Now,
+            "(/event source  ",
+            execution_contexts.create(),
+            new Artifact(Guid.NewGuid(), 0),
+            true,
+            "");
+
+    protected static readonly CommittedEvent a_non_public_event =
+        new(
+            EventLogSequenceNumber.Initial,
+            DateTimeOffset.Now,
+            "__event_source__",
+            execution_contexts.create(),
+            new Artifact(Guid.NewGuid(), 0),
+            false,
+            "");
+
+    protected static Mock<IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>> dispatcher;
+
+    protected static PublicFilterProcessor filter;
+
+    Establish context = () =>
     {
-        protected static readonly CommittedEvent a_public_event =
-            new CommittedEvent(
-                EventLogSequenceNumber.Initial,
-                DateTimeOffset.Now,
-                Guid.NewGuid(),
-                execution_contexts.create(),
-                new Artifact(Guid.NewGuid(), 0),
-                true,
-                "");
-
-        protected static readonly CommittedEvent a_non_public_event =
-            new CommittedEvent(
-                EventLogSequenceNumber.Initial,
-                DateTimeOffset.Now,
-                Guid.NewGuid(),
-                execution_contexts.create(),
-                new Artifact(Guid.NewGuid(), 0),
-                false,
-                "");
-
-        protected static Mock<IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>> dispatcher;
-
-        protected static PublicFilterProcessor filter;
-
-        Establish context = () =>
-        {
-            dispatcher = new Mock<IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>>();
-            filter = new PublicFilterProcessor(
-                new PublicFilterDefinition(Guid.NewGuid(), Guid.NewGuid()),
-                dispatcher.Object,
-                Mock.Of<IWriteEventsToPublicStreams>(),
-                Mock.Of<ILogger>());
-        };
-    }
+        dispatcher = new Mock<IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>>();
+        filter = new PublicFilterProcessor(
+            new PublicFilterDefinition(Guid.NewGuid(), Guid.NewGuid()),
+            dispatcher.Object,
+            Mock.Of<IWriteEventsToPublicStreams>(),
+            Mock.Of<ILogger>());
+    };
 }

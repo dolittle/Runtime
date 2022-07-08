@@ -3,28 +3,27 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
-{
-    /// <summary>
-    /// Represents an implementation of <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.
-    /// </summary>
-    public class TimeToRetryForUnpartitionedStreamProcessor : ICanGetTimeToRetryFor<StreamProcessorState>
-    {
-        /// <inheritdoc/>
-        public bool TryGetTimespanToRetry(StreamProcessorState streamProcessorState, out TimeSpan timeToRetry)
-        {
-            timeToRetry = TimeSpan.MaxValue;
-            if (streamProcessorState.IsFailing)
-            {
-                var retryTime = streamProcessorState.RetryTime;
-                timeToRetry = RetryTimeIsInThePast(retryTime) ? TimeSpan.Zero : retryTime.Subtract(DateTimeOffset.UtcNow);
-                return true;
-            }
+namespace Dolittle.Runtime.Events.Processing.Streams;
 
-            return false;
+/// <summary>
+/// Represents an implementation of <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.
+/// </summary>
+public class TimeToRetryForUnpartitionedStreamProcessor : ICanGetTimeToRetryFor<StreamProcessorState>
+{
+    /// <inheritdoc/>
+    public bool TryGetTimespanToRetry(StreamProcessorState streamProcessorState, out TimeSpan timeToRetry)
+    {
+        timeToRetry = TimeSpan.MaxValue;
+        if (streamProcessorState.IsFailing)
+        {
+            var retryTime = streamProcessorState.RetryTime;
+            timeToRetry = RetryTimeIsInThePast(retryTime) ? TimeSpan.Zero : retryTime.Subtract(DateTimeOffset.UtcNow);
+            return true;
         }
 
-        bool RetryTimeIsInThePast(DateTimeOffset retryTime)
-            => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
+        return false;
     }
+
+    bool RetryTimeIsInThePast(DateTimeOffset retryTime)
+        => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
 }

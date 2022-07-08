@@ -1,21 +1,25 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents the visibility for a gRPC service endpoint.
+/// </summary>
+public enum EndpointVisibility
 {
     /// <summary>
-    /// Represents the visibility for an <see cref="IEndpoint"/>.
+    /// Represents public endpoints.
     /// </summary>
-    public enum EndpointVisibility
-    {
-        /// <summary>
-        /// Represents public endpoints
-        /// </summary>
-        Public = 1,
+    Public = 1,
 
-        /// <summary>
-        /// Represents private endpoints
-        /// </summary>
-        Private
-    }
+    /// <summary>
+    /// Represents private endpoints.
+    /// </summary>
+    Private = 2,
+        
+    /// <summary>
+    /// Represents management endpoints.
+    /// </summary>
+    Management = 3,
 }

@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: alpha,beta,rc,turbo,projections,embeddings,timeout # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: sauron
 
 on:
   pull_request:
@@ -15,6 +15,7 @@ jobs:
       should-publish: ${{ steps.context.outputs.should-publish }}
       release-type: ${{ steps.context.outputs.release-type }}
       next-version: ${{ steps.increment-version.outputs.next-version }}
+      release-upload-url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v2
       - name: Establish context
@@ -40,12 +41,62 @@ jobs:
           user-email: build@dolittle.com
           user-name: dolittle-build
       - name: Create GitHub Release
+        id: create-release
         uses: dolittle/github-release-action@v2
         if: ${{ steps.context.outputs.should-publish == 'true' }}
         with:
+          token: ${{ secrets.BUILD_PAT }}
           version: ${{ steps.increment-version.outputs.next-version }}
           body: ${{ steps.context.outputs.pr-body }}
-
+  
+  benchmarks:
+    name: Benchmarks
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.should-publish == 'true'
+    strategy:
+      matrix:
+        benchmark:
+          - 'Events.Store.CommitAggregateEvents'
+          - 'Events.Store.CommitEvents'
+          - 'Events.Store.FetchAggregateEvents'
+          - 'Events.Store.Streams.StreamProcessorStateRepository'
+          - 'Events.Processing.EventHandlers.EventHandler'
+          - 'Events.Processing.EventHandlers.FastEventHandler'
+#          - 'Events.Processing.EventHandlers.FastEventHandlerWithImplicitFilter'
+          - 'Events.Processing.EventHandlers.Filter'
+          - 'Events.Processing.Projections.Projection'
+    env: 
+      BENCHMARK_NAME: Integration.Benchmarks.${{ matrix.benchmark }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+      - name: Run Mongo container
+        run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
+      - name: Run Benchmarks
+        working-directory: ./Integration/Benchmarks
+        run: dotnet run --configuration Release -- -m -f '*${{ env.BENCHMARK_NAME }}*'
+      - name: Upload benchmark markdown results
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Integration/Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report-github.md
+          asset_name: ${{ env.BENCHMARK_NAME }}.md
+          asset_content_type: text/markdown
+      - name: Upload benchmark html results
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Integration/Benchmarks/BenchmarkDotNet.Artifacts/results/${{ env.BENCHMARK_NAME }}-report.html
+          asset_name: ${{ env.BENCHMARK_NAME }}.html
+          asset_content_type: text/html
+  
   release-runtime-production-image:
     name: Release Runtime Production Image
     needs: setup
@@ -53,17 +104,26 @@ jobs:
     if: needs.setup.outputs.should-publish == 'true'
     steps:
       - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Production Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
+          platforms: linux/amd64,linux/arm64
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}
       - name: Push Latest Tag Of Production Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -72,36 +132,10 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
+          platforms: linux/amd64,linux/arm64
           tags: dolittle/runtime:latest
-
-  release-runtime-debug-image:
-    name: Release Runtime Debug Image
-    needs: setup
-    runs-on: ubuntu-latest
-    if: needs.setup.outputs.should-publish == 'true'
-    steps:
-      - uses: actions/checkout@v2
-      - uses: docker/setup-buildx-action@v1
-      - uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Push Debug Image to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: .
-          build-args: CONFIGURATION="Debug"
-          file: ./Docker/Production/Dockerfile
-          tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-debug
-      - name: Push Latest Tag Of Debug Image to Docker Hub
-        uses: docker/build-push-action@v2
-        if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
-        with:
-          push: true
-          context: .
-          file: ./Docker/Production/Dockerfile
-          tags: dolittle/runtime:latest-debug
 
   release-runtime-development-image:
     name: Release Runtime Development Image
@@ -110,17 +144,26 @@ jobs:
     if: needs.setup.outputs.should-publish == 'true'
     steps:
       - uses: actions/checkout@v2
+      - uses: docker/setup-qemu-action@v1
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Development Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
           push: true
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
+          platforms: linux/amd64,linux/arm64
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development
       - name: Push Latest Tag Of Development Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -129,4 +172,136 @@ jobs:
           push: true
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
+          platforms: linux/amd64,linux/arm64
           tags: dolittle/runtime:latest-development
+
+  release-cli-tool:
+    name: Release Dolittle CLI tool
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
+      - name: Package as DotNET tool
+        working-directory: ./Source/CLI
+        run: dotnet pack --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PackageVersion=${{ needs.setup.outputs.next-version }}
+      - name: Push DotNET tool to NuGet
+        run: dotnet nuget push --skip-duplicate './Source/CLI/bin/Release/*.nupkg' --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      - name: Publish for macOS x64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx-x64
+      - name: Upload macOS x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/osx-x64/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-macos-x64
+          asset_content_type: application/octet-stream
+      - name: Publish for macOS arm64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
+      - name: Upload macOS arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/osx.11.0-arm64/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-macos-arm64
+          asset_content_type: application/octet-stream
+      - name: Publish for Windows x64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x64
+      - name: Upload Windows x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-x64/publish/Dolittle.Runtime.CLI.exe
+          asset_name: dolittle-win-x64.exe
+          asset_content_type: application/octet-stream
+      - name: Publish for Windows x86
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x86
+      - name: Upload Windows x86
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-x86/publish/Dolittle.Runtime.CLI.exe
+          asset_name: dolittle-win-x86.exe
+          asset_content_type: application/octet-stream
+      - name: Publish for Windows arm64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm64
+      - name: Upload Windows arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-arm64/publish/Dolittle.Runtime.CLI.exe
+          asset_name: dolittle-win-arm64.exe
+          asset_content_type: application/octet-stream
+      - name: Publish for Windows arm
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm
+      - name: Upload Windows arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-arm/publish/Dolittle.Runtime.CLI.exe
+          asset_name: dolittle-win-arm.exe
+          asset_content_type: application/octet-stream
+      - name: Publish for Linux x64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-x64
+      - name: Upload Linux x64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/linux-x64/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-linux-x64
+          asset_content_type: application/octet-stream
+      - name: Publish for Linux arm64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-arm64
+      - name: Upload Linux arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/linux-arm64/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-linux-arm64
+          asset_content_type: application/octet-stream
+      - name: Publish for Linux arm
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-arm
+      - name: Upload Linux arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/linux-arm/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-linux-arm
+          asset_content_type: application/octet-stream

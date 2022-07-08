@@ -2,15 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
+using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given
+namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given;
+
+public class all_dependencies
 {
-    public class all_dependencies : a_serializer
+    protected static ProjectionKeys projection_keys;
+    Establish context = () =>
     {
-        protected static ProjectionKeys projection_keys;
-        Establish context = () =>
-        {
-            projection_keys = new ProjectionKeys(new ProjectionKeyPropertyExtractor());
-        };
-    }
+        projection_keys = new ProjectionKeys(new ProjectionKeyPropertyExtractor(), Mock.Of<ILogger>());
+    };
 }

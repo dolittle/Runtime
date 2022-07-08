@@ -3,34 +3,32 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
+
+/// <summary>
+/// Represents an implementation of <see cref="IGetNextEventToReceiveForSubscription"/>.
+/// </summary>
+public class GetNextEventToReceiveForSubscription : IGetNextEventToReceiveForSubscription
 {
+    readonly IStreamProcessorStateRepository _repository;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IGetNextEventToReceiveForSubscription"/>.
+    /// Initializes a new instance of the <see cref="GetNextEventToReceiveForSubscription"/> class.
     /// </summary>
-    public class GetNextEventToReceiveForSubscription : IGetNextEventToReceiveForSubscription
+    /// <param name="repository">The stream processor state repository to use for getting subscription states.</param>
+    public GetNextEventToReceiveForSubscription(IStreamProcessorStateRepository repository)
     {
-        readonly IStreamProcessorStateRepository _repository;
+        _repository = repository;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetNextEventToReceiveForSubscription"/> class.
-        /// </summary>
-        /// <param name="repository">The stream processor state repository to use for getting subscription states.</param>
-        public GetNextEventToReceiveForSubscription(IStreamProcessorStateRepository repository)
-        {
-            _repository = repository;
-        }
-
-        /// <inheritdoc/>
-        public async Task<StreamPosition> GetNextEventToReceiveFor(SubscriptionId subscriptionId, CancellationToken cancellationToken)
-        {
-            var tryGetState = await _repository.TryGetFor(subscriptionId, cancellationToken).ConfigureAwait(false);
-            return tryGetState.Success
-                ? tryGetState.Result.Position
-                : StreamPosition.Start;
-        }
+    /// <inheritdoc/>
+    public async Task<StreamPosition> GetNextEventToReceiveFor(SubscriptionId subscriptionId, CancellationToken cancellationToken)
+    {
+        var tryGetState = await _repository.TryGetFor(subscriptionId, cancellationToken).ConfigureAwait(false);
+        return tryGetState.Success
+            ? tryGetState.Result.Position
+            : StreamPosition.Start;
     }
 }
