@@ -67,8 +67,7 @@ public class Event : IStoredEvent
     /// Gets or sets the domain specific event data.
     /// </summary>
     public BsonDocument Content { get; set; }
-    
-    
+
     /// <inheritdoc/>
     public EventLogSequenceNumber GetEventLogSequenceNumber()
         => EventLogSequenceNumber;

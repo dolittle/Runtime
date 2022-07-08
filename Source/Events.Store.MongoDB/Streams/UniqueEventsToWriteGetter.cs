@@ -7,8 +7,12 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 
+/// <summary>
+/// Represents an implementation of <see cref="IGetUniqueEventsToWrite"/>.
+/// </summary>
 public class UniqueEventsToWriteGetter : IGetUniqueEventsToWrite
 {
+    /// <inheritdoc />
     public bool TryGet<TEvent>(IReadOnlyList<TEvent> eventsToWrite, IReadOnlyList<TEvent> storedEvents, out IReadOnlyList<TEvent>? uniqueEvents, out EventLogSequenceNumber? duplicateEventLogSequenceNumber)
         where TEvent : IStoredEvent
     {
@@ -17,6 +21,7 @@ public class UniqueEventsToWriteGetter : IGetUniqueEventsToWrite
             duplicateEventLogSequenceNumber = default;
             return true;
         }
+
         var storedIndex = 0;
         var toCheckIndex = 0;
         

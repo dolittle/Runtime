@@ -196,8 +196,10 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     static Task<List<TEvent>> GetStoredEvents<TEvent>(IMongoCollection<TEvent> stream, IReadOnlyList<TEvent> eventsToWrite, IClientSessionHandle transaction, CancellationToken cancellationToken)
         where TEvent : IStoredEvent
         => stream
-            .Find(Builders<TEvent>.Filter.Gte(_ => _.GetEventLogSequenceNumber().Value, eventsToWrite[0].GetEventLogSequenceNumber().Value)
-                    & Builders<TEvent>.Filter.Lte(_ => _.GetEventLogSequenceNumber().Value, eventsToWrite[^1].GetEventLogSequenceNumber().Value))
+            .Find(
+                transaction,
+                Builders<TEvent>.Filter.Gte(_ => _.GetEventLogSequenceNumber().Value, eventsToWrite[0].GetEventLogSequenceNumber().Value) 
+                & Builders<TEvent>.Filter.Lte(_ => _.GetEventLogSequenceNumber().Value, eventsToWrite[^1].GetEventLogSequenceNumber().Value))
             .SortByDescending(_ => _.GetEventLogSequenceNumber().Value)
             .Limit(eventsToWrite.Count)
             .ToListAsync(cancellationToken);
