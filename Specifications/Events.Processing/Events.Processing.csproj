@@ -4,7 +4,7 @@
     <AssemblyName>Dolittle.Runtime.Events.Processing.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../specs.props"></Import>
+  <Import Project="../../specs.props" />
 
   <ItemGroup>
     <ProjectReference Include="../../Source/Events.Processing/Events.Processing.csproj" />
