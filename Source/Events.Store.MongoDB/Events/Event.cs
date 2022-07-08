@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
 /// <summary>
 /// Represents an event stored in the MongoDB event store.
 /// </summary>
-public class Event : IStoredEvent
+public class Event
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Event"/> class.
@@ -67,16 +67,4 @@ public class Event : IStoredEvent
     /// Gets or sets the domain specific event data.
     /// </summary>
     public BsonDocument Content { get; set; }
-
-    /// <inheritdoc/>
-    public EventLogSequenceNumber GetEventLogSequenceNumber()
-        => EventLogSequenceNumber;
-
-    /// <inheritdoc/>
-    public bool IsTheSameAs(IStoredEvent otherEvent)
-        => GetEventLogSequenceNumber().Equals(otherEvent.GetEventLogSequenceNumber())
-            && otherEvent is Event otherEventLogEvent
-            && Metadata.TypeId == otherEventLogEvent.Metadata.TypeId
-            && Metadata.TypeGeneration == otherEventLogEvent.Metadata.TypeGeneration
-            && Metadata.EventSource == otherEventLogEvent.Metadata.EventSource;
 }

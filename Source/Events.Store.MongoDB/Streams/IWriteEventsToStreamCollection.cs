@@ -21,30 +21,24 @@ public interface IWriteEventsToStreamCollection
     /// </summary>
     /// <typeparam name="TEvent">The event type.</typeparam>
     /// <param name="stream">The Stream <see cref="IMongoCollection{TDocument}" />.</param>
-    /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
     /// <param name="createStoreEvent">A <see cref="Func{T, TResult}" /> that creates a <typeparamref name="TEvent" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     Task<StreamPosition> Write<TEvent>(
         IMongoCollection<TEvent> stream,
-        FilterDefinitionBuilder<TEvent> filter,
         Func<StreamPosition, TEvent> createStoreEvent,
-        CancellationToken cancellationToken)
-        where TEvent : IStoredEvent;
+        CancellationToken cancellationToken);
     
     /// <summary>
     /// Writes multiple <typeparamref name="TEvent">Event</typeparamref> to <see cref="IMongoCollection{TDocument}" /> Stream collection.
     /// </summary>
     /// <typeparam name="TEvent">The event type.</typeparam>
     /// <param name="stream">The Stream <see cref="IMongoCollection{TDocument}" />.</param>
-    /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
     /// <param name="createStoreEvents">A <see cref="Func{T, TResult}" /> that creates a <typeparamref name="TEvent" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     Task<StreamPosition> Write<TEvent>(
         IMongoCollection<TEvent> stream,
-        FilterDefinitionBuilder<TEvent> filter,
-        Func<StreamPosition, IEnumerable<TEvent>> createStoreEvents,
-        CancellationToken cancellationToken)
-        where TEvent : IStoredEvent;
+        Func<StreamPosition, IReadOnlyList<TEvent>> createStoreEvents,
+        CancellationToken cancellationToken);
 }

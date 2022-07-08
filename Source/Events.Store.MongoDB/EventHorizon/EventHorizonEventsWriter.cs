@@ -23,7 +23,6 @@ public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     readonly IWriteEventsToStreamCollection _eventsToStreamsWriter;
     readonly IEventConverter _eventConverter;
     readonly IStreamEventWatcher _streamWatcher;
-    readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventHorizonEventsWriter"/> class.
@@ -32,27 +31,19 @@ public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreamCollection" />.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
-    /// <param name="logger">The <see cref="ILogger" />.</param>
-    public EventHorizonEventsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger logger)
+    public EventHorizonEventsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, IStreamEventWatcher streamWatcher)
     {
         _streams = streams;
         _eventsToStreamsWriter = eventsToStreamsWriter;
         _eventConverter = eventConverter;
         _streamWatcher = streamWatcher;
-        _logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<EventLogSequenceNumber> Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken)
     {
-        _logger.WritingEventHorizonEvent(
-            @event.EventLogSequenceNumber,
-            @event.ExecutionContext.Tenant,
-            @event.ExecutionContext.Microservice,
-            scope);
         var writtenStreamPosition = await _eventsToStreamsWriter.Write(
             await _streams.GetEventLog(scope, cancellationToken).ConfigureAwait(false),
-            _eventFilter,
             streamPosition => _eventConverter.ToEventLogEvent(
                 new CommittedExternalEvent(
                     streamPosition.Value,
