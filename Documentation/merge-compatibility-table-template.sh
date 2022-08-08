@@ -23,7 +23,7 @@ cat "$GENERATED" >> "$TEMPLATE"
 echo "$TAIL" >> "$TEMPLATE"
 
 git diff --quiet "$TEMPLATE"
-CHANGED=$?
+CHANGED="$?"
 
 function set_github_output {
     if [ "$CI" == "true" ]; then
@@ -31,7 +31,7 @@ function set_github_output {
     fi
 }
 
-if [ "$CHANGED" ]; then 
+if [ "$CHANGED" -ne 0 ]; then 
     echo "The update has changed the compatibility table"
     set_github_output "changed" "true"
 else
