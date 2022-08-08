@@ -4,6 +4,7 @@ description: Runtime compatibility table
 weight: 1
 ---
 
+<!-- BEGIN TABLE -->
 ## By Runtime version:
 |    Runtime    |   DotNET SDK    | JavaScript SDK  |
 |---------------|-----------------|-----------------|
@@ -59,3 +60,5 @@ weight: 1
 | 18.0.0          | 7.0.0 - 7.8.1 |
 | 15.0.0 - 17.0.3 | 6.1.0 - 6.2.2 |
 | 14.3.0 - 14.4.0 | 5.5.0 - 5.6.0 |
+
+<!-- END TABLE -->
