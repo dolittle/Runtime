@@ -48,8 +48,16 @@ public static class Runtime
 
         var runtimeHost = Host.CreateDefaultBuilder()
             .UseDolittleServices()
-            .ConfigureHostConfiguration(_ => _
-                .AddInMemoryCollection(configuration))
+            .ConfigureHostConfiguration(_ =>
+            {
+                _.Sources.Clear();
+                _.AddInMemoryCollection(configuration);
+            })
+            .ConfigureAppConfiguration(_ =>
+            {
+                _.Sources.Clear();
+                _.AddInMemoryCollection(configuration);
+            })
             .ConfigureServices(_ => _
                 .AddLogging(_ => _.ClearProviders()))
             .AddActorSystem()

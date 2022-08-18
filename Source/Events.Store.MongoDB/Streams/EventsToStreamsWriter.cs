@@ -105,7 +105,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
-        catch (Exception ex) when (typeof(TEvent) == typeof(Events.StreamEvent) && (ex is MongoDuplicateKeyException || (ex is MongoBulkWriteException bulkException && bulkException.Message.Contains("duplicate key error"))))
+        catch (Exception ex) when (typeof(TEvent) == typeof(Events.StreamEvent) && IsDuplicateKeyException(ex))
         {
             using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             try
@@ -184,4 +184,13 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     static bool IsSameStreamEvents(Events.StreamEvent eventToWrite, Events.StreamEvent storedEvent)
         => eventToWrite.Metadata.EventLogSequenceNumber.Equals(storedEvent.Metadata.EventLogSequenceNumber)
             && eventToWrite.Partition.Equals(storedEvent.Partition);
+
+    static bool IsDuplicateKeyException(Exception exception)
+        => exception switch
+        {
+            MongoDuplicateKeyException => true,
+            MongoWriteException writeException => writeException.Message.Contains("duplicate key error"),
+            MongoBulkWriteException bulkWriteException => bulkWriteException.Message.Contains("duplicate key error"),
+            _ => false,
+        };
 }

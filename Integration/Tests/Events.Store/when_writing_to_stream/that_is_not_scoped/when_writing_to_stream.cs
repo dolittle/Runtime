@@ -86,4 +86,15 @@ class when_writing_to_stream : given.a_clean_event_store
         It should_fail = () => failure.ShouldNotBeNull();
         It should_have_only_3_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(3);
     }
+    
+    [Tags("IntegrationTest")]
+    class and_writing_an_event_twice
+    {
+        Establish context = () => events_to_streams_writer.Write(committed_events.Select(_ => (_, partition with {Value = "partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult();
+        
+        Because of = () => failure = Catch.Exception(() => events_to_streams_writer.Write(committed_events.Skip(3).Select(_ => (_, partition with {Value = "partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult());
+
+        It should_not_fail = () => failure.ShouldBeNull();
+        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(4);
+    }
 }
