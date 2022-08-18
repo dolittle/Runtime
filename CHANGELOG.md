@@ -1,3 +1,13 @@
+# [8.4.2] - 2022-8-18 [PR: #707](https://github.com/dolittle/Runtime/pull/707)
+## Summary
+
+Fixes a bug in the implementation of handling multiple writes of the same events to a stream (https://github.com/dolittle/Runtime/pull/704). The previous fix did not catch the case where a single event was written multiple times - which is the case for most writes, e.g. when using Event Handlers.
+
+### Fixed
+
+- The `EventsToStreamsWriter.WriteOnlyNewEvents` failed when it was given a single event because it throws a `MongoWriteException` instead of a `MongoBulkWriteException`
+
+
 # [8.4.1] - 2022-7-8 [PR: #704](https://github.com/dolittle/Runtime/pull/704)
 ## Summary
 
