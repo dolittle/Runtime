@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Configuration;
 
-namespace Dolittle.Runtime.Configuration.Legacy;
+namespace Dolittle.Runtime.Configuration;
 
 /// <summary>
 /// Extension methods for <see cref="IConfigurationBuilder"/>.
@@ -11,10 +11,10 @@ namespace Dolittle.Runtime.Configuration.Legacy;
 public static class ConfigurationBuilderExtensions
 {
     /// <summary>
-    /// Adds the <see cref="LegacyConfigurationSource"/> <see cref="IConfigurationSource"/> to the <see cref="IConfigurationBuilder"/>.
+    /// Adds the <see cref="RuntimeFileConfigurationSource"/> <see cref="IConfigurationSource"/> to the <see cref="IConfigurationBuilder"/>.
     /// </summary>
     /// <param name="builder">The <see cref="IConfigurationBuilder"/>.</param>
     /// <returns>Tbe builder for continuation.</returns>
-    public static IConfigurationBuilder AddLegacyDolittleFiles(this IConfigurationBuilder builder)
-        => builder.Add(new LegacyConfigurationSource());
+    public static IConfigurationBuilder AddDolittleFiles(this IConfigurationBuilder builder)
+        => builder.Add(new RuntimeFileConfigurationSource());
 }

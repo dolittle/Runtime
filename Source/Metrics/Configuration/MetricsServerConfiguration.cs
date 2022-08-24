@@ -19,5 +19,5 @@ public record MetricsServerConfiguration
     /// <summary>
     /// Gets the port to serve the endpoint on.
     /// </summary>
-    public int Port { get; init; }
+    public int Port { get; init; } = 9700;
 }

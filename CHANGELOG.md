@@ -1,3 +1,38 @@
+# [8.4.2] - 2022-8-18 [PR: #707](https://github.com/dolittle/Runtime/pull/707)
+## Summary
+
+Fixes a bug in the implementation of handling multiple writes of the same events to a stream (https://github.com/dolittle/Runtime/pull/704). The previous fix did not catch the case where a single event was written multiple times - which is the case for most writes, e.g. when using Event Handlers.
+
+### Fixed
+
+- The `EventsToStreamsWriter.WriteOnlyNewEvents` failed when it was given a single event because it throws a `MongoWriteException` instead of a `MongoBulkWriteException`
+
+
+# [8.4.1] - 2022-7-8 [PR: #704](https://github.com/dolittle/Runtime/pull/704)
+## Summary
+
+There could occur an issue when a filter would try to write the same event to a stream multiple times. To fix this we catch the duplicate key exception and tries to figure out which events to write.
+
+### Fixed
+
+- Issue where filter tries to write the same event to a stream forever
+
+
+# [8.4.0] - 2022-7-8 [PR: #699](https://github.com/dolittle/Runtime/pull/699)
+## Summary
+
+Adds support for a unified json configuration file called `runtime.json` but stil supports the old legacy configuration files under the .dolittle folder. Legacy configurations under the .dolittle folder will overwrite configurations provided in the `runtime.json` configuration file
+
+### Added
+
+- Configuration provider for a `runtime.json` file
+- A default `runtime.json` file for default config similar to what we had before under the .dolittle folder
+
+### Deprecated
+
+- Configuration files under the .dolittle folder
+
+
 # [8.3.0] - 2022-6-20 [PR: #700](https://github.com/dolittle/Runtime/pull/700)
 ## Summary
 

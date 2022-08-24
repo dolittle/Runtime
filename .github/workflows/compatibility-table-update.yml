@@ -1,0 +1,30 @@
+name: Update Runtime <-> SDK compatibility table for Documentation
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  update:
+    name: Recalculate and commit new table
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.BUILD_PAT }}
+      - name: Run dolittle/contracts-compatibility tool
+        run: docker run --pull=always dolittle/contracts-compatibility | tee generated-compatibility-table.md
+      - name: Merge generated table with template
+        id: update
+        run: ./Documentation/merge-compatibility-table-template.sh generated-compatibility-table.md
+      - name: Commit and push changes
+        if: ${{ steps.update.outputs.changed == 'true' }}
+        run: |
+          git config user.name dolittle-build
+          git config user.email build@dolittle.com
+          git add Documentation/References/compatibility.md
+          git commit -m "Automatic update of compatibility table"
+          git push

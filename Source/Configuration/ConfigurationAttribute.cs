@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.Extensions.Configuration;
 
 namespace Dolittle.Runtime.Configuration;
 
@@ -17,7 +18,7 @@ public class ConfigurationAttribute : Attribute
     /// <param name="section">The configuration section to parse the object from, excluding the "dolittle:runtime" prefix</param>
     public ConfigurationAttribute(params string[] section)
     {
-        Section = string.Join(':', section);
+        Section = ConfigurationPath.Combine(section);
     }
     
     /// <summary>
