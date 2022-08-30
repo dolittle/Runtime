@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.Collections;
 
 namespace Dolittle.Runtime.Client;
@@ -21,9 +22,22 @@ public static class BuildResultExtensions
                 _ => BuildResultType.Information
             },
             result.Message);
+    
+    public static ArtifactBuildResult ToArtifactBuildResult(this Contracts.ArtifactBuildResult result)
+        => new(
+            result.Aritfact.ToArtifact(),
+            result.Alias,
+            result.BuildResult.ToBuildResult());
 
-    public static BuildResults ToBuildResults(this RepeatedField<Contracts.BuildResult> results)
-        => new(results.Select(_ => ToBuildResult(_)).ToList());
+    public static BuildResults ToBuildResults(this Contracts.BuildResults results)
+        => new(
+            results.EventTypes.Select(_ => _.ToArtifactBuildResult()),
+            results.AggregateRoots.Select(_ => _.ToArtifactBuildResult()),
+            results.EventHandlers.Select(_ => _.ToArtifactBuildResult()),
+            results.Projections.Select(_ => _.ToArtifactBuildResult()),
+            results.Embeddings.Select(_ => _.ToArtifactBuildResult()),
+            results.Filters.Select(_ => _.ToArtifactBuildResult()),
+            results.Other.Select(_ => _.ToBuildResult()));
     
     public static Contracts.BuildResult ToProtobuf(this BuildResult result) => new()
     {
@@ -36,11 +50,23 @@ public static class BuildResultExtensions
             _ => Contracts.BuildResult.Types.Type.Information
         }
     };
-
-    public static RepeatedField<Contracts.BuildResult> ToProtobuf(this BuildResults results)
+    
+    public static Contracts.ArtifactBuildResult ToProtobuf(this ArtifactBuildResult result) => new()
     {
-        var pbResults = new RepeatedField<Contracts.BuildResult>();
-        pbResults.AddRange(results.Select(_ => _.ToProtobuf()));
-        return pbResults;
-    }
+        Alias = result.Alias,
+        Aritfact = result.Artifact.ToProtobuf(),
+        BuildResult = result.Result.ToProtobuf()
+    };
+
+    public static Contracts.BuildResults ToProtobuf(this BuildResults results)
+        => new ()
+        {
+            Embeddings = { results.Embeddings.Select(_ => _.ToProtobuf()) },
+            Filters = { results.Filters.Select(_ => _.ToProtobuf()) },
+            Other = { results.Other.Select(_ => _.ToProtobuf()) },
+            Projections = { results.Projections.Select(_ => _.ToProtobuf()) },
+            AggregateRoots = { results.AggregateRoots.Select(_ => _.ToProtobuf()) },
+            EventHandlers = { results.EventHandlers.Select(_ => _.ToProtobuf()) },
+            EventTypes = { results.EventTypes.Select(_ => _.ToProtobuf()) }
+        };
 }

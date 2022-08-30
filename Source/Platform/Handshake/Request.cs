@@ -23,4 +23,4 @@ public record Request(
     Version ContractsVersion,
     HandshakeAttempt Attempt,
     HandshakeTimeSpent TimeSpent,
-    BuildResults? BuildResults);
+    BuildResults BuildResults);

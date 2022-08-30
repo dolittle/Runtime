@@ -21,20 +21,13 @@ public class BuildResultsForHeads : IBuildResultsForHeads
 
     /// <inheritdoc />
     public BuildResults GetFor(HeadId head)
-        => _buildResults ?? new BuildResults(Enumerable.Empty<BuildResult>().ToList());
+        => _buildResults ?? BuildResults.Empty;
 
     /// <inheritdoc />
     public void AddFor(HeadId head, BuildResults results)
     {
         _buildResults = results;
         _logger.BuildResultsAddedForHead(head);
-        foreach (var result in results)
-        {
-            var logLevel = result.LogLevel;
-            if (_logger.IsEnabled(logLevel))
-            {
-                _logger.Log(result.LogLevel, "{Type} Build Result for Head {Head}: {Message}", result.Type, head, result.Message);
-            }
-        }
+        results.Log(_logger, head);
     }
 }

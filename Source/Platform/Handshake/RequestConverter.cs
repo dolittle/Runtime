@@ -41,11 +41,6 @@ public class RequestConverter : IRequestConverter
             failure = new MissingHandshakeInformation(nameof(request.TimeSpent));
             return false;
         }
-
-        var buildResults = request.BuildResults?.Count > 0
-            ? request.BuildResults.ToBuildResults()
-            : null;
-
         failure = null;
         parsed = new Request(
             request.SdkIdentifier,
@@ -54,7 +49,7 @@ public class RequestConverter : IRequestConverter
             request.ContractsVersion.ToVersion(),
             request.Attempt,
             request.TimeSpent.ToTimeSpan(),
-            buildResults);
+            request.BuildResults?.ToBuildResults() ?? BuildResults.Empty);
         return true;
     }
 }

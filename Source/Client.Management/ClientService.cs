@@ -33,7 +33,7 @@ public class ClientService : Contracts.Client.ClientBase
         _logger.GettingClientBuildResults();
         var response = new GetBuildResultsResponse
         {
-            BuildResults = { _buildResults.GetFor(Guid.Empty).ToProtobuf() }
+            BuildResults = _buildResults.GetFor(Guid.Empty).ToProtobuf()
         };
         return Task.FromResult(response);
     }

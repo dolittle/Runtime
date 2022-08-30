@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Client;
@@ -22,4 +23,12 @@ public record BuildResult(BuildResultType Type, string Message)
         BuildResultType.Error => LogLevel.Error,
         _ => LogLevel.Debug
     };
+
+    public void Log(ILogger logger, HeadId head)
+    {
+        if (logger.IsEnabled(LogLevel))
+        {
+            logger.Log(LogLevel, "{Type} Build Result for Head {Head}: {Message}", Type, head, Message);
+        }
+    }
 }
