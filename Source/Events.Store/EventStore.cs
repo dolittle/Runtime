@@ -2,12 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Services.Contracts;
 using Microsoft.Extensions.Logging;
 using Proto;
@@ -79,6 +83,31 @@ public class EventStore : IEventStore
             {
                 Failure = e.ToFailure()
             };
+        }
+    }
+
+    /// <inheritdoc />
+    public Try<IAsyncEnumerable<CommittedAggregateEvent>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, TenantId tenant, CancellationToken cancellationToken)
+    {
+        if (!eventTypes.Any())
+        {
+            var error = new CannotFetchAggregateEventsWithNoEventTypes(eventSource, aggregateRoot);
+            _logger.ErrorFetchingEventsFromAggregate(error);
+            return error;
+        }
+        try
+        {
+            var result = _getCommittedEventsFetcher(tenant).FetchForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken);
+            if (!result.Success)
+            {
+                _logger.ErrorFetchingEventsFromAggregate(result.Exception);
+            }
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorFetchingEventsFromAggregate(e);
+            return e;
         }
     }
 

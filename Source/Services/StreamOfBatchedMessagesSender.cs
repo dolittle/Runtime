@@ -18,10 +18,19 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
     where TData : IMessage
 {
     /// <inheritdoc />
-    public async Task Send(
+    public Task Send(
         uint maxBatchSize,
         IAsyncEnumerator<TData> dataEnumerator,
         Action<TBatch, TData> putInBatch,
+        Func<TBatch, Task> sendBatch)
+        => Send(maxBatchSize, dataEnumerator, putInBatch, _ => _, sendBatch);
+    
+    /// <inheritdoc />
+    public async Task Send<TDataToBatch>(
+        uint maxBatchSize,
+        IAsyncEnumerator<TDataToBatch> dataEnumerator,
+        Action<TBatch, TDataToBatch> putInBatch,
+        Func<TDataToBatch, TData> convertToData,
         Func<TBatch, Task> sendBatch)
     {
         try
@@ -31,7 +40,7 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
             {
                 var batchToSend = new TBatch();
                 putInBatch(batchToSend, dataEnumerator.Current);
-                hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch).ConfigureAwait(false);
+                hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch, convertToData).ConfigureAwait(false);
                 await sendBatch(batchToSend).ConfigureAwait(false);
             }
         }
@@ -40,39 +49,13 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
             await dataEnumerator.DisposeAsync().ConfigureAwait(false);
         }
     }
-    
-    // /// <inheritdoc />
-    // public async Task Send<TDataBatch>(
-    //     uint maxBatchSize,
-    //     IAsyncEnumerator<TData> dataEnumerator,
-    //     Action<TBatch, TDataBatch> putInBatch,
-    //     Func<TBatch, TData, TDataBatch> aggregateData,
-    //     Func<TBatch, Task> sendBatch)
-    //     where TDataBatch : IMessage
-    // {
-    //     try
-    //     {
-    //         var hasMoreStates = await dataEnumerator.MoveNextAsync().ConfigureAwait(false);
-    //         while (hasMoreStates)
-    //         {
-    //             var batchToSend = new TBatch();
-    //             putInBatch(batchToSend, dataEnumerator.Current);
-    //             hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch).ConfigureAwait(false);
-    //             await sendBatch(batchToSend).ConfigureAwait(false);
-    //         }
-    //     }
-    //     finally
-    //     {
-    //         await dataEnumerator.DisposeAsync().ConfigureAwait(false);
-    //     }
-    // }
-    
-    static async Task<bool> FillBatch(uint maxBatchSize, IAsyncEnumerator<TData> stream, TBatch batch, Action<TBatch, TData> putInBatch)
+
+    static async Task<bool> FillBatch<TDataToBatch>(uint maxBatchSize, IAsyncEnumerator<TDataToBatch> stream, TBatch batch, Action<TBatch, TDataToBatch> putInBatch, Func<TDataToBatch, TData> convertToData)
     {
         while (await stream.MoveNextAsync().ConfigureAwait(false))
         {
             var data = stream.Current;
-            if (BatchWouldBeTooLarge(maxBatchSize, batch, data))
+            if (BatchWouldBeTooLarge(maxBatchSize, batch, convertToData(data)))
             {
                 return true;
             }

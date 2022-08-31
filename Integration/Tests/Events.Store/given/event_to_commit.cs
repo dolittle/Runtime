@@ -12,13 +12,14 @@ static class event_to_commit
 {
     
     public static UncommittedEvent create() => with_content(new {Hello = 42}).build();
+    public static UncommittedEvent create_with_type(Artifact event_type) => with_content(new {Hello = 42}).with_event_type(event_type).build();
 
     public static event_builder with_content(object content) => new(content);
     
     public class event_builder
     {
         EventSourceId event_source_id = "some event source";
-        Artifact artifact = new("a52f686f-c045-4c7a-9a5b-91ee4b107237", ArtifactGeneration.First);
+        Artifact event_type = new("a52f686f-c045-4c7a-9a5b-91ee4b107237", ArtifactGeneration.First);
         bool is_public;
         readonly string content;
         
@@ -33,9 +34,9 @@ static class event_to_commit
             return this;
         }
         
-        public event_builder with_artifact(ArtifactId artifact_id)
+        public event_builder with_event_type(Artifact artifact)
         {
-            artifact = new Artifact(artifact_id, ArtifactGeneration.First);
+            event_type = artifact;
             return this;
         }
         
@@ -45,6 +46,6 @@ static class event_to_commit
             return this;
         }
 
-        public UncommittedEvent build() => new UncommittedEvent(event_source_id, artifact, is_public, content);
+        public UncommittedEvent build() => new(event_source_id, event_type, is_public, content);
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
+using Dolittle.Runtime.MongoDB;
+using Dolittle.Runtime.Rudimentary;
 using MongoDB.Driver;
 
  namespace Dolittle.Runtime.Events.Store.MongoDB;
@@ -84,6 +87,26 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             cancellationToken);
 
     /// <inheritdoc/>
+    public Try<IAsyncEnumerable<CommittedAggregateEvent>> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var filter = EventsFromAggregateFilter(eventSource, aggregateRoot)
+                & _eventFilter.In(_ => _.Metadata.TypeId, eventTypes.Select(_ => _.Id.Value));
+            var events = _streams.DefaultEventLog
+                .Find(filter)
+                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
+                .ToAsyncEnumerable(cancellationToken);
+            var result = events.Select(_ => (CommittedAggregateEvent)_eventConverter.ToRuntimeStreamEvent(_).Event);
+            return Try<IAsyncEnumerable<CommittedAggregateEvent>>.Succeeded(result);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+
+    /// <inheritdoc/>
     public Task<CommittedAggregateEvents> FetchForAggregateAfter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion after, CancellationToken cancellationToken)
         => DoFetchForAggregate(
             eventSource,
@@ -110,18 +133,14 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
                     aggregateRoot,
                     Array.Empty<CommittedAggregateEvent>());
             }
-            var defaultFilter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
-                & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
-                & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
+
+            var defaultFilter = EventsFromAggregateFilter(eventSource, aggregateRoot)
                 & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
-
             var filter = filterCallback(defaultFilter);
-
             var events = await _streams.DefaultEventLog
                 .Find(filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
-
             return new CommittedAggregateEvents(
                 eventSource,
                 aggregateRoot,
@@ -134,7 +153,12 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
     }
-    
+
+    FilterDefinition<MongoDB.Events.Event> EventsFromAggregateFilter(EventSourceId eventSource, ArtifactId aggregateRoot)
+        => _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
+            & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
+            & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value);
+
     Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scope, CancellationToken cancellationToken)
         => scope == ScopeId.Default
             ? Task.FromResult(_streams.DefaultEventLog)

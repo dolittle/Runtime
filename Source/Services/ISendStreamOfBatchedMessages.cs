@@ -26,4 +26,11 @@ public interface ISendStreamOfBatchedMessages<TBatch, TData>
     /// <param name="sendBatch">The callback for sending a batch.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     Task Send(uint maxBatchSize, IAsyncEnumerator<TData> dataEnumerator, Action<TBatch, TData> putInBatch, Func<TBatch, Task> sendBatch);
+
+    Task Send<TDataToBatch>(
+        uint maxBatchSize,
+        IAsyncEnumerator<TDataToBatch> dataEnumerator,
+        Action<TBatch, TDataToBatch> putInBatch,
+        Func<TDataToBatch, TData> convertToData,
+        Func<TBatch, Task> sendBatch);
 }

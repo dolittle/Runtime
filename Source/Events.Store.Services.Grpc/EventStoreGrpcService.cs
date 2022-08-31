@@ -1,10 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventStore;
@@ -17,17 +18,21 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc;
 [PrivateService]
 public class EventStoreGrpcService : EventStoreBase
 {
+    const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IEventStore _eventStore;
-    readonly IFetchCommittedEvents _committedEventsFetcher;
+    readonly ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> _aggregateEventsBatchSender;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStore">The event store to use.</param>
-    /// <param name="committedEventsReader"></param>
-    public EventStoreGrpcService(IEventStore eventStore)
+    /// <param name="aggregateEventsBatchSender">The batched aggregate events sender.</param>
+    public EventStoreGrpcService(
+        IEventStore eventStore,
+        ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> aggregateEventsBatchSender)
     {
         _eventStore = eventStore;
+        _aggregateEventsBatchSender = aggregateEventsBatchSender;
     }
 
     /// <inheritdoc/>
@@ -41,4 +46,34 @@ public class EventStoreGrpcService : EventStoreBase
     /// <inheritdoc/>
     public override Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, ServerCallContext context)
         => _eventStore.FetchAggregateEvents(request, context.CancellationToken);
+
+    public override async Task FetchForAggregateInBatches(FetchForAggregateInBatchesRequest request, IServerStreamWriter<FetchForAggregateResponse> responseStream, ServerCallContext context)
+    {
+        var eventSourceId = request.Aggregate.EventSourceId;
+        var aggregateRootId = request.Aggregate.AggregateRootId.ToGuid(); 
+        var fetchResult = _eventStore.FetchAggregateEvents(
+            eventSourceId,
+            aggregateRootId,
+            request.EventTypes.Select(_ => _.ToArtifact()),
+            request.CallContext.ExecutionContext.TenantId.ToGuid(),
+            context.CancellationToken);
+
+        if (!fetchResult.Success)
+        {
+            var response = new FetchForAggregateResponse() { Failure = fetchResult.Exception.ToFailure() };
+            await responseStream.WriteAsync(response).ConfigureAwait(false);
+            return;
+        }
+        await _aggregateEventsBatchSender.Send(
+            MaxBatchMessageSize,
+            fetchResult.Result.GetAsyncEnumerator(context.CancellationToken),
+            (response, aggregateEvent) =>
+            {
+                response.Events.AggregateRootVersion = aggregateEvent.AggregateRootVersion;
+                response.Events.Events.Add(aggregateEvent.ToProtobuf());
+            },
+            _ => _.ToProtobuf(),
+            _ => responseStream.WriteAsync(_, context.CancellationToken)
+        ).ConfigureAwait(false);
+    }
 }

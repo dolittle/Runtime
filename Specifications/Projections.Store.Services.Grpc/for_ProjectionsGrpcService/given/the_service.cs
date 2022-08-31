@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Projections.Contracts;
+using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -15,8 +17,10 @@ public class the_service
     private Establish context = () =>
     {
         projections_service = new Mock<IProjectionsService>();
+        
         grpc_service = new ProjectionsGrpcService(
             projections_service.Object,
+            new StreamOfBatchedMessagesSender<GetAllResponse, ProjectionCurrentState>(),
             NullLogger.Instance);
     };
 }

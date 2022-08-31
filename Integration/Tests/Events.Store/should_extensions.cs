@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
@@ -37,6 +38,18 @@ static class should_extensions
         }
     }
     public static void should_be_the_correct_responses(this CommitAggregateEventsResponse[] responses, UncommittedAggregateEvents[] uncommitted_events, ExecutionContext execution_context, bool random_commit_order = false)
+    {
+        var startEventLogSequenceNumber = EventLogSequenceNumber.Initial;
+        for (var i = 0; i < responses.Length; i++)
+        {
+            var response = responses[i];
+            var events = uncommitted_events[i];
+            response.should_be_the_correct_response(events, execution_context, random_commit_order ? response.Events?.Events?.First().EventLogSequenceNumber : startEventLogSequenceNumber);
+            startEventLogSequenceNumber += (ulong)events.Count;
+        }
+    }
+
+    public static void should_be_the_correct_responses(this FetchForAggregateResponse[] responses, UncommittedAggregateEvents[] uncommitted_events, ExecutionContext execution_context, bool random_commit_order = false)
     {
         var startEventLogSequenceNumber = EventLogSequenceNumber.Initial;
         for (var i = 0; i < responses.Length; i++)
@@ -81,21 +94,35 @@ static class should_extensions
         ExecutionContext execution_context,
         EventLogSequenceNumber start_sequence_number = null,
         AggregateRootVersion start_aggregate_root_version = null)
-    {
-        var committedEvents = response.Events.ToCommittedEvents();
+        => events_should_be_the_same(response.Events.ToCommittedEvents(), uncommitted_events, execution_context, start_sequence_number, start_aggregate_root_version);
 
-        committedEvents.Count.ShouldEqual(uncommitted_events.Count);
+    public static void should_be_the_correct_response(
+        this FetchForAggregateResponse response,
+        UncommittedAggregateEvents uncommitted_events,
+        ExecutionContext execution_context,
+        EventLogSequenceNumber start_sequence_number = null,
+        AggregateRootVersion start_aggregate_root_version = null)
+        => events_should_be_the_same(response.Events.ToCommittedEvents(), uncommitted_events, execution_context, start_sequence_number, start_aggregate_root_version);
+    
+    public static void events_should_be_the_same(
+        CommittedAggregateEvents committed_events,
+        UncommittedAggregateEvents uncommitted_events,
+        ExecutionContext execution_context,
+        EventLogSequenceNumber start_sequence_number = null,
+        AggregateRootVersion start_aggregate_root_version = null)
+    {
+        committed_events.Count.ShouldEqual(uncommitted_events.Count);
         if (uncommitted_events.Count == 0)
         {
             return;
         }
 
-        committedEvents.AggregateRoot.ShouldEqual(uncommitted_events.AggregateRoot.Id);
-        committedEvents.EventSource.ShouldEqual(uncommitted_events.EventSource);
+        committed_events.AggregateRoot.ShouldEqual(uncommitted_events.AggregateRoot.Id);
+        committed_events.EventSource.ShouldEqual(uncommitted_events.EventSource);
 
-        for (var i = 0; i < committedEvents.Count; i++)
+        for (var i = 0; i < committed_events.Count; i++)
         {
-            var committedEvent = committedEvents[i];
+            var committedEvent = committed_events[i];
             var uncommittedEvent = uncommitted_events[i];
 
             if (start_sequence_number != null)
@@ -109,12 +136,14 @@ static class should_extensions
 
             committedEvent.AggregateRoot.ShouldEqual(uncommitted_events.AggregateRoot);
             committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            committedEvent.Content.ShouldEqual(uncommittedEvent.Content);
+            compare_event_content(committedEvent.Content, uncommittedEvent.Content);
             committedEvent.Public.ShouldEqual(uncommittedEvent.Public);
             committedEvent.Type.ShouldEqual(uncommittedEvent.Type);
             committedEvent.EventSource.ShouldEqual(uncommittedEvent.EventSource);
         }
     }
+    
+    static void compare_event_content(string content1, string content2) => Regex.Replace(content1, @"\s+", "").ShouldEqual(Regex.Replace(content2, @"\s+", ""));
     
     public static void should_have_stored_committed_events<TEvent>(this CommittedEventSequence<TEvent> events, IStreams streams, IEventContentConverter event_content_converter)
         where TEvent : Dolittle.Runtime.Events.Store.CommittedEvent
