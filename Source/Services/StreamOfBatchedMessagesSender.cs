@@ -14,21 +14,23 @@ namespace Dolittle.Runtime.Services;
 /// <typeparam name="TBatch">The <see cref="Type"/> of the batch message.</typeparam>
 /// <typeparam name="TData">The <see cref="Type"/> of the data to put in a batch.</typeparam>
 public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatchedMessages<TBatch, TData>
-    where TBatch : IMessage, new()
+    where TBatch : IMessage
     where TData : IMessage
 {
     /// <inheritdoc />
     public Task Send(
         uint maxBatchSize,
         IAsyncEnumerator<TData> dataEnumerator,
+        Func<TBatch> createNewBatch,
         Action<TBatch, TData> putInBatch,
         Func<TBatch, Task> sendBatch)
-        => Send(maxBatchSize, dataEnumerator, putInBatch, _ => _, sendBatch);
+        => Send(maxBatchSize, dataEnumerator, createNewBatch, putInBatch, _ => _, sendBatch);
     
     /// <inheritdoc />
     public async Task Send<TDataToBatch>(
         uint maxBatchSize,
         IAsyncEnumerator<TDataToBatch> dataEnumerator,
+        Func<TBatch> createNewBatch,
         Action<TBatch, TDataToBatch> putInBatch,
         Func<TDataToBatch, TData> convertToData,
         Func<TBatch, Task> sendBatch)
@@ -38,7 +40,7 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
             var hasMoreStates = await dataEnumerator.MoveNextAsync().ConfigureAwait(false);
             while (hasMoreStates)
             {
-                var batchToSend = new TBatch();
+                var batchToSend = createNewBatch();
                 putInBatch(batchToSend, dataEnumerator.Current);
                 hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch, convertToData).ConfigureAwait(false);
                 await sendBatch(batchToSend).ConfigureAwait(false);

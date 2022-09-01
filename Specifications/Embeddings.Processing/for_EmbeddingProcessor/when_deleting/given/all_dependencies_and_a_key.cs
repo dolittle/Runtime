@@ -54,6 +54,7 @@ public class all_dependencies_and_a_key : for_EmbeddingProcessor.given.all_depen
         committed_events = new CommittedAggregateEvents(
             "1d137f3a-b8d0-43a5-a08a-f8eb35b5e932",
             "5512cda5-5e38-4654-ba86-3a7d917f3eb0",
+            aggregate_root_version,
             new[] { committed_event });
     };
     protected static UncommittedAggregateEvents CreateUncommittedEvents(params UncommittedEvent[] events)

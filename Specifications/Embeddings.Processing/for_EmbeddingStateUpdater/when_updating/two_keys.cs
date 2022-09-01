@@ -32,13 +32,13 @@ public class two_keys : given.all_dependencies
         projection_key_a = "key-a";
         current_state_a = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "state-current-a", projection_key_a);
         unprocessed_event_a = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 1, 10, DateTimeOffset.Now, projection_key_a.Value, execution_context, event_type, false, "event-one-content");
-        unprocessed_events_a = new CommittedAggregateEvents(projection_key_a.Value, embedding.Value, new[] { unprocessed_event_a });
+        unprocessed_events_a = new CommittedAggregateEvents(projection_key_a.Value, embedding.Value, current_state_a.Version, new[] { unprocessed_event_a });
         projection_result_a = new EmbeddingCurrentState(current_state_a.Version + 1, EmbeddingCurrentStateType.Deleted, current_state_a.State, current_state_a.Key);
 
         projection_key_b = "key-b";
         current_state_b = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "state-initial-b", projection_key_b);
         unprocessed_event_b = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 0, 12, DateTimeOffset.Now, projection_key_b.Value, execution_context, event_type, false, "event-two-content");
-        unprocessed_events_b = new CommittedAggregateEvents(projection_key_b.Value, embedding.Value, new[] { unprocessed_event_b });
+        unprocessed_events_b = new CommittedAggregateEvents(projection_key_b.Value, embedding.Value, current_state_b.Version, new[] { unprocessed_event_b });
         projection_result_b = new EmbeddingCurrentState(current_state_b.Version + 1, EmbeddingCurrentStateType.Persisted, current_state_b.State, current_state_b.Key);
 
         embedding_store

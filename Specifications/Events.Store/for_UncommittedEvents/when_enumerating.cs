@@ -4,7 +4,7 @@
 using System.Linq;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedEvents;
+namespace Dolittle.Runtime.Events.Store.for_UncommittedEvents;
 
 public class when_enumerating : given.events
 {

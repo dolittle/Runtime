@@ -111,6 +111,7 @@ public class ProjectionsGrpcService : ProjectionsBase
         await _projectionBatchSender.Send(
             MaxBatchMessageSize,
             getAllResult.Result.Select(_ => _.ToProtobuf()).GetAsyncEnumerator(context.CancellationToken),
+            () => new GetAllResponse(),
             (response, state) => response.States.Add(state),
             batchToSend => 
             {

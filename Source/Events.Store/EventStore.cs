@@ -87,17 +87,17 @@ public class EventStore : IEventStore
     }
 
     /// <inheritdoc />
-    public Try<IAsyncEnumerable<CommittedAggregateEvent>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, TenantId tenant, CancellationToken cancellationToken)
+    public async Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, TenantId tenant, CancellationToken cancellationToken)
     {
-        if (!eventTypes.Any())
-        {
-            var error = new CannotFetchAggregateEventsWithNoEventTypes(eventSource, aggregateRoot);
-            _logger.ErrorFetchingEventsFromAggregate(error);
-            return error;
-        }
         try
         {
-            var result = _getCommittedEventsFetcher(tenant).FetchForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken);
+            var committedEventsFetcher = _getCommittedEventsFetcher(tenant);
+            if (!eventTypes.Any())
+            {
+                var committedEvents = await committedEventsFetcher.FetchForAggregate(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
+                return (committedEvents.AggregateRootVersion, committedEvents.ToAsyncEnumerable());
+            }
+            var result = await committedEventsFetcher.FetchForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).ConfigureAwait(false);
             if (!result.Success)
             {
                 _logger.ErrorFetchingEventsFromAggregate(result.Exception);

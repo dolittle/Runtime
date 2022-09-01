@@ -4,7 +4,7 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents;
+namespace Dolittle.Runtime.Events.Store.for_UncommittedAggregateEvents;
 
 public class when_creating_with_null : given.events_and_an_aggregate
 {

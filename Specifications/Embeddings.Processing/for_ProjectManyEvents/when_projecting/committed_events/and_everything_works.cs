@@ -38,7 +38,7 @@ public class and_everything_works : given.all_dependencies
         event_one = new CommittedAggregateEvent(aggregate_root_type, 3, 10, DateTimeOffset.Now, event_source, execution_context, event_type, false, "event-one-content");
         event_two = new CommittedAggregateEvent(aggregate_root_type, 4, 11, DateTimeOffset.Now, event_source, execution_context, event_type, true, "event-two-content");
         event_three = new CommittedAggregateEvent(aggregate_root_type, 5, 12, DateTimeOffset.Now, event_source, execution_context, event_type, false, "event-three-content");
-        unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, new[] { event_one, event_two, event_three });
+        unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, current_state.Version, new[] { event_one, event_two, event_three });
         result_after_one = new ProjectionReplaceResult("state-after-one");
         result_after_two = new ProjectionDeleteResult();
         result_after_three = new ProjectionReplaceResult("state-after-three");

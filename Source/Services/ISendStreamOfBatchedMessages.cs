@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Services;
 /// <typeparam name="TBatch">The <see cref="Type"/> of the batch message.</typeparam>
 /// <typeparam name="TData">The <see cref="Type"/> of the data to put in a batch.</typeparam>
 public interface ISendStreamOfBatchedMessages<TBatch, TData>
-    where TBatch : IMessage, new()
+    where TBatch : IMessage
     where TData : IMessage
 {
     /// <summary>
@@ -22,14 +22,26 @@ public interface ISendStreamOfBatchedMessages<TBatch, TData>
     /// </summary>
     /// <param name="maxBatchSize">The max batch size.</param>
     /// <param name="dataEnumerator">The stream of data to batch and send.</param>
+    /// <param name="createEmptyBatch">The callback for creating an empty batch.</param>
     /// <param name="putInBatch">The callback for putting data in a batch.</param>
     /// <param name="sendBatch">The callback for sending a batch.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task Send(uint maxBatchSize, IAsyncEnumerator<TData> dataEnumerator, Action<TBatch, TData> putInBatch, Func<TBatch, Task> sendBatch);
+    Task Send(uint maxBatchSize, IAsyncEnumerator<TData> dataEnumerator, Func<TBatch> createEmptyBatch, Action<TBatch, TData> putInBatch, Func<TBatch, Task> sendBatch);
 
+    /// <summary>
+    /// Sends a stream of data as batched messages.
+    /// </summary>
+    /// <param name="maxBatchSize">The max batch size.</param>
+    /// <param name="dataEnumerator">The stream of data to batch and send.</param>
+    /// <param name="createEmptyBatch">The callback for creating an empty batch.</param>
+    /// <param name="putInBatch">The callback for putting data in a batch.</param>
+    /// <param name="convertToData">The callback for converting <typeparamref name="TDataToBatch"/> to <typeparamref name="TData"/>.</param>
+    /// <param name="sendBatch">The callback for sending a batch.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     Task Send<TDataToBatch>(
         uint maxBatchSize,
         IAsyncEnumerator<TDataToBatch> dataEnumerator,
+        Func<TBatch> createEmptyBatch,
         Action<TBatch, TDataToBatch> putInBatch,
         Func<TDataToBatch, TData> convertToData,
         Func<TBatch, Task> sendBatch);

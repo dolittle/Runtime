@@ -51,12 +51,12 @@ public class EventStoreGrpcService : EventStoreBase
     {
         var eventSourceId = request.Aggregate.EventSourceId;
         var aggregateRootId = request.Aggregate.AggregateRootId.ToGuid(); 
-        var fetchResult = _eventStore.FetchAggregateEvents(
+        var fetchResult = await _eventStore.FetchAggregateEvents(
             eventSourceId,
             aggregateRootId,
             request.EventTypes.Select(_ => _.ToArtifact()),
             request.CallContext.ExecutionContext.TenantId.ToGuid(),
-            context.CancellationToken);
+            context.CancellationToken).ConfigureAwait(false);
 
         if (!fetchResult.Success)
         {
@@ -66,10 +66,18 @@ public class EventStoreGrpcService : EventStoreBase
         }
         await _aggregateEventsBatchSender.Send(
             MaxBatchMessageSize,
-            fetchResult.Result.GetAsyncEnumerator(context.CancellationToken),
+            fetchResult.Result.EventStream.GetAsyncEnumerator(context.CancellationToken),
+            () => new FetchForAggregateResponse
+            {
+                Events = new Contracts.CommittedAggregateEvents
+                {
+                    AggregateRootId = aggregateRootId.ToProtobuf(),
+                    EventSourceId = eventSourceId,
+                    AggregateRootVersion = fetchResult.Result.AggregateRootVersion
+                }
+            },
             (response, aggregateEvent) =>
             {
-                response.Events.AggregateRootVersion = aggregateEvent.AggregateRootVersion;
                 response.Events.Events.Add(aggregateEvent.ToProtobuf());
             },
             _ => _.ToProtobuf(),
