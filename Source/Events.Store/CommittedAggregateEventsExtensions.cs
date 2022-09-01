@@ -18,17 +18,14 @@ public static class CommittedAggregateEventsExtensions
     /// <param name="committedAggregateEvents">The committed events.</param>
     /// <returns>The converted <see cref="Contracts.CommittedAggregateEvents" />.</returns>
     public static Contracts.CommittedAggregateEvents ToProtobuf(this CommittedAggregateEvents committedAggregateEvents)
-    {
-        var aggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion ?? 0;
-        var protobuf = new Contracts.CommittedAggregateEvents
+        => new()
         {
             AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
             EventSourceId = committedAggregateEvents.EventSource.Value,
-            AggregateRootVersion = aggregateRootVersion
+            AggregateRootVersion = committedAggregateEvents.AggregateRootVersion,
+            Events = { committedAggregateEvents.Select(_ => _.ToProtobuf()) }
         };
-        protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
-        return protobuf;
-    }
+
     
     /// <summary>
     /// Converts the <see cref="Contracts.CommittedAggregateEvents"/> to <see cref="CommittedAggregateEvents"/>.
@@ -41,6 +38,7 @@ public static class CommittedAggregateEventsExtensions
         return new CommittedAggregateEvents(
             committedAggregateEvents.EventSourceId,
             committedAggregateEvents.AggregateRootId.ToGuid(),
+            committedAggregateEvents.AggregateRootVersion,
             committedAggregateEvents.Events.Select(_ => new CommittedAggregateEvent(
                 new Artifact(committedAggregateEvents.AggregateRootId.ToGuid(), ArtifactGeneration.First),
                 version++,
