@@ -22,7 +22,8 @@ public static class CommittedAggregateEventsExtensions
         {
             AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
             EventSourceId = committedAggregateEvents.EventSource.Value,
-            AggregateRootVersion = committedAggregateEvents.AggregateRootVersion,
+            AggregateRootVersion = committedAggregateEvents.AggregateRootVersion - 1,
+            CurrentAggregateRootVersion = committedAggregateEvents.AggregateRootVersion,
             Events = { committedAggregateEvents.Select(_ => _.ToProtobuf()) }
         };
 
@@ -34,11 +35,11 @@ public static class CommittedAggregateEventsExtensions
     /// <returns>The converted <see cref="CommittedAggregateEvents"/>.</returns>
     public static CommittedAggregateEvents ToCommittedEvents(this Contracts.CommittedAggregateEvents committedAggregateEvents)
     {
-        var version = committedAggregateEvents.AggregateRootVersion + 1 - (ulong)committedAggregateEvents.Events.Count;
+        var version = committedAggregateEvents.CurrentAggregateRootVersion - (ulong)committedAggregateEvents.Events.Count;
         return new CommittedAggregateEvents(
             committedAggregateEvents.EventSourceId,
             committedAggregateEvents.AggregateRootId.ToGuid(),
-            committedAggregateEvents.AggregateRootVersion,
+            committedAggregateEvents.CurrentAggregateRootVersion,
             committedAggregateEvents.Events.Select(_ => new CommittedAggregateEvent(
                 new Artifact(committedAggregateEvents.AggregateRootId.ToGuid(), ArtifactGeneration.First),
                 version++,

@@ -49,6 +49,12 @@ public class CommittedAggregateEvents : CommittedEventSequence<CommittedAggregat
     
     /// <summary>
     /// Gets the current <see cref="AggregateRootVersion"/> of the aggregate root.
+    /// <remarks>
+    /// The number here will always be the number of events committed for an aggregate.
+    /// However when this is converted to the CommittedAggregateEvents protobuf message it will populate now deprecated aggregateRootVersion field with the value of this minus 1.
+    /// This is due to a mistake in how we first used the CommittedAggregateEvents protobuf message and the SDKs are built around this.
+    /// To ensure backwards compatability we'll keep this flaw for now.
+    /// </remarks>
     /// </summary>
     public AggregateRootVersion AggregateRootVersion { get; }
 

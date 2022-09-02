@@ -73,7 +73,10 @@ public class EventStoreGrpcService : EventStoreBase
                 {
                     AggregateRootId = aggregateRootId.ToProtobuf(),
                     EventSourceId = eventSourceId,
-                    AggregateRootVersion = fetchResult.Result.AggregateRootVersion
+                    AggregateRootVersion = fetchResult.Result.AggregateRootVersion == AggregateRootVersion.Initial
+                        ? AggregateRootVersion.Initial
+                        : fetchResult.Result.AggregateRootVersion - 1,
+                    CurrentAggregateRootVersion = fetchResult.Result.AggregateRootVersion
                 }
             },
             (response, aggregateEvent) =>
