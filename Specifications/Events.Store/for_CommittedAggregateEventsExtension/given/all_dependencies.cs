@@ -48,7 +48,8 @@ public class all_dependencies
             AggregateRootId = aggregate_root_id.ToProtobuf(),
             EventSourceId = event_source_id,
             // The aggregate root version of the committed aggregate events is the version of the last event, meaning the aggregate root version before commit happened + number of events - 1
-            AggregateRootVersion = aggregate_version_after_commit - 1
+            AggregateRootVersion = aggregate_version_after_commit - 1,
+            CurrentAggregateRootVersion =  aggregate_version_after_commit
         };
         result.Events.AddRange(events);
         return result;
