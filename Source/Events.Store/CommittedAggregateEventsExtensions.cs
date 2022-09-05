@@ -34,15 +34,13 @@ public static class CommittedAggregateEventsExtensions
     /// <param name="committedAggregateEvents">The committed events.</param>
     /// <returns>The converted <see cref="CommittedAggregateEvents"/>.</returns>
     public static CommittedAggregateEvents ToCommittedEvents(this Contracts.CommittedAggregateEvents committedAggregateEvents)
-    {
-        var version = committedAggregateEvents.CurrentAggregateRootVersion - (ulong)committedAggregateEvents.Events.Count;
-        return new CommittedAggregateEvents(
+        => new(
             committedAggregateEvents.EventSourceId,
             committedAggregateEvents.AggregateRootId.ToGuid(),
             committedAggregateEvents.CurrentAggregateRootVersion,
             committedAggregateEvents.Events.Select(_ => new CommittedAggregateEvent(
                 new Artifact(committedAggregateEvents.AggregateRootId.ToGuid(), ArtifactGeneration.First),
-                version++,
+                _.AggregateRootVersion,
                 _.EventLogSequenceNumber,
                 _.Occurred.ToDateTimeOffset(),
                 committedAggregateEvents.EventSourceId,
@@ -50,5 +48,5 @@ public static class CommittedAggregateEventsExtensions
                 _.EventType.ToArtifact(),
                 _.Public,
                 _.Content)).ToList());
-    }
+    
 }

@@ -114,7 +114,7 @@ public class ManagementClient : IManagementClient
         => new(
             events.EventSourceId,
             events.AggregateRootId.ToGuid(),
-            events.AggregateRootVersion,
+            events.CurrentAggregateRootVersion,
             events.Events.Select((@event, i) => new CommittedAggregateEvent(
                 new Artifact(events.AggregateRootId.ToGuid(), ArtifactGeneration.First),
                 events.AggregateRootVersion + 1u - (ulong)events.Events.Count + (ulong)i,
