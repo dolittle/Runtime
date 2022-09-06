@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
@@ -20,7 +21,8 @@ public class EventStoreGrpcService : EventStoreBase
 {
     const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IEventStore _eventStore;
-    readonly ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> _aggregateEventsBatchSender;
+    readonly ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> _aggregateEventsBatchSender
+        = new StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
@@ -28,11 +30,11 @@ public class EventStoreGrpcService : EventStoreBase
     /// <param name="eventStore">The event store to use.</param>
     /// <param name="aggregateEventsBatchSender">The batched aggregate events sender.</param>
     public EventStoreGrpcService(
-        IEventStore eventStore,
-        ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> aggregateEventsBatchSender)
+        IEventStore eventStore
+        // ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> aggregateEventsBatchSender
+        )
     {
         _eventStore = eventStore;
-        _aggregateEventsBatchSender = aggregateEventsBatchSender;
     }
 
     /// <inheritdoc/>
@@ -64,27 +66,31 @@ public class EventStoreGrpcService : EventStoreBase
             await responseStream.WriteAsync(response).ConfigureAwait(false);
             return;
         }
+        if (!await fetchResult.Result.EventStream.AnyAsync().ConfigureAwait(false))
+        {
+            await responseStream.WriteAsync(CreateResponse(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion)).ConfigureAwait(false);
+        }
         await _aggregateEventsBatchSender.Send(
             MaxBatchMessageSize,
             fetchResult.Result.EventStream.GetAsyncEnumerator(context.CancellationToken),
-            () => new FetchForAggregateResponse
-            {
-                Events = new Contracts.CommittedAggregateEvents
-                {
-                    AggregateRootId = aggregateRootId.ToProtobuf(),
-                    EventSourceId = eventSourceId,
-                    AggregateRootVersion = fetchResult.Result.AggregateRootVersion == AggregateRootVersion.Initial
-                        ? AggregateRootVersion.Initial
-                        : fetchResult.Result.AggregateRootVersion - 1,
-                    CurrentAggregateRootVersion = fetchResult.Result.AggregateRootVersion
-                }
-            },
-            (response, aggregateEvent) =>
-            {
-                response.Events.Events.Add(aggregateEvent.ToProtobuf());
-            },
+            () => CreateResponse(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion),
+            (response, aggregateEvent) => response.Events.Events.Add(aggregateEvent.ToProtobuf()),
             _ => _.ToProtobuf(),
             _ => responseStream.WriteAsync(_, context.CancellationToken)
         ).ConfigureAwait(false);
     }
+
+    static FetchForAggregateResponse CreateResponse(ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion currentAggregateRootVersion)
+        => new()
+        {
+            Events = new Contracts.CommittedAggregateEvents
+            {
+                AggregateRootId = aggregateRootId.ToProtobuf(),
+                EventSourceId = eventSourceId,
+                AggregateRootVersion = currentAggregateRootVersion == AggregateRootVersion.Initial
+                    ? AggregateRootVersion.Initial
+                    : currentAggregateRootVersion - 1,
+                CurrentAggregateRootVersion = currentAggregateRootVersion
+            }
+        };
 }

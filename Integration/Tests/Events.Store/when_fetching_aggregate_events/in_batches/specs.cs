@@ -67,12 +67,7 @@ class specs : given.a_clean_event_store
 
         It should_not_fail = () => response.Success.ShouldBeTrue();
         
-        It should_return_the_correct_committed_event = () => should_extensions.events_should_be_the_same(
-            to_committed_events(response.Result, uncommitted_events).Result,
-            uncommitted_events,
-            execution_context,
-            EventLogSequenceNumber.Initial,
-            uncommitted_events.ExpectedAggregateRootVersion);
+        It should_return_no_committed_events = () => to_committed_events(response.Result, uncommitted_events).Result.ShouldBeEmpty();
     }
 
     

@@ -25,6 +25,8 @@ public class EventStore : IEventStore
 {
     readonly Func<TenantId, EventStoreClient> _getEventStoreClient;
     readonly Func<TenantId, IFetchCommittedEvents> _getCommittedEventsFetcher;
+    readonly Func<TenantId, IFetchAggregateRootVersions> _getAggregateRootVersionsFetcher;
+    
     readonly IRootContext _rootContext;
     readonly ILogger _logger;
 
@@ -34,12 +36,14 @@ public class EventStore : IEventStore
     /// <param name="getEventStoreClient">The factory to use to get the <see cref="EventStoreActor"/> client.</param>
     /// <param name="logger">The logger to use for logging.</param>
     /// <param name="getCommittedEventsFetcher"></param>
+    /// <param name="getAggregateRootVersionsFetcher"></param>
     /// <param name="rootContext">Proto root context. Allows middleware to be used</param>
-    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, IRootContext rootContext)
+    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, Func<TenantId, IFetchAggregateRootVersions> getAggregateRootVersionsFetcher, IRootContext rootContext)
     {
         _getEventStoreClient = getEventStoreClient;
         _logger = logger;
         _getCommittedEventsFetcher = getCommittedEventsFetcher;
+        _getAggregateRootVersionsFetcher = getAggregateRootVersionsFetcher;
         _rootContext = rootContext;
     }
 
@@ -94,8 +98,7 @@ public class EventStore : IEventStore
             var committedEventsFetcher = _getCommittedEventsFetcher(tenant);
             if (!eventTypes.Any())
             {
-                var committedEvents = await committedEventsFetcher.FetchForAggregate(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
-                return (committedEvents.AggregateRootVersion, committedEvents.ToAsyncEnumerable());
+                return (await _getAggregateRootVersionsFetcher(tenant).FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false), Enumerable.Empty<CommittedAggregateEvent>().ToAsyncEnumerable());
             }
             var result = await committedEventsFetcher.FetchForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).ConfigureAwait(false);
             if (!result.Success)
