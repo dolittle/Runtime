@@ -62,13 +62,9 @@ public class EventStoreGrpcService : EventStoreBase
 
         if (!fetchResult.Success)
         {
-            var response = new FetchForAggregateResponse() { Failure = fetchResult.Exception.ToFailure() };
+            var response = new FetchForAggregateResponse { Failure = fetchResult.Exception.ToFailure() };
             await responseStream.WriteAsync(response).ConfigureAwait(false);
             return;
-        }
-        if (!await fetchResult.Result.EventStream.AnyAsync().ConfigureAwait(false))
-        {
-            await responseStream.WriteAsync(CreateResponse(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion)).ConfigureAwait(false);
         }
         await _aggregateEventsBatchSender.Send(
             MaxBatchMessageSize,

@@ -38,9 +38,14 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
         try
         {
             var hasMoreStates = await dataEnumerator.MoveNextAsync().ConfigureAwait(false);
+            var batchToSend = createNewBatch();
+            if (!hasMoreStates)
+            {
+                await sendBatch(batchToSend).ConfigureAwait(false);
+                return;
+            }
             while (hasMoreStates)
             {
-                var batchToSend = createNewBatch();
                 putInBatch(batchToSend, dataEnumerator.Current);
                 hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch, convertToData).ConfigureAwait(false);
                 await sendBatch(batchToSend).ConfigureAwait(false);
