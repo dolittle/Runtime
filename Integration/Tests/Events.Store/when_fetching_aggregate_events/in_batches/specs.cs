@@ -69,8 +69,6 @@ class specs : given.a_clean_event_store
         
         It should_return_no_committed_events = () => to_committed_events(response.Result, uncommitted_events).Result.ShouldBeEmpty();
     }
-
-    
     
     [Tags("IntegrationTest")]
     class and_there_are_no_events_for_aggregate
@@ -91,6 +89,27 @@ class specs : given.a_clean_event_store
         It should_not_fail = () => response.Success.ShouldBeTrue();
         It should_have_no_aggregate_events = () => to_committed_events(response.Result, uncommitted_events).Result.ShouldBeEmpty();
     }
+    
+    [Tags("IntegrationTest")]
+    class and_there_are_no_events_for_aggregate_when_getting_all
+    {
+        static UncommittedAggregateEvents uncommitted_events;
+        Establish context = () =>
+        {
+            event_types.Add(new Artifact("270b39d9-cfe3-455c-968a-c0b01002e84b", ArtifactGeneration.First));
+            uncommitted_events = new UncommittedAggregateEvents("another event source", new Artifact(aggregate_root_id, ArtifactGeneration.First), AggregateRootVersion.Initial, new[]
+            {
+                given.event_to_commit.create()
+            }.ToList());
+            event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
+        };
+        
+        Because of = () => response = event_store.FetchAggregateEvents(event_source, aggregate_root_id, execution_context.Tenant, CancellationToken.None).GetAwaiter().GetResult();
+
+        It should_not_fail = () => response.Success.ShouldBeTrue();
+        It should_have_no_aggregate_events = () => to_committed_events(response.Result, uncommitted_events).Result.ShouldBeEmpty();
+    }
+
     
     [Tags("IntegrationTest")]
     class and_there_is_one_event_for_aggregate_with_unwanted_event_type
