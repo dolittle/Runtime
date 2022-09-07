@@ -49,6 +49,7 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
                 putInBatch(batchToSend, dataEnumerator.Current);
                 hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch, convertToData).ConfigureAwait(false);
                 await sendBatch(batchToSend).ConfigureAwait(false);
+                batchToSend = createNewBatch();
             }
         }
         finally
