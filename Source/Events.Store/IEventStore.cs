@@ -50,4 +50,15 @@ public interface IEventStore
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the operation.</param>
     /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IAsyncEnumerable{TResult}"/> of all the <see cref="CommittedAggregateEvent">aggregate events</see>.</returns>
     Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, TenantId tenant, CancellationToken cancellationToken);
+    
+    /// <summary>
+    /// Fetches aggregate events in batches from the Event Log for an aggregate given an <see cref="FetchForAggregateInBatchesRequest"/>.
+    /// </summary>
+    /// <param name="eventSource">The event source of the aggregate to fetch events from.</param>
+    /// <param name="aggregateRoot">The aggregate </param>
+    /// <param name="eventTypes">The event types of the aggregate events to fetch.</param>
+    /// <param name="tenant">The tenant fetching events for.</param>
+    /// <param name="cancellationToken">The cancellation token that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IAsyncEnumerable{TResult}"/> of all the <see cref="CommittedAggregateEvent">aggregate events</see>.</returns>
+    Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, TenantId tenant, CancellationToken cancellationToken);
 }

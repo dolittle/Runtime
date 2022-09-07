@@ -21,18 +21,13 @@ public class EventStoreGrpcService : EventStoreBase
 {
     const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IEventStore _eventStore;
-    readonly ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> _aggregateEventsBatchSender
-        = new StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent>();
+    readonly StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> _aggregateEventsBatchSender = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
     /// </summary>
     /// <param name="eventStore">The event store to use.</param>
-    /// <param name="aggregateEventsBatchSender">The batched aggregate events sender.</param>
-    public EventStoreGrpcService(
-        IEventStore eventStore
-        // ISendStreamOfBatchedMessages<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> aggregateEventsBatchSender
-        )
+    public EventStoreGrpcService(IEventStore eventStore)
     {
         _eventStore = eventStore;
     }
@@ -53,26 +48,32 @@ public class EventStoreGrpcService : EventStoreBase
     {
         var eventSourceId = request.Aggregate.EventSourceId;
         var aggregateRootId = request.Aggregate.AggregateRootId.ToGuid(); 
-        var fetchResult = await _eventStore.FetchAggregateEvents(
-            eventSourceId,
-            aggregateRootId,
-            request.EventTypes.Select(_ => _.ToArtifact()),
-            request.CallContext.ExecutionContext.TenantId.ToGuid(),
-            context.CancellationToken).ConfigureAwait(false);
-
+        var fetchResult = request.RequestCase == FetchForAggregateInBatchesRequest.RequestOneofCase.FetchEvents
+            ? await _eventStore.FetchAggregateEvents(
+                eventSourceId,
+                aggregateRootId,
+                request.FetchEvents.EventTypes.Select(_ => _.ToArtifact()),
+                request.CallContext.ExecutionContext.TenantId.ToGuid(),
+                context.CancellationToken).ConfigureAwait(false)
+            : await _eventStore.FetchAggregateEvents(
+                eventSourceId,
+                aggregateRootId,
+                request.CallContext.ExecutionContext.TenantId.ToGuid(),
+                context.CancellationToken);
         if (!fetchResult.Success)
         {
             var response = new FetchForAggregateResponse { Failure = fetchResult.Exception.ToFailure() };
             await responseStream.WriteAsync(response).ConfigureAwait(false);
             return;
         }
+
         await _aggregateEventsBatchSender.Send(
             MaxBatchMessageSize,
             fetchResult.Result.EventStream.GetAsyncEnumerator(context.CancellationToken),
             () => CreateResponse(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion),
-            (response, aggregateEvent) => response.Events.Events.Add(aggregateEvent.ToProtobuf()),
-            _ => _.ToProtobuf(),
-            _ => responseStream.WriteAsync(_, context.CancellationToken)
+            (batch, aggregateEvent) => batch.Events.Events.Add(aggregateEvent.ToProtobuf()),
+            aggregateEvent => aggregateEvent.ToProtobuf(),
+            batch => responseStream.WriteAsync(batch, context.CancellationToken)
         ).ConfigureAwait(false);
     }
 

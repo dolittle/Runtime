@@ -100,7 +100,26 @@ public class EventStore : IEventStore
             {
                 return (await _getAggregateRootVersionsFetcher(tenant).FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false), Enumerable.Empty<CommittedAggregateEvent>().ToAsyncEnumerable());
             }
-            var result = await committedEventsFetcher.FetchForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).ConfigureAwait(false);
+            var result = await committedEventsFetcher.FetchStreamForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                _logger.ErrorFetchingEventsFromAggregate(result.Exception);
+            }
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorFetchingEventsFromAggregate(e);
+            return e;
+        }
+    }
+
+    public async Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, TenantId tenant, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var committedEventsFetcher = _getCommittedEventsFetcher(tenant);
+            var result = await committedEventsFetcher.FetchStreamForAggregate(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
             if (!result.Success)
             {
                 _logger.ErrorFetchingEventsFromAggregate(result.Exception);
