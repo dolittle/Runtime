@@ -220,4 +220,43 @@ class specs : given.a_clean_event_store
             null,
             null);
     }
+    
+    [Tags("IntegrationTest")]
+    class and_getting_all_aggregate_events
+    {
+        static UncommittedAggregateEvents uncommitted_events;
+        static Artifact event_type;
+
+        Establish context = () =>
+        {
+            event_type = new Artifact("36e5c743-d647-491a-ae79-7fb2af1cc31b", ArtifactGeneration.First);
+            event_types.Add(event_type);
+            uncommitted_events = new UncommittedAggregateEvents(
+                event_source,
+                new Artifact(aggregate_root_id, ArtifactGeneration.First),
+                AggregateRootVersion.Initial,
+                new []
+                {
+                    given.event_to_commit.create(),
+                    given.event_to_commit.create_with_type(event_type),
+                    given.event_to_commit.create(),
+                    given.event_to_commit.create_with_type(event_type),
+                    given.event_to_commit.create(),
+                    given.event_to_commit.create_with_type(event_type)
+                });
+            event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
+        };
+
+        Because of = () => response = event_store.FetchAggregateEvents(event_source, aggregate_root_id, execution_context.Tenant, CancellationToken.None).GetAwaiter().GetResult();
+
+        It should_not_fail = () => response.Success.ShouldBeTrue();
+
+        It s = () => response.Result.aggregate_root_version.Value.ShouldEqual((ulong)uncommitted_events.Count);
+        It should_return_the_correct_committed_event = () => should_extensions.events_should_be_the_same(
+            to_committed_events(response.Result, uncommitted_events).Result,
+            uncommitted_events,
+            execution_context,
+            null,
+            null);
+    }
 }
