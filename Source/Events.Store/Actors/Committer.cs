@@ -224,6 +224,7 @@ public class Committer : IActor
                 if (!result.Success)
                 {
                     Console.WriteLine("Error while committing aggregate events");
+                    Console.WriteLine(result.Exception);
                     return RespondWithFailureAndClearInFlight(result.Exception.ToFailure());
                 }
 
