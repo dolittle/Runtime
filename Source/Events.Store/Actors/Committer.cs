@@ -4,7 +4,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
@@ -13,7 +12,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 using Proto;
 using Aggregate = Dolittle.Runtime.Events.Store.Persistence.Aggregate;
 using Failure = Dolittle.Runtime.Protobuf.Failure;
@@ -39,7 +38,7 @@ public class Committer : IActor
     
     bool _readyToSend = true;
     bool _shuttingDown = false;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Committer"/> class.
     /// </summary>
@@ -47,12 +46,14 @@ public class Committer : IActor
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/>.</param>
     /// <param name="aggregateRootVersions">The <see cref="IFetchAggregateRootVersions"/>.</param>
     /// <param name="lifecycleHooks">The <see cref="IApplicationLifecycleHooks"/>.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
     public Committer(
         TenantId tenant,
         IPersistCommits commits,
         IFetchCommittedEvents committedEvents,
         IFetchAggregateRootVersions aggregateRootVersions,
-        IApplicationLifecycleHooks lifecycleHooks)
+        IApplicationLifecycleHooks lifecycleHooks,
+        ILogger<Committer> logger)
     {
         _tenant = tenant;
         _commits = commits;
@@ -177,16 +178,16 @@ public class Committer : IActor
         {
             try
             {
-                Console.WriteLine($"Aggregate root version inconsistency in cache. Expected {expectedAggregateRootVersion} but current is {currentAggregateRootVersion}");
+                Console.WriteLine($"{aggregate} Aggregate root version inconsistency in cache. Expected {expectedAggregateRootVersion} but current is {currentAggregateRootVersion}");
                 var newCurrentAggregateRootVersion = GetAggregateRootVersion(aggregate, context.CancellationToken).Result;
                 if (newCurrentAggregateRootVersion == expectedAggregateRootVersion)
                 {
-                    Console.WriteLine($"Aggregate root version inconsistency resolved itself. Aggregate root version is now {newCurrentAggregateRootVersion}");
+                    Console.WriteLine($"{aggregate} Aggregate root version inconsistency resolved itself. Aggregate root version is now {newCurrentAggregateRootVersion}");
                     _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
                 }
                 else if (newCurrentAggregateRootVersion != currentAggregateRootVersion)
                 {
-                    Console.WriteLine("Aggregate root concurrency conflict, but cache was not correct. ");
+                    Console.WriteLine("{aggregate} Aggregate root concurrency conflict, but cache was not correct. ");
                     _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
                     return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
                         request.Events.EventSourceId,
@@ -196,7 +197,7 @@ public class Committer : IActor
                 }
                 else
                 {
-                    Console.WriteLine("Aggregate root version cache is consistent, but not the expected version");
+                    Console.WriteLine($"{aggregate} Aggregate root version cache is consistent, but not the expected version. Expected {expectedAggregateRootVersion} but current is {currentAggregateRootVersion}");
                     return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
                         request.Events.EventSourceId,
                         request.Events.AggregateRootId.ToGuid(),
@@ -227,7 +228,7 @@ public class Committer : IActor
                     Console.WriteLine(result.Exception);
                     return RespondWithFailureAndClearInFlight(result.Exception.ToFailure());
                 }
-
+                Console.WriteLine("");
                 _aggregateCommitInFlight.Remove(aggregate);
                 _aggregateRootVersionCache[aggregate] = batchedEvents.Item[^1].AggregateRootVersion + 1;
                 var events = batchedEvents.Item.ToProtobuf();
