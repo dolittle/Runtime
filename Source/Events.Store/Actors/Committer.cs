@@ -175,32 +175,40 @@ public class Committer : IActor
         var expectedAggregateRootVersion = request.Events.ExpectedAggregateRootVersion;
         if (currentAggregateRootVersion != expectedAggregateRootVersion)
         {
-            Console.WriteLine($"Aggregate root version inconsistency in cache. Expected {expectedAggregateRootVersion} but current is {currentAggregateRootVersion}");
-            var newCurrentAggregateRootVersion = GetAggregateRootVersion(aggregate, context.CancellationToken).Result;
-            if (newCurrentAggregateRootVersion == expectedAggregateRootVersion)
+            try
             {
-                Console.WriteLine($"Aggregate root version inconsistency resolved itself. Aggregate root version is now {newCurrentAggregateRootVersion}");
-                _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
+                Console.WriteLine($"Aggregate root version inconsistency in cache. Expected {expectedAggregateRootVersion} but current is {currentAggregateRootVersion}");
+                var newCurrentAggregateRootVersion = GetAggregateRootVersion(aggregate, context.CancellationToken).Result;
+                if (newCurrentAggregateRootVersion == expectedAggregateRootVersion)
+                {
+                    Console.WriteLine($"Aggregate root version inconsistency resolved itself. Aggregate root version is now {newCurrentAggregateRootVersion}");
+                    _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
+                }
+                else if (newCurrentAggregateRootVersion != currentAggregateRootVersion)
+                {
+                    Console.WriteLine("Aggregate root concurrency conflict, but cache was not correct. ");
+                    _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
+                    return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
+                        request.Events.EventSourceId,
+                        request.Events.AggregateRootId.ToGuid(),
+                        currentAggregateRootVersion,
+                        expectedAggregateRootVersion).ToFailure());
+                }
+                else
+                {
+                    Console.WriteLine("Aggregate root version cache is consistent, but not the expected version");
+                    return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
+                        request.Events.EventSourceId,
+                        request.Events.AggregateRootId.ToGuid(),
+                        currentAggregateRootVersion,
+                        expectedAggregateRootVersion).ToFailure());
+                }
             }
-            else if (newCurrentAggregateRootVersion != currentAggregateRootVersion)
+            catch (Exception e)
             {
-                Console.WriteLine("Aggregate root concurrency conflict, but cache was not correct. ");
-                _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
-                return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
-                    request.Events.EventSourceId,
-                    request.Events.AggregateRootId.ToGuid(),
-                    currentAggregateRootVersion,
-                    expectedAggregateRootVersion).ToFailure());
+                return RespondWithFailureAndClearInFlight(e.ToFailure());
             }
-            else
-            {
-                Console.WriteLine("Aggregate root version cache is consistent, but not the expected version");
-                return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
-                    request.Events.EventSourceId,
-                    request.Events.AggregateRootId.ToGuid(),
-                    currentAggregateRootVersion,
-                    expectedAggregateRootVersion).ToFailure());
-            }
+            
         }
 
         if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
