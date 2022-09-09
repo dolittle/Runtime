@@ -28,6 +28,7 @@ public class Committer : IActor
     readonly IFetchCommittedEvents _committedEvents;
     readonly IFetchAggregateRootVersions _aggregateRootVersions;
     readonly IApplicationLifecycleHooks _lifecycleHooks;
+    readonly ILogger<Committer> _logger;
 
     readonly HashSet<Aggregate> _aggregateCommitInFlight = new();
     readonly Dictionary<Aggregate, AggregateRootVersion> _aggregateRootVersionCache = new();
@@ -42,6 +43,7 @@ public class Committer : IActor
     /// <summary>
     /// Initializes a new instance of the <see cref="Committer"/> class.
     /// </summary>
+    /// <param name="tenant">The <see cref="TenantId"/>.</param>
     /// <param name="commits">The <see cref="IPersistCommits"/>.</param>
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/>.</param>
     /// <param name="aggregateRootVersions">The <see cref="IFetchAggregateRootVersions"/>.</param>
@@ -60,6 +62,7 @@ public class Committer : IActor
         _committedEvents = committedEvents;
         _aggregateRootVersions = aggregateRootVersions;
         _lifecycleHooks = lifecycleHooks;
+        _logger = logger;
     }
 
     /// <inheritdoc />
