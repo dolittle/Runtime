@@ -18,5 +18,5 @@ static partial class Log
     internal static partial void AggregateRootConcurrencyConflictWithInconsistentCache(this ILogger logger, ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion expectedAggregateRootVersion, AggregateRootVersion cachedVersion, AggregateRootVersion storedVersion);
     
     [LoggerMessage(0, LogLevel.Warning, "Aggregate root '{AggregateRootId}' with event source '{EventSourceId}' version has a concurrency conflict, expected version {ExpectedAggregateRootVersion} but cached version {CachedVersion} is consistent with storage")]
-    internal static partial void AggregateRootConcurrencyConflictWithConsistentCache(this ILogger logger, ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion expectedAggregateRootVersion, AggregateRootVersion cachedVersion, AggregateRootVersion storedVersion);
+    internal static partial void AggregateRootConcurrencyConflictWithConsistentCache(this ILogger logger, ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion expectedAggregateRootVersion, AggregateRootVersion cachedVersion);
 }

@@ -264,14 +264,14 @@ public class Committer : IActor
     }
     async Task<Try> TryHandleAggregateRootVersionInconsistency(
         Aggregate aggregate,
-        AggregateRootVersion currentAggregateRootVersion,
+        AggregateRootVersion cachedAggregateRootVersion,
         AggregateRootVersion expectedAggregateRootVersion,
         CancellationToken cancellationToken)
     {
         try
         {
             _metrics.IncrementTotalAggregateRootVersionCacheInconsistencies();
-            _logger.AggregateRootVersionCacheInconsistency(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, currentAggregateRootVersion);
+            _logger.AggregateRootVersionCacheInconsistency(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
             var newCurrentAggregateRootVersion = await GetAggregateRootVersion(aggregate, cancellationToken).ConfigureAwait(false);
             if (newCurrentAggregateRootVersion == expectedAggregateRootVersion)
             {
@@ -280,21 +280,21 @@ public class Committer : IActor
                 _aggregateRootVersionCache[aggregate] = expectedAggregateRootVersion;
                 return Try.Succeeded();
             }
-            if (newCurrentAggregateRootVersion != currentAggregateRootVersion)
+            if (newCurrentAggregateRootVersion != cachedAggregateRootVersion)
             {
-                _logger.AggregateRootConcurrencyConflictWithInconsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, currentAggregateRootVersion, newCurrentAggregateRootVersion);
+                _logger.AggregateRootConcurrencyConflictWithInconsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion, newCurrentAggregateRootVersion);
                 _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
                 return new AggregateRootConcurrencyConflict(
                     aggregate.EventSourceId,
                     aggregate.AggregateRoot,
-                    currentAggregateRootVersion,
+                    newCurrentAggregateRootVersion,
                     expectedAggregateRootVersion);
             }
-            _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, currentAggregateRootVersion, newCurrentAggregateRootVersion);
+            _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
             return new AggregateRootConcurrencyConflict(
                 aggregate.EventSourceId,
                 aggregate.AggregateRoot,
-                currentAggregateRootVersion,
+                cachedAggregateRootVersion,
                 expectedAggregateRootVersion);
         }
         catch (Exception e)
@@ -366,6 +366,10 @@ public class Committer : IActor
             _pipeline?.EmptyAllWithFailure(error);
             _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);
             _readyToSend = true;
+            if (_shuttingDown)
+            {
+                _shutdownHook!.MarkCompleted();
+            }
         }
     }
 
