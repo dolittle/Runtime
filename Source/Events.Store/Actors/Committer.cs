@@ -103,26 +103,33 @@ public class Committer : IActor
     
     Task Commit(IContext context, CommitEventsRequest request, Action<CommitEventsResponse> respond)
     {
-        _metrics.IncrementTotalCommitsReceived();
-        if (CannotProcessCommit(out var failure))
+        try
         {
-            return RespondWithFailure(failure);
-        }
+            _metrics.IncrementTotalCommitsReceived();
+            if (CannotProcessCommit(out var failure))
+            {
+                return RespondWithFailure(failure);
+            }
         
-        if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
-        {
-            return RespondWithFailure(error.ToFailure());
+            if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
+            {
+                return RespondWithFailure(error.ToFailure());
+            }
+            TrySendBatch(context);
+
+            context.SafeReenterAfter(
+                batchedEvents.Completed,
+                result => !result.Success
+                    ? RespondWithFailure(result.Exception.ToFailure())
+                    : RespondWithEvents(batchedEvents.Item.ToProtobuf()),
+                (error, _) => RespondWithFailure(error.ToFailure()));
+
+            return Task.CompletedTask;
         }
-        TrySendBatch(context);
-
-        context.SafeReenterAfter(
-            batchedEvents.Completed,
-            result => !result.Success
-                ? RespondWithFailure(result.Exception.ToFailure())
-                : RespondWithEvents(batchedEvents.Item.ToProtobuf()),
-            (error, _) => RespondWithFailure(error.ToFailure()));
-
-        return Task.CompletedTask;
+        catch (Exception e)
+        {
+            return RespondWithFailure(e.ToFailure());
+        }
 
         Task RespondWithEvents(IEnumerable<Contracts.CommittedEvent> events)
         {
@@ -138,33 +145,40 @@ public class Committer : IActor
 
     Task CommitForAggregate(IContext context, CommitAggregateEventsRequest request, Action<CommitAggregateEventsResponse> respond)
     {
-        _metrics.IncrementTotalCommitsForAggregateReceived();
-        if (CannotProcessCommit(out var failure))
+        try
         {
-            return RespondWithFailure(failure);
-        }
-
-        var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
-        if (_aggregateCommitInFlight.Contains(aggregate))
-        {
-            return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
-        }
-
-        _aggregateCommitInFlight.Add(aggregate);
-        if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
-        {
-            return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
-        }
-        
-        context.SafeReenterAfter(
-            GetAggregateRootVersion(aggregate, context.CancellationToken),
-            currentAggregateRootVersion =>
+            _metrics.IncrementTotalCommitsForAggregateReceived();
+            if (CannotProcessCommit(out var failure))
             {
-                _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
-                return CommitForAggregate(context, request, aggregate, currentAggregateRootVersion, respond);
-            },
-            (ex, _) => RespondWithFailureAndClearInFlight(aggregate, ex.ToFailure()));
-        return Task.CompletedTask;
+                return RespondWithFailure(failure);
+            }
+
+            var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
+            if (_aggregateCommitInFlight.Contains(aggregate))
+            {
+                return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
+            }
+
+            _aggregateCommitInFlight.Add(aggregate);
+            if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
+            {
+                return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
+            }
+            context.SafeReenterAfter(
+                GetAggregateRootVersion(aggregate, context.CancellationToken),
+                currentAggregateRootVersion =>
+                {
+                    _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
+                    return CommitForAggregate(context, request, aggregate, currentAggregateRootVersion, respond);
+                },
+                (ex, _) => RespondWithFailureAndClearInFlight(aggregate, ex.ToFailure()));
+            return Task.CompletedTask;
+
+        }
+        catch (Exception e)
+        {
+            return RespondWithFailure(e.ToFailure());
+        }
 
         Task RespondWithFailure(Failure failure)
         {
@@ -330,6 +344,7 @@ public class Committer : IActor
                 _metrics.IncrementTotalBatchedEventsSuccessfullyPersisted(batchToSend.Batch.AllEvents.Count);
                 batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
+                _readyToSend = true;
                 TrySendBatch(context);
                 if (_shuttingDown)
                 {
@@ -350,6 +365,7 @@ public class Committer : IActor
             batchToSend.Fail(error);
             _pipeline?.EmptyAllWithFailure(error);
             _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);
+            _readyToSend = true;
         }
     }
 
