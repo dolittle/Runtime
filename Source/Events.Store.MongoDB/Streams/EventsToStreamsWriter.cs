@@ -86,6 +86,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             try
             {
                 session.StartTransaction();
+                // TODO: Have a look at this.
                 var streamPosition = (ulong) await stream.CountDocumentsAsync(
                     session,
                     Builders<TEvent>.Filter.Empty,
@@ -111,6 +112,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             try
             {
                 session.StartTransaction();
+                //TODO: Have a look at this.
                 var streamPosition = (ulong) await stream.CountDocumentsAsync(
                     session,
                     Builders<TEvent>.Filter.Empty,

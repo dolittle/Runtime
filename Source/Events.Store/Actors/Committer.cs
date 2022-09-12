@@ -4,7 +4,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
@@ -14,6 +13,7 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 using Proto;
 using Aggregate = Dolittle.Runtime.Events.Store.Persistence.Aggregate;
 using Failure = Dolittle.Runtime.Protobuf.Failure;
@@ -29,6 +29,8 @@ public class Committer : IActor
     readonly IFetchCommittedEvents _committedEvents;
     readonly IFetchAggregateRootVersions _aggregateRootVersions;
     readonly IApplicationLifecycleHooks _lifecycleHooks;
+    readonly IMetricsCollector _metrics;
+    readonly ILogger<Committer> _logger;
 
     readonly HashSet<Aggregate> _aggregateCommitInFlight = new();
     readonly Dictionary<Aggregate, AggregateRootVersion> _aggregateRootVersionCache = new();
@@ -39,26 +41,32 @@ public class Committer : IActor
     
     bool _readyToSend = true;
     bool _shuttingDown = false;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Committer"/> class.
     /// </summary>
+    /// <param name="tenant">The <see cref="TenantId"/>.</param>
     /// <param name="commits">The <see cref="IPersistCommits"/>.</param>
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/>.</param>
     /// <param name="aggregateRootVersions">The <see cref="IFetchAggregateRootVersions"/>.</param>
     /// <param name="lifecycleHooks">The <see cref="IApplicationLifecycleHooks"/>.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
     public Committer(
         TenantId tenant,
         IPersistCommits commits,
         IFetchCommittedEvents committedEvents,
         IFetchAggregateRootVersions aggregateRootVersions,
-        IApplicationLifecycleHooks lifecycleHooks)
+        IApplicationLifecycleHooks lifecycleHooks,
+        IMetricsCollector metrics,
+        ILogger<Committer> logger)
     {
         _tenant = tenant;
         _commits = commits;
         _committedEvents = committedEvents;
         _aggregateRootVersions = aggregateRootVersions;
         _lifecycleHooks = lifecycleHooks;
+        _metrics = metrics;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -95,25 +103,33 @@ public class Committer : IActor
     
     Task Commit(IContext context, CommitEventsRequest request, Action<CommitEventsResponse> respond)
     {
-        if (CannotProcessCommit(out var failure))
+        try
         {
-            return RespondWithFailure(failure);
-        }
+            _metrics.IncrementTotalCommitsReceived();
+            if (CannotProcessCommit(out var failure))
+            {
+                return RespondWithFailure(failure);
+            }
         
-        if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
-        {
-            return RespondWithFailure(error.ToFailure());
+            if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
+            {
+                return RespondWithFailure(error.ToFailure());
+            }
+            TrySendBatch(context);
+
+            context.SafeReenterAfter(
+                batchedEvents.Completed,
+                result => !result.Success
+                    ? RespondWithFailure(result.Exception.ToFailure())
+                    : RespondWithEvents(batchedEvents.Item.ToProtobuf()),
+                (error, _) => RespondWithFailure(error.ToFailure()));
+
+            return Task.CompletedTask;
         }
-        TrySendBatch(context);
-
-        context.SafeReenterAfter(
-            batchedEvents.Completed,
-            result => !result.Success
-                ? RespondWithFailure(result.Exception.ToFailure())
-                : RespondWithEvents(batchedEvents.Item.ToProtobuf()),
-            (error, _) => RespondWithFailure(error.ToFailure()));
-
-        return Task.CompletedTask;
+        catch (Exception e)
+        {
+            return RespondWithFailure(e.ToFailure());
+        }
 
         Task RespondWithEvents(IEnumerable<Contracts.CommittedEvent> events)
         {
@@ -129,32 +145,40 @@ public class Committer : IActor
 
     Task CommitForAggregate(IContext context, CommitAggregateEventsRequest request, Action<CommitAggregateEventsResponse> respond)
     {
-        if (CannotProcessCommit(out var failure))
+        try
         {
-            return RespondWithFailure(failure);
-        }
-
-        var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
-        if (_aggregateCommitInFlight.Contains(aggregate))
-        {
-            return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
-        }
-
-        _aggregateCommitInFlight.Add(aggregate);
-        if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
-        {
-            return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
-        }
-        
-        context.SafeReenterAfter(
-            GetAggregateRootVersion(aggregate, context.CancellationToken),
-            currentAggregateRootVersion =>
+            _metrics.IncrementTotalCommitsForAggregateReceived();
+            if (CannotProcessCommit(out var failure))
             {
-                _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
-                return CommitForAggregate(context, request, aggregate, currentAggregateRootVersion, respond);
-            },
-            (ex, _) => RespondWithFailureAndClearInFlight(aggregate, ex.ToFailure()));
-        return Task.CompletedTask;
+                return RespondWithFailure(failure);
+            }
+
+            var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
+            if (_aggregateCommitInFlight.Contains(aggregate))
+            {
+                return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
+            }
+
+            _aggregateCommitInFlight.Add(aggregate);
+            if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
+            {
+                return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
+            }
+            context.SafeReenterAfter(
+                GetAggregateRootVersion(aggregate, context.CancellationToken),
+                currentAggregateRootVersion =>
+                {
+                    _aggregateRootVersionCache[aggregate] = currentAggregateRootVersion;
+                    return CommitForAggregate(context, request, aggregate, currentAggregateRootVersion, respond);
+                },
+                (ex, _) => RespondWithFailureAndClearInFlight(aggregate, ex.ToFailure()));
+            return Task.CompletedTask;
+
+        }
+        catch (Exception e)
+        {
+            return RespondWithFailure(e.ToFailure());
+        }
 
         Task RespondWithFailure(Failure failure)
         {
@@ -173,15 +197,33 @@ public class Committer : IActor
         Action<CommitAggregateEventsResponse> respond)
     {
         var expectedAggregateRootVersion = request.Events.ExpectedAggregateRootVersion;
-        if (currentAggregateRootVersion != expectedAggregateRootVersion)
+        if (currentAggregateRootVersion == expectedAggregateRootVersion)
         {
-            return RespondWithFailureAndClearInFlight(new AggregateRootConcurrencyConflict(
-                request.Events.EventSourceId,
-                request.Events.AggregateRootId.ToGuid(),
-                currentAggregateRootVersion,
-                expectedAggregateRootVersion).ToFailure());
+            return SendAggregateEvents(context, request, aggregate, respond);
         }
+        context.SafeReenterAfter(
+            TryHandleAggregateRootVersionInconsistency(aggregate, currentAggregateRootVersion, expectedAggregateRootVersion, context.CancellationToken),
+            tryHandle => tryHandle.Success
+                ? SendAggregateEvents(context, request, aggregate, respond)
+                : RespondWithFailureAndClearInFlight(tryHandle.Exception.ToFailure()),
+            (ex, _) => RespondWithFailureAndClearInFlight(ex.ToFailure()));
+        return Task.CompletedTask;
 
+        Task RespondWithFailureAndClearInFlight(Failure failure)
+        {
+            _aggregateCommitInFlight.Remove(aggregate);
+            respond(new CommitAggregateEventsResponse { Failure = failure });
+            return Task.CompletedTask;
+        }
+    }
+
+
+    Task SendAggregateEvents(
+        IContext context,
+        CommitAggregateEventsRequest request,
+        Aggregate aggregate,
+        Action<CommitAggregateEventsResponse> respond)
+    {
         if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
         {
             return RespondWithFailureAndClearInFlight(error.ToFailure());
@@ -196,7 +238,6 @@ public class Committer : IActor
                 {
                     return RespondWithFailureAndClearInFlight(result.Exception.ToFailure());
                 }
-
                 _aggregateCommitInFlight.Remove(aggregate);
                 _aggregateRootVersionCache[aggregate] = batchedEvents.Item[^1].AggregateRootVersion + 1;
                 var events = batchedEvents.Item.ToProtobuf();
@@ -205,7 +246,7 @@ public class Committer : IActor
             (ex, _) => RespondWithFailureAndClearInFlight(ex.ToFailure()));
 
         return Task.CompletedTask;
-
+        
         Task RespondWithEvents(Contracts.CommittedAggregateEvents events)
         {
             respond(new CommitAggregateEventsResponse
@@ -219,6 +260,46 @@ public class Committer : IActor
             _aggregateCommitInFlight.Remove(aggregate);
             respond(new CommitAggregateEventsResponse { Failure = failure });
             return Task.CompletedTask;
+        }
+    }
+    async Task<Try> TryHandleAggregateRootVersionInconsistency(
+        Aggregate aggregate,
+        AggregateRootVersion cachedAggregateRootVersion,
+        AggregateRootVersion expectedAggregateRootVersion,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            _metrics.IncrementTotalAggregateRootVersionCacheInconsistencies();
+            _logger.AggregateRootVersionCacheInconsistency(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
+            var newCurrentAggregateRootVersion = await GetAggregateRootVersion(aggregate, cancellationToken).ConfigureAwait(false);
+            if (newCurrentAggregateRootVersion == expectedAggregateRootVersion)
+            {
+                _metrics.IncrementTotalAggregateRootVersionCacheInconsistenciesResolved();
+                _logger.AggregateRootVersionCacheInconsistencyResolved(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion);
+                _aggregateRootVersionCache[aggregate] = expectedAggregateRootVersion;
+                return Try.Succeeded();
+            }
+            if (newCurrentAggregateRootVersion != cachedAggregateRootVersion)
+            {
+                _logger.AggregateRootConcurrencyConflictWithInconsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion, newCurrentAggregateRootVersion);
+                _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
+                return new AggregateRootConcurrencyConflict(
+                    aggregate.EventSourceId,
+                    aggregate.AggregateRoot,
+                    newCurrentAggregateRootVersion,
+                    expectedAggregateRootVersion);
+            }
+            _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
+            return new AggregateRootConcurrencyConflict(
+                aggregate.EventSourceId,
+                aggregate.AggregateRoot,
+                cachedAggregateRootVersion,
+                expectedAggregateRootVersion);
+        }
+        catch (Exception e)
+        {
+            return e;
         }
     }
 
@@ -247,30 +328,49 @@ public class Committer : IActor
             return;
         }
 
+        _metrics.IncrementTotalBatchesSent();
         _readyToSend = false;
-        context.ReenterAfter(_commits.Persist(batchToSend.Batch, CancellationToken.None), persistTask =>
-        {
-            _readyToSend = true;
-            if (persistTask.IsCompletedSuccessfully)
+        context.SafeReenterAfter(
+            _commits.Persist(batchToSend.Batch, CancellationToken.None),
+            persist =>
             {
+                if (!persist.Success)
+                {
+                    FailBatchAndPipeline(persist.Exception);
+                    return Task.CompletedTask;
+                }
+                
+                _metrics.IncrementTotalBatchesSuccessfullyPersisted();
+                _metrics.IncrementTotalBatchedEventsSuccessfullyPersisted(batchToSend.Batch.AllEvents.Count);
                 batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
+                _readyToSend = true;
                 TrySendBatch(context);
-            }
-            else
-            {
-                batchToSend.Completion.SetResult(persistTask.Exception);
-                _pipeline.EmptyAllWithFailure(persistTask.Exception);
-                _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);
-            }
+                if (_shuttingDown)
+                {
+                    _shutdownHook!.MarkCompleted();
+                }
 
+                return Task.CompletedTask;
+            },
+            (ex, _) =>
+            {
+                FailBatchAndPipeline(ex);
+                return Task.CompletedTask;
+            });
+        
+        void FailBatchAndPipeline(Exception error)
+        {
+            _metrics.IncrementTotalBatchesFailedPersisting();
+            batchToSend.Fail(error);
+            _pipeline?.EmptyAllWithFailure(error);
+            _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);
+            _readyToSend = true;
             if (_shuttingDown)
             {
                 _shutdownHook!.MarkCompleted();
             }
-
-            return Task.CompletedTask;
-        });
+        }
     }
 
     Task<AggregateRootVersion> GetAggregateRootVersion(Aggregate aggregate, CancellationToken cancellationToken)
