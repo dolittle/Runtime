@@ -25,35 +25,35 @@ public class MetricsCollector : IMetricsCollector
     public MetricsCollector(IMetricFactory metricFactory)
     {
         _totalCommitsReceived = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_commits_received_total",
+            "dolittle_system_runtime_events_store_commits_received_total",
             "EventStore total number of non-aggregate commits received");
         
         _totalCommitsForAggregateReceived = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_commits_for_aggregate_received_total",
+            "dolittle_system_runtime_events_store_commits_for_aggregate_received_total",
             "EventStore total number of commits for aggregate received");
         
         _totalAggregateRootVersionCacheInconsistencies = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_aggregate_root_version_cache_inconsistencies_total",
+            "dolittle_system_runtime_events_store_aggregate_root_version_cache_inconsistencies_total",
             "EventStore total number of aggregate root version cache inconsistencies occurred");
         
         _totalBatchesSuccessfullyPersisted = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_batches_successfully_persisted_total",
+            "dolittle_system_runtime_events_store_batches_successfully_persisted_total",
             "EventStore total number of batches that has been successfully persisted");
         
         _totalBatchedEventsSuccessfullyPersisted = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_batched_events_successfully_persisted_total",
+            "dolittle_system_runtime_events_store_batched_events_successfully_persisted_total",
             "EventStore total number of batched events that has been successfully persisted");
          
         _totalBatchesSent = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_batches_sent_total",
+            "dolittle_system_runtime_events_store_batches_sent_total",
             "EventStore total number of batches that has been sent to the event store");
         
         _totalAggregateRootVersionCacheInconsistenciesResolved = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_aggregate_root_version_cache_inconsistencies_resolved_total",
+            "dolittle_system_runtime_events_store_aggregate_root_version_cache_inconsistencies_resolved_total",
             "EventStore total number of aggregate root version cache inconsistencies that has been resolved");
 
         _totalBatchesFailedPersisting = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_events_store_batches_failed_persisting_total",
+            "dolittle_system_runtime_events_store_batches_failed_persisting_total",
             "EventStore total number of batches that failed to be persisted");
     }
 
