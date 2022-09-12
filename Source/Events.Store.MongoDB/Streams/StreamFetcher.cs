@@ -117,6 +117,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     {
         try
         {
+            // TODO: Do not do this, get last document instead.
             var numEvents = await _collection.CountDocumentsAsync(_filter.Empty, cancellationToken: cancellationToken).ConfigureAwait(false);
             return Try<StreamPosition>.Succeeded((ulong)numEvents);
         }
