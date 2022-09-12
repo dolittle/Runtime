@@ -287,10 +287,10 @@ public class Committer : IActor
                 return new AggregateRootConcurrencyConflict(
                     aggregate.EventSourceId,
                     aggregate.AggregateRoot,
-                    cachedAggregateRootVersion,
+                    newCurrentAggregateRootVersion,
                     expectedAggregateRootVersion);
             }
-            _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion, newCurrentAggregateRootVersion);
+            _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
             return new AggregateRootConcurrencyConflict(
                 aggregate.EventSourceId,
                 aggregate.AggregateRoot,
