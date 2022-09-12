@@ -366,6 +366,10 @@ public class Committer : IActor
             _pipeline?.EmptyAllWithFailure(error);
             _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);
             _readyToSend = true;
+            if (_shuttingDown)
+            {
+                _shutdownHook!.MarkCompleted();
+            }
         }
     }
 
