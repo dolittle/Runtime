@@ -14,6 +14,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.MongoDB;
 using Dolittle.Runtime.Rudimentary;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
  namespace Dolittle.Runtime.Events.Store.MongoDB;
@@ -53,6 +54,14 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
                 _eventFilter.Empty,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+        // TODO: This is for getting the sequence number from the last event.
+        // var lastEvent = await eventLog
+        //     .Find(_eventFilter.Empty)
+        //     .Sort(Builders<MongoDB.Events.Event>.Sort.Descending(_ => _.EventLogSequenceNumber))
+        //     .Limit(1)
+        //     .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        //
+        // return lastEvent?.EventLogSequenceNumber ?? 0ul;
     }
 
     /// <inheritdoc/>

@@ -1,3 +1,19 @@
+# [8.4.3] - 2022-9-12 [PR: #709](https://github.com/dolittle/Runtime/pull/709)
+## Summary
+
+A critical error was unearthed where it was possible to get into a corrupted event store state due to the Runtime thinking it had committed events that it had not. This would eventually result in a cascading problem where for each restart of an application the first X events would not be written to the event store and it would not have been easily noticeable.
+
+### Added
+
+- More metrics around committing events
+- More logging when committing events
+- Self healing for aggregate root version cache in event store
+
+### Fixed
+
+- A bug in the event store where it could end up not writing events and thinking that it did
+
+
 # [8.4.2] - 2022-8-18 [PR: #707](https://github.com/dolittle/Runtime/pull/707)
 ## Summary
 
