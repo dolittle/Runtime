@@ -22,7 +22,7 @@ public class ProjectionsGrpcService : ProjectionsBase
 {
     const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IProjectionsService _projectionsService;
-    readonly ISendStreamOfBatchedMessages<GetAllResponse, ProjectionCurrentState> _projectionBatchSender;
+    readonly StreamOfBatchedMessagesSender<GetAllResponse, ProjectionCurrentState> _projectionBatchSender = new();
     readonly ILogger _logger;
 
     /// <summary>
@@ -32,12 +32,10 @@ public class ProjectionsGrpcService : ProjectionsBase
     /// <param name="logger">The logger to use.</param>
     public ProjectionsGrpcService(
         IProjectionsService projectionsService,
-        ISendStreamOfBatchedMessages<GetAllResponse, ProjectionCurrentState> projectionBatchSender,
         ILogger logger
     )
     {
         _projectionsService = projectionsService;
-        _projectionBatchSender = projectionBatchSender;
         _logger = logger;
     }
 
