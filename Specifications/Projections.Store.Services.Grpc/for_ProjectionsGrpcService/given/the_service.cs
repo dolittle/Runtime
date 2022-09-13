@@ -20,7 +20,6 @@ public class the_service
         
         grpc_service = new ProjectionsGrpcService(
             projections_service.Object,
-            new StreamOfBatchedMessagesSender<GetAllResponse, ProjectionCurrentState>(),
             NullLogger.Instance);
     };
 }
