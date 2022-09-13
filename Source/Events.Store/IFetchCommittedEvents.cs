@@ -50,7 +50,7 @@ public interface IFetchCommittedEvents
     /// <param name="eventTypes">The <see cref="IEnumerable{T}"/> of <see cref="Artifact"/> event types of the aggregate events that should be fetched.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns the a stream of <see cref="CommittedAggregateEvents"/> containing all <see cref="CommittedAggregateEvent"/> applied to the Event Source by the Aggregate root, in the order of which they appear in the Event Log that have one of the requested event types.</returns>
-    Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, CancellationToken cancellationToken);
+    Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken);
     
     /// <summary>
     /// Fetches all <see cref="CommittedAggregateEvent"/>s applied to an Event Source by an Aggregate Root.

@@ -24,7 +24,7 @@ class specs : given.a_clean_event_store
 {
     static ArtifactId aggregate_root_id;
     static EventSourceId event_source;
-    static List<Artifact> event_types;
+    static List<ArtifactId> event_types;
     static Try<(AggregateRootVersion aggregate_root_version, IAsyncEnumerable<CommittedAggregateEvent> event_stream)> response;
     
     
@@ -32,7 +32,7 @@ class specs : given.a_clean_event_store
     {
         aggregate_root_id = "7348f567-d45f-4d9b-9b8e-32eff7282ea0";
         event_source = "some event source";
-        event_types = new List<Artifact>();
+        event_types = new List<ArtifactId>();
     };
     
     [Tags("IntegrationTest")]
@@ -40,7 +40,7 @@ class specs : given.a_clean_event_store
     {
         Establish context = () =>
         {
-            event_types.Add(new Artifact("270b39d9-cfe3-455c-968a-c0b01002e84b", ArtifactGeneration.First));
+            event_types.Add("270b39d9-cfe3-455c-968a-c0b01002e84b");
         };
 
         Because of = () => response = event_store.FetchAggregateEvents(event_source, aggregate_root_id, event_types, "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579", CancellationToken.None).GetAwaiter().GetResult();
@@ -76,7 +76,7 @@ class specs : given.a_clean_event_store
         static UncommittedAggregateEvents uncommitted_events;
         Establish context = () =>
         {
-            event_types.Add(new Artifact("270b39d9-cfe3-455c-968a-c0b01002e84b", ArtifactGeneration.First));
+            event_types.Add("270b39d9-cfe3-455c-968a-c0b01002e84b");
             uncommitted_events = new UncommittedAggregateEvents("another event source", new Artifact(aggregate_root_id, ArtifactGeneration.First), AggregateRootVersion.Initial, new[]
             {
                 given.event_to_commit.create()
@@ -96,7 +96,7 @@ class specs : given.a_clean_event_store
         static UncommittedAggregateEvents uncommitted_events;
         Establish context = () =>
         {
-            event_types.Add(new Artifact("270b39d9-cfe3-455c-968a-c0b01002e84b", ArtifactGeneration.First));
+            event_types.Add("270b39d9-cfe3-455c-968a-c0b01002e84b");
             uncommitted_events = new UncommittedAggregateEvents("another event source", new Artifact(aggregate_root_id, ArtifactGeneration.First), AggregateRootVersion.Initial, new[]
             {
                 given.event_to_commit.create()
@@ -117,7 +117,7 @@ class specs : given.a_clean_event_store
         static UncommittedAggregateEvents uncommitted_events;
         Establish context = () =>
         {
-            event_types.Add(new Artifact("270b39d9-cfe3-455c-968a-c0b01002e84b", ArtifactGeneration.First));
+            event_types.Add("270b39d9-cfe3-455c-968a-c0b01002e84b");
             uncommitted_events = new UncommittedAggregateEvents(event_source, new Artifact(aggregate_root_id, ArtifactGeneration.First), AggregateRootVersion.Initial, new[]
             {
                 given.event_to_commit.create()
@@ -135,11 +135,11 @@ class specs : given.a_clean_event_store
     class and_there_is_one_event_for_aggregate_with_wanted_event_type
     {
         static UncommittedAggregateEvents uncommitted_events;
-        static Artifact event_type;
+        static ArtifactId event_type;
 
         Establish context = () =>
         {
-            event_type = new Artifact("36e5c743-d647-491a-ae79-7fb2af1cc31b", ArtifactGeneration.First);
+            event_type = "36e5c743-d647-491a-ae79-7fb2af1cc31b";
             event_types.Add(event_type);
             uncommitted_events = new UncommittedAggregateEvents(
                 event_source,
@@ -171,11 +171,11 @@ class specs : given.a_clean_event_store
     class and_there_are_multiple_events_for_aggregate_with_wanted_event_type
     {
         static UncommittedAggregateEvents uncommitted_events;
-        static Artifact event_type;
+        static ArtifactId event_type;
 
         Establish context = () =>
         {
-            event_type = new Artifact("36e5c743-d647-491a-ae79-7fb2af1cc31b", ArtifactGeneration.First);
+            event_type = "36e5c743-d647-491a-ae79-7fb2af1cc31b";
             event_types.Add(event_type);
             uncommitted_events = new UncommittedAggregateEvents(
                 event_source,
@@ -201,11 +201,11 @@ class specs : given.a_clean_event_store
     class and_there_are_multiple_events_for_aggregate_with_a_mix_of_wanted_and_unwanted_event_types
     {
         static UncommittedAggregateEvents uncommitted_events;
-        static Artifact event_type;
+        static ArtifactId event_type;
 
         Establish context = () =>
         {
-            event_type = new Artifact("36e5c743-d647-491a-ae79-7fb2af1cc31b", ArtifactGeneration.First);
+            event_type = "36e5c743-d647-491a-ae79-7fb2af1cc31b";
             event_types.Add(event_type);
             uncommitted_events = new UncommittedAggregateEvents(
                 event_source,
@@ -234,7 +234,7 @@ class specs : given.a_clean_event_store
                 uncommitted_events.EventSource,
                 uncommitted_events.AggregateRoot,
                 uncommitted_events.ExpectedAggregateRootVersion,
-                uncommitted_events.Where(_ => _.Type.Id == event_type.Id).ToList()),
+                uncommitted_events.Where(_ => _.Type.Id == event_type).ToList()),
             execution_context,
             null,
             null);
@@ -244,11 +244,11 @@ class specs : given.a_clean_event_store
     class and_getting_all_aggregate_events
     {
         static UncommittedAggregateEvents uncommitted_events;
-        static Artifact event_type;
+        static ArtifactId event_type;
 
         Establish context = () =>
         {
-            event_type = new Artifact("36e5c743-d647-491a-ae79-7fb2af1cc31b", ArtifactGeneration.First);
+            event_type = "36e5c743-d647-491a-ae79-7fb2af1cc31b";
             event_types.Add(event_type);
             uncommitted_events = new UncommittedAggregateEvents(
                 event_source,

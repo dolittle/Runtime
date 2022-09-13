@@ -49,7 +49,7 @@ public interface IEventStore
     /// <param name="tenant">The tenant fetching events for.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the operation.</param>
     /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IAsyncEnumerable{TResult}"/> of all the <see cref="CommittedAggregateEvent">aggregate events</see>.</returns>
-    Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<Artifact> eventTypes, TenantId tenant, CancellationToken cancellationToken);
+    Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<ArtifactId> eventTypes, TenantId tenant, CancellationToken cancellationToken);
     
     /// <summary>
     /// Fetches aggregate events in batches from the Event Log for an aggregate given an <see cref="FetchForAggregateInBatchesRequest"/>.

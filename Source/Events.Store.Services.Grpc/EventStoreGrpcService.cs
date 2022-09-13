@@ -52,7 +52,7 @@ public class EventStoreGrpcService : EventStoreBase
             ? await _eventStore.FetchAggregateEvents(
                 eventSourceId,
                 aggregateRootId,
-                request.FetchEvents.EventTypes.Select(_ => _.ToArtifact()),
+                request.FetchEvents.EventTypes.Select(_ => _.ToArtifact().Id),
                 request.CallContext.ExecutionContext.TenantId.ToGuid(),
                 context.CancellationToken).ConfigureAwait(false)
             : await _eventStore.FetchAggregateEvents(

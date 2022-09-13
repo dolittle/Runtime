@@ -12,7 +12,7 @@ static class event_to_commit
 {
     
     public static UncommittedEvent create() => with_content(new {Hello = 42}).build();
-    public static UncommittedEvent create_with_type(Artifact event_type) => with_content(new {Hello = 42}).with_event_type(event_type).build();
+    public static UncommittedEvent create_with_type(ArtifactId event_type) => with_content(new {Hello = 42}).with_event_type(event_type).build();
 
     public static event_builder with_content(object content) => new(content);
     
@@ -34,9 +34,9 @@ static class event_to_commit
             return this;
         }
         
-        public event_builder with_event_type(Artifact artifact)
+        public event_builder with_event_type(ArtifactId artifact)
         {
-            event_type = artifact;
+            event_type = event_type with {Id = artifact};
             return this;
         }
         

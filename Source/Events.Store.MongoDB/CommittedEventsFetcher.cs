@@ -108,7 +108,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     public async Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchStreamForAggregate(
         EventSourceId eventSource,
         ArtifactId aggregateRoot,
-        IEnumerable<Artifact> eventTypes,
+        IEnumerable<ArtifactId> eventTypes,
         CancellationToken cancellationToken)
     {
         try
@@ -116,7 +116,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             return await DoFetchForAggregate(
                 eventSource,
                 aggregateRoot,
-                filter => filter & _eventFilter.In(_ => _.Metadata.TypeId, eventTypes.Select(_ => _.Id.Value)),
+                filter => filter & _eventFilter.In(_ => _.Metadata.TypeId, eventTypes.Select(_ => _.Value)),
                 cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
