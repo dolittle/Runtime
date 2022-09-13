@@ -82,7 +82,7 @@ static class should_extensions
             }
             
             committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            committedEvent.Content.ShouldEqual(uncommittedEvent.Content);
+            JToken.DeepEquals(JToken.Parse(committedEvent.Content), JToken.Parse(uncommittedEvent.Content)).ShouldBeTrue();
             committedEvent.Public.ShouldEqual(uncommittedEvent.Public);
             committedEvent.Type.ShouldEqual(uncommittedEvent.Type);
             committedEvent.EventSource.ShouldEqual(uncommittedEvent.EventSource);
@@ -136,14 +136,13 @@ static class should_extensions
 
             committedEvent.AggregateRoot.ShouldEqual(uncommitted_events.AggregateRoot);
             committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            compare_event_content(committedEvent.Content, uncommittedEvent.Content);
+            JToken.DeepEquals(JToken.Parse(committedEvent.Content), JToken.Parse(uncommittedEvent.Content)).ShouldBeTrue();
             committedEvent.Public.ShouldEqual(uncommittedEvent.Public);
             committedEvent.Type.ShouldEqual(uncommittedEvent.Type);
             committedEvent.EventSource.ShouldEqual(uncommittedEvent.EventSource);
         }
     }
     
-    static void compare_event_content(string content1, string content2) => Regex.Replace(content1, @"\s+", "").ShouldEqual(Regex.Replace(content2, @"\s+", ""));
     
     public static void should_have_stored_committed_events<TEvent>(this CommittedEventSequence<TEvent> events, IStreams streams, IEventContentConverter event_content_converter)
         where TEvent : Dolittle.Runtime.Events.Store.CommittedEvent
