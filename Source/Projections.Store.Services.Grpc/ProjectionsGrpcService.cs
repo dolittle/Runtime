@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary.AsyncEnumerators;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
@@ -105,15 +106,14 @@ public class ProjectionsGrpcService : ProjectionsBase
             return;
         }
 
-        await StreamOfBatchedMessagesSender<GetAllResponse, ProjectionCurrentState>.Send(
-            MaxBatchMessageSize,
-            getAllResult.Result.Select(_ => _.ToProtobuf()).GetAsyncEnumerator(context.CancellationToken),
-            () => new GetAllResponse(),
-            (response, state) => response.States.Add(state),
-            batchToSend => 
-            {
-                Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
-                return responseStream.WriteAsync(batchToSend);
-            }).ConfigureAwait(false);
+        var states = getAllResult.Result.Select(_ => _.ToProtobuf());
+        await foreach (var batch in states.CreateMessageBatchesOfSize(MaxBatchMessageSize, context.CancellationToken))
+        {
+            var batchToSend = new GetAllResponse();
+            batchToSend.States.AddRange(batch);
+            
+            Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
+            await responseStream.WriteAsync(batchToSend, context.CancellationToken).ConfigureAwait(false);
+        }
     }
 }

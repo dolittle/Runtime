@@ -1,11 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary.AsyncEnumerators;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
@@ -40,46 +43,37 @@ public class EventStoreGrpcService : EventStoreBase
         => _eventStore.CommitAggregateEvents(request, context.CancellationToken);
 
     /// <inheritdoc/>
-    public override Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, ServerCallContext context)
-        => _eventStore.FetchAggregateEvents(request, context.CancellationToken);
+    public override async Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, ServerCallContext context)
+        => await FetchEventsInBatches(
+                new FetchForAggregateInBatchesRequest
+                {
+                    CallContext = request.CallContext,
+                    Aggregate = request.Aggregate,
+                    FetchAllEvents = new FetchAllEventsForAggregateInBatchesRequest(),
+                },
+                uint.MaxValue,
+                context)
+            .SingleAsync(context.CancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc/>
     public override async Task FetchForAggregateInBatches(FetchForAggregateInBatchesRequest request, IServerStreamWriter<FetchForAggregateResponse> responseStream, ServerCallContext context)
     {
-        var eventSourceId = request.Aggregate.EventSourceId;
-        var aggregateRootId = request.Aggregate.AggregateRootId.ToGuid(); 
-        var fetchResult = request.RequestCase == FetchForAggregateInBatchesRequest.RequestOneofCase.FetchEvents
-            ? await _eventStore.FetchAggregateEvents(
-                eventSourceId,
-                aggregateRootId,
-                request.FetchEvents.EventTypes.Select(_ => _.ToArtifact().Id),
-                request.CallContext.ExecutionContext.TenantId.ToGuid(),
-                context.CancellationToken).ConfigureAwait(false)
-            : await _eventStore.FetchAggregateEvents(
-                eventSourceId,
-                aggregateRootId,
-                request.CallContext.ExecutionContext.TenantId.ToGuid(),
-                context.CancellationToken);
-        if (!fetchResult.Success)
+        await foreach (var batch in FetchEventsInBatches(request, MaxBatchMessageSize, context).WithCancellation(context.CancellationToken))
         {
-            var response = new FetchForAggregateResponse { Failure = fetchResult.Exception.ToFailure() };
-            await responseStream.WriteAsync(response).ConfigureAwait(false);
-            return;
+            await responseStream.WriteAsync(batch, context.CancellationToken).ConfigureAwait(false);
         }
-
-        await StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent>.Send(
-            MaxBatchMessageSize,
-            fetchResult.Result.EventStream.GetAsyncEnumerator(context.CancellationToken),
-            () => new FetchForAggregateResponse
-            {
-                Events = CreateEmptyCommittedAggregateEvents(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion)
-            },
-            (batch, aggregateEvent) => batch.Events.Events.Add(aggregateEvent),
-            aggregateEvent => aggregateEvent.ToProtobuf(),
-            batch => responseStream.WriteAsync(batch, context.CancellationToken)
-        ).ConfigureAwait(false);
     }
 
-    static Contracts.CommittedAggregateEvents CreateEmptyCommittedAggregateEvents(ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion currentAggregateRootVersion)
-        => new CommittedAggregateEvents(eventSourceId, aggregateRootId, currentAggregateRootVersion, Enumerable.Empty<CommittedAggregateEvent>().ToList()).ToProtobuf();
+    IAsyncEnumerable<FetchForAggregateResponse> FetchEventsInBatches(FetchForAggregateInBatchesRequest request, uint maxBatchSize, ServerCallContext context)
+        => _eventStore
+            .FetchAggregateEvents(request, context.CancellationToken)
+            .BatchReduceMessagesOfSize(AddAllEventsToFirstResponse, maxBatchSize, context.CancellationToken);
+
+    static FetchForAggregateResponse AddAllEventsToFirstResponse(FetchForAggregateResponse first, FetchForAggregateResponse next)
+    {
+        first.Failure ??= next.Failure;
+        first.Events.Events.AddRange(next.Events.Events);
+        
+        return first;
+    }
 }

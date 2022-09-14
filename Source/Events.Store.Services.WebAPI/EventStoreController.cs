@@ -1,7 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Rudimentary.AsyncEnumerators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -64,7 +66,21 @@ public class EventStoreController : ControllerBase
     [HttpPost("fetchForAggregate")]
     public async Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request)
     {
-        var result = await _eventStore.FetchAggregateEvents(request, HttpContext.RequestAborted).ConfigureAwait(false);
+        var result = await _eventStore
+            .FetchAggregateEvents(request, HttpContext.RequestAborted)
+            .BatchReduceMessagesOfSize(
+                (first, next) =>
+                {
+                    first.Events.Events.AddRange(next.Events.Events);
+                    first.Failure ??= next.Failure;
+
+                    return first;
+                },
+                uint.MaxValue,
+                HttpContext.RequestAborted)
+            .SingleAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+        
         if (result.Failure is not null)
         {
             Response.StatusCode = StatusCodes.Status500InternalServerError;

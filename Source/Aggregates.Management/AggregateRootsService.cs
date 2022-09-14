@@ -8,6 +8,7 @@ using Dolittle.Runtime.Aggregates.Management.Contracts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary.AsyncEnumerators;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -87,10 +88,21 @@ public class AggregateRootsService : AggregateRootsBase
             var tenant = request.TenantId.ToGuid();
             
             _logger.GetEvents(aggregateRootId, eventSourceId);
+
+            var singleBatch = await _getCommittedEventsFetcher(tenant)
+                .FetchStreamForAggregate(eventSourceId, aggregateRootId, context.CancellationToken)
+                .Select(_ => _.ToProtobuf())
+                .BatchReduceMessagesOfSize(
+                    (first, next) =>
+                    {
+                        first.Events.AddRange(next.Events);
+                        return first;
+                    },
+                    uint.MaxValue,
+                    context.CancellationToken)
+                .SingleAsync(context.CancellationToken);
             
-            var events = await _getCommittedEventsFetcher(tenant).FetchForAggregate(eventSourceId, aggregateRootId, context.CancellationToken).ConfigureAwait(false);
-            
-            return new GetEventsResponse { Events = events.ToProtobuf() };
+            return new GetEventsResponse { Events = singleBatch };
         }
         catch (Exception ex)
         {
