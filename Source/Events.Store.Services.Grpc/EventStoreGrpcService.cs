@@ -69,24 +69,16 @@ public class EventStoreGrpcService : EventStoreBase
         await StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent>.Send(
             MaxBatchMessageSize,
             fetchResult.Result.EventStream.GetAsyncEnumerator(context.CancellationToken),
-            () => CreateResponse(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion),
+            () => new FetchForAggregateResponse
+            {
+                Events = CreateEmptyCommittedAggregateEvents(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion)
+            },
             (batch, aggregateEvent) => batch.Events.Events.Add(aggregateEvent),
             aggregateEvent => aggregateEvent.ToProtobuf(),
             batch => responseStream.WriteAsync(batch, context.CancellationToken)
         ).ConfigureAwait(false);
     }
 
-    static FetchForAggregateResponse CreateResponse(ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion currentAggregateRootVersion)
-        => new()
-        {
-            Events = new Contracts.CommittedAggregateEvents
-            {
-                AggregateRootId = aggregateRootId.ToProtobuf(),
-                EventSourceId = eventSourceId,
-                AggregateRootVersion = currentAggregateRootVersion == AggregateRootVersion.Initial
-                    ? AggregateRootVersion.Initial
-                    : currentAggregateRootVersion - 1,
-                CurrentAggregateRootVersion = currentAggregateRootVersion
-            }
-        };
+    static Contracts.CommittedAggregateEvents CreateEmptyCommittedAggregateEvents(ArtifactId aggregateRootId, EventSourceId eventSourceId, AggregateRootVersion currentAggregateRootVersion)
+        => new CommittedAggregateEvents(eventSourceId, aggregateRootId, currentAggregateRootVersion, Enumerable.Empty<CommittedAggregateEvent>().ToList()).ToProtobuf();
 }

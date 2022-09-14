@@ -24,7 +24,7 @@ public static class CommittedAggregateEventsExtensions
             EventSourceId = committedAggregateEvents.EventSource.Value,
             // To support backwards compatibility this number should be 0 if committedAggregateEvents.AggregateRootVersion is 0 or committedAggregateEvents.AggregateRootVersion - 1.  
             AggregateRootVersion = committedAggregateEvents.AggregateRootVersion == AggregateRootVersion.Initial
-                ? 0
+                ? AggregateRootVersion.Initial
                 : committedAggregateEvents.AggregateRootVersion - 1,
             CurrentAggregateRootVersion = committedAggregateEvents.AggregateRootVersion,
             Events = { committedAggregateEvents.Select(_ => _.ToProtobuf()) }
