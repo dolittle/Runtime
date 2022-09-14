@@ -43,6 +43,6 @@ public class and_it_returns_10_small_states : given.the_service_and_get_all_requ
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();
 
-    It should_send_all_states_in_one_batch = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 10)));
+    It should_send_all_states_in_one_batch = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 10), Moq.It.IsAny<CancellationToken>()));
     It should_not_send_any_other_messages = () => server_stream_writer.VerifyNoOtherCalls();
 }

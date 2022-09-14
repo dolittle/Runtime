@@ -36,7 +36,7 @@ public class and_it_returns_3_medium_states : given.the_service_and_get_all_requ
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();
 
-    It should_send_one_batch_of_two_states = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 2)));
-    It should_send_one_batch_of_one_state = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 1)));
+    It should_send_one_batch_of_two_states = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 2), Moq.It.IsAny<CancellationToken>()));
+    It should_send_one_batch_of_one_state = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 1), Moq.It.IsAny<CancellationToken>()));
     It should_not_send_any_other_messages = () => server_stream_writer.VerifyNoOtherCalls();
 }

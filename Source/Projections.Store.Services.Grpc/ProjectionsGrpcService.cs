@@ -7,7 +7,6 @@ using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary.AsyncEnumerators;
-using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -102,7 +101,7 @@ public class ProjectionsGrpcService : ProjectionsBase
         {
             Log.SendingGetAllInBatchesFailed(_logger, request.ProjectionId, request.ScopeId, getAllResult.Exception);
             var response = new GetAllResponse { Failure = getAllResult.Exception.ToFailure() };
-            await responseStream.WriteAsync(response).ConfigureAwait(false);
+            await responseStream.WriteAsync(response, context.CancellationToken).ConfigureAwait(false);
             return;
         }
 
@@ -111,7 +110,6 @@ public class ProjectionsGrpcService : ProjectionsBase
         {
             var batchToSend = new GetAllResponse();
             batchToSend.States.AddRange(batch);
-            
             Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
             await responseStream.WriteAsync(batchToSend, context.CancellationToken).ConfigureAwait(false);
         }
