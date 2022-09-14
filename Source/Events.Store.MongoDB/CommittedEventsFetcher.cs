@@ -118,7 +118,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         
         if (version <= AggregateRootVersion.Initial)
         {
-            yield return new CommittedAggregateEvents(eventSource, aggregateRoot, version, Array.Empty<CommittedAggregateEvent>());
+            yield return EmptyCommittedAggregateEvents(eventSource, aggregateRoot, version);
         }
 
         IAsyncEnumerable<CommittedAggregateEvents> stream;
@@ -139,12 +139,21 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
 
+        var hasEvents = false;
         await foreach (var batch in stream.WithCancellation(cancellationToken))
         {
+            hasEvents = true;
             yield return batch;
         }
+        if (!hasEvents)
+        {
+            yield return EmptyCommittedAggregateEvents(eventSource, aggregateRoot, version);
+        }
     }
-
+    
+    static CommittedAggregateEvents EmptyCommittedAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion aggregateRootVersion)
+        => new(eventSource, aggregateRoot, aggregateRootVersion, Array.Empty<CommittedAggregateEvent>());
+    
     FilterDefinition<Events.Event> EventsFromAggregateFilter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion aggregateRootVersion)
         => _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
             & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
