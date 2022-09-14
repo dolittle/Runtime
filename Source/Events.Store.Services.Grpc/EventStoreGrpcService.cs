@@ -21,7 +21,6 @@ public class EventStoreGrpcService : EventStoreBase
 {
     const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IEventStore _eventStore;
-    readonly StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent> _aggregateEventsBatchSender = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventStoreGrpcService"/> class.
@@ -67,11 +66,11 @@ public class EventStoreGrpcService : EventStoreBase
             return;
         }
 
-        await _aggregateEventsBatchSender.Send(
+        await StreamOfBatchedMessagesSender<FetchForAggregateResponse, Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent>.Send(
             MaxBatchMessageSize,
             fetchResult.Result.EventStream.GetAsyncEnumerator(context.CancellationToken),
             () => CreateResponse(aggregateRootId, eventSourceId, fetchResult.Result.AggregateRootVersion),
-            (batch, aggregateEvent) => batch.Events.Events.Add(aggregateEvent.ToProtobuf()),
+            (batch, aggregateEvent) => batch.Events.Events.Add(aggregateEvent),
             aggregateEvent => aggregateEvent.ToProtobuf(),
             batch => responseStream.WriteAsync(batch, context.CancellationToken)
         ).ConfigureAwait(false);

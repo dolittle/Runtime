@@ -22,7 +22,6 @@ public class ProjectionsGrpcService : ProjectionsBase
 {
     const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IProjectionsService _projectionsService;
-    readonly StreamOfBatchedMessagesSender<GetAllResponse, ProjectionCurrentState> _projectionBatchSender = new();
     readonly ILogger _logger;
 
     /// <summary>
@@ -106,7 +105,7 @@ public class ProjectionsGrpcService : ProjectionsBase
             return;
         }
 
-        await _projectionBatchSender.Send(
+        await StreamOfBatchedMessagesSender<GetAllResponse, ProjectionCurrentState>.Send(
             MaxBatchMessageSize,
             getAllResult.Result.Select(_ => _.ToProtobuf()).GetAsyncEnumerator(context.CancellationToken),
             () => new GetAllResponse(),
@@ -115,7 +114,6 @@ public class ProjectionsGrpcService : ProjectionsBase
             {
                 Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
                 return responseStream.WriteAsync(batchToSend);
-            }
-            ).ConfigureAwait(false);
+            }).ConfigureAwait(false);
     }
 }
