@@ -85,17 +85,17 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         }
     }
 
-    public async IAsyncEnumerable<CommittedAggregateEvents> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
-        => await DoFetchForAggregate(eventSource, aggregateRoot, _eventFilter.Empty, cancellationToken);
+    public IAsyncEnumerable<CommittedAggregateEvents> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
+        => DoFetchForAggregate(eventSource, aggregateRoot, _eventFilter.Empty, cancellationToken);
 
-    public async IAsyncEnumerable<CommittedAggregateEvents> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken)
-        => await DoFetchForAggregate(eventSource, aggregateRoot, _eventFilter.In(_ => _.Metadata.TypeId, eventTypes.Select(_ => _.Value)), cancellationToken);
+    public IAsyncEnumerable<CommittedAggregateEvents> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<ArtifactId> eventTypes, CancellationToken cancellationToken)
+        => DoFetchForAggregate(eventSource, aggregateRoot, _eventFilter.In(_ => _.Metadata.TypeId, eventTypes.Select(_ => _.Value)), cancellationToken);
 
     /// <inheritdoc/>
     public async Task<CommittedAggregateEvents> FetchForAggregateAfter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion after, CancellationToken cancellationToken)
     {
         var stream = DoFetchForAggregate(eventSource, aggregateRoot, _eventFilter.Gt(_ => _.Aggregate.Version, after.Value), cancellationToken);
-        var events = await (await stream.ConfigureAwait(false)).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var events = await stream.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new CommittedAggregateEvents(
             events[0].EventSource,
@@ -104,22 +104,27 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             events.SelectMany(_ => _).ToList());
     }
 
-    async Task<IAsyncEnumerable<CommittedAggregateEvents>> DoFetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, FilterDefinition<MongoDB.Events.Event> filter, CancellationToken cancellationToken)
+    async IAsyncEnumerable<CommittedAggregateEvents> DoFetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, FilterDefinition<MongoDB.Events.Event> filter, CancellationToken cancellationToken)
     {
+        AggregateRootVersion version;
         try
         {
-            var version = await _aggregateRoots.FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
-            if (version <= AggregateRootVersion.Initial)
-            {
-                return AsyncEnumerable.Repeat(new CommittedAggregateEvents(
-                    eventSource,
-                    aggregateRoot,
-                    version,
-                    Array.Empty<CommittedAggregateEvent>()
-                ), 1);
-            }
+            version = await _aggregateRoots.FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+        
+        if (version <= AggregateRootVersion.Initial)
+        {
+            yield return new CommittedAggregateEvents(eventSource, aggregateRoot, version, Array.Empty<CommittedAggregateEvent>());
+        }
 
-            return _streams.DefaultEventLog
+        IAsyncEnumerable<CommittedAggregateEvents> stream;
+        try
+        {
+            stream = _streams.DefaultEventLog
                 .Find(filter & EventsFromAggregateFilter(eventSource, aggregateRoot, version))
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
                 .ToAsyncEnumerable(cancellationToken)
@@ -132,6 +137,11 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         catch (Exception ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+
+        await foreach (var batch in stream.WithCancellation(cancellationToken))
+        {
+            yield return batch;
         }
     }
 
