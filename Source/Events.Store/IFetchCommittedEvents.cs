@@ -24,6 +24,7 @@ public interface IFetchCommittedEvents
     Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken);
 
     /// <summary>
+    /// TODO: This should be made into a streaming call.
     /// Fetches EventLog <see cref="CommittedEvent"/>s from a given offset
     /// </summary>
     /// <param name="scopeId">The <see cref="ScopeId"/>.</param>
@@ -34,6 +35,7 @@ public interface IFetchCommittedEvents
     Task<CommittedEvents> FetchCommittedEvents(ScopeId scopeId, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken);
 
     /// <summary>
+    /// TODO: This should be made into a streaming call.
     /// Fetches all <see cref="CommittedAggregateEvent"/>s applied to an Event Source by an Aggregate Root.
     /// </summary>
     /// <param name="eventSource">The <see cref="EventSourceId"/> identifying the Event Source.</param>
@@ -62,6 +64,7 @@ public interface IFetchCommittedEvents
     Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchStreamForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken);
     
     /// <summary>
+    /// TODO: This should be made into a streaming call.
     /// Fetches all <see cref="CommittedAggregateEvent"/>s applied to an Event Source by an Aggregate Root after the given version.
     /// </summary>
     /// <param name="eventSource">The <see cref="EventSourceId"/> identifying the Event Source.</param>

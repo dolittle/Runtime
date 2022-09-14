@@ -11,7 +11,6 @@ namespace Dolittle.Runtime.Events.Store;
 /// </summary>
 public class CommittedAggregateEvents : CommittedEventSequence<CommittedAggregateEvent>
 {
-
     /// <summary>
     /// Initializes a new instance of the <see cref="CommittedAggregateEvents"/> class.
     /// </summary>
