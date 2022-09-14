@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Rudimentary;
 using Dolittle.Services.Contracts;
 using Microsoft.Extensions.Logging;
 using Proto;
@@ -25,7 +23,6 @@ public class EventStore : IEventStore
 {
     readonly Func<TenantId, EventStoreClient> _getEventStoreClient;
     readonly Func<TenantId, IFetchCommittedEvents> _getCommittedEventsFetcher;
-    readonly Func<TenantId, IFetchAggregateRootVersions> _getAggregateRootVersionsFetcher;
     
     readonly IRootContext _rootContext;
     readonly ILogger _logger;
@@ -34,17 +31,15 @@ public class EventStore : IEventStore
     /// Initializes a new instance of the <see cref="EventStore"/> class.
     /// </summary>
     /// <param name="getEventStoreClient">The factory to use to get the <see cref="EventStoreActor"/> client.</param>
-    /// <param name="logger">The logger to use for logging.</param>
-    /// <param name="getCommittedEventsFetcher"></param>
-    /// <param name="getAggregateRootVersionsFetcher"></param>
+    /// <param name="getCommittedEventsFetcher">The factory to use to get the <see cref="IFetchCommittedEvents"/> to use for fetching events.</param>
     /// <param name="rootContext">Proto root context. Allows middleware to be used</param>
-    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, Func<TenantId, IFetchAggregateRootVersions> getAggregateRootVersionsFetcher, IRootContext rootContext)
+    /// <param name="logger">The logger to use for logging.</param>
+    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, IRootContext rootContext, ILogger logger)
     {
         _getEventStoreClient = getEventStoreClient;
-        _logger = logger;
         _getCommittedEventsFetcher = getCommittedEventsFetcher;
-        _getAggregateRootVersionsFetcher = getAggregateRootVersionsFetcher;
         _rootContext = rootContext;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -66,72 +61,43 @@ public class EventStore : IEventStore
         return _getEventStoreClient(GetTenantFrom(request.CallContext))
             .CommitForAggregate(request, _rootContext, cancellationToken);
     }
-    
-    /// <inheritdoc />
-    public async Task<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateRequest request, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var events = await _getCommittedEventsFetcher(GetTenantFrom(request.CallContext))
-                .FetchForAggregate(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), cancellationToken);
-
-            return new FetchForAggregateResponse
-            {
-                Events = events.ToProtobuf()
-            };
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorFetchingEventsFromAggregate(e);
-            return new FetchForAggregateResponse
-            {
-                Failure = e.ToFailure()
-            };
-        }
-    }
 
     /// <inheritdoc />
-    public async Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IEnumerable<ArtifactId> eventTypes, TenantId tenant, CancellationToken cancellationToken)
+    public IAsyncEnumerable<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateInBatchesRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var committedEventsFetcher = _getCommittedEventsFetcher(tenant);
-            if (!eventTypes.Any())
+            var fetcher = _getCommittedEventsFetcher(GetTenantFrom(request.CallContext));
+
+            var eventSource = request.Aggregate.EventSourceId;
+            var aggregateRoot = request.Aggregate.AggregateRootId.ToGuid();
+            
+            switch (request.RequestCase)
             {
-                return (await _getAggregateRootVersionsFetcher(tenant).FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false), Enumerable.Empty<CommittedAggregateEvent>().ToAsyncEnumerable());
+                case FetchForAggregateInBatchesRequest.RequestOneofCase.FetchAllEvents:
+                    return fetcher.FetchStreamForAggregate(eventSource, aggregateRoot, cancellationToken).Select(ConvertAggregateEventsToResponse);
+                case FetchForAggregateInBatchesRequest.RequestOneofCase.FetchEvents:
+                    var eventTypes = request.FetchEvents.EventTypes.Select(_ => _.ToArtifact().Id);
+                    return fetcher.FetchStreamForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).Select(ConvertAggregateEventsToResponse);
+                case FetchForAggregateInBatchesRequest.RequestOneofCase.None:
+                default:
+                    return AsyncEnumerable.Repeat(new FetchForAggregateResponse
+                    {
+                        Failure = new UnsupportedFetchForAggregatesInBatchesType(request.RequestCase).ToFailure(),
+                    }, 1);
             }
-            var result = await committedEventsFetcher.FetchStreamForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).ConfigureAwait(false);
-            if (!result.Success)
-            {
-                _logger.ErrorFetchingEventsFromAggregate(result.Exception);
-            }
-            return result;
         }
         catch (Exception e)
         {
-            _logger.ErrorFetchingEventsFromAggregate(e);
-            return e;
+            return AsyncEnumerable.Repeat(new FetchForAggregateResponse
+            {
+                Failure = e.ToFailure(),
+            }, 1);
         }
     }
 
-    public async Task<Try<(AggregateRootVersion AggregateRootVersion, IAsyncEnumerable<CommittedAggregateEvent> EventStream)>> FetchAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, TenantId tenant, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var committedEventsFetcher = _getCommittedEventsFetcher(tenant);
-            var result = await committedEventsFetcher.FetchStreamForAggregate(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
-            if (!result.Success)
-            {
-                _logger.ErrorFetchingEventsFromAggregate(result.Exception);
-            }
-            return result;
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorFetchingEventsFromAggregate(e);
-            return e;
-        }
-    }
+    static FetchForAggregateResponse ConvertAggregateEventsToResponse(CommittedAggregateEvents events)
+        => new() { Events = events.ToProtobuf() };
 
     static TenantId GetTenantFrom(CallRequestContext context)
         => context.ExecutionContext.TenantId.ToGuid();

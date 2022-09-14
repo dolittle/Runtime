@@ -4,10 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Store;
 
