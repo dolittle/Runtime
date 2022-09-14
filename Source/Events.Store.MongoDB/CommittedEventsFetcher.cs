@@ -119,6 +119,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         if (version <= AggregateRootVersion.Initial)
         {
             yield return EmptyCommittedAggregateEvents(eventSource, aggregateRoot, version);
+            yield break;
         }
 
         IAsyncEnumerable<CommittedAggregateEvents> stream;
