@@ -43,6 +43,7 @@ public class EventStoreGrpcService : EventStoreBase
     public override Task<FetchForAggregateResponse> FetchForAggregate(FetchForAggregateRequest request, ServerCallContext context)
         => _eventStore.FetchAggregateEvents(request, context.CancellationToken);
 
+    /// <inheritdoc/>
     public override async Task FetchForAggregateInBatches(FetchForAggregateInBatchesRequest request, IServerStreamWriter<FetchForAggregateResponse> responseStream, ServerCallContext context)
     {
         var eventSourceId = request.Aggregate.EventSourceId;
