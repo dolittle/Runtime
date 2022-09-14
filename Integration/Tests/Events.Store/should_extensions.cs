@@ -60,7 +60,7 @@ static class should_extensions
             startEventLogSequenceNumber += (ulong)events.Count;
         }
     }
-    
+
     public static void should_be_the_correct_response(this CommitEventsResponse response, UncommittedEvents uncommitted_events, ExecutionContext execution_context, EventLogSequenceNumber start_sequence_number = null)
     {
         var committedEvents = response.Events.ToCommittedEvents();

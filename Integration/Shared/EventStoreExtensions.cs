@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Artifacts.Contracts;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Processing;
 using Dolittle.Runtime.Events.Contracts;
@@ -56,4 +57,40 @@ public static class EventStoreExtensions
 
         return response;
     }
+    
+    public static IAsyncEnumerable<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, IEnumerable<ArtifactId> eventTypes, Dolittle.Runtime.Execution.ExecutionContext executionContext)
+    {
+        var response = eventStore.FetchAggregateEvents(new FetchForAggregateInBatchesRequest 
+        {
+            CallContext = new CallRequestContext
+            {
+                ExecutionContext = executionContext.ToProtobuf(),
+            },
+            Aggregate = new Aggregate
+            {
+                AggregateRootId = aggregateRootId.ToProtobuf(),
+                EventSourceId = eventSourceId,
+            },
+            FetchEvents = new FetchEventsForAggregateInBatchesRequest{EventTypes = { eventTypes.Select(_ => new Dolittle.Artifacts.Contracts.Artifact{Id = _.ToProtobuf(), Generation = ArtifactGeneration.First})}}
+        }, CancellationToken.None);
+
+        return response;
+    }
+
+    public static FetchForAggregateResponse Combine(this FetchForAggregateResponse[] responses)
+        => new()
+        {
+            Failure = responses.Where(_ => _.Failure is not null).Select(_ => _.Failure).FirstOrDefault(),
+            Events = new Dolittle.Runtime.Events.Contracts.CommittedAggregateEvents
+            {
+                Events =
+                {
+                    responses.SelectMany(_ => _.Events.Events)
+                },
+                AggregateRootId = responses.First().Events.AggregateRootId,
+                EventSourceId = responses.First().Events.EventSourceId,
+                CurrentAggregateRootVersion = responses.First().Events.CurrentAggregateRootVersion,
+                AggregateRootVersion = responses.First().Events.AggregateRootVersion
+            }
+        };
 }
