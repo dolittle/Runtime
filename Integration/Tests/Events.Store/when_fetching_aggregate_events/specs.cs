@@ -20,7 +20,7 @@ class specs : given.a_clean_event_store
 {
     static ArtifactId aggregate_root_id;
     static EventSourceId event_source;
-    static FetchForAggregateResponse response;
+    static IList<FetchForAggregateResponse> response;
     
     Establish context = () =>
     {
@@ -31,9 +31,10 @@ class specs : given.a_clean_event_store
     [Tags("IntegrationTest")]
     class for_a_tenant_that_is_not_configured
     {
-        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context with {Tenant = "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579"}).GetAwaiter().GetResult();
+        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context with {Tenant = "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579"}).ToListAsync().GetAwaiter().GetResult();
 
-        It should_fail = () => response.Failure.ShouldNotBeNull();
+        It should_return_one_message = () => response.Count.ShouldEqual(1);
+        It should_fail = () => response[0].Failure.ShouldNotBeNull();
     }
     
     [Tags("IntegrationTest")]
@@ -47,10 +48,11 @@ class specs : given.a_clean_event_store
             }.ToList()), execution_context).GetAwaiter().GetResult();
         };
         
-        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).GetAwaiter().GetResult();
+        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToListAsync().GetAwaiter().GetResult();
 
-        It should_not_fail = () => response.Failure.ShouldBeNull();
-        It should_have_no_aggregate_events = () => response.Events.Events.ShouldBeEmpty();
+        It should_return_one_message = () => response.Count.ShouldEqual(1);
+        It should_not_fail = () => response[0].Failure.ShouldBeNull();
+        It should_have_no_aggregate_events = () => response[0].Events.Events.ShouldBeEmpty();
     }
     
     [Tags("IntegrationTest")]
@@ -68,9 +70,9 @@ class specs : given.a_clean_event_store
             event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
         };
 
-        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).GetAwaiter().GetResult();
+        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToListAsync().GetAwaiter().GetResult();
 
-        It should_not_fail = () => response.Failure.ShouldBeNull();
+        It should_not_fail = () => response.ShouldNotContain(_ => _.Failure != default);
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
     }
@@ -90,9 +92,9 @@ class specs : given.a_clean_event_store
             event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
         };
 
-        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).GetAwaiter().GetResult();
+        Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToListAsync().GetAwaiter().GetResult();
 
-        It should_not_fail = () => response.Failure.ShouldBeNull();
+        It should_not_fail = () => response.ShouldNotContain(_ => _.Failure != default);
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
     }

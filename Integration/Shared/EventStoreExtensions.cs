@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,15 +38,20 @@ public static class EventStoreExtensions
         return response;
 
     }
-    public static async Task<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, Dolittle.Runtime.Execution.ExecutionContext executionContext)
+    public static IAsyncEnumerable<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, Dolittle.Runtime.Execution.ExecutionContext executionContext)
     {
-        var response = await eventStore.FetchAggregateEvents(new FetchForAggregateRequest
+        var response = eventStore.FetchAggregateEvents(new FetchForAggregateInBatchesRequest 
         {
             CallContext = new CallRequestContext
             {
-                ExecutionContext = executionContext.ToProtobuf()
+                ExecutionContext = executionContext.ToProtobuf(),
             },
-            Aggregate = new Aggregate{AggregateRootId = aggregateRootId.ToProtobuf(), EventSourceId = eventSourceId}
+            Aggregate = new Aggregate
+            {
+                AggregateRootId = aggregateRootId.ToProtobuf(),
+                EventSourceId = eventSourceId,
+            },
+            FetchAllEvents = new FetchAllEventsForAggregateInBatchesRequest(),
         }, CancellationToken.None);
 
         return response;
