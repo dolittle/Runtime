@@ -9,16 +9,24 @@ using Google.Protobuf;
 namespace Dolittle.Runtime.Services;
 
 /// <summary>
-/// Represents an implementation of <see cref="ISendStreamOfBatchedMessages{TBatch,TData}"/>.
+/// Represents a system that can send a stream of data as batched messages.
 /// </summary>
 /// <typeparam name="TBatch">The <see cref="Type"/> of the batch message.</typeparam>
 /// <typeparam name="TData">The <see cref="Type"/> of the data to put in a batch.</typeparam>
-public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatchedMessages<TBatch, TData>
+public static class StreamOfBatchedMessagesSender<TBatch, TData>
     where TBatch : IMessage
     where TData : IMessage
 {
-    /// <inheritdoc />
-    public Task Send(
+    /// <summary>
+    /// Sends a stream of data as batched messages.
+    /// </summary>
+    /// <param name="maxBatchSize">The max batch size.</param>
+    /// <param name="dataEnumerator">The stream of data to batch and send.</param>
+    /// <param name="createNewBatch">The callback for creating an empty batch.</param>
+    /// <param name="putInBatch">The callback for putting data in a batch.</param>
+    /// <param name="sendBatch">The callback for sending a batch.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public static Task Send(
         uint maxBatchSize,
         IAsyncEnumerator<TData> dataEnumerator,
         Func<TBatch> createNewBatch,
@@ -26,30 +34,37 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
         Func<TBatch, Task> sendBatch)
         => Send(maxBatchSize, dataEnumerator, createNewBatch, putInBatch, _ => _, sendBatch);
     
-    /// <inheritdoc />
-    public async Task Send<TDataToBatch>(
+    /// <summary>
+    /// Sends a stream of data as batched messages.
+    /// </summary>
+    /// <param name="maxBatchSize">The max batch size.</param>
+    /// <param name="dataEnumerator">The stream of data to batch and send.</param>
+    /// <param name="createNewBatch">The callback for creating an empty batch.</param>
+    /// <param name="putInBatch">The callback for putting data in a batch.</param>
+    /// <param name="convertToData">The callback for converting <typeparamref name="TDataToBatch"/> to <typeparamref name="TData"/>.</param>
+    /// <param name="sendBatch">The callback for sending a batch.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    public static async Task Send<TDataToBatch>(
         uint maxBatchSize,
         IAsyncEnumerator<TDataToBatch> dataEnumerator,
         Func<TBatch> createNewBatch,
-        Action<TBatch, TDataToBatch> putInBatch,
+        Action<TBatch, TData> putInBatch,
         Func<TDataToBatch, TData> convertToData,
         Func<TBatch, Task> sendBatch)
     {
         try
         {
-            var hasMoreStates = await dataEnumerator.MoveNextAsync().ConfigureAwait(false);
-            var batchToSend = createNewBatch();
-            if (!hasMoreStates)
+            var hasMoreData = await dataEnumerator.MoveNextAsync().ConfigureAwait(false);
+            if (!hasMoreData)
             {
-                await sendBatch(batchToSend).ConfigureAwait(false);
-                return;
+                await sendBatch(createNewBatch()).ConfigureAwait(false);
             }
-            while (hasMoreStates)
+            while (hasMoreData)
             {
-                putInBatch(batchToSend, dataEnumerator.Current);
-                hasMoreStates = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch, convertToData).ConfigureAwait(false);
+                var batchToSend = createNewBatch();
+                putInBatch(batchToSend, convertToData(dataEnumerator.Current));
+                hasMoreData = await FillBatch(maxBatchSize, dataEnumerator, batchToSend, putInBatch, convertToData).ConfigureAwait(false);
                 await sendBatch(batchToSend).ConfigureAwait(false);
-                batchToSend = createNewBatch();
             }
         }
         finally
@@ -58,12 +73,13 @@ public class StreamOfBatchedMessagesSender<TBatch, TData> : ISendStreamOfBatched
         }
     }
 
-    static async Task<bool> FillBatch<TDataToBatch>(uint maxBatchSize, IAsyncEnumerator<TDataToBatch> stream, TBatch batch, Action<TBatch, TDataToBatch> putInBatch, Func<TDataToBatch, TData> convertToData)
+    static async Task<bool> FillBatch<TDataToBatch>(uint maxBatchSize, IAsyncEnumerator<TDataToBatch> stream, TBatch batch, Action<TBatch, TData> putInBatch, Func<TDataToBatch, TData> convertToData)
     {
         while (await stream.MoveNextAsync().ConfigureAwait(false))
         {
-            var data = stream.Current;
-            if (BatchWouldBeTooLarge(maxBatchSize, batch, convertToData(data)))
+            var data = convertToData(stream.Current);
+            
+            if (BatchWouldBeTooLarge(maxBatchSize, batch, data))
             {
                 return true;
             }
