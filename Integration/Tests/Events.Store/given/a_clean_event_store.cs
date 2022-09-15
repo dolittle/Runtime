@@ -15,7 +15,7 @@ using Event = Dolittle.Runtime.Events.Store.MongoDB.Events.Event;
 
 namespace Integration.Tests.Events.Store.given;
 
-class a_clean_event_store : a_runtime_with_a_single_tenant
+public class a_clean_event_store : a_runtime_with_a_single_tenant
 {
     protected static readonly FilterDefinition<Event> all_events_filter = Builders<Event>.Filter.Empty;
     protected static IEventStore event_store;

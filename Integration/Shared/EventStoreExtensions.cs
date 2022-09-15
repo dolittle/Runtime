@@ -13,6 +13,7 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
+using Integration.Shared;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEventContract = Dolittle.Runtime.Events.Contracts.UncommittedEvent;
 
@@ -33,49 +34,14 @@ public static class EventStoreExtensions
         var response = await eventStore.CommitEvents(request, CancellationToken.None).ConfigureAwait(false);
         return response;
     }
-    public static async Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
-    {
-        var response = await eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
-        return response;
+    public static Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
+        => eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
 
-    }
     public static IAsyncEnumerable<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, Dolittle.Runtime.Execution.ExecutionContext executionContext)
-    {
-        var response = eventStore.FetchAggregateEvents(new FetchForAggregateInBatchesRequest 
-        {
-            CallContext = new CallRequestContext
-            {
-                ExecutionContext = executionContext.ToProtobuf(),
-            },
-            Aggregate = new Aggregate
-            {
-                AggregateRootId = aggregateRootId.ToProtobuf(),
-                EventSourceId = eventSourceId,
-            },
-            FetchAllEvents = new FetchAllEventsForAggregateInBatchesRequest(),
-        }, CancellationToken.None);
-
-        return response;
-    }
+        => eventStore.FetchAggregateEvents(EventStoreRequests.FetchBatchFor(aggregateRootId, eventSourceId, executionContext), CancellationToken.None);
     
     public static IAsyncEnumerable<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, IEnumerable<ArtifactId> eventTypes, Dolittle.Runtime.Execution.ExecutionContext executionContext)
-    {
-        var response = eventStore.FetchAggregateEvents(new FetchForAggregateInBatchesRequest 
-        {
-            CallContext = new CallRequestContext
-            {
-                ExecutionContext = executionContext.ToProtobuf(),
-            },
-            Aggregate = new Aggregate
-            {
-                AggregateRootId = aggregateRootId.ToProtobuf(),
-                EventSourceId = eventSourceId,
-            },
-            FetchEvents = new FetchEventsForAggregateInBatchesRequest{EventTypes = { eventTypes.Select(_ => new Dolittle.Artifacts.Contracts.Artifact{Id = _.ToProtobuf(), Generation = ArtifactGeneration.First})}}
-        }, CancellationToken.None);
-
-        return response;
-    }
+        => eventStore.FetchAggregateEvents(EventStoreRequests.FetchBatchFor(aggregateRootId, eventSourceId, eventTypes, executionContext), CancellationToken.None);
 
     public static FetchForAggregateResponse Combine(this FetchForAggregateResponse[] responses)
         => new()
@@ -93,4 +59,5 @@ public static class EventStoreExtensions
                 AggregateRootVersion = responses.First().Events.AggregateRootVersion
             }
         };
+
 }
