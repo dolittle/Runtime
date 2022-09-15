@@ -1,3 +1,13 @@
+# [8.5.0] - 2022-9-15 [PR: #708](https://github.com/dolittle/Runtime/pull/708)
+## Summary
+
+Implements the new gRPC method for fetching aggregate events in batches that is use by the SDKs to implement more efficient rehydration of aggregate roots.
+
+### Added
+
+- Implemented `FetchForAggregateInBatches` gRPC method that enables SDKs to stream the aggregate events in batches also filtered on event types.
+
+
 # [8.4.3] - 2022-9-12 [PR: #709](https://github.com/dolittle/Runtime/pull/709)
 ## Summary
 
