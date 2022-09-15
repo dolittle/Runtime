@@ -33,7 +33,7 @@ class specs : given.a_clean_event_store
     {
         Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context with {Tenant = "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579"}).ToArrayAsync().GetAwaiter().GetResult();
 
-        It should_return_one_message = () => response.Length.ShouldEqual(1);
+        It should_return_one_batch = () => response.Length.ShouldEqual(1);
         It should_fail = () => response[0].Failure.ShouldNotBeNull();
     }
     
@@ -50,7 +50,7 @@ class specs : given.a_clean_event_store
         
         Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToArrayAsync().GetAwaiter().GetResult();
 
-        It should_return_one_message = () => response.Length.ShouldEqual(1);
+        It should_return_one_batch = () => response.Length.ShouldEqual(1);
         It should_not_fail = () => response[0].Failure.ShouldBeNull();
         It should_have_no_aggregate_events = () => response[0].Events.Events.ShouldBeEmpty();
     }
@@ -73,7 +73,9 @@ class specs : given.a_clean_event_store
         Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToArrayAsync().GetAwaiter().GetResult();
 
         It should_not_fail = () => response.ShouldNotContain(_ => _.Failure != default);
-
+        It should_return_the_correct_event_source_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.EventSourceId == event_source.Value);
+        It should_return_the_correct_aggregate_root_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.AggregateRootId.ToGuid() == aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.CurrentAggregateRootVersion == 1L);
         It should_return_the_correct_committed_event = () => response.Combine().should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
     }
     
@@ -95,7 +97,9 @@ class specs : given.a_clean_event_store
         Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToArrayAsync().GetAwaiter().GetResult();
 
         It should_not_fail = () => response.ShouldNotContain(_ => _.Failure != default);
-
+        It should_return_the_correct_event_source_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.EventSourceId == event_source.Value);
+        It should_return_the_correct_aggregate_root_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.AggregateRootId.ToGuid() == aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.CurrentAggregateRootVersion == 1L);
         It should_return_the_correct_committed_event = () => response.Combine().should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
     }
 }
