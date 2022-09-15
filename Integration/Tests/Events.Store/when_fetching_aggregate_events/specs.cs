@@ -54,7 +54,7 @@ class specs : given.a_clean_event_store
         It should_not_fail = () => response[0].Failure.ShouldBeNull();
         It should_have_the_correct_event_source = () => response[0].Events.EventSourceId.ShouldEqual(event_source.Value);
         It should_have_the_correct_aggregate_root = () => response[0].Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_have_the_correct_aggregate_root_version = () => response[0].Events.CurrentAggregateRootVersion.ShouldEqual(3UL);
+        It should_have_the_correct_aggregate_root_version = () => response[0].Events.CurrentAggregateRootVersion.ShouldEqual(0UL);
         It should_have_no_aggregate_events = () => response[0].Events.Events.ShouldBeEmpty();
     }
     
@@ -102,7 +102,7 @@ class specs : given.a_clean_event_store
         It should_not_fail = () => response.ShouldNotContain(_ => _.Failure != default);
         It should_return_the_correct_event_source_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.EventSourceId == event_source.Value);
         It should_return_the_correct_aggregate_root_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.AggregateRootId.ToGuid() == aggregate_root_id.Value);
-        It should_return_the_correct_aggregate_root_version_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.CurrentAggregateRootVersion == 1L);
+        It should_return_the_correct_aggregate_root_version_in_all_batches = () => response.ShouldEachConformTo(_ => _.Events.CurrentAggregateRootVersion == 3L);
         It should_return_the_correct_committed_event = () => response.Combine().should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
     }
 }
