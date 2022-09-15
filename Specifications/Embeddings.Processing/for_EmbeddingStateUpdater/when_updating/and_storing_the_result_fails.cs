@@ -28,7 +28,7 @@ public class and_storing_the_result_fails : given.all_dependencies
         projection_key = "projection-key";
         current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
         committed_event = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 3, 10, DateTimeOffset.Now, projection_key.Value, execution_context, event_type, false, "event-one-content");
-        unprocessed_events = new CommittedAggregateEvents(projection_key.Value, embedding.Value, new[] { committed_event });
+        unprocessed_events = new CommittedAggregateEvents(projection_key.Value, embedding.Value, current_state.Version, new[] { committed_event });
         projection_result = new EmbeddingCurrentState(current_state.Version + 1, EmbeddingCurrentStateType.Persisted, current_state.State, current_state.Key);
         exception = new Exception();
 

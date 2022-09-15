@@ -174,7 +174,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
             }
 
             var committedEvents = response.Events.ToCommittedEvents();
-            await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
+            await replaceOrRemoveEmbedding(committedEvents.AggregateRootVersion).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)

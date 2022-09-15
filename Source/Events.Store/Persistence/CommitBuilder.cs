@@ -106,6 +106,7 @@ public class CommitBuilder : ICanBuildABatch<Commit>
             var committedEvents = new CommittedAggregateEvents(
                 request.Events.EventSourceId,
                 aggregate.AggregateRoot,
+                nextAggregateRootVersion + (ulong)request.Events.Events.Count,
                 request.Events.Events.Select(_ => new CommittedAggregateEvent(
                     aggregateRoot,
                     nextAggregateRootVersion++,

@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedEvents.given;
+namespace Dolittle.Runtime.Events.Store.for_UncommittedEvents.given;
 
 public abstract class events
 {

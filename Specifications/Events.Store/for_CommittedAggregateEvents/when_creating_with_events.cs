@@ -3,13 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents;
+namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvents;
 
 public class when_creating_with_events : given.events_and_an_artifact
 {
     static CommittedAggregateEvents events;
 
-    Because of = () => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, new[] { event_one, event_two, event_three });
+    Because of = () => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, 4, new[] { event_one, event_two, event_three });
 
     It should_not_be_empty = () => events.ShouldNotBeEmpty();
     It should_have_events = () => events.HasEvents.ShouldBeTrue();

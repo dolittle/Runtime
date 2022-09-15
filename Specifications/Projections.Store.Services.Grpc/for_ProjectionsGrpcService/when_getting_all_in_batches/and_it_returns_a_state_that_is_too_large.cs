@@ -36,6 +36,6 @@ public class and_it_returns_a_state_that_is_too_large : given.the_service_and_ge
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();
 
-    It should_send_three_batches_of_one_state = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 1)), Times.Exactly(3));
+    It should_send_three_batches_of_one_state = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.States.Count == 1), Moq.It.IsAny<CancellationToken>()), Times.Exactly(3));
     It should_not_send_any_other_messages = () => server_stream_writer.VerifyNoOtherCalls();
 }

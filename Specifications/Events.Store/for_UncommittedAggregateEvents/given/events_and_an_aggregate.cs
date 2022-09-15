@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents.given;
+namespace Dolittle.Runtime.Events.Store.for_UncommittedAggregateEvents.given;
 
 public abstract class events_and_an_aggregate
 {

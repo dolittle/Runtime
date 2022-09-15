@@ -34,7 +34,7 @@ public class and_it_fails_on_first_event : given.all_dependencies
         current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
         event_one = new CommittedAggregateEvent(aggregate_root_type, 3, 10, DateTimeOffset.Now, event_source, execution_context, event_type, false, "event-one-content");
         event_two = new CommittedAggregateEvent(aggregate_root_type, 4, 11, DateTimeOffset.Now, event_source, execution_context, event_type, true, "event-two-content");
-        unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, new[] { event_one, event_two });
+        unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, current_state.Version, new[] { event_one, event_two });
         exception = new Exception();
         result_after_one = new ProjectionFailedResult(exception);
 

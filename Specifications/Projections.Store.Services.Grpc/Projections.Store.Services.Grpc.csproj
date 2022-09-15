@@ -13,5 +13,4 @@
   <ItemGroup>
     <ProjectReference Include="../../Source/Projections.Store.Services.Grpc/Projections.Store.Services.Grpc.csproj" />
   </ItemGroup>
-
 </Project>

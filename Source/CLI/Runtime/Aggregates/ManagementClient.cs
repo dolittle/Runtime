@@ -89,7 +89,7 @@ public class ManagementClient : IManagementClient
             }
         };
 
-        var response = await client.GetEventsAsync(request);
+        var response = await client.GetEventsAsync(request).ConfigureAwait(false);
 
         if (response.Failure is not null)
         {
@@ -114,9 +114,10 @@ public class ManagementClient : IManagementClient
         => new(
             events.EventSourceId,
             events.AggregateRootId.ToGuid(),
+            events.CurrentAggregateRootVersion,
             events.Events.Select((@event, i) => new CommittedAggregateEvent(
                 new Artifact(events.AggregateRootId.ToGuid(), ArtifactGeneration.First),
-                events.AggregateRootVersion + 1u - (ulong)events.Events.Count + (ulong)i,
+                @event.AggregateRootVersion,
                 @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
                 events.EventSourceId,

@@ -6,7 +6,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Execution;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents.given;
+namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvents.given;
 
 public abstract class events_and_an_artifact
 {

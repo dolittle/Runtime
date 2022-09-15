@@ -118,7 +118,9 @@ public class CommitAggregateEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            await _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+            await foreach (var _ in _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false))
+            {
+            }
             await _eventStore.Commit(
                 new UncommittedAggregateEvents(
                     _eventsToCommit.EventSource,
@@ -146,7 +148,9 @@ public class CommitAggregateEvents : JobBase
     [Benchmark]
     public async Task FetchCommitEventsInBatch()
     {
-        await _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+        await foreach(var _ in _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false))
+        {
+        }
         await _eventStore.Commit(_eventsToCommit, _executionContext).ConfigureAwait(false);
     }
 

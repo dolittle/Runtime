@@ -4,7 +4,7 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents;
+namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvents;
 
 public class when_creating_with_an_out_of_order_aggregate_version : given.events_and_an_artifact
 {
@@ -12,9 +12,9 @@ public class when_creating_with_an_out_of_order_aggregate_version : given.events
     static CommittedAggregateEvents events;
     static Exception exception;
 
-    Establish context = () => out_of_order_event = new CommittedAggregateEvent(aggregate_artifact, 10, 3, DateTimeOffset.UtcNow, event_source_id, execution_contexts.create(), event_b_artifact, is_public, "wrong");
+    Establish context = () => out_of_order_event = new CommittedAggregateEvent(aggregate_artifact, 1, 3, DateTimeOffset.UtcNow, event_source_id, execution_contexts.create(), event_b_artifact, is_public, "wrong");
 
-    Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, new[] { event_one, event_two, event_three, out_of_order_event }));
+    Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, 2, new[] { event_one, event_two, event_three, out_of_order_event }));
 
     It should_throw_an_exception = () => exception.ShouldBeOfExactType<AggregateRootVersionIsOutOfOrder>();
     It should_not_be_created = () => events.ShouldBeNull();

@@ -91,9 +91,11 @@ public class FetchAggregateEvents : JobBase
     /// Fetches the events for the aggregate root.
     /// </summary>
     [Benchmark]
-    public Task FetchEvents()
+    public async Task FetchEvents()
     {
-        return _eventStore.FetchForAggregate(_aggregateRoot, _eventSource, _executionContext);
+        await foreach (var _ in _eventStore.FetchForAggregate(_aggregateRoot, _eventSource, _executionContext))
+        {
+        }
     }
 
     /// <inheritdoc />

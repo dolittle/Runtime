@@ -3,7 +3,7 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents;
+namespace Dolittle.Runtime.Events.Store.for_CommittedEvents;
 
 public class when_creating_with_events : given.events
 {
