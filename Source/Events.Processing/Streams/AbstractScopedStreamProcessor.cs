@@ -28,8 +28,8 @@ public abstract class AbstractScopedStreamProcessor
     readonly IEventFetcherPolicies _eventFetcherPolicies;
     readonly IStreamEventWatcher _eventWaiter;
     readonly object _setPositionLock = new();
-    CancellationTokenSource _resetStreamProcessor;
-    TaskCompletionSource<Try<StreamPosition>> _resetStreamProcessorCompletionSource;
+    CancellationTokenSource? _resetStreamProcessor;
+    TaskCompletionSource<Try<StreamPosition>>? _resetStreamProcessorCompletionSource;
     Func<TenantId, CancellationToken, Task<Try>> _resetStreamProcessorAction;
     IStreamProcessorState _currentState;
     bool _started;
@@ -344,6 +344,7 @@ public abstract class AbstractScopedStreamProcessor
                         _resetStreamProcessorCompletionSource = default;
                         _resetStreamProcessorAction = default;
                     }
+
                     try
                     {
                         _currentState = await Catchup(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
@@ -361,6 +362,11 @@ public abstract class AbstractScopedStreamProcessor
                     catch (TaskCanceledException ex)
                     {
                         tryGetEvents = ex;
+                    }
+                    finally
+                    {
+                        _resetStreamProcessor?.Dispose();
+                        _resetStreamProcessor = null;
                     }
                 }
                 while (!tryGetEvents.Success && !cancellationToken.IsCancellationRequested);
@@ -385,6 +391,7 @@ public abstract class AbstractScopedStreamProcessor
         finally
         {
             _resetStreamProcessor?.Dispose();
+            _resetStreamProcessor = null;
         }
     }
 }
