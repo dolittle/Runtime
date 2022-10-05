@@ -1,3 +1,9 @@
+# [8.5.1] - 2022-10-5 [PR: #715](https://github.com/dolittle/Runtime/pull/715)
+### Fixed
+
+- Fixes a minor memory leak for scoped stream processors
+
+
 # [8.5.0] - 2022-9-15 [PR: #708](https://github.com/dolittle/Runtime/pull/708)
 ## Summary
 
