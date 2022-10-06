@@ -13,14 +13,19 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 [Metrics, Singleton]
 public class MetricsCollector : IMetricsCollector
 {
-    readonly Counter _registrationsTotal;
+    readonly Counter _customerRegistrationsTotal;
+    readonly Counter _systemRegistrationsTotal;
     readonly Counter _failedRegistrationsTotal;
     readonly Counter _eventsProcessedTotal;
 
     public MetricsCollector(IMetricFactory metricFactory)
     {
-        _registrationsTotal = metricFactory.CreateCounter(
+        _customerRegistrationsTotal = metricFactory.CreateCounter(
             "dolittle_runtime_customer_eventhandlers_registrations_total",
+            "Total number of event handler registrations");
+
+        _systemRegistrationsTotal = metricFactory.CreateCounter(
+            "dolittle_runtime_system_eventhandlers_registrations_total",
             "Total number of event handler registrations");
 
         _failedRegistrationsTotal = metricFactory.CreateCounter(
@@ -33,8 +38,11 @@ public class MetricsCollector : IMetricsCollector
     }
 
     /// <inheritdoc />
-    public void IncrementRegistrationsTotal() 
-        => _registrationsTotal.Inc();
+    public void IncrementRegistrationsTotal(EventHandlerInfo info) 
+    {
+        _customerRegistrationsTotal.WithLabels();
+        _systemRegistrationsTotal.Inc();
+    }
 
     /// <inheritdoc />
     public void IncrementFailedRegistrationsTotal() 

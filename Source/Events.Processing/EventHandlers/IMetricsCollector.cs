@@ -8,18 +8,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// </summary>
 public interface IMetricsCollector
 {
-    /// <summary>
-    /// Increments the total number of calls to <see cref="IProjectionStore.TryGet"/>.
-    /// </summary>
-    void IncrementRegistrationsTotal();
+    void IncrementRegistrationsTotal(EventHandlerInfo info);
 
-    /// <summary>
-    /// Increments the total number of calls to <see cref="IProjectionStore.TryGet"/>.
-    /// </summary>
     void IncrementFailedRegistrationsTotal();
 
-    /// <summary>
-    /// Increments the total number of calls to <see cref="IProjectionStore.TryGet"/>.
-    /// </summary>
     void IncrementEventsProcessedTotal();
 }
