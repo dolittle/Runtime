@@ -10,25 +10,16 @@ namespace Dolittle.Runtime.Events.Processing;
 /// </summary>
 public class FailedProcessing : IProcessingResult
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FailedProcessing"/> class.
-    /// </summary>
-    /// <param name="reason">The reason for failure.</param>
-    public FailedProcessing(string reason)
+    public static FailedProcessing SingleEvent(string reason,  bool retry, TimeSpan retryTimeout)
+        => new(reason, 0, retry, retryTimeout);
+    
+    public static FailedProcessing Batch(string reason, int batchPosition, bool retry, TimeSpan retryTimeout)
+        => new(reason, batchPosition,  retry, retryTimeout);
+
+    FailedProcessing(string reason, int batchPosition, bool retry, TimeSpan retryTimeout)
     {
         FailureReason = reason;
-        Retry = false;
-        RetryTimeout = TimeSpan.Zero;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FailedProcessing"/> class.
-    /// </summary>
-    /// <param name="reason">The reason for failure.</param>
-    /// <param name="retry">Whether to retry processing.</param>
-    /// <param name="retryTimeout">The retry timeout <see cref="TimeSpan" />.</param>
-    public FailedProcessing(string reason, bool retry, TimeSpan retryTimeout)
-    {
+        BatchPosition = batchPosition;
         FailureReason = reason;
         Retry = retry;
         RetryTimeout = retryTimeout;
@@ -45,4 +36,9 @@ public class FailedProcessing : IProcessingResult
 
     /// <inheritdoc/>
     public TimeSpan RetryTimeout { get; }
+    
+    /// <summary>
+    /// Gets the position in the batch that failed processing.
+    /// </summary>
+    public int BatchPosition { get; }
 }

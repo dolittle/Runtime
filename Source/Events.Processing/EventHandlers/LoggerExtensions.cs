@@ -7,6 +7,7 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
@@ -14,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// <summary>
 /// Represents a extensions for <see cref="ILogger" />.
 /// </summary>
-static class LoggerExtensions
+static partial class LoggerExtensions
 {
     static readonly Action<ILogger, Guid, Guid, Guid, string, bool, Exception> _receivedEventHandler = LoggerMessage
         .Define<Guid, Guid, Guid, string, bool>(
@@ -117,6 +118,13 @@ static class LoggerExtensions
             LogLevel.Debug,
             new EventId(250914604, nameof(EventProcessorIsProcessingAgain)),
             "Event processor: {EventProcessor} is processing event type: {EventTypeId} for partition: {PartitionId} again for the {RetryCount} time, because of: {FailureReason}");
+
+
+    [LoggerMessage(0, LogLevel.Debug, "Event Handler: {EventHandler} in scope: {Scope} is processing a batch of {NumEvents} events")]
+    internal static partial void EventProcessorIsProcessingBatch(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, int numEvents);
+    
+    [LoggerMessage(0, LogLevel.Debug, "Event Handler: {EventHandler} in scope: {Scope} is processing a batch of {NumEvents} events again for the {RetryCount} time, because of: {FailureReason}")]
+    internal static partial void EventProcessorIsProcessingBatchAgain(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, int numEvents, uint retryCount, FailureReason failureReason);
 
     internal static void ReceivedEventHandler(this ILogger logger, StreamId sourceStream, EventProcessorId handler, ScopeId scope, IEnumerable<ArtifactId> types, bool partitioned)
         => _receivedEventHandler(logger, sourceStream, handler, scope, string.Join(", ", types.Select(_ => $"'{_.Value}'")), partitioned, null);

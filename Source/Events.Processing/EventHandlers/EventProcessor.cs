@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
@@ -15,8 +17,10 @@ using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatch
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationRequest,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
-                                    Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
+                                    Dolittle.Runtime.Events.Processing.Contracts.HandleEventsRequest,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
+
+using StreamEvent = Dolittle.Runtime.Events.Store.Streams.StreamEvent;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
@@ -50,37 +54,60 @@ public class EventProcessor : IEventProcessor
     public EventProcessorId Identifier { get; }
 
     /// <inheritdoc />
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public Task<IProcessingResult> Process(IReadOnlyList<StreamEvent> batch, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
+        _logger.EventProcessorIsProcessingBatch(Identifier, Scope, batch.Count);
 
-        var request = new HandleEventRequest
+        var request = new HandleEventsRequest
         {
-            Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf() },
+            Batch = { batch.Select(_ => _.ToProtobuf(Scope))}
+        };
+        return Process(request, executionContext, cancellationToken);
+    }
+    
+    /// <inheritdoc />
+    public Task<IProcessingResult> Process(StreamEvent streamEvent, ExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        _logger.EventProcessorIsProcessing(Identifier, streamEvent.Event.Type.Id, streamEvent.Partition);
+
+        var request = new HandleEventsRequest
+        {
+            Event = streamEvent.ToProtobuf(Scope)
         };
         return Process(request, executionContext, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public Task<IProcessingResult> ReProcess(StreamEvent streamEvent, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
-        var request = new HandleEventRequest
+        _logger.EventProcessorIsProcessingAgain(Identifier, streamEvent.Event.Type.Id, streamEvent.Partition, retryCount, failureReason);
+        var request = new HandleEventsRequest
         {
-            Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf() },
+            Event = streamEvent.ToProtobuf(Scope),
+            RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+        };
+        return Process(request, executionContext, cancellationToken);
+    }
+    /// <inheritdoc/>
+    public Task<IProcessingResult> ReProcess(IReadOnlyList<StreamEvent> batch, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        _logger.EventProcessorIsProcessingBatchAgain(Identifier, Scope, batch.Count, retryCount, failureReason);
+        var request = new HandleEventsRequest
+        {
+            Batch =  { batch.Select(_ => _.ToProtobuf(Scope))},
             RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
         };
         return Process(request, executionContext, cancellationToken);
     }
 
-    async Task<IProcessingResult> Process(HandleEventRequest request, ExecutionContext executionContext, CancellationToken cancellationToken)
+    async Task<IProcessingResult> Process(HandleEventsRequest request, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var response = await _dispatcher.Call(request, executionContext, cancellationToken).ConfigureAwait(false);
 
         return response switch
         {
             { Failure: null } => new SuccessfulProcessing(),
-            _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout?.ToTimeSpan() ?? TimeSpan.MaxValue)
+            _ => new FailedProcessing(response.Failure.Reason, request.Event.Metadata.StreamPosition, request.Event.Metadata.PartitionId, response.Failure.Retry, response.Failure.RetryTimeout?.ToTimeSpan() ?? TimeSpan.MaxValue)
         };
     }
 }
