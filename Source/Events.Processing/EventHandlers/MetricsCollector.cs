@@ -29,6 +29,11 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _customerEventProcessingFailuresTotal;
     readonly Histogram _customerEvenProcessingTime;
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="MetricsCollector"/> class.
+    /// </summary>
+    /// <param name="metricFactory">The metric factory to use to create metrics.</param>
+    /// <param name="eventTypes">The system to use to resolve event aliases from event types.</param>
     public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes)
     {
         _eventTypeAliases = eventTypes.All.ToDictionary(type => type.Identifier.Id.Value, type => type.Alias == EventTypeAlias.NotSet ? string.Empty : type.Alias.Value);
