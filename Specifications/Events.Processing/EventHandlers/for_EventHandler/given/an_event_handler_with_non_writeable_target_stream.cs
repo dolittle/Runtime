@@ -44,6 +44,7 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
             {
                 Failure = failure.ToProtobuf()
             }, cancellation),
+            metrics_collector.Object,
             logger_factory.CreateLogger<EventHandler>(),
             execution_context,
             cancellation_token);
