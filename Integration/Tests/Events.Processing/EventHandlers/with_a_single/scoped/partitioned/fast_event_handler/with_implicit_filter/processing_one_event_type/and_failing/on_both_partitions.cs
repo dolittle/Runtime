@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
 using Machine.Specifications;

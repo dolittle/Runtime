@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Events.Store;
-
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Aggregates.Management;
@@ -59,12 +57,12 @@ public class GetTenantScopedAggregateRoot : IGetTenantScopedAggregateRoot
 
     async Task<AggregateRootWithTenantScopedInstances> GetByArtifactIdFor(ArtifactId aggregateRootId, Func<TenantId, bool> shouldFetchForTenant)
     {
-        if (!_aggregateRoots.TryGet(aggregateRootId, out var aggregateRoot))
+        if (!_aggregateRoots.TryGetFor(aggregateRootId, out var aggregateRoot))
         {
             aggregateRoot = new AggregateRoot(new AggregateRootId(aggregateRootId, ArtifactGeneration.First));
         }
             
-        var instances = await GetFor(new[] {aggregateRoot}, shouldFetchForTenant).ConfigureAwait(false);
+        var instances = await GetFor(new[] {aggregateRoot!}, shouldFetchForTenant).ConfigureAwait(false);
         return instances.First();
     }
 
@@ -94,7 +92,7 @@ public class GetTenantScopedAggregateRoot : IGetTenantScopedAggregateRoot
             }
 
             var forTenant = await _getAggregateRootInstancesFor(tenant).GetFor(aggregateRoot.Identifier).ConfigureAwait(false);
-            instances.AddRange(forTenant.Instances.Select(_ => new TenantScopedAggregateRootInstance(tenant, _)));
+            instances.AddRange(forTenant.Instances.Select(__ => new TenantScopedAggregateRootInstance(tenant, __)));
         }).ConfigureAwait(false);
 
         return new AggregateRootWithTenantScopedInstances(aggregateRoot, instances);

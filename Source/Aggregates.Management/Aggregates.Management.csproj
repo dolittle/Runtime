@@ -8,6 +8,8 @@
 
     <ItemGroup>
         <ProjectReference Include="../Aggregates/Aggregates.csproj" />
+        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 
     <ItemGroup>

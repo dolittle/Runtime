@@ -9,6 +9,7 @@ using Dolittle.Runtime.CLI.Serialization;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using McMaster.Extensions.CommandLineUtils;
 

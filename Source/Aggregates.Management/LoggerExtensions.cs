@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Aggregates.Management;

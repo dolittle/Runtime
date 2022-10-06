@@ -15,7 +15,8 @@
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-        <ProjectReference Include="..\Events\Events.csproj" />
+        <ProjectReference Include="../Aggregates/Aggregates.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
     </ItemGroup>
 
     <ItemGroup>

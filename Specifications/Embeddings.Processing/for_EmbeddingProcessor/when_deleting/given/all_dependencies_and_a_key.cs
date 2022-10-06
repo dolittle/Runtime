@@ -4,13 +4,12 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
-using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store;
-using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 using CommittedAggregateEvents = Dolittle.Runtime.Events.Store.CommittedAggregateEvents;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;

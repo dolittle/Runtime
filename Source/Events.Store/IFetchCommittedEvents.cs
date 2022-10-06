@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Store;
 

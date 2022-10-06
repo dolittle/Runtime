@@ -6,16 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Scoping;
-using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.MongoDB;
 using MongoDB.Driver;
+using IAggregateRoots = Dolittle.Runtime.Events.Store.MongoDB.Aggregates.IAggregateRoots;
 
- namespace Dolittle.Runtime.Events.Store.MongoDB;
+namespace Dolittle.Runtime.Events.Store.MongoDB;
 
 /// <summary>
 /// Represents the MongoDB implementation of <see cref="IEventStore"/>.

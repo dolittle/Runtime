@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.without_implicit_filter.processing_all_event_types.needing_catchup;

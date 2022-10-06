@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;

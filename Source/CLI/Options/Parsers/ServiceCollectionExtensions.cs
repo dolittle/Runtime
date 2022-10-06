@@ -8,6 +8,7 @@ using Dolittle.Runtime.CLI.Options.Parsers.EventHandlers;
 using Dolittle.Runtime.CLI.Options.Parsers.Microservices;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;

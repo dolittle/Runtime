@@ -3,10 +3,9 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;

@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 

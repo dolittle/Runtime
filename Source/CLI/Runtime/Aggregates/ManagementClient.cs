@@ -10,6 +10,7 @@ using Dolittle.Runtime.Aggregates.Management.Contracts;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;

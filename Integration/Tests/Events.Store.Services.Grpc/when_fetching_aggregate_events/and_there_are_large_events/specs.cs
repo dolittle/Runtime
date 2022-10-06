@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Integration.Shared;
 using Integration.Tests.Events.Store.given;

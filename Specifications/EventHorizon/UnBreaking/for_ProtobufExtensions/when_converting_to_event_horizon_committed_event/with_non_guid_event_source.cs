@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_converting_to_event_horizon_committed_event.given;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_converting_to_event_horizon_committed_event;
