@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
@@ -19,8 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 [Metrics, Singleton]
 public class MetricsCollector : IMetricsCollector
 {
-    readonly Dictionary<Guid, string> _eventTypeAliases = new();
-    
+    readonly IEventTypes _eventTypes;
     readonly Counter _customerRegistrationsTotal;
     readonly Counter _systemRegistrationsTotal;
     readonly Counter _customerFailedRegistrationsTotal;
@@ -36,8 +33,7 @@ public class MetricsCollector : IMetricsCollector
     /// <param name="eventTypes">The system to use to resolve event aliases from event types.</param>
     public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes)
     {
-        _eventTypeAliases = eventTypes.All.ToDictionary(type => type.Identifier.Id.Value, type => type.Alias == EventTypeAlias.NotSet ? string.Empty : type.Alias.Value);
-        
+        _eventTypes = eventTypes;
         _customerRegistrationsTotal = metricFactory.CreateCounter(
             "dolittle_customer_runtime_eventhandlers_registrations_total",
             "Total number of event handler registrations",
@@ -96,7 +92,7 @@ public class MetricsCollector : IMetricsCollector
                 info.HasAlias ? info.Alias : string.Empty,
                 tenant.ToString(),
                 @event.Event.Type.Id.ToString(),
-                GetEventTypeAliasLabel(@event.Event.Type))
+                _eventTypes.GetEventTypeAliasOrEmptyString(@event.Event.Type))
             .Inc();
         _customerEvenProcessingTime.WithLabels(
                 info.Id.Scope.ToString(),
@@ -104,7 +100,7 @@ public class MetricsCollector : IMetricsCollector
                 info.HasAlias ? info.Alias : string.Empty,
                 tenant.ToString(),
                 @event.Event.Type.Id.ToString(),
-                GetEventTypeAliasLabel(@event.Event.Type))
+                _eventTypes.GetEventTypeAliasOrEmptyString(@event.Event.Type))
             .Observe(processingTime.TotalSeconds);
     }
 
@@ -116,11 +112,6 @@ public class MetricsCollector : IMetricsCollector
                 info.HasAlias ? info.Alias : string.Empty,
                 tenant.ToString(),
                 @event.Event.Type.Id.ToString(),
-                GetEventTypeAliasLabel(@event.Event.Type))
+                _eventTypes.GetEventTypeAliasOrEmptyString(@event.Event.Type))
             .Inc();
-
-    string GetEventTypeAliasLabel(Artifact eventType)
-        => _eventTypeAliases.TryGetValue(eventType.Id.Value, out var alias)
-            ? alias
-            : string.Empty;
 }
