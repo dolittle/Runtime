@@ -69,6 +69,16 @@ public class StreamProcessor : IDisposable
     }
 
     /// <summary>
+    /// Event that occurs when the Stream Processor has successfully processed an event.
+    /// </summary>
+    public StreamProcessorProcessedEvent OnProcessedEvent;
+
+    /// <summary>
+    /// Event that occurs when the Stream Processor failed to processed an event.
+    /// </summary>
+    public StreamProcessorFailedToProcessEvent OnFailedToProcessedEvent;
+
+    /// <summary>
     /// Gets all current <see cref="IStreamProcessorState"/> states. 
     /// </summary>
     /// <returns>The <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
@@ -103,6 +113,10 @@ public class StreamProcessor : IDisposable
                 eventProcessor,
                 _executionContext,
                 _stopAllScopedStreamProcessorsTokenSource.Token).ConfigureAwait(false);
+            
+            scopedStreamProcessor.OnProcessedEvent += (@event, time) => OnProcessedEvent?.Invoke(tenant, @event, time);
+            scopedStreamProcessor.OnFailedToProcessedEvent += (@event, time) => OnFailedToProcessedEvent?.Invoke(tenant, @event, time);
+            // TODO: Do we need to remove these on disposal maybe?
             
             _streamProcessors.Add(tenant, scopedStreamProcessor);
         }).ConfigureAwait(false);

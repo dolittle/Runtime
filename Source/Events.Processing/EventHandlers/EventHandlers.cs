@@ -23,15 +23,18 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 public class EventHandlers : IEventHandlers
 {
     readonly ConcurrentDictionary<EventHandlerId, IEventHandler> _eventHandlers = new();
-    
+
+    readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventHandlers"/> class.
     /// </summary>
+    /// <param name="metrics">The <see cref="IMetricsCollector"/> to use.</param>
     /// <param name="logger">The <see cref="ILogger"/>.</param>
-    public EventHandlers(ILogger logger)
+    public EventHandlers(IMetricsCollector metrics, ILogger logger)
     {
+        _metrics = metrics;
         _logger = logger;
     }
         
@@ -48,19 +51,26 @@ public class EventHandlers : IEventHandlers
     public async Task RegisterAndStart(IEventHandler eventHandler, Func<Failure, CancellationToken, Task> onFailure, CancellationToken cancellationToken)
     {
         var eventHandlerId = eventHandler.Info.Id;
+        
+        _metrics.IncrementRegistrationsTotal(eventHandler.Info);
+        void IncrementFailure() => _metrics.IncrementFailedRegistrationsTotal(eventHandler.Info);
+        
         if (!_eventHandlers.TryAdd(eventHandlerId, eventHandler))
         {
             _logger.EventHandlerAlreadyRegistered(eventHandlerId);
+            _metrics.IncrementFailedRegistrationsTotal(eventHandler.Info);
             await onFailure(new EventHandlerAlreadyRegistered(eventHandlerId), cancellationToken).ConfigureAwait(false);
             return;
         }
         try
         {
+            eventHandler.OnRegistrationFailed += IncrementFailure;
             await eventHandler.RegisterAndStart().ConfigureAwait(false);
         }
         finally
         {
             _eventHandlers.Remove(eventHandlerId, out _);
+            eventHandler.OnRegistrationFailed -= IncrementFailure;
         }
     }
 
