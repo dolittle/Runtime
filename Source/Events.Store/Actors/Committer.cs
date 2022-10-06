@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
@@ -340,8 +341,7 @@ public class Committer : IActor
                     return Task.CompletedTask;
                 }
                 
-                _metrics.IncrementTotalBatchesSuccessfullyPersisted();
-                _metrics.IncrementTotalBatchedEventsSuccessfullyPersisted(batchToSend.Batch.AllEvents.Count);
+                _metrics.IncrementTotalBatchesSuccessfullyPersisted(batchToSend.Batch);
                 batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
                 _readyToSend = true;
@@ -362,6 +362,7 @@ public class Committer : IActor
         void FailBatchAndPipeline(Exception error)
         {
             _metrics.IncrementTotalBatchesFailedPersisting();
+            // TODO: Can we check this exception and increment AggregateConcurrencyConflictsTotal? Or is there another more suitable place?
             batchToSend.Fail(error);
             _pipeline?.EmptyAllWithFailure(error);
             _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);

@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store.Persistence;
+
 namespace Dolittle.Runtime.Events.Store.Actors;
 
 /// <summary>
@@ -26,13 +28,7 @@ public interface IMetricsCollector
     /// <summary>
     /// Increments the total number of commits that has been successfully written to the event store.
     /// </summary>
-    void IncrementTotalBatchesSuccessfullyPersisted();
-
-    
-    /// <summary>
-    /// Increments the total number of events in commits that has been successfully written to the event store.
-    /// </summary>
-    void IncrementTotalBatchedEventsSuccessfullyPersisted(int allEventsCount);
+    void IncrementTotalBatchesSuccessfullyPersisted(Commit commit);
 
     /// <summary>
     /// Increments the total number of batches that has been sent to the event store persistence layer.
