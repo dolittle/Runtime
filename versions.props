@@ -24,7 +24,7 @@
         <NewtonsoftVersion>13.0.1</NewtonsoftVersion>
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <PollyVersion>7.2.3</PollyVersion>
-        <PrometheusVersion>5.0.2</PrometheusVersion>
+        <PrometheusVersion>6.0.0</PrometheusVersion>
         <ProtoActorVersion>0.33.1-alpha.0.13</ProtoActorVersion>
         <ProtobufVersion>3.19.4</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
