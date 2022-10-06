@@ -4,6 +4,7 @@
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
@@ -28,6 +29,7 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _totalBatchesFailedPersisting;
     readonly Counter _totalCommittedEvents;
     readonly Counter _totalCommittedAggregateEvents;
+    readonly Counter _totalAggregateConcurrencyConflicts;
 
     public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes, IAggregateRoots aggregateRoots)
     {
@@ -74,6 +76,11 @@ public class MetricsCollector : IMetricsCollector
             "dolittle_customer_runtime_events_store_committed_aggregate_events_total",
             "EventStore total number of committed events by type",
             new[] {"tenantId", "eventTypeId", "eventTypeAlias", "aggregateRootId", "aggregateRootAlias"});
+        
+        _totalAggregateConcurrencyConflicts = metricFactory.CreateCounter(
+            "dolittle_customer_runtime_events_store_aggregate_concurrency_conflicts_total",
+            "EventStore total number of aggregate concurrency conflicts by aggregate root",
+            new[] {"tenantId", "aggregateRootId", "aggregateRootAlias"});
     }
 
     /// <inheritdoc />
@@ -139,6 +146,11 @@ public class MetricsCollector : IMetricsCollector
     /// <inheritdoc />
     public void IncrementTotalBatchesFailedPersisting()
         => _totalBatchesFailedPersisting.Inc();
+
+    public void IncrementTotalAggregateRootConcurrencyConflicts(TenantId tenant, ArtifactId aggregateRoot)
+        => _totalAggregateConcurrencyConflicts
+            .WithLabels(tenant.ToString(), aggregateRoot.ToString(), GetAggregateRootAliasOrEmptyString(new Artifact(aggregateRoot, ArtifactGeneration.First)))
+            .Inc();
 
     string GetAggregateRootAliasOrEmptyString(Artifact aggregateRoot)
     {

@@ -22,5 +22,12 @@ public class AggregateRootConcurrencyConflict : Exception
     public AggregateRootConcurrencyConflict(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion currentVersion, AggregateRootVersion commitVersion)
         : base($"Tried to commit events to event source {eventSource} on aggregate root {aggregateRoot} with expected aggregate root version {commitVersion}, but current aggregate root version was {currentVersion}. The expected aggregate root version needs to be the same as the current aggregate root version")
     {
+        AggregateRoot = aggregateRoot;
     }
+    
+    /// <summary>
+    /// Gets the <see cref="ArtifactId"/> of the aggregate root that the concurrency conflict occurred for.
+    /// </summary>
+    public ArtifactId AggregateRoot { get; }
+    
 }

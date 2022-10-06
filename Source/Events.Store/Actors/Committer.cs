@@ -362,7 +362,10 @@ public class Committer : IActor
         void FailBatchAndPipeline(Exception error)
         {
             _metrics.IncrementTotalBatchesFailedPersisting();
-            // TODO: Can we check this exception and increment AggregateConcurrencyConflictsTotal? Or is there another more suitable place?
+            if (error is AggregateRootConcurrencyConflict concurrencyConflict)
+            {
+                _metrics.IncrementTotalAggregateRootConcurrencyConflicts(_tenant, concurrencyConflict.AggregateRoot);
+            }
             batchToSend.Fail(error);
             _pipeline?.EmptyAllWithFailure(error);
             _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);

@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Persistence;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
@@ -44,4 +46,9 @@ public interface IMetricsCollector
     /// Increments the total number of commit batches that failed being persisted 
     /// </summary>
     void IncrementTotalBatchesFailedPersisting();
+    
+    /// <summary>
+    /// Increments the total number of <see cref="AggregateRootConcurrencyConflict"/> errors received when persisting commits.
+    /// </summary>
+    void IncrementTotalAggregateRootConcurrencyConflicts(TenantId tenant, ArtifactId aggregateRoot);
 }
