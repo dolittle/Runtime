@@ -26,6 +26,7 @@ public class and_it_is_given_a_non_writeable_stream : given.an_event_handler_wit
         .TryCreateAndRegister(
             IsAny<ScopeId>(),
             IsAny<EventProcessorId>(),
+            IsAny<EventProcessorKind>(),
             IsAny<IStreamDefinition>(),
             IsAny<Func<TenantId, IEventProcessor>>(),
             IsAny<ExecutionContext>(),

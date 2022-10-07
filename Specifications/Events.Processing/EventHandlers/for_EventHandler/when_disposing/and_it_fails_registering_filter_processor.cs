@@ -21,6 +21,7 @@ public class and_it_fails_registering_filter_processor : given.an_event_handler
             .TryCreateAndRegister(
                 event_handler.Scope,
                 event_handler.EventProcessor,
+                IsAny<EventProcessorKind>(),
                 IsAny<EventLogStreamDefinition>(),
                 IsAny<Func<TenantId, IEventProcessor>>(),
                 IsAny<ExecutionContext>(),
@@ -39,6 +40,7 @@ public class and_it_fails_registering_filter_processor : given.an_event_handler
         .TryCreateAndRegister(
             event_handler.Scope,
             event_handler.EventProcessor,
+            IsAny<EventProcessorKind>(),
             IsAny<EventLogStreamDefinition>(),
             IsAny<Func<TenantId, IEventProcessor>>(),
             IsAny<ExecutionContext>(),
@@ -48,6 +50,7 @@ public class and_it_fails_registering_filter_processor : given.an_event_handler
         .TryCreateAndRegister(
             event_handler.Scope,
             event_handler.EventProcessor,
+            IsAny<EventProcessorKind>(),
             event_handler.FilteredStreamDefinition,
             IsAny<Func<TenantId, IEventProcessor>>(),
             IsAny<ExecutionContext>(),
