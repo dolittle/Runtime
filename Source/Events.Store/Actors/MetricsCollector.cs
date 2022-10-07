@@ -128,7 +128,7 @@ public class MetricsCollector : IMetricsCollector
                         committedEvent.Type.Id.ToString(),
                         _eventTypes.GetEventTypeAliasOrEmptyString(committedEvent.Type),
                         committedEvent.AggregateRoot.Id.ToString(),
-                        GetAggregateRootAliasOrEmptyString(committedEvent.AggregateRoot)
+                        GetAggregateRootAliasOrEmptyString(committedEvent.AggregateRoot.Id)
                     ).Inc();
                 _totalBatchedEventsSuccessfullyPersisted.Inc();
             }
@@ -149,12 +149,15 @@ public class MetricsCollector : IMetricsCollector
 
     public void IncrementTotalAggregateRootConcurrencyConflicts(TenantId tenant, ArtifactId aggregateRoot)
         => _totalAggregateConcurrencyConflicts
-            .WithLabels(tenant.ToString(), aggregateRoot.ToString(), GetAggregateRootAliasOrEmptyString(new Artifact(aggregateRoot, ArtifactGeneration.First)))
-            .Inc();
+            .WithLabels(
+                tenant.ToString(),
+                aggregateRoot.ToString(),
+                GetAggregateRootAliasOrEmptyString(aggregateRoot)
+            ).Inc();
 
-    string GetAggregateRootAliasOrEmptyString(Artifact aggregateRoot)
+    string GetAggregateRootAliasOrEmptyString(ArtifactId aggregateRoot)
     {
-        if (!_aggregateRoots.TryGetFor(aggregateRoot.Id, out var aggregateRootInfo))
+        if (!_aggregateRoots.TryGetFor(aggregateRoot, out var aggregateRootInfo))
         {
             return string.Empty;
         }
