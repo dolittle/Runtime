@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
+using Prometheus.DotNetRuntime;
 
 namespace Dolittle.Runtime.Metrics.Hosting;
 
@@ -22,6 +23,7 @@ public static class HostBuilderExtensions
         {
             var registry = Prometheus.Metrics.NewCustomRegistry();
             DotNetStats.Register(registry);
+            var collector = DotNetRuntimeStatsBuilder.Default().StartCollecting(registry);
 
             var factory = Prometheus.Metrics.WithCustomRegistry(registry);
             services.AddSingleton<IMetricFactory>(factory);
