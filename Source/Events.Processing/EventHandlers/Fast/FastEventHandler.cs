@@ -49,6 +49,7 @@ public class FastEventHandler : IEventHandler
     readonly bool _implicitFilter;
     readonly ILogger _logger;
     readonly CancellationTokenSource _cancellationTokenSource;
+    readonly EventProcessorKind _kind = "FastEventHandler";
 
     bool _disposed;
 
@@ -316,6 +317,7 @@ public class FastEventHandler : IEventHandler
         var streamProcessor = _streamProcessors.TryCreateAndRegister(
             Scope,
             EventProcessor,
+            _kind,
             streamDefinition,
             getProcessor,
             _executionContext,

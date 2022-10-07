@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
@@ -21,11 +21,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 public class StreamProcessor : IDisposable
 {
     readonly StreamProcessorId _identifier;
+    readonly EventProcessorKind _eventProcessorKind;
     readonly IStreamDefinition _streamDefinition;
     readonly IPerformActionsForAllTenants _forAllTenants;
     readonly Func<TenantId, IEventProcessor> _createEventProcessorFor;
     readonly Func<TenantId, ICreateScopedStreamProcessors> _getCreateScopedStreamProcessors;
     readonly Action _unregister;
+    readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
     readonly ExecutionContext _executionContext;
     readonly CancellationTokenSource _stopAllScopedStreamProcessorsTokenSource;
@@ -38,6 +40,7 @@ public class StreamProcessor : IDisposable
     /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
     /// </summary>
     /// <param name="streamProcessorId">The identifier of the stream processor.</param>
+    /// <param name="eventProcessorKind ">The kind of the event processor.</param>
     /// <param name="streamDefinition">The definition of the stream the processor should process events from.</param>
     /// <param name="forAllTenants">The performer to use to create scoped stream processors for all tenants.</param>
     /// <param name="createEventProcessorFor">The factory to use to create an event processor per tenant.</param>
@@ -48,20 +51,24 @@ public class StreamProcessor : IDisposable
     /// <param name="cancellationToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
     public StreamProcessor(
         StreamProcessorId streamProcessorId,
+        EventProcessorKind eventProcessorKind,
         IStreamDefinition streamDefinition,
         IPerformActionsForAllTenants forAllTenants,
         Action unregister,
         Func<TenantId, IEventProcessor> createEventProcessorFor,
         Func<TenantId, ICreateScopedStreamProcessors> getCreateScopedStreamProcessors,
+        IMetricsCollector metrics,
         ILogger logger,
         ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
         _identifier = streamProcessorId;
+        _eventProcessorKind = eventProcessorKind;
         _forAllTenants = forAllTenants;
         _streamDefinition = streamDefinition;
         _createEventProcessorFor = createEventProcessorFor;
         _getCreateScopedStreamProcessors = getCreateScopedStreamProcessors;
+        _metrics = metrics;
         _unregister = unregister;
         _logger = logger;
         _executionContext = executionContext;
@@ -94,6 +101,7 @@ public class StreamProcessor : IDisposable
     public async Task Initialize()
     {
         Log.InitializingStreamProcessor(_logger, _identifier);
+        _metrics.IncrementInitializations(_eventProcessorKind);
 
         _stopAllScopedStreamProcessorsTokenSource.Token.ThrowIfCancellationRequested();
         if (_initialized)
@@ -114,8 +122,17 @@ public class StreamProcessor : IDisposable
                 _executionContext,
                 _stopAllScopedStreamProcessorsTokenSource.Token).ConfigureAwait(false);
             
-            scopedStreamProcessor.OnProcessedEvent += (@event, time) => OnProcessedEvent?.Invoke(tenant, @event, time);
-            scopedStreamProcessor.OnFailedToProcessedEvent += (@event, time) => OnFailedToProcessedEvent?.Invoke(tenant, @event, time);
+            scopedStreamProcessor.OnProcessedEvent += (@event, time) =>
+            {
+                _metrics.IncrementEventsProcessed(_eventProcessorKind, time);
+                OnProcessedEvent?.Invoke(tenant, @event, time);
+            };
+            scopedStreamProcessor.OnFailedToProcessedEvent += (@event, time) =>
+            {
+                _metrics.IncrementEventsProcessed(_eventProcessorKind, time);
+                _metrics.IncrementFailedEventsProcessed(_eventProcessorKind);
+                OnFailedToProcessedEvent?.Invoke(tenant, @event, time);
+            };
             // TODO: Do we need to remove these on disposal maybe?
             
             _streamProcessors.Add(tenant, scopedStreamProcessor);
@@ -129,6 +146,7 @@ public class StreamProcessor : IDisposable
     public async Task Start()
     {
         Log.StartingStreamProcessor(_logger, _identifier);
+        _metrics.IncrementStarts(_eventProcessorKind);
 
         if (!_initialized)
         {
@@ -145,7 +163,11 @@ public class StreamProcessor : IDisposable
         {
             var tasks = new TaskGroup(StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token));
             
-            tasks.OnFirstTaskFailure += (_, ex) => Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
+            tasks.OnFirstTaskFailure += (_, ex) =>
+            {
+                Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
+                _metrics.IncrementFailures(_eventProcessorKind);
+            };
             await tasks.WaitForAllCancellingOnFirst(_stopAllScopedStreamProcessorsTokenSource).ConfigureAwait(false);
         }
         finally
@@ -178,10 +200,16 @@ public class StreamProcessor : IDisposable
     /// <param name="action">The action to perform before setting the position.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
     public Task<Try<StreamPosition>> PerformActionAndSetToPosition(TenantId tenant, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> action)
-        => _streamProcessors.TryGetValue(tenant, out var streamProcessor)
-            ? streamProcessor.PerformActionAndReprocessEventsFrom(position, action)
-            : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
-    
+    {
+        if (!_streamProcessors.TryGetValue(tenant, out var streamProcessor))
+        {
+            return Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
+        }
+
+        _metrics.IncrementPositionSet(_eventProcessorKind);
+        return streamProcessor.PerformActionAndReprocessEventsFrom(position, action);
+    }
+
     /// <summary>
     /// Performs an action, then sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
     /// </summary>
@@ -189,6 +217,8 @@ public class StreamProcessor : IDisposable
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
     public async Task<IDictionary<TenantId, Try<StreamPosition>>> PerformActionAndSetToInitialPositionForAllTenants(Func<TenantId, CancellationToken, Task<Try>> action)
     {
+        _metrics.IncrementInitialPositionSetForAllTenants(_eventProcessorKind);
+
         var tasks = _streamProcessors
             .ToDictionary(_ => _.Key, _ => _.Value.PerformActionAndReprocessEventsFrom(StreamPosition.Start, action));
 

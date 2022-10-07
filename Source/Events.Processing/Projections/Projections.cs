@@ -39,6 +39,7 @@ public class Projections : IProjections
     readonly Func<IProjection, StreamProcessor, Action, CancellationToken, ProjectionProcessor> _createProjectionProcessor;
     readonly IPerformActionsForAllTenants _forAllTenants;
     readonly ILogger _logger;
+    readonly EventProcessorKind _kind = "Projection";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Projections"/> class.
@@ -91,6 +92,7 @@ public class Projections : IProjections
         var registration = _streamProcessors.TryCreateAndRegister(
             projection.Definition.Scope,
             projection.Definition.Projection.Value,
+            _kind,
             new EventLogStreamDefinition(),
             (tenant) => _createEventProcessor(tenant, projection.Definition, projection),
             executionContext,

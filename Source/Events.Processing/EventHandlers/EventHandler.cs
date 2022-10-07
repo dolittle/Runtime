@@ -46,6 +46,7 @@ public class EventHandler : IEventHandler
     readonly ILogger _logger;
     readonly ExecutionContext _executionContext;
     readonly CancellationTokenSource _cancellationTokenSource;
+    readonly EventProcessorKind _kind = "EventHandler";
 
     bool _disposed;
 
@@ -283,6 +284,7 @@ public class EventHandler : IEventHandler
         var streamProcessor = _streamProcessors.TryCreateAndRegister(
             Scope,
             EventProcessor,
+            _kind,
             streamDefinition,
             getProcessor,
             _executionContext,

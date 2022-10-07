@@ -22,9 +22,8 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _systemRegistrationsTotal;
     readonly Counter _customerFailedRegistrationsTotal;
     readonly Counter _systemFailedRegistrationsTotal;
-    readonly Counter _customerEventsProcessedTotal;
     readonly Counter _customerEventProcessingFailuresTotal;
-    readonly Histogram _customerEvenProcessingTime;
+    readonly Histogram _customerEventProcessingTime;
 
     /// <summary>
     /// Creates a new instance of the <see cref="MetricsCollector"/> class.
@@ -52,17 +51,12 @@ public class MetricsCollector : IMetricsCollector
             "dolittle_system_runtime_eventhandlers_failed_registrations_total",
             "Total number of failed event handler registrations");
 
-        _customerEventsProcessedTotal = metricFactory.CreateCounter(
-            "dolittle_customer_runtime_eventhandlers_events_processed_total",
-            "Total number of events processed by an event handler",
-                new[] { "scope", "eventHandlerId", "eventHandlerAlias", "tenantId", "eventTypeId", "eventTypeAlias" });
-        
         _customerEventProcessingFailuresTotal = metricFactory.CreateCounter(
             "dolittle_customer_runtime_eventhandlers_event_processing_failures_total",
             "Total number of failed event processing attempts by an event handler",
                 new[] { "scope", "eventHandlerId", "eventHandlerAlias", "tenantId", "eventTypeId", "eventTypeAlias" });
         
-        _customerEvenProcessingTime = metricFactory.CreateHistogram(
+        _customerEventProcessingTime = metricFactory.CreateHistogram(
             "dolittle_customer_runtime_eventhandlers_event_processing_time_seconds",
             "The processing time of events processed by event handlers",
                 new[] { "scope", "eventHandlerId", "eventHandlerAlias", "tenantId", "eventTypeId", "eventTypeAlias" },
@@ -86,15 +80,7 @@ public class MetricsCollector : IMetricsCollector
     /// <inheritdoc />
     public void IncrementEventsProcessedTotal(EventHandlerInfo info, TenantId tenant, StreamEvent @event, TimeSpan processingTime)
     {
-        _customerEventsProcessedTotal.WithLabels(
-                info.Id.Scope.ToString(),
-                info.Id.EventHandler.ToString(),
-                info.HasAlias ? info.Alias : string.Empty,
-                tenant.ToString(),
-                @event.Event.Type.Id.ToString(),
-                _eventTypes.GetEventTypeAliasOrEmptyString(@event.Event.Type))
-            .Inc();
-        _customerEvenProcessingTime.WithLabels(
+        _customerEventProcessingTime.WithLabels(
                 info.Id.Scope.ToString(),
                 info.Id.EventHandler.ToString(),
                 info.HasAlias ? info.Alias : string.Empty,
