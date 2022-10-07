@@ -9,9 +9,9 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given;
 public class all_dependencies
 {
     protected static StreamProcessorId stream_processor_id;
+    protected static EventProcessorKind event_processor_kind;
     protected static IPerformActionsForAllTenants on_all_tenants;
     protected static IStreamDefinition stream_definition;
     protected static Mock<Func<TenantId, IEventProcessor>> get_event_processor;
@@ -35,6 +36,7 @@ public class all_dependencies
         execution_context = execution_contexts.create();
         tenant_service_providers = new Mock<ITenantServiceProviders>();
         stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), StreamId.New());
+        event_processor_kind = "test";
         stream_definition = new StreamDefinition(new FilterDefinition(Guid.NewGuid(), Guid.NewGuid(), false));
         tenants = new Mock<ITenants>();
         scoped_stream_processors_creator = new Mock<ICreateScopedStreamProcessors>();
@@ -57,11 +59,13 @@ public class all_dependencies
                 Mock.Of<ILogger>()).Object));
         stream_processor = new StreamProcessor(
             stream_processor_id,
+            event_processor_kind,
             stream_definition,
             on_all_tenants,
             () => { },
             get_event_processor.Object,
             get_scoped_stream_processors_creator.Object,
+            Mock.Of<IMetricsCollector>(),
             Mock.Of<ILogger<StreamProcessor>>(),
             execution_context,
             CancellationToken.None);

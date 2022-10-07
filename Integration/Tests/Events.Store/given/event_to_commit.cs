@@ -3,9 +3,9 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Integration.Tests.Events.Store.given;
 

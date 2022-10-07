@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
@@ -17,6 +17,7 @@ using Machine.Specifications;
 using MongoDB.Driver;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using IAggregateRoots = Dolittle.Runtime.Events.Store.MongoDB.Aggregates.IAggregateRoots;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Persistence.for_UpdateAggregateVersionsAfterCommit.given;
 

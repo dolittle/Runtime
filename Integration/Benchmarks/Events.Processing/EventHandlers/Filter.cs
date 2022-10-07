@@ -72,6 +72,7 @@ public class Filter : JobBase
             return _streamProcessors.TryCreateAndRegister(
                 ScopeId.Default,
                 eventHandlerId,
+                "Filter",
                 new EventLogStreamDefinition(),
                 tenant => new TypeFilterWithEventSourcePartition(
                     ScopeId.Default,

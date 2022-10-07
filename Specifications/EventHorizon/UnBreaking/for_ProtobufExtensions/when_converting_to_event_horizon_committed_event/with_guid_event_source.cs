@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_converting_to_event_horizon_committed_event.given;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 

@@ -1,7 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Aggregates;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
 
@@ -13,6 +17,8 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 [Metrics, Singleton]
 public class MetricsCollector : IMetricsCollector
 {
+    readonly IEventTypes _eventTypes;
+    readonly IAggregateRoots _aggregateRoots;
     readonly Counter _totalCommitsReceived;
     readonly Counter _totalCommitsForAggregateReceived;
     readonly Counter _totalAggregateRootVersionCacheInconsistencies;
@@ -21,9 +27,14 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _totalBatchesSent;
     readonly Counter _totalAggregateRootVersionCacheInconsistenciesResolved;
     readonly Counter _totalBatchesFailedPersisting;
+    readonly Counter _totalCommittedEvents;
+    readonly Counter _totalCommittedAggregateEvents;
+    readonly Counter _totalAggregateConcurrencyConflicts;
 
-    public MetricsCollector(IMetricFactory metricFactory)
+    public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes, IAggregateRoots aggregateRoots)
     {
+        _eventTypes = eventTypes;
+        _aggregateRoots = aggregateRoots;
         _totalCommitsReceived = metricFactory.CreateCounter(
             "dolittle_system_runtime_events_store_commits_received_total",
             "EventStore total number of non-aggregate commits received");
@@ -55,6 +66,21 @@ public class MetricsCollector : IMetricsCollector
         _totalBatchesFailedPersisting = metricFactory.CreateCounter(
             "dolittle_system_runtime_events_store_batches_failed_persisting_total",
             "EventStore total number of batches that failed to be persisted");
+
+        _totalCommittedEvents = metricFactory.CreateCounter(
+            "dolittle_customer_runtime_events_store_committed_events_total",
+            "EventStore total number of committed events by type",
+            new[] {"tenantId", "eventTypeId", "eventTypeAlias"});
+        
+        _totalCommittedAggregateEvents = metricFactory.CreateCounter(
+            "dolittle_customer_runtime_events_store_committed_aggregate_events_total",
+            "EventStore total number of committed events by type",
+            new[] {"tenantId", "eventTypeId", "eventTypeAlias", "aggregateRootId", "aggregateRootAlias"});
+        
+        _totalAggregateConcurrencyConflicts = metricFactory.CreateCounter(
+            "dolittle_customer_runtime_events_store_aggregate_concurrency_conflicts_total",
+            "EventStore total number of aggregate concurrency conflicts by aggregate root",
+            new[] {"tenantId", "aggregateRootId", "aggregateRootAlias"});
     }
 
     /// <inheritdoc />
@@ -70,12 +96,44 @@ public class MetricsCollector : IMetricsCollector
         => _totalAggregateRootVersionCacheInconsistencies.Inc();
 
     /// <inheritdoc />
-    public void IncrementTotalBatchesSuccessfullyPersisted()
-        => _totalBatchesSuccessfullyPersisted.Inc();
-
-    /// <inheritdoc />
-    public void IncrementTotalBatchedEventsSuccessfullyPersisted(int allEventsCount)
-        => _totalBatchedEventsSuccessfullyPersisted.Inc(allEventsCount);
+    public void IncrementTotalBatchesSuccessfullyPersisted(Commit commit)
+    {
+        _totalBatchesSuccessfullyPersisted.Inc();
+        foreach (var committedEvents in commit.Events)
+        {
+            foreach (var committedEvent in committedEvents)
+            {
+                _totalCommittedEvents
+                    .WithLabels(
+                        committedEvent.ExecutionContext.Tenant.ToString(),
+                        committedEvent.Type.Id.ToString(),
+                        _eventTypes.GetEventTypeAliasOrEmptyString(committedEvent.Type)
+                    ).Inc();
+                _totalBatchedEventsSuccessfullyPersisted.Inc();
+            }
+        }
+        foreach (var commitAggregateEvents in commit.AggregateEvents)
+        {
+            foreach (var committedEvent in commitAggregateEvents)
+            {
+                _totalCommittedEvents
+                    .WithLabels(
+                        committedEvent.ExecutionContext.Tenant.ToString(),
+                        committedEvent.Type.Id.ToString(),
+                        _eventTypes.GetEventTypeAliasOrEmptyString(committedEvent.Type)
+                    ).Inc();
+                _totalCommittedAggregateEvents
+                    .WithLabels(
+                        committedEvent.ExecutionContext.Tenant.ToString(),
+                        committedEvent.Type.Id.ToString(),
+                        _eventTypes.GetEventTypeAliasOrEmptyString(committedEvent.Type),
+                        committedEvent.AggregateRoot.Id.ToString(),
+                        GetAggregateRootAliasOrEmptyString(committedEvent.AggregateRoot.Id)
+                    ).Inc();
+                _totalBatchedEventsSuccessfullyPersisted.Inc();
+            }
+        }
+    }
 
     /// <inheritdoc />
     public void IncrementTotalBatchesSent()
@@ -88,4 +146,24 @@ public class MetricsCollector : IMetricsCollector
     /// <inheritdoc />
     public void IncrementTotalBatchesFailedPersisting()
         => _totalBatchesFailedPersisting.Inc();
+
+    public void IncrementTotalAggregateRootConcurrencyConflicts(TenantId tenant, ArtifactId aggregateRoot)
+        => _totalAggregateConcurrencyConflicts
+            .WithLabels(
+                tenant.ToString(),
+                aggregateRoot.ToString(),
+                GetAggregateRootAliasOrEmptyString(aggregateRoot)
+            ).Inc();
+
+    string GetAggregateRootAliasOrEmptyString(ArtifactId aggregateRoot)
+    {
+        if (!_aggregateRoots.TryGetFor(aggregateRoot, out var aggregateRootInfo))
+        {
+            return string.Empty;
+        }
+
+        return aggregateRootInfo!.Alias == AggregateRootAlias.NotSet
+            ? string.Empty
+            : aggregateRootInfo.Alias.Value;
+    }
 }

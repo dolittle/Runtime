@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
@@ -283,6 +284,7 @@ public class Committer : IActor
             if (newCurrentAggregateRootVersion != cachedAggregateRootVersion)
             {
                 _logger.AggregateRootConcurrencyConflictWithInconsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion, newCurrentAggregateRootVersion);
+                _metrics.IncrementTotalAggregateRootConcurrencyConflicts(_tenant, aggregate.AggregateRoot);
                 _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
                 return new AggregateRootConcurrencyConflict(
                     aggregate.EventSourceId,
@@ -291,6 +293,7 @@ public class Committer : IActor
                     expectedAggregateRootVersion);
             }
             _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
+            _metrics.IncrementTotalAggregateRootConcurrencyConflicts(_tenant, aggregate.AggregateRoot);
             return new AggregateRootConcurrencyConflict(
                 aggregate.EventSourceId,
                 aggregate.AggregateRoot,
@@ -340,8 +343,7 @@ public class Committer : IActor
                     return Task.CompletedTask;
                 }
                 
-                _metrics.IncrementTotalBatchesSuccessfullyPersisted();
-                _metrics.IncrementTotalBatchedEventsSuccessfullyPersisted(batchToSend.Batch.AllEvents.Count);
+                _metrics.IncrementTotalBatchesSuccessfullyPersisted(batchToSend.Batch);
                 batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
                 _readyToSend = true;
@@ -362,6 +364,10 @@ public class Committer : IActor
         void FailBatchAndPipeline(Exception error)
         {
             _metrics.IncrementTotalBatchesFailedPersisting();
+            if (error is AggregateRootConcurrencyConflict concurrencyConflict)
+            {
+                _metrics.IncrementTotalAggregateRootConcurrencyConflicts(_tenant, concurrencyConflict.AggregateRoot);
+            }
             batchToSend.Fail(error);
             _pipeline?.EmptyAllWithFailure(error);
             _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(batchToSend.Batch.FirstSequenceNumber);

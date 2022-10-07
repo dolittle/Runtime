@@ -23,7 +23,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 [Singleton]
 public class StreamProcessors : IStreamProcessors
 {
-    readonly Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> _createStreamProcessor;
+    readonly Func<StreamProcessorId, EventProcessorKind, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> _createStreamProcessor;
+    readonly IMetricsCollector _metrics;
     readonly ICreateExecutionContexts _executionContextCreator;
     readonly ILogger _logger;
     readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors = new();
@@ -32,11 +33,13 @@ public class StreamProcessors : IStreamProcessors
     /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
     /// </summary>
     public StreamProcessors(
-        Func<StreamProcessorId, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> createStreamProcessor,
+        Func<StreamProcessorId, EventProcessorKind, IStreamDefinition, Action, Func<TenantId, IEventProcessor>, ExecutionContext, CancellationToken, StreamProcessor> createStreamProcessor,
+        IMetricsCollector metrics,
         ICreateExecutionContexts executionContextCreator,
         ILogger logger)
     {
         _createStreamProcessor = createStreamProcessor;
+        _metrics = metrics;
         _executionContextCreator = executionContextCreator;
         _logger = logger;
     }
@@ -45,6 +48,7 @@ public class StreamProcessors : IStreamProcessors
     public Try<StreamProcessor> TryCreateAndRegister(
         ScopeId scopeId,
         EventProcessorId eventProcessorId,
+        EventProcessorKind eventProcessorKind,
         IStreamDefinition sourceStreamDefinition,
         Func<TenantId, IEventProcessor> getEventProcessor,
         ExecutionContext executionContext,
@@ -52,10 +56,12 @@ public class StreamProcessors : IStreamProcessors
     {
         try
         {
+            _metrics.IncrementRegistrations(eventProcessorKind);
             var createExecutionContext = _executionContextCreator.TryCreateUsing(executionContext);
             if (!createExecutionContext.Success)
             {
                 // TODO: Logging
+                _metrics.IncrementFailedRegistrations(eventProcessorKind);
                 return createExecutionContext.Exception;
             }
             
@@ -63,20 +69,23 @@ public class StreamProcessors : IStreamProcessors
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
                 Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
+                _metrics.IncrementFailedRegistrations(eventProcessorKind);
                 return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
             
             var streamProcessor = _createStreamProcessor(
                 streamProcessorId,
+                eventProcessorKind,
                 sourceStreamDefinition,
                 () => Unregister(streamProcessorId),
                 getEventProcessor,
                 createExecutionContext.Result,
                 cancellationToken);
-            
+
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
                 Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
+                _metrics.IncrementFailedRegistrations(eventProcessorKind);
                 return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
 
@@ -85,6 +94,7 @@ public class StreamProcessors : IStreamProcessors
         }
         catch (Exception ex)
         {
+            _metrics.IncrementFailedRegistrations(eventProcessorKind);
             return ex;
         }
 

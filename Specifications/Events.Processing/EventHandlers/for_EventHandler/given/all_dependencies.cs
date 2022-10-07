@@ -41,6 +41,7 @@ public class all_dependencies
     protected static Mock<ReverseCallDispatcherType> reverse_call_dispatcher;
     protected static Mock<IWriteEventsToStreams> stream_writer;
     protected static EventHandlerRegistrationArguments arguments;
+    protected static Mock<IMetricsCollector> metrics_collector;
     protected static ILoggerFactory logger_factory;
     protected static Func<TenantId, IWriteEventsToStreams> factory_for_stream_writer;
     protected static CancellationToken cancellation_token;
@@ -58,7 +59,7 @@ public class all_dependencies
 
     protected static Failure failure;
 
-    private Establish context = () =>
+    Establish context = () =>
     {
         stream_processors = new Mock<IStreamProcessors>(MockBehavior.Strict);
         filter_validation = new Mock<IValidateFilterForAllTenants>(MockBehavior.Strict);
@@ -67,8 +68,9 @@ public class all_dependencies
         reverse_call_dispatcher.Setup(
             _ => _.Reject(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>())
         ).Callback((EventHandlerRegistrationResponse e, CancellationToken ct) => failure = e.Failure);
-
+        
         stream_writer = new Mock<IWriteEventsToStreams>(MockBehavior.Strict);
+        metrics_collector = new Mock<IMetricsCollector>();
         logger_factory = new NullLoggerFactory();
         execution_context = new ExecutionContext(
             MicroserviceId,

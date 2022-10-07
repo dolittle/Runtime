@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
     
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Events</AssemblyName>
@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)"/>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
-        <ProjectReference Include="../Services/Services.csproj"/>
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
     </ItemGroup>
 </Project>

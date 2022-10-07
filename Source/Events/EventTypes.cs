@@ -21,6 +21,10 @@ public class EventTypes : IEventTypes
     public IEnumerable<EventType> All => _eventTypes.Values;
 
     /// <inheritdoc />
+    public bool TryGetFor(ArtifactId id, out EventType? eventType)
+        => _eventTypes.TryGetValue(id, out eventType);
+
+    /// <inheritdoc />
     public void Register(EventType eventType)
         => _eventTypes.AddOrUpdate(eventType.Identifier.Id, eventType, (_, _) => eventType);
 }

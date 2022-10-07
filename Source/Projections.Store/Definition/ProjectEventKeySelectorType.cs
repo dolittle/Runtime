@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Projections.Store.Definition;
 public enum ProjectEventKeySelectorType : ushort
 {
     /// <summary>
-    /// The type when <see cref="Events.Store.EventSourceId" /> is the key.
+    /// The type when <see cref="Events.EventSourceId" /> is the key.
     /// </summary>
     EventSourceId = 0,
 

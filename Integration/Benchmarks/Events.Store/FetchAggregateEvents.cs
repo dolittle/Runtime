@@ -6,10 +6,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Integration.Benchmarks.Events.Store;
 

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
-using Dolittle.Runtime.Events.Store;
 
 
 namespace Dolittle.Runtime.Aggregates;

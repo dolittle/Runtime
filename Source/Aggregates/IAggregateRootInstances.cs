@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Aggregates;
 

@@ -42,8 +42,9 @@ public class EventHandler : IEventHandler
     readonly Func<TenantId, IEventProcessor> _eventProcessorForTenant;
     readonly Func<CancellationToken, Task> _acceptRegistration;
     readonly Func<Failure, CancellationToken, Task> _rejectRegistration;
-    readonly ExecutionContext _executionContext;
+    readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
+    readonly ExecutionContext _executionContext;
     readonly CancellationTokenSource _cancellationTokenSource;
 
     bool _disposed;
@@ -59,6 +60,7 @@ public class EventHandler : IEventHandler
     /// <param name="eventProcessorForTenant">The event processor.</param>
     /// <param name="acceptRegistration">Accepts the event handler registration.</param>
     /// <param name="rejectRegistration">Rejects the event handler registration.</param>
+    /// <param name="metrics">The collector to use for metrics.</param>
     /// <param name="logger">Logger for logging.</param>
     /// <param name="executionContext">The execution context for the event handler.</param>
     /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
@@ -71,6 +73,7 @@ public class EventHandler : IEventHandler
         Func<TenantId, IEventProcessor> eventProcessorForTenant,
         Func<CancellationToken, Task> acceptRegistration,
         Func<Failure, CancellationToken, Task> rejectRegistration,
+        IMetricsCollector metrics,
         ILogger logger,
         ExecutionContext executionContext,
         CancellationToken cancellationToken)
@@ -85,6 +88,7 @@ public class EventHandler : IEventHandler
         _eventProcessorForTenant = eventProcessorForTenant;
         _acceptRegistration = acceptRegistration;
         _rejectRegistration = rejectRegistration;
+        _metrics = metrics;
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
     
@@ -187,6 +191,9 @@ public class EventHandler : IEventHandler
         await Start().ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
+    public event EventHandlerRegistrationFailed? OnRegistrationFailed;
+
     async Task<bool> RejectIfNonWriteableStream()
     {
         if (!TargetStream.IsNonWriteable)
@@ -205,6 +212,7 @@ public class EventHandler : IEventHandler
     {
         _logger.RegisteringStreamProcessorForFilter(EventProcessor);
         return await RegisterStreamProcessor(
+            "EventHandler-Filter",
             new EventLogStreamDefinition(),
             _filterProcessorForTenant,
             HandleFailedToRegisterFilter,
@@ -232,11 +240,23 @@ public class EventHandler : IEventHandler
     {
         _logger.RegisteringStreamProcessorForEventProcessor(EventProcessor, TargetStream);
         return await RegisterStreamProcessor(
+            "EventHandler-EventProcessor",
             FilteredStreamDefinition,
             _eventProcessorForTenant,
             HandleFailedToRegisterEventProcessor,
-            (streamProcessor) => EventProcessorStreamProcessor = streamProcessor
-        ).ConfigureAwait(false);
+            (streamProcessor) =>
+            {
+                EventProcessorStreamProcessor = streamProcessor;
+                streamProcessor.OnProcessedEvent += (tenant, @event, time) =>
+                {
+                    _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
+                };
+                streamProcessor.OnFailedToProcessedEvent += (tenant, @event, time) =>
+                {
+                    _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
+                    _metrics.IncrementEventProcessingFailuresTotal(Info, tenant, @event);
+                };
+            }).ConfigureAwait(false);
     }
 
     Failure HandleFailedToRegisterEventProcessor(Exception exception)
@@ -257,6 +277,7 @@ public class EventHandler : IEventHandler
     }
 
     async Task<bool> RegisterStreamProcessor(
+        EventProcessorKind kind,
         IStreamDefinition streamDefinition,
         Func<TenantId, IEventProcessor> getProcessor,
         Func<Exception, Failure> onException,
@@ -265,6 +286,7 @@ public class EventHandler : IEventHandler
         var streamProcessor = _streamProcessors.TryCreateAndRegister(
             Scope,
             EventProcessor,
+            kind,
             streamDefinition,
             getProcessor,
             _executionContext,
@@ -328,5 +350,8 @@ public class EventHandler : IEventHandler
         => Fail(new Failure(failureId, message));
 
     Task Fail(Failure failure)
-        => _rejectRegistration(failure, _cancellationTokenSource.Token);
+    {
+        OnRegistrationFailed?.Invoke();
+        return _rejectRegistration(failure, _cancellationTokenSource.Token);
+    }
 }

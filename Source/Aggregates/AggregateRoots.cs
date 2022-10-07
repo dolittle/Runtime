@@ -24,6 +24,7 @@ public class AggregateRoots : IAggregateRoots
     public void Register(AggregateRoot aggregateRoot)
         => _aggregateRoots.AddOrUpdate(aggregateRoot.Identifier.Id, aggregateRoot, (_, _) => aggregateRoot);
 
-    public bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot)
+    /// <inheritdoc />
+    public bool TryGetFor(ArtifactId aggregateRootId, out AggregateRoot? aggregateRoot)
         => _aggregateRoots.TryGetValue(aggregateRootId, out aggregateRoot);
 }

@@ -1,18 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
-using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 
 namespace Integration.Tests.Events.Store.when_fetching_aggregate_events;
 

@@ -42,4 +42,9 @@ public interface IEventHandler : IDisposable
     /// </summary>
     /// <returns>Async <see cref="Task"/>.</returns>
     Task RegisterAndStart();
+
+    /// <summary>
+    /// Event that occurs if the EventHandler registration fails.
+    /// </summary>
+    event EventHandlerRegistrationFailed OnRegistrationFailed;
 }

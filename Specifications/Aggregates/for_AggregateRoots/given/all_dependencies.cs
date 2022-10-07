@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Aggregates.for_AggregateRoots.given;

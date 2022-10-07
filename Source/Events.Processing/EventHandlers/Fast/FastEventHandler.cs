@@ -44,6 +44,7 @@ public class FastEventHandler : IEventHandler
     readonly Func<TenantId, IEventProcessor> _eventProcessorForTenant;
     readonly Func<CancellationToken, Task> _acceptRegistration;
     readonly Func<Failure, CancellationToken, Task> _rejectRegistration;
+    readonly IMetricsCollector _metrics;
     readonly ExecutionContext _executionContext;
     readonly bool _implicitFilter;
     readonly ILogger _logger;
@@ -64,6 +65,7 @@ public class FastEventHandler : IEventHandler
     /// <param name="eventProcessorForTenant">The event processor.</param>
     /// <param name="acceptRegistration">Accepts the event handler registration.</param>
     /// <param name="rejectRegistration">Rejects the event handler registration.</param>
+    /// <param name="metrics">The collector to use for metrics.</param>
     /// <param name="logger">Logger for logging.</param>
     /// <param name="executionContext">The execution context for the event handler.</param>
     /// <param name="cancellationToken">Cancellation token that can cancel the hierarchy.</param>
@@ -78,6 +80,7 @@ public class FastEventHandler : IEventHandler
         Func<TenantId, IEventProcessor> eventProcessorForTenant,
         Func<CancellationToken, Task> acceptRegistration,
         Func<Failure, CancellationToken, Task> rejectRegistration,
+        IMetricsCollector metrics,
         ILogger logger,
         ExecutionContext executionContext,
         CancellationToken cancellationToken)
@@ -94,6 +97,7 @@ public class FastEventHandler : IEventHandler
         _eventProcessorForTenant = eventProcessorForTenant;
         _acceptRegistration = acceptRegistration;
         _rejectRegistration = rejectRegistration;
+        _metrics = metrics;
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
     
@@ -196,6 +200,9 @@ public class FastEventHandler : IEventHandler
         await Start().ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
+    public event EventHandlerRegistrationFailed? OnRegistrationFailed;
+
     async Task<bool> RejectIfNonWriteableStream()
     {
         if (!TargetStream.IsNonWriteable)
@@ -247,8 +254,19 @@ public class FastEventHandler : IEventHandler
             FilteredStreamDefinition,
             _eventProcessorForTenant,
             HandleFailedToRegisterEventProcessor,
-            (streamProcessor) => EventProcessorStreamProcessor = streamProcessor
-        ).ConfigureAwait(false);
+            (streamProcessor) =>
+            {
+                EventProcessorStreamProcessor = streamProcessor;
+                streamProcessor.OnProcessedEvent += (tenant, @event, time) =>
+                {
+                    _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
+                };
+                streamProcessor.OnFailedToProcessedEvent += (tenant, @event, time) =>
+                {
+                    _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
+                    _metrics.IncrementEventProcessingFailuresTotal(Info, tenant, @event);
+                };
+            }).ConfigureAwait(false);
     }
 
     Failure HandleFailedToRegisterEventProcessor(Exception exception)
@@ -298,6 +316,7 @@ public class FastEventHandler : IEventHandler
         var streamProcessor = _streamProcessors.TryCreateAndRegister(
             Scope,
             EventProcessor,
+            "FastEventHandler-EventProcessor",
             streamDefinition,
             getProcessor,
             _executionContext,
@@ -372,5 +391,8 @@ public class FastEventHandler : IEventHandler
         => Fail(new Failure(failureId, message));
 
     Task Fail(Failure failure)
-        => _rejectRegistration(failure, _cancellationTokenSource.Token);
+    {
+        OnRegistrationFailed?.Invoke();
+        return _rejectRegistration(failure, _cancellationTokenSource.Token);
+    }
 }
