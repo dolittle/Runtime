@@ -1,3 +1,17 @@
+# [8.6.0] - 2022-10-7 [PR: #716](https://github.com/dolittle/Runtime/pull/716)
+## Summary
+
+Adds new metrics to the Runtime that exposes information that can be used to more clearly investigate performance.
+
+### Added
+
+- More metrics for committed events and committed aggregate events
+- Metrics for total number of aggregate concurrency conflicts
+- Metrics for Event Handlers; registrations, number processed, failed and processing time
+- Metrics for registrations/initializations/starts of stream processors and the events they processed or failed to process per event processor kind
+- Metrics for the .NET Runtime
+
+
 # [8.5.1] - 2022-10-5 [PR: #715](https://github.com/dolittle/Runtime/pull/715)
 ### Fixed
 
