@@ -133,7 +133,6 @@ public class StreamProcessor : IDisposable
                 _metrics.IncrementFailedEventsProcessed(_eventProcessorKind);
                 OnFailedToProcessedEvent?.Invoke(tenant, @event, time);
             };
-            // TODO: Do we need to remove these on disposal maybe?
             
             _streamProcessors.Add(tenant, scopedStreamProcessor);
         }).ConfigureAwait(false);
