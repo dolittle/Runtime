@@ -284,6 +284,7 @@ public class Committer : IActor
             if (newCurrentAggregateRootVersion != cachedAggregateRootVersion)
             {
                 _logger.AggregateRootConcurrencyConflictWithInconsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion, newCurrentAggregateRootVersion);
+                _metrics.IncrementTotalAggregateRootConcurrencyConflicts(_tenant, aggregate.AggregateRoot);
                 _aggregateRootVersionCache[aggregate] = newCurrentAggregateRootVersion;
                 return new AggregateRootConcurrencyConflict(
                     aggregate.EventSourceId,
@@ -292,6 +293,7 @@ public class Committer : IActor
                     expectedAggregateRootVersion);
             }
             _logger.AggregateRootConcurrencyConflictWithConsistentCache(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion, cachedAggregateRootVersion);
+            _metrics.IncrementTotalAggregateRootConcurrencyConflicts(_tenant, aggregate.AggregateRoot);
             return new AggregateRootConcurrencyConflict(
                 aggregate.EventSourceId,
                 aggregate.AggregateRoot,
