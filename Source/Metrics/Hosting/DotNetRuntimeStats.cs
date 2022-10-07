@@ -10,17 +10,34 @@ using Prometheus.DotNetRuntime;
 
 namespace Dolittle.Runtime.Metrics.Hosting;
 
+/// <summary>
+/// Represents an <see cref="IHostedService"/> that owns the lifecycle of the dotnet runtime metrics collector <see cref="IDisposable"/>.
+/// </summary>
 public class DotNetRuntimeStats : IHostedService
 {
     readonly CollectorRegistry _registry;
-    IDisposable _collector;
+    IDisposable? _collector;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DotNetRuntimeStats"/> class.
+    /// </summary>
+    /// <param name="registry">The <see cref="CollectorRegistry"/>.</param>
     public DotNetRuntimeStats(CollectorRegistry registry)
     {
         _registry = registry;
     }
 
+    /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
-        => _collector = DotNetRuntimeStatsBuilder.Default().StartCollecting(_registry);
-    public Task StopAsync(CancellationToken cancellationToken) => _collector.Dispose();
+    {
+        _collector = DotNetRuntimeStatsBuilder.Default().StartCollecting(_registry);
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _collector?.Dispose();
+        return Task.CompletedTask;
+    }
 }

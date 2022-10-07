@@ -23,8 +23,7 @@ public static class HostBuilderExtensions
         {
             var registry = Prometheus.Metrics.NewCustomRegistry();
             DotNetStats.Register(registry);
-            var collector = DotNetRuntimeStatsBuilder.Default().StartCollecting(registry);
-
+            services.AddHostedService(_ => new DotNetRuntimeStats(registry));
             var factory = Prometheus.Metrics.WithCustomRegistry(registry);
             services.AddSingleton<IMetricFactory>(factory);
             
