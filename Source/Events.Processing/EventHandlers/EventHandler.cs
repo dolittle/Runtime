@@ -46,7 +46,6 @@ public class EventHandler : IEventHandler
     readonly ILogger _logger;
     readonly ExecutionContext _executionContext;
     readonly CancellationTokenSource _cancellationTokenSource;
-    readonly EventProcessorKind _kind = "EventHandler";
 
     bool _disposed;
 
@@ -213,6 +212,7 @@ public class EventHandler : IEventHandler
     {
         _logger.RegisteringStreamProcessorForFilter(EventProcessor);
         return await RegisterStreamProcessor(
+            "EventHandler-Filter",
             new EventLogStreamDefinition(),
             _filterProcessorForTenant,
             HandleFailedToRegisterFilter,
@@ -240,6 +240,7 @@ public class EventHandler : IEventHandler
     {
         _logger.RegisteringStreamProcessorForEventProcessor(EventProcessor, TargetStream);
         return await RegisterStreamProcessor(
+            "EventHandler-EventProcessor",
             FilteredStreamDefinition,
             _eventProcessorForTenant,
             HandleFailedToRegisterEventProcessor,
@@ -276,6 +277,7 @@ public class EventHandler : IEventHandler
     }
 
     async Task<bool> RegisterStreamProcessor(
+        EventProcessorKind kind,
         IStreamDefinition streamDefinition,
         Func<TenantId, IEventProcessor> getProcessor,
         Func<Exception, Failure> onException,
@@ -284,7 +286,7 @@ public class EventHandler : IEventHandler
         var streamProcessor = _streamProcessors.TryCreateAndRegister(
             Scope,
             EventProcessor,
-            _kind,
+            kind,
             streamDefinition,
             getProcessor,
             _executionContext,
