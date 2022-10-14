@@ -8,12 +8,15 @@ using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.Configuration;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Diagnostics.OpenTelemetry;
+using Dolittle.Runtime.Events.Management;
+using Dolittle.Runtime.Events.Processing.Management.EventHandlers;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,6 +39,11 @@ var host = Host.CreateDefaultBuilder(args)
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)
     .AddGrpcHost(EndpointVisibility.Management)
+    .AddGrpcWebHost(endpoints =>
+    {
+        endpoints.MapGrpcService<EventTypesService>();
+        endpoints.MapGrpcService<EventHandlersService>();
+    })
     .AddMetricsHost()
     .AddWebHost()
     .Build();

@@ -1,11 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Hosting;
 using Dolittle.Runtime.Services.HealthChecks;
 using Dolittle.Runtime.Services.Hosting.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -45,6 +48,36 @@ public static class HostBuilderExtensions
                         endpoints.MapDiscoveredGrpcServicesOf(visibility);
                         endpoints.MapGrpcReflectionService();
                         endpoints.MapGrpcService<HealthService>();
+                    });
+                });
+            }));
+
+    public static IHostBuilder AddGrpcWebHost(this IHostBuilder builder, Action<IEndpointRouteBuilder> services)
+        => builder
+            .AddScopedHost(_ => _.ConfigureWebHost(grpcWebHost =>
+            {
+                grpcWebHost.UseKestrel().ConfigureKestrel(_ =>
+                {
+                    _.ListenAnyIP(61052, _ =>
+                    {
+                        _.Protocols = HttpProtocols.Http1;
+                    });
+                });
+
+                grpcWebHost.ConfigureServices(services =>
+                {
+                    services.AddGrpc();
+                });
+
+                grpcWebHost.Configure(app =>
+                {
+                    app.UseRouting();
+
+                    app.UseGrpcWeb(new GrpcWebOptions{ DefaultEnabled = true});
+
+                    app.UseEndpoints(endpoints =>
+                    {
+                        services(endpoints);
                     });
                 });
             }));
