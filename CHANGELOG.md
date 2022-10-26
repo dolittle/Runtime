@@ -1,3 +1,14 @@
+# [8.7.0] - 2022-10-26 [PR: #718](https://github.com/dolittle/Runtime/pull/718)
+## Summary
+
+Exposing management services on a new, configurable, grpc-web port so that we can make calls to the management services from a web browser
+
+### Added
+
+- Endpoint configuration for managementWeb with default port 51152
+- Exposing management services through grpc-web
+
+
 # [8.6.0] - 2022-10-7 [PR: #716](https://github.com/dolittle/Runtime/pull/716)
 ## Summary
 
