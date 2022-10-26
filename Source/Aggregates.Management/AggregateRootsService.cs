@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Aggregates.Management;
 /// <summary>
 /// Represents an implementation of <see cref="AggregateRootsBase"/>.
 /// </summary>
-[ManagementService]
+[ManagementService, ManagementWebService]
 public class AggregateRootsService : AggregateRootsBase
 {
     readonly IGetTenantScopedAggregateRoot _tenantScopedAggregateRoot;

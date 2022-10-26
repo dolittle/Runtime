@@ -12,10 +12,12 @@ namespace Dolittle.Runtime.Services.Hosting;
 public class KestrelConfiguration : IConfigureOptions<KestrelServerOptions>
 {
     readonly EndpointConfiguration _configuration;
-    
-    public KestrelConfiguration(IOptions<EndpointsConfiguration> configuration, EndpointVisibility visibility)
+    readonly HttpProtocols _protocols;
+
+    public KestrelConfiguration(IOptions<EndpointsConfiguration> configuration, EndpointVisibility visibility, HttpProtocols protocols)
     {
         _configuration = configuration.Value.GetConfigurationFor(visibility);
+        _protocols = protocols;
     }
 
     /// <inheritdoc />
@@ -25,7 +27,7 @@ public class KestrelConfiguration : IConfigureOptions<KestrelServerOptions>
             _configuration.Port,
             _ =>
             {
-                _.Protocols = HttpProtocols.Http2;
+                _.Protocols = _protocols;
             });
     }
 }

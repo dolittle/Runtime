@@ -11,11 +11,21 @@ namespace Dolittle.Runtime.Services.Hosting;
 public static class ServiceCollectionExtensions
 {
 
-    public static void AddKestrelConfigurationFor(this IServiceCollection services, EndpointVisibility visibility)
+    public static void AddKestrelConfigurationForGrpc(this IServiceCollection services, EndpointVisibility visibility)
     {
         services.AddSingleton<IConfigureOptions<KestrelServerOptions>>(_ => 
             new KestrelConfiguration(
                 _.GetRequiredService<IOptions<EndpointsConfiguration>>(),
-                visibility));
+                visibility,
+                HttpProtocols.Http2));
+    }
+
+    public static void AddKestrelConfigurationForGrpcWeb(this IServiceCollection services, EndpointVisibility visibility)
+    {
+        services.AddSingleton<IConfigureOptions<KestrelServerOptions>>(_ => 
+            new KestrelConfiguration(
+                _.GetRequiredService<IOptions<EndpointsConfiguration>>(),
+                visibility,
+                HttpProtocols.Http1));
     }
 }

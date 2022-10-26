@@ -14,6 +14,7 @@ using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,6 +37,7 @@ var host = Host.CreateDefaultBuilder(args)
     .AddGrpcHost(EndpointVisibility.Private)
     .AddGrpcHost(EndpointVisibility.Public)
     .AddGrpcHost(EndpointVisibility.Management)
+    .AddGrpcWebHost(EndpointVisibility.ManagementWeb)
     .AddMetricsHost()
     .AddWebHost()
     .Build();

@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.Projections;
 /// <summary>
 /// Represents an implementation of <see cref="ProjectionsBase"/>.
 /// </summary>
-[ManagementService]
+[ManagementService, ManagementWebService]
 public class ProjectionsService : ProjectionsBase
 {
     readonly IProjections _projections;

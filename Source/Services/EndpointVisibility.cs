@@ -17,9 +17,14 @@ public enum EndpointVisibility
     /// Represents private endpoints.
     /// </summary>
     Private = 2,
-        
+
     /// <summary>
     /// Represents management endpoints.
     /// </summary>
     Management = 3,
+
+    /// <summary>
+    /// Represents management endpoints exposed through gRPC web.
+    /// </summary>
+    ManagementWeb = 4,
 }
