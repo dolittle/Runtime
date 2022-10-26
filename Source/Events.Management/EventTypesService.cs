@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Management;
 /// <summary>
 /// Represents an implementation of <see cref="EventTypesBase"/>.
 /// </summary>
-[ManagementService]
+[ManagementService, ManagementWebService]
 public class EventTypesService : EventTypesBase
 {
     readonly IEventTypes _eventTypes;

@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
 /// <summary>
 /// Represents an implementation of <see cref="EventHandlersBase"/>.
 /// </summary>
-[ManagementService]
+[ManagementService, ManagementWebService]
 public class EventHandlersService : EventHandlersBase
 {
     readonly IEventHandlers _eventHandlers;
