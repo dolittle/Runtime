@@ -155,6 +155,27 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diagnostics", "Source\Diagn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Store.Services.Grpc", "Integration\Tests\Events.Store.Services.Grpc\Events.Store.Services.Grpc.csproj", "{4D838304-13DE-4B16-BBDD-E061F2E65300}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Meta", "Meta", "{CAF1D781-37E5-4C33-A114-7991B4AC4299}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		default.props = default.props
+		versions.props = versions.props
+		specs.props = specs.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{89A4E435-785F-4CDF-91B4-A14EAB91084B}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\benchmarks.yml = .github\workflows\benchmarks.yml
+		.github\workflows\compatibility-table-update.yml = .github\workflows\compatibility-table-update.yml
+		.github\workflows\documentation.yml = .github\workflows\documentation.yml
+		.github\workflows\integration-tests.yml = .github\workflows\integration-tests.yml
+		.github\workflows\ms-teams-release.yml = .github\workflows\ms-teams-release.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\runtime.yml = .github\workflows\runtime.yml
+		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
