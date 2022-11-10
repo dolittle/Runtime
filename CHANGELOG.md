@@ -1,3 +1,9 @@
+# [8.7.1] - 2022-11-10 [PR: #719](https://github.com/dolittle/Runtime/pull/719)
+## Summary
+
+Upgrades the Dolittle Runtime to run on dotnet 7.
+
+
 # [8.7.0] - 2022-10-26 [PR: #718](https://github.com/dolittle/Runtime/pull/718)
 ## Summary
 
