@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+<Import Project="../../../specs.props" />
+
+<PropertyGroup>
+    <AssemblyName>Integration.Tests.Events.Store.Services.Grpc</AssemblyName>
+    <RootNamespace>Integration.Tests.Events.Store.Services.Grpc</RootNamespace>
+</PropertyGroup>
+
+<ItemGroup>
+    <ProjectReference Include="..\..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
+</ItemGroup>
+
+</Project>

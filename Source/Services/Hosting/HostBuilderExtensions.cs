@@ -31,7 +31,7 @@ public static class HostBuilderExtensions
 
                 grpcHost.ConfigureServices(services =>
                 {
-                    services.AddKestrelConfigurationFor(visibility);
+                    services.AddKestrelConfigurationForGrpc(visibility);
                     services.AddGrpc();
                     services.AddGrpcReflection();
                 });
@@ -39,6 +39,40 @@ public static class HostBuilderExtensions
                 grpcHost.Configure(app =>
                 {
                     app.UseRouting();
+
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapDiscoveredGrpcServicesOf(visibility);
+                        endpoints.MapGrpcReflectionService();
+                        endpoints.MapGrpcService<HealthService>();
+                    });
+                });
+            }));
+
+    /// <summary>
+    /// Configures a scoped host that serves gRPC-web endpoints of the specified <see cref="EndpointVisibility"/> using Kestrel.
+    /// </summary>
+    /// <param name="builder">The host builder to add a scoped host to.</param>
+    /// <param name="visibility">The endpoint visibility to serve endpoints for.</param>
+    /// <returns>The builder for continuation.</returns>
+    public static IHostBuilder AddGrpcWebHost(this IHostBuilder builder, EndpointVisibility visibility)
+        => builder
+            .AddScopedHost(_ => _.ConfigureWebHost(grpcWebHost =>
+            {
+                grpcWebHost.UseKestrel();
+
+                grpcWebHost.ConfigureServices(services =>
+                {
+                    services.AddKestrelConfigurationForGrpcWeb(visibility);
+                    services.AddGrpc();
+                    services.AddGrpcReflection();
+                });
+
+                grpcWebHost.Configure(app =>
+                {
+                    app.UseRouting();
+
+                    app.UseGrpcWeb(new GrpcWebOptions{ DefaultEnabled = true});
 
                     app.UseEndpoints(endpoints =>
                     {

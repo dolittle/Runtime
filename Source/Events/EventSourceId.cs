@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Events.Store;
+namespace Dolittle.Runtime.Events;
 
 /// <summary>
 /// Represents the identification of an event source.

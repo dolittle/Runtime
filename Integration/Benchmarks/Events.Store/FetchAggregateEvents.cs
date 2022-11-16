@@ -6,10 +6,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Integration.Benchmarks.Events.Store;
 
@@ -91,9 +91,11 @@ public class FetchAggregateEvents : JobBase
     /// Fetches the events for the aggregate root.
     /// </summary>
     [Benchmark]
-    public Task FetchEvents()
+    public async Task FetchEvents()
     {
-        return _eventStore.FetchForAggregate(_aggregateRoot, _eventSource, _executionContext);
+        await foreach (var _ in _eventStore.FetchForAggregate(_aggregateRoot, _eventSource, _executionContext))
+        {
+        }
     }
 
     /// <inheritdoc />

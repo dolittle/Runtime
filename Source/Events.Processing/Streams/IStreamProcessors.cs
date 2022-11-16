@@ -27,6 +27,7 @@ public interface IStreamProcessors
     /// </summary>
     /// <param name="scopeId">The scope that the processor should process events from.</param>
     /// <param name="eventProcessorId">The identifier of the event processor.</param>
+    /// <param name="eventProcessorKind ">The kind of the event processor.</param>
     /// <param name="sourceStreamDefinition">The definition of the stream (in the specified scope) that the stream processor should process events from.</param>
     /// <param name="createEventProcessor">The factory to use to create the event processor to call for a tenant.</param>
     /// <param name="executionContext">The execution context to use for the created stream processor.</param>
@@ -35,6 +36,7 @@ public interface IStreamProcessors
     Try<StreamProcessor> TryCreateAndRegister(
         ScopeId scopeId,
         EventProcessorId eventProcessorId,
+        EventProcessorKind eventProcessorKind,
         IStreamDefinition sourceStreamDefinition,
         Func<TenantId, IEventProcessor> createEventProcessor,
         ExecutionContext executionContext,

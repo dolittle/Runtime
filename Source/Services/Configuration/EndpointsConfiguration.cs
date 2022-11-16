@@ -25,6 +25,11 @@ public record EndpointsConfiguration
     /// Gets the configuration for the management endpoint.
     /// </summary>
     public EndpointConfiguration Management { get; init; } = new() {Port = 51052};
+    
+    /// <summary>
+    /// Gets the configuration for the management web endpoint.
+    /// </summary>
+    public EndpointConfiguration ManagementWeb {get; init; } = new() {Port = 51152};
 
     /// <summary>
     /// Gets the configuration for an endpoint by its <see cref="EndpointVisibility"/>.
@@ -37,6 +42,7 @@ public record EndpointsConfiguration
             EndpointVisibility.Public => Public,
             EndpointVisibility.Private => Private,
             EndpointVisibility.Management => Management,
+            EndpointVisibility.ManagementWeb => ManagementWeb,
             _ => throw new UnknownEndpointVisibility(visibility)
         };
 }

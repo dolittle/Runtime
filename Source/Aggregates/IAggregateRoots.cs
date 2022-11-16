@@ -28,5 +28,5 @@ public interface IAggregateRoots
     /// <param name="aggregateRootId">The Aggregate Root Id.</param>
     /// <param name="aggregateRoot">The registered Aggregate Root.</param>
     /// <returns>A value indicating whether an Aggregate Root with the given Id is registered.</returns>
-    bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot);
+    bool TryGetFor(ArtifactId aggregateRootId, out AggregateRoot? aggregateRoot);
 }

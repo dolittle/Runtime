@@ -32,6 +32,6 @@ public class and_it_fails : given.the_service_and_get_all_request
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();
 
-    It should_send_a_failure_message = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.Failure != null && response.States.Count == 0)));
+    It should_send_a_failure_message = () => server_stream_writer.Verify(_ => _.WriteAsync(Moq.It.Is<GetAllResponse>(response => response.Failure != null && response.States.Count == 0), Moq.It.IsAny<CancellationToken>()));
     It should_not_send_any_other_messages = () => server_stream_writer.VerifyNoOtherCalls();
 }

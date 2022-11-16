@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: sauron
+  PRERELEASE_BRANCHES: bad-aggregate
 
 on:
   pull_request:
@@ -72,7 +72,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "6.0.x"
+          dotnet-version: "7.0.x"
       - name: Run Mongo container
         run: docker run -p 27017:27017 -d dolittle/mongodb:4.2.2
       - name: Run Benchmarks
@@ -186,7 +186,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "6.0.x"
+          dotnet-version: "7.0.x"
       - name: Update VersionInfo
         uses: dolittle/update-version-info-action@v1
         with:

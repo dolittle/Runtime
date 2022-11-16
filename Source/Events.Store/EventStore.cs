@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -21,6 +23,7 @@ public class EventStore : IEventStore
 {
     readonly Func<TenantId, EventStoreClient> _getEventStoreClient;
     readonly Func<TenantId, IFetchCommittedEvents> _getCommittedEventsFetcher;
+    
     readonly IRootContext _rootContext;
     readonly ILogger _logger;
 
@@ -28,15 +31,15 @@ public class EventStore : IEventStore
     /// Initializes a new instance of the <see cref="EventStore"/> class.
     /// </summary>
     /// <param name="getEventStoreClient">The factory to use to get the <see cref="EventStoreActor"/> client.</param>
-    /// <param name="logger">The logger to use for logging.</param>
-    /// <param name="getCommittedEventsFetcher"></param>
+    /// <param name="getCommittedEventsFetcher">The factory to use to get the <see cref="IFetchCommittedEvents"/> to use for fetching events.</param>
     /// <param name="rootContext">Proto root context. Allows middleware to be used</param>
-    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, ILogger logger, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, IRootContext rootContext)
+    /// <param name="logger">The logger to use for logging.</param>
+    public EventStore(Func<TenantId, EventStoreClient> getEventStoreClient, Func<TenantId, IFetchCommittedEvents> getCommittedEventsFetcher, IRootContext rootContext, ILogger logger)
     {
         _getEventStoreClient = getEventStoreClient;
-        _logger = logger;
         _getCommittedEventsFetcher = getCommittedEventsFetcher;
         _rootContext = rootContext;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -58,29 +61,43 @@ public class EventStore : IEventStore
         return _getEventStoreClient(GetTenantFrom(request.CallContext))
             .CommitForAggregate(request, _rootContext, cancellationToken);
     }
-    
+
     /// <inheritdoc />
-    public async Task<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateRequest request, CancellationToken cancellationToken)
+    public IAsyncEnumerable<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateInBatchesRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var events = await _getCommittedEventsFetcher(GetTenantFrom(request.CallContext))
-                .FetchForAggregate(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), cancellationToken);
+            var fetcher = _getCommittedEventsFetcher(GetTenantFrom(request.CallContext));
 
-            return new FetchForAggregateResponse
+            var eventSource = request.Aggregate.EventSourceId;
+            var aggregateRoot = request.Aggregate.AggregateRootId.ToGuid();
+            
+            switch (request.RequestCase)
             {
-                Events = events.ToProtobuf()
-            };
+                case FetchForAggregateInBatchesRequest.RequestOneofCase.FetchAllEvents:
+                    return fetcher.FetchStreamForAggregate(eventSource, aggregateRoot, cancellationToken).Select(ConvertAggregateEventsToResponse);
+                case FetchForAggregateInBatchesRequest.RequestOneofCase.FetchEvents:
+                    var eventTypes = request.FetchEvents.EventTypes.Select(_ => _.ToArtifact().Id);
+                    return fetcher.FetchStreamForAggregate(eventSource, aggregateRoot, eventTypes, cancellationToken).Select(ConvertAggregateEventsToResponse);
+                case FetchForAggregateInBatchesRequest.RequestOneofCase.None:
+                default:
+                    return AsyncEnumerable.Repeat(new FetchForAggregateResponse
+                    {
+                        Failure = new UnsupportedFetchForAggregatesInBatchesType(request.RequestCase).ToFailure(),
+                    }, 1);
+            }
         }
         catch (Exception e)
         {
-            _logger.ErrorFetchingEventsFromAggregate(e);
-            return new FetchForAggregateResponse
+            return AsyncEnumerable.Repeat(new FetchForAggregateResponse
             {
-                Failure = e.ToFailure()
-            };
+                Failure = e.ToFailure(),
+            }, 1);
         }
     }
+
+    static FetchForAggregateResponse ConvertAggregateEventsToResponse(CommittedAggregateEvents events)
+        => new() { Events = events.ToProtobuf() };
 
     static TenantId GetTenantFrom(CallRequestContext context)
         => context.ExecutionContext.TenantId.ToGuid();

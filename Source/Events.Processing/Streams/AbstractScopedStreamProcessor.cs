@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,8 +29,8 @@ public abstract class AbstractScopedStreamProcessor
     readonly IEventFetcherPolicies _eventFetcherPolicies;
     readonly IStreamEventWatcher _eventWaiter;
     readonly object _setPositionLock = new();
-    CancellationTokenSource _resetStreamProcessor;
-    TaskCompletionSource<Try<StreamPosition>> _resetStreamProcessorCompletionSource;
+    CancellationTokenSource? _resetStreamProcessor;
+    TaskCompletionSource<Try<StreamPosition>>? _resetStreamProcessorCompletionSource;
     Func<TenantId, CancellationToken, Task<Try>> _resetStreamProcessorAction;
     IStreamProcessorState _currentState;
     bool _started;
@@ -87,6 +88,16 @@ public abstract class AbstractScopedStreamProcessor
     /// </summary>
     /// <returns>Current <see cref="IStreamProcessorState"/>.</returns>
     public IStreamProcessorState GetCurrentState() => _currentState;
+
+    /// <summary>
+    /// Event that occurs when the Scoped Stream Processor has successfully processed an event.
+    /// </summary>
+    public ScopedStreamProcessorProcessedEvent OnProcessedEvent;
+
+    /// <summary>
+    /// Event that occurs when the Scoped Stream Processor failed to processed an event.
+    /// </summary>
+    public ScopedStreamProcessorFailedToProcessEvent OnFailedToProcessedEvent;
 
     /// <summary>
     /// Starts the stream processing.
@@ -223,8 +234,10 @@ public abstract class AbstractScopedStreamProcessor
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
     protected async Task<(IStreamProcessorState, IProcessingResult)> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
+        var stopwatch = Stopwatch.StartNew();
         var processingResult = await _processor.Process(@event.Event, @event.Partition, executionContext, cancellationToken).ConfigureAwait(false);
-        return (await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false), processingResult);
+        stopwatch.Stop();
+        return (await HandleProcessingResult(processingResult, @event, stopwatch.Elapsed, currentState).ConfigureAwait(false), processingResult);
     }
 
     /// <summary>
@@ -269,8 +282,10 @@ public abstract class AbstractScopedStreamProcessor
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
     protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
+        var stopwatch = Stopwatch.StartNew();
         var processingResult = await _processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, executionContext, cancellationToken).ConfigureAwait(false);
-        return await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false);
+        stopwatch.Stop();
+        return await HandleProcessingResult(processingResult, @event, stopwatch.Elapsed, currentState).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -278,19 +293,23 @@ public abstract class AbstractScopedStreamProcessor
     /// </summary>
     /// <param name="processingResult">The <see cref="IProcessingResult" />.</param>
     /// <param name="processedEvent">The processed <see cref="StreamEvent" />.</param>
+    /// <param name="processingTime">The time it took to process the event.</param>
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="IStreamProcessorState" />.</returns>
-    protected Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, TimeSpan processingTime, IStreamProcessorState currentState)
     {
         if (processingResult.Retry)
         {
+            OnFailedToProcessedEvent?.Invoke(processedEvent, processingTime);
             return OnRetryProcessingResult(processingResult as FailedProcessing, processedEvent, currentState);
         }
-        else if (!processingResult.Succeeded)
+        if (!processingResult.Succeeded)
         {
+            OnFailedToProcessedEvent?.Invoke(processedEvent, processingTime);
             return OnFailedProcessingResult(processingResult as FailedProcessing, processedEvent, currentState);
         }
 
+        OnProcessedEvent?.Invoke(processedEvent, processingTime);
         return OnSuccessfulProcessingResult(processingResult as SuccessfulProcessing, processedEvent, currentState);
     }
 
@@ -344,6 +363,7 @@ public abstract class AbstractScopedStreamProcessor
                         _resetStreamProcessorCompletionSource = default;
                         _resetStreamProcessorAction = default;
                     }
+
                     try
                     {
                         _currentState = await Catchup(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
@@ -361,6 +381,11 @@ public abstract class AbstractScopedStreamProcessor
                     catch (TaskCanceledException ex)
                     {
                         tryGetEvents = ex;
+                    }
+                    finally
+                    {
+                        _resetStreamProcessor?.Dispose();
+                        _resetStreamProcessor = null;
                     }
                 }
                 while (!tryGetEvents.Success && !cancellationToken.IsCancellationRequested);
@@ -385,6 +410,7 @@ public abstract class AbstractScopedStreamProcessor
         finally
         {
             _resetStreamProcessor?.Dispose();
+            _resetStreamProcessor = null;
         }
     }
 }

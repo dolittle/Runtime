@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store;
@@ -17,9 +18,9 @@ public class AggregateRootVersionIsOutOfOrder : ArgumentException
     /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
     /// <param name="aggregateRoot">The aggregate root id.</param>
     /// <param name="eventVersion">The <see cref="AggregateRootVersion"/> the Event was applied by.</param>
-    /// <param name="expectedVersion">Expected <see cref="AggregateRootVersion"/>.</param>
-    public AggregateRootVersionIsOutOfOrder(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion eventVersion, AggregateRootVersion expectedVersion)
-        : base($"Aggregate Root version for event source {eventSource} on aggregate root {aggregateRoot} is out of order. Version '{eventVersion}' from event does not match '{expectedVersion}'")
+    /// <param name="previousVersion">The previous <see cref="AggregateRootVersion"/>.</param>
+    public AggregateRootVersionIsOutOfOrder(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion eventVersion, AggregateRootVersion previousVersion)
+        : base($"Aggregate Root version for event source {eventSource} on aggregate root {aggregateRoot} is out of order. Version '{eventVersion}' from event is not greater than '{previousVersion}'")
     {
     }
 }

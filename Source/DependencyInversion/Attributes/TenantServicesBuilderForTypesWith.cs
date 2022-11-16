@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Runtime.DependencyInversion.Types;
 using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,7 @@ public class TenantServicesBuilderForTypesWith<TAttribute> : ICanAddTenantServic
     where TAttribute : Attribute
 {
     readonly ICanAddTenantServicesForTypesWith<TAttribute> _builder;
-    readonly Dictionary<Type, TAttribute> _typesWithAttribute = new();
+    readonly Dictionary<Type, IEnumerable<TAttribute>> _typesWithAttribute = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantServicesBuilderForTypesWith{TAttribute}"/> class.
@@ -30,9 +31,10 @@ public class TenantServicesBuilderForTypesWith<TAttribute> : ICanAddTenantServic
         _builder = builder;
         foreach (var type in discoveredClasses)
         {
-            if (type.TryGetAttribute<TAttribute>(out var attribute))
+            var attributes = type.GetAttributes<TAttribute>();
+            if (attributes.Any())
             {
-                _typesWithAttribute.Add(type, attribute);
+                _typesWithAttribute.Add(type, attributes);
             }
         }
     }
@@ -40,9 +42,12 @@ public class TenantServicesBuilderForTypesWith<TAttribute> : ICanAddTenantServic
     /// <inheritdoc />
     public void AddFor(TenantId tenant, IServiceCollection services)
     {
-        foreach (var (type, attribute) in _typesWithAttribute)
+        foreach (var (type, attributes) in _typesWithAttribute)
         {
-            _builder.AddServiceFor(type, attribute, tenant, services);
+            foreach (var attribute in attributes)
+            {
+                _builder.AddServiceFor(type, attribute, tenant, services);
+            }
         }
     }
 }

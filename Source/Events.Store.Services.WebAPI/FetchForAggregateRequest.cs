@@ -23,7 +23,7 @@ public record FetchForAggregateRequest(
     /// </summary>
     /// <param name="request">The request to convert.</param>
     /// <returns>The converted request.</returns>
-    public static implicit operator Contracts.FetchForAggregateRequest(FetchForAggregateRequest request)
+    public static implicit operator Contracts.FetchForAggregateInBatchesRequest(FetchForAggregateRequest request)
         => new()
         {
             CallContext = request.CallContext,
@@ -31,6 +31,7 @@ public record FetchForAggregateRequest(
             {
                 AggregateRootId = request.AggregateRoot.ToProtobuf(),
                 EventSourceId = request.EventSource
-            }
+            },
+            FetchAllEvents = new FetchAllEventsForAggregateInBatchesRequest(),
         };
 }

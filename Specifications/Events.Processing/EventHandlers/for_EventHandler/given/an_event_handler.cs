@@ -30,6 +30,7 @@ public class an_event_handler : all_dependencies
             tenant => event_processor.Object,
             cancellation => reverse_call_dispatcher.Object.Accept(new EventHandlerRegistrationResponse(), cancellation),
             (failure, cancellation) => reverse_call_dispatcher.Object.Reject(new EventHandlerRegistrationResponse{Failure = failure.ToProtobuf()}, cancellation),
+            metrics_collector.Object,
             logger_factory.CreateLogger<EventHandler>(),
             execution_context,
             cancellation_token

@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Contracts;
@@ -29,10 +30,10 @@ public interface IEventStore
     Task<CommitAggregateEventsResponse> CommitAggregateEvents(CommitAggregateEventsRequest request, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Fetches aggregate events from the Event Log for an aggregate given an <see cref="FetchForAggregateRequest"/>.
+    /// Fetches aggregate events in batches from the Event Log for an aggregate given an <see cref="FetchForAggregateInBatchesRequest"/>.
     /// </summary>
-    /// <param name="request">The request containing the execution context and aggregate root instance to fetch events for.</param>
+    /// <param name="request">The <see cref="FetchEventsForAggregateInBatchesRequest"/> request.</param>
     /// <param name="cancellationToken">The cancellation token that can be used to cancel the operation.</param>
-    /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="FetchForAggregateResponse">result</see> of the fetch.</returns>
-    Task<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateRequest request, CancellationToken cancellationToken);
+    /// <returns><see cref="IAsyncEnumerable{TResult}"/> of <see cref="FetchForAggregateResponse"/> batched responses.</returns>
+    IAsyncEnumerable<FetchForAggregateResponse> FetchAggregateEvents(FetchForAggregateInBatchesRequest request, CancellationToken cancellationToken);
 }

@@ -1,3 +1,66 @@
+# [8.7.1] - 2022-11-10 [PR: #719](https://github.com/dolittle/Runtime/pull/719)
+## Summary
+
+Upgrades the Dolittle Runtime to run on dotnet 7.
+
+
+# [8.7.0] - 2022-10-26 [PR: #718](https://github.com/dolittle/Runtime/pull/718)
+## Summary
+
+Exposing management services on a new, configurable, grpc-web port so that we can make calls to the management services from a web browser
+
+### Added
+
+- Endpoint configuration for managementWeb with default port 51152
+- Exposing management services through grpc-web
+
+
+# [8.6.0] - 2022-10-7 [PR: #716](https://github.com/dolittle/Runtime/pull/716)
+## Summary
+
+Adds new metrics to the Runtime that exposes information that can be used to more clearly investigate performance.
+
+### Added
+
+- More metrics for committed events and committed aggregate events
+- Metrics for total number of aggregate concurrency conflicts
+- Metrics for Event Handlers; registrations, number processed, failed and processing time
+- Metrics for registrations/initializations/starts of stream processors and the events they processed or failed to process per event processor kind
+- Metrics for the .NET Runtime
+
+
+# [8.5.1] - 2022-10-5 [PR: #715](https://github.com/dolittle/Runtime/pull/715)
+### Fixed
+
+- Fixes a minor memory leak for scoped stream processors
+
+
+# [8.5.0] - 2022-9-15 [PR: #708](https://github.com/dolittle/Runtime/pull/708)
+## Summary
+
+Implements the new gRPC method for fetching aggregate events in batches that is use by the SDKs to implement more efficient rehydration of aggregate roots.
+
+### Added
+
+- Implemented `FetchForAggregateInBatches` gRPC method that enables SDKs to stream the aggregate events in batches also filtered on event types.
+
+
+# [8.4.3] - 2022-9-12 [PR: #709](https://github.com/dolittle/Runtime/pull/709)
+## Summary
+
+A critical error was unearthed where it was possible to get into a corrupted event store state due to the Runtime thinking it had committed events that it had not. This would eventually result in a cascading problem where for each restart of an application the first X events would not be written to the event store and it would not have been easily noticeable.
+
+### Added
+
+- More metrics around committing events
+- More logging when committing events
+- Self healing for aggregate root version cache in event store
+
+### Fixed
+
+- A bug in the event store where it could end up not writing events and thinking that it did
+
+
 # [8.4.2] - 2022-8-18 [PR: #707](https://github.com/dolittle/Runtime/pull/707)
 ## Summary
 

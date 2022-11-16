@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Dolittle.Runtime.Events.Store;
+namespace Dolittle.Runtime.Aggregates;
 
 /// <summary>
 /// Defines a system that can fetch Aggregate Root Instances from the Event Store.

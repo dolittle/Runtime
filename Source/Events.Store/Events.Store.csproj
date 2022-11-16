@@ -15,10 +15,13 @@
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+        <ProjectReference Include="../Aggregates/Aggregates.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="System.Linq.Async" Version="$(SystemLinqAsyncVersion)" />
         <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

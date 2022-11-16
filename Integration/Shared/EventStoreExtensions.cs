@@ -1,16 +1,18 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Processing;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
+using Integration.Shared;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEventContract = Dolittle.Runtime.Events.Contracts.UncommittedEvent;
 
@@ -31,23 +33,30 @@ public static class EventStoreExtensions
         var response = await eventStore.CommitEvents(request, CancellationToken.None).ConfigureAwait(false);
         return response;
     }
-    public static async Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
-    {
-        var response = await eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
-        return response;
+    public static Task<CommitAggregateEventsResponse> Commit(this IEventStore eventStore, UncommittedAggregateEvents events, Dolittle.Runtime.Execution.ExecutionContext executionContext)
+        => eventStore.CommitAggregateEvents(events.ToCommitRequest(executionContext), CancellationToken.None);
 
-    }
-    public static async Task<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, Dolittle.Runtime.Execution.ExecutionContext executionContext)
-    {
-        var response = await eventStore.FetchAggregateEvents(new FetchForAggregateRequest
+    public static IAsyncEnumerable<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, Dolittle.Runtime.Execution.ExecutionContext executionContext)
+        => eventStore.FetchAggregateEvents(EventStoreRequests.FetchBatchFor(aggregateRootId, eventSourceId, executionContext), CancellationToken.None);
+    
+    public static IAsyncEnumerable<FetchForAggregateResponse> FetchForAggregate(this IEventStore eventStore, ArtifactId aggregateRootId, EventSourceId eventSourceId, IEnumerable<ArtifactId> eventTypes, Dolittle.Runtime.Execution.ExecutionContext executionContext)
+        => eventStore.FetchAggregateEvents(EventStoreRequests.FetchBatchFor(aggregateRootId, eventSourceId, eventTypes, executionContext), CancellationToken.None);
+
+    public static FetchForAggregateResponse Combine(this FetchForAggregateResponse[] responses)
+        => new()
         {
-            CallContext = new CallRequestContext
+            Failure = responses.Where(_ => _.Failure is not null).Select(_ => _.Failure).FirstOrDefault(),
+            Events = new Dolittle.Runtime.Events.Contracts.CommittedAggregateEvents
             {
-                ExecutionContext = executionContext.ToProtobuf()
-            },
-            Aggregate = new Aggregate{AggregateRootId = aggregateRootId.ToProtobuf(), EventSourceId = eventSourceId}
-        }, CancellationToken.None);
+                Events =
+                {
+                    responses.SelectMany(_ => _.Events.Events)
+                },
+                AggregateRootId = responses.First().Events.AggregateRootId,
+                EventSourceId = responses.First().Events.EventSourceId,
+                CurrentAggregateRootVersion = responses.First().Events.CurrentAggregateRootVersion,
+                AggregateRootVersion = responses.First().Events.AggregateRootVersion
+            }
+        };
 
-        return response;
-    }
 }

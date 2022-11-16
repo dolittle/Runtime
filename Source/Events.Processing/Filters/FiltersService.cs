@@ -8,33 +8,26 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
+using Dolittle.Runtime.Events.Processing.Filters.Partitioned;
+using Dolittle.Runtime.Events.Processing.Filters.Unpartitioned;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Services.Hosting;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
-using Dolittle.Runtime.Events.Processing.Filters.Unpartitioned;
-using Dolittle.Runtime.Events.Processing.Filters.Partitioned;
-using Dolittle.Runtime.Services.Hosting;
+using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using UnpartitionedFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
-    Dolittle.Runtime.Events.Processing.Contracts.FilterClientToRuntimeMessage,
-    Dolittle.Runtime.Events.Processing.Contracts.FilterRuntimeToClientMessage,
-    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationRequest,
-    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationResponse,
-    Dolittle.Runtime.Events.Processing.Contracts.FilterEventRequest,
-    Dolittle.Runtime.Events.Processing.Contracts.FilterResponse>;
 using PartitionedFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.PartitionedFilterClientToRuntimeMessage,
     Dolittle.Runtime.Events.Processing.Contracts.FilterRuntimeToClientMessage,
@@ -49,6 +42,13 @@ using PublicFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationResponse,
     Dolittle.Runtime.Events.Processing.Contracts.FilterEventRequest,
     Dolittle.Runtime.Events.Processing.Contracts.PartitionedFilterResponse>;
+using UnpartitionedFilterDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
+    Dolittle.Runtime.Events.Processing.Contracts.FilterClientToRuntimeMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRuntimeToClientMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterRegistrationResponse,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterEventRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.FilterResponse>;
 
 namespace Dolittle.Runtime.Events.Processing.Filters;
 
@@ -71,6 +71,7 @@ public class FiltersService : FiltersBase
     readonly Func<TenantId, PublicFilterDefinition, PublicFilterDispatcher, PublicFilterProcessor> _createPublicFilterProcessorFor;
     readonly IStreamDefinitions _streamDefinitions;
     readonly ILogger _logger;
+    readonly EventProcessorKind _kind = "Filter";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FiltersService"/> class.
@@ -412,6 +413,7 @@ public class FiltersService : FiltersBase
             return _streamProcessors.TryCreateAndRegister(
                 scopeId,
                 filterDefinition.TargetStream.Value,
+                _kind,
                 new EventLogStreamDefinition(),
                 getFilterProcessor,
                 executionContext,

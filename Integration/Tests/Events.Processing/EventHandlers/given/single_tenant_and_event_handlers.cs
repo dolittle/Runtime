@@ -10,15 +10,14 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Google.Protobuf.WellKnownTypes;
 using Integration.Shared;
@@ -35,7 +34,6 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
-using StreamEvent = Dolittle.Runtime.Events.Processing.Contracts.StreamEvent;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using MongoStreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 using EventHorizonConsumerProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.EventProcessor;

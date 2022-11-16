@@ -10,7 +10,7 @@ using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Integration.Tests.Events.Store.given;
 
-class a_runtime_with_a_multiple_tenant
+public class a_runtime_with_a_multiple_tenant
 {
     protected static RunningRuntime runtime;
     protected static Dictionary<TenantId, ExecutionContext> execution_contexts;

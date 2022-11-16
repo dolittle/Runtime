@@ -21,5 +21,6 @@
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
         <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+        <ProjectReference Include="..\Events\Events.csproj" />
     </ItemGroup>
 </Project>

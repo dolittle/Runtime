@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
@@ -106,6 +107,7 @@ public class CommitBuilder : ICanBuildABatch<Commit>
             var committedEvents = new CommittedAggregateEvents(
                 request.Events.EventSourceId,
                 aggregate.AggregateRoot,
+                nextAggregateRootVersion + (ulong)request.Events.Events.Count,
                 request.Events.Events.Select(_ => new CommittedAggregateEvent(
                     aggregateRoot,
                     nextAggregateRootVersion++,

@@ -3,8 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Microsoft.Extensions.Logging;

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Protobuf;
 
@@ -18,17 +19,18 @@ public static class CommittedAggregateEventsExtensions
     /// <param name="committedAggregateEvents">The committed events.</param>
     /// <returns>The converted <see cref="Contracts.CommittedAggregateEvents" />.</returns>
     public static Contracts.CommittedAggregateEvents ToProtobuf(this CommittedAggregateEvents committedAggregateEvents)
-    {
-        var aggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion ?? 0;
-        var protobuf = new Contracts.CommittedAggregateEvents
+        => new()
         {
             AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
             EventSourceId = committedAggregateEvents.EventSource.Value,
-            AggregateRootVersion = aggregateRootVersion
+            // To support backwards compatibility this number should be 0 if committedAggregateEvents.AggregateRootVersion is 0 or committedAggregateEvents.AggregateRootVersion - 1.  
+            AggregateRootVersion = committedAggregateEvents.AggregateRootVersion == AggregateRootVersion.Initial
+                ? AggregateRootVersion.Initial
+                : committedAggregateEvents.AggregateRootVersion - 1,
+            CurrentAggregateRootVersion = committedAggregateEvents.AggregateRootVersion,
+            Events = { committedAggregateEvents.Select(_ => _.ToProtobuf()) }
         };
-        protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
-        return protobuf;
-    }
+
     
     /// <summary>
     /// Converts the <see cref="Contracts.CommittedAggregateEvents"/> to <see cref="CommittedAggregateEvents"/>.
@@ -36,14 +38,13 @@ public static class CommittedAggregateEventsExtensions
     /// <param name="committedAggregateEvents">The committed events.</param>
     /// <returns>The converted <see cref="CommittedAggregateEvents"/>.</returns>
     public static CommittedAggregateEvents ToCommittedEvents(this Contracts.CommittedAggregateEvents committedAggregateEvents)
-    {
-        var version = committedAggregateEvents.AggregateRootVersion + 1 - (ulong)committedAggregateEvents.Events.Count;
-        return new CommittedAggregateEvents(
+        => new(
             committedAggregateEvents.EventSourceId,
             committedAggregateEvents.AggregateRootId.ToGuid(),
+            committedAggregateEvents.CurrentAggregateRootVersion,
             committedAggregateEvents.Events.Select(_ => new CommittedAggregateEvent(
                 new Artifact(committedAggregateEvents.AggregateRootId.ToGuid(), ArtifactGeneration.First),
-                version++,
+                _.AggregateRootVersion,
                 _.EventLogSequenceNumber,
                 _.Occurred.ToDateTimeOffset(),
                 committedAggregateEvents.EventSourceId,
@@ -51,5 +52,5 @@ public static class CommittedAggregateEventsExtensions
                 _.EventType.ToArtifact(),
                 _.Public,
                 _.Content)).ToList());
-    }
+    
 }

@@ -18,8 +18,7 @@ public static class CommittedAggregateEventExtensions
     /// <param name="event"><see cref="CommittedAggregateEvent"/> to convert from.</param>
     /// <returns>Converted <see cref="Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent"/>.</returns>
     public static Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent ToProtobuf(this CommittedAggregateEvent @event)
-    {
-        return new Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent
+        => new()
         {
             EventLogSequenceNumber = @event.EventLogSequenceNumber,
             Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
@@ -30,7 +29,7 @@ public static class CommittedAggregateEventExtensions
                 Generation = @event.Type.Generation
             },
             Content = @event.Content,
-            Public = @event.Public
+            Public = @event.Public,
+            AggregateRootVersion = @event.AggregateRootVersion
         };
-    }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
 using Microservices;

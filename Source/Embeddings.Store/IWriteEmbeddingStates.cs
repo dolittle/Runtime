@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
@@ -18,7 +18,7 @@ public interface IWriteEmbeddingStates
     /// <summary>
     /// Try to replace a specific embedding state by key.
     /// </summary>
-    /// <param name="embedding">The embeddding id.</param>
+    /// <param name="embedding">The embedding id.</param>
     /// <param name="key">The projection key.</param>
     /// <param name="version">The <see cref="AggregateRootVersion"/> corresponding to this state.</param>
     /// <param name="state">The new projection state.</param>

@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents.given;
+namespace Dolittle.Runtime.Events.Store.for_UncommittedAggregateEvents.given;
 
 public abstract class events_and_an_aggregate
 {

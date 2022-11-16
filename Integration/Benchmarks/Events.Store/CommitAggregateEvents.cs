@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
@@ -118,7 +120,9 @@ public class CommitAggregateEvents : JobBase
     {
         for (var n = 0; n < EventsToCommit; n++)
         {
-            await _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+            await foreach (var _ in _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false))
+            {
+            }
             await _eventStore.Commit(
                 new UncommittedAggregateEvents(
                     _eventsToCommit.EventSource,
@@ -146,7 +150,9 @@ public class CommitAggregateEvents : JobBase
     [Benchmark]
     public async Task FetchCommitEventsInBatch()
     {
-        await _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false);
+        await foreach(var _ in _eventStore.FetchForAggregate(_eventsToCommit.AggregateRoot.Id, _eventsToCommit.EventSource, _executionContext).ConfigureAwait(false))
+        {
+        }
         await _eventStore.Commit(_eventsToCommit, _executionContext).ConfigureAwait(false);
     }
 

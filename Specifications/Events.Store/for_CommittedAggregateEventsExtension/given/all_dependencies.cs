@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
@@ -22,7 +23,8 @@ public class all_dependencies
     protected static ExecutionContext execution_context;
     
     protected static Dolittle.Runtime.Events.Contracts.CommittedAggregateEvents protobuf_committed_events;
-    protected static CommittedAggregateEvents result; 
+    protected static CommittedAggregateEvents result;
+    static AggregateRootVersion version_after_commits;
     Establish context = () =>
     {
         aggregate_root_id = "a82d47c8-b444-4467-be45-7801a46f495f";
@@ -42,13 +44,20 @@ public class all_dependencies
 
     protected static Contracts.CommittedAggregateEvents with_committed_events(params Contracts.CommittedAggregateEvents.Types.CommittedAggregateEvent[] events)
     {
-        var aggregate_version_after_commit = number_of_events_in_aggregate_when_commit_happened + (ulong)events.Length;
+        var aggregate_version_after_commit = number_of_events_in_aggregate_when_commit_happened;
+        foreach (var e in events)
+        {
+            e.AggregateRootVersion = aggregate_version_after_commit++;
+        }
         var result = new Contracts.CommittedAggregateEvents
         {
             AggregateRootId = aggregate_root_id.ToProtobuf(),
             EventSourceId = event_source_id,
             // The aggregate root version of the committed aggregate events is the version of the last event, meaning the aggregate root version before commit happened + number of events - 1
-            AggregateRootVersion = aggregate_version_after_commit - 1
+            AggregateRootVersion = aggregate_version_after_commit == AggregateRootVersion.Initial
+                ? AggregateRootVersion.Initial
+                : aggregate_version_after_commit - 1,
+            CurrentAggregateRootVersion =  aggregate_version_after_commit
         };
         result.Events.AddRange(events);
         return result;

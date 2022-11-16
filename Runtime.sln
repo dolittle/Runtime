@@ -156,6 +156,28 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Management", "Source\Client.Management\Client.Management.csproj", "{D405DE86-99D4-4FF5-9938-1069DC6EB3C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Source\Client\Client.csproj", "{ACAF1983-1EFC-4E42-932A-9396D0C4E228}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Store.Services.Grpc", "Integration\Tests\Events.Store.Services.Grpc\Events.Store.Services.Grpc.csproj", "{4D838304-13DE-4B16-BBDD-E061F2E65300}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Meta", "Meta", "{CAF1D781-37E5-4C33-A114-7991B4AC4299}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		default.props = default.props
+		versions.props = versions.props
+		specs.props = specs.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{89A4E435-785F-4CDF-91B4-A14EAB91084B}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\benchmarks.yml = .github\workflows\benchmarks.yml
+		.github\workflows\compatibility-table-update.yml = .github\workflows\compatibility-table-update.yml
+		.github\workflows\documentation.yml = .github\workflows\documentation.yml
+		.github\workflows\integration-tests.yml = .github\workflows\integration-tests.yml
+		.github\workflows\ms-teams-release.yml = .github\workflows\ms-teams-release.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\runtime.yml = .github\workflows\runtime.yml
+		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1046,6 +1068,18 @@ Global
 		{ACAF1983-1EFC-4E42-932A-9396D0C4E228}.Release|x64.Build.0 = Release|Any CPU
 		{ACAF1983-1EFC-4E42-932A-9396D0C4E228}.Release|x86.ActiveCfg = Release|Any CPU
 		{ACAF1983-1EFC-4E42-932A-9396D0C4E228}.Release|x86.Build.0 = Release|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Debug|x64.Build.0 = Debug|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Debug|x86.Build.0 = Debug|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Release|x64.ActiveCfg = Release|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Release|x64.Build.0 = Release|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Release|x86.ActiveCfg = Release|Any CPU
+		{4D838304-13DE-4B16-BBDD-E061F2E65300}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{79AB0F5F-4DA5-40C5-9A0B-BE392F16B7C0} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
@@ -1122,5 +1156,6 @@ Global
 		{0B94A905-F24E-4097-ACEE-D4152A17CFF8} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
 		{D405DE86-99D4-4FF5-9938-1069DC6EB3C8} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
 		{ACAF1983-1EFC-4E42-932A-9396D0C4E228} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
+		{4D838304-13DE-4B16-BBDD-E061F2E65300} = {37343684-7BA7-40C1-9904-B8C434B8BD19}
 	EndGlobalSection
 EndGlobal

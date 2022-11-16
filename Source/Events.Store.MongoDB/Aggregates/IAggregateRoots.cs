@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using MongoDB.Driver;
 

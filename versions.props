@@ -4,7 +4,7 @@
         <AutofacExtensionsVersion>7.2.0</AutofacExtensionsVersion>
         <BaselineTypeDiscoveryVersion>1.1.2</BaselineTypeDiscoveryVersion>
         <ConsoleTablesVersion>2.4.2</ConsoleTablesVersion>
-        <ContractsVersion>7.4.0-boromir.3</ContractsVersion>
+        <ContractsVersion>7.5.0-boromir.0</ContractsVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
@@ -24,7 +24,8 @@
         <NewtonsoftVersion>13.0.1</NewtonsoftVersion>
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <PollyVersion>7.2.3</PollyVersion>
-        <PrometheusVersion>5.0.2</PrometheusVersion>
+        <PrometheusVersion>6.0.0</PrometheusVersion>
+        <PrometheusNetDotNetRuntimeVersion>4.2.4</PrometheusNetDotNetRuntimeVersion>
         <ProtoActorVersion>0.33.1-alpha.0.13</ProtoActorVersion>
         <ProtobufVersion>3.19.4</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>

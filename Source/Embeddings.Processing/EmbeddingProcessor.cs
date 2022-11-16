@@ -3,10 +3,9 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
@@ -174,7 +173,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
             }
 
             var committedEvents = response.Events.ToCommittedEvents();
-            await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
+            await replaceOrRemoveEmbedding(committedEvents.AggregateRootVersion).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)

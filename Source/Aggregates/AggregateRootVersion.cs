@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Events.Store;
+namespace Dolittle.Runtime.Aggregates;
 
 /// <summary>
 /// Represents a version of an aggregate root as a natural number, corresponding to the number of events the Aggregate Root has applied to an Event Source.
