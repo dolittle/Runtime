@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Client.Management;
 /// <summary>
 /// Represents an implementation of <see cref="Contracts.Client.ClientBase"/>.
 /// </summary>
-[ManagementService]
+[ManagementService, ManagementWebService]
 public class ClientService : Contracts.Client.ClientBase
 {
     readonly IBuildResultsForHeads _buildResults;

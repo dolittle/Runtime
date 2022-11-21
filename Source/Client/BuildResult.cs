@@ -28,7 +28,7 @@ public record BuildResult(BuildResultType Type, string Message)
     {
         if (logger.IsEnabled(LogLevel))
         {
-            logger.Log(LogLevel, "{Type} Build Result for Head {Head}: {Message}", Type, head, Message);
+            logger.Log(LogLevel, Message);
         }
     }
 }

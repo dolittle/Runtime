@@ -78,16 +78,16 @@ public class BuildResults
 
     public void Log(ILogger logger, HeadId headId)
     {
-        foreach (var result in Other)
-        {
-            result.Log(logger, headId);
-        }
         Log(logger, headId, EventTypes, "Event Type");
         Log(logger, headId, AggregateRoots, "Aggregate Root Type");
         Log(logger, headId, EventHandlers, "Event Handler");
         Log(logger, headId, Projections, "Projection");
         Log(logger, headId, Embeddings, "Embedding");
-        Log(logger, headId, Embeddings, "Filters");
+        Log(logger, headId, Filters, "Filters");
+        foreach (var result in Other)
+        {
+            result.Log(logger, headId);
+        }
     }
 
     static void Log(ILogger logger, HeadId headId, IEnumerable<ArtifactBuildResult> results, string artifactType)
