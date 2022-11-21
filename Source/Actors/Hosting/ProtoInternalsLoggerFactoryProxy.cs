@@ -27,7 +27,6 @@ class ProtoInternalsLoggerFactoryProxy : ILoggerFactory
 
     public void Dispose()
     {
-        _loggerFactory.Dispose();
     }
 
     class LoggerProxy : ILogger
