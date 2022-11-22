@@ -31,8 +31,8 @@ public class ActorSystemClusterHostedService : IHostedService
     {
         _actorSystem = actorSystem;
         _shutdownHook = shutdownHook;
-        _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ActorSystemClusterHostedService>();
+        _loggerFactory = new ProtoInternalsLoggerFactoryProxy(loggerFactory);
     }
     
     /// <inheritdoc />
