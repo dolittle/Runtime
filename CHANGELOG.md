@@ -1,3 +1,14 @@
+# [8.7.2] - 2022-11-22 [PR: #720](https://github.com/dolittle/Runtime/pull/720)
+## Summary
+
+Makes the default runtime logs less noisy, by reducing log levels for Proto Debug and Information logs.
+
+### Changed
+
+- Proto Debug logs demoted to Trace
+- Proto Info logs demoted to Debug
+
+
 # [8.7.1] - 2022-11-10 [PR: #719](https://github.com/dolittle/Runtime/pull/719)
 ## Summary
 
