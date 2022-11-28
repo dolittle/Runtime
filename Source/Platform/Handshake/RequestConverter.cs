@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Client;
 using Dolittle.Runtime.Handshake.Contracts;
 using Dolittle.Runtime.Protobuf;
 
@@ -40,7 +41,6 @@ public class RequestConverter : IRequestConverter
             failure = new MissingHandshakeInformation(nameof(request.TimeSpent));
             return false;
         }
-
         failure = null;
         parsed = new Request(
             request.SdkIdentifier,
@@ -48,7 +48,8 @@ public class RequestConverter : IRequestConverter
             request.HeadVersion.ToVersion(),
             request.ContractsVersion.ToVersion(),
             request.Attempt,
-            request.TimeSpent.ToTimeSpan());
+            request.TimeSpent.ToTimeSpan(),
+            request.BuildResults?.ToBuildResults() ?? BuildResults.Empty);
         return true;
     }
 }
