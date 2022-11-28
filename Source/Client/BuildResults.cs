@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Client;
 /// </summary>
 public class BuildResults
 {
-    public static BuildResults Empty => new(
+    public static BuildResults Empty = new(
         Enumerable.Empty<ArtifactBuildResult>(),
         Enumerable.Empty<ArtifactBuildResult>(),
         Enumerable.Empty<ArtifactBuildResult>(),
