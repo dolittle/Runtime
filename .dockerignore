@@ -7,4 +7,5 @@ Benchmarks
 Diagrams
 .vscode
 **/node_modules
+**/wwwroot
 .github

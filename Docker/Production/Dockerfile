@@ -1,3 +1,4 @@
+
 # DotNet Build
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS dotnet-build
 SHELL ["/bin/bash", "-c"]
@@ -14,6 +15,17 @@ WORKDIR /app/Source/Server
 RUN dotnet restore
 RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
+# Web Build
+FROM node:14.2.0 AS web-build
+WORKDIR /app
+
+COPY Source/Management.Web ./Source/Management.Web
+
+WORKDIR /app/Source/Management.Web
+
+RUN yarn
+RUN yarn build
+
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
 SHELL ["/bin/bash", "-c"]
@@ -22,7 +34,7 @@ ENV Logging__Console__FormatterName=""
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
-COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
+COPY --from=web-build /app/Source/Management.Web/wwwroot ./wwwroot
 COPY Docker/Production/.dolittle ./.dolittle
 
 EXPOSE 9700 50052 50053 51052
