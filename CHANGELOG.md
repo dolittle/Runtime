@@ -1,3 +1,14 @@
+# [8.8.0] - 2022-11-28 [PR: #703](https://github.com/dolittle/Runtime/pull/703)
+## Summary
+
+Implement Contracts versions 7.4.0 adding Client Build Results to handshake and a management API for getting them
+
+### Added
+
+- Management Grpc API for getting client build results
+- Client build results in the handshake request and log them if any
+
+
 # [8.7.2] - 2022-11-22 [PR: #720](https://github.com/dolittle/Runtime/pull/720)
 ## Summary
 
