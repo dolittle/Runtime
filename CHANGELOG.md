@@ -1,3 +1,13 @@
+# [8.8.1] - 2022-11-30 [PR: #721](https://github.com/dolittle/Runtime/pull/721)
+## Summary
+
+Fixes a bug in the partitioned stream processing that could cause partitioned event handlers that were failing to be called with big retry processing attempts number which would in turn cause the SDK to wait for the maximum amount of time (usually 1 minute) 
+
+### Fixed
+
+- Partitioned stream processing retry processing attempts calculation bug
+
+
 # [8.8.0] - 2022-11-28 [PR: #703](https://github.com/dolittle/Runtime/pull/703)
 ## Summary
 
