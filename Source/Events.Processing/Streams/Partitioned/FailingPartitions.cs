@@ -225,7 +225,7 @@ public class FailingPartitions : IFailingPartitions
     }
 
     Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition, ExecutionContext executionContext, CancellationToken cancellationToken) =>
-        _eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts - 1, executionContext, cancellationToken);
+        _eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts == 0 ? 0 : failingPartitionState.ProcessingAttempts - 1, executionContext, cancellationToken);
 
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
