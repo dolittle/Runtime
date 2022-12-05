@@ -15,6 +15,6 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftDotNetTestVersion)" />
         <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="$(MachineSpecificationsRunnerVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Grpc.Core.Testing" Version="$(GrpcVersion)" />
+        <PackageReference Include="Grpc.Core.Testing" Version="$(GrpcTestingVersion)" />
     </ItemGroup>
 </Project>

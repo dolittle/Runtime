@@ -5,6 +5,7 @@
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Events.Specs</AssemblyName>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../Source/Events/Events.csproj" />
   </ItemGroup>
