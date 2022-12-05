@@ -12,7 +12,6 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Microservices;
-using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 using Polly;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;

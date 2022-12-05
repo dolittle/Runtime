@@ -9,7 +9,6 @@ using Machine.Specifications;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using It = Machine.Specifications.It;
-using ReturnsExtensions = Moq.ReturnsExtensions;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor.when_processing;
 

@@ -5,7 +5,6 @@
 
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Integration.Tests.Events.Processing.EventHandlers.given;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.scoped.not_partitioned.event_handler.without_implicit_filter.processing_all_event_types.given;
 

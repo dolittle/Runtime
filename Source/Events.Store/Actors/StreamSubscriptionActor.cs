@@ -20,7 +20,7 @@ public class StreamSubscriptionActor : IActor
     readonly TenantId _tenantId;
     readonly ILogger<StreamSubscriptionActor> _logger;
 
-    Func<Contracts.CommittedEvent, bool> _shouldIncludeEvent;
+    Func<Contracts.CommittedEvent, bool>? _shouldIncludeEvent;
     PID _target;
     Uuid _subscriptionId;
 
@@ -116,7 +116,7 @@ public class StreamSubscriptionActor : IActor
             SubscriptionId = _subscriptionId,
             FromOffset = request.FromOffset,
             ToOffset = request.ToOffset,
-            Events = { request.Events.Where(_shouldIncludeEvent) }
+            Events = { request.Events.Where(_shouldIncludeEvent!) }
         };
     
     SubscriptionEvents ToSubscriptionEvent(EventLogCatchupResponse response) =>
@@ -125,6 +125,6 @@ public class StreamSubscriptionActor : IActor
             SubscriptionId = _subscriptionId,
             FromOffset = response.FromOffset,
             ToOffset = response.ToOffset,
-            Events = { response.Events.Where(_shouldIncludeEvent) }
+            Events = { response.Events.Where(_shouldIncludeEvent!) }
         };
 }
