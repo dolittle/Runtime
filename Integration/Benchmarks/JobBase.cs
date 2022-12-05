@@ -15,7 +15,7 @@ namespace Integration.Benchmarks;
 /// </summary>
 public abstract class JobBase
 {
-    RunningRuntime _runtime;
+    RunningRuntime? _runtime;
     
     /// <summary>
     /// Ensures that a local MongoDB is reachable, and boots up a new Runtime Server host configured for tenants provided by the <see cref="GetTenantsToSetup"/>.
@@ -35,13 +35,13 @@ public abstract class JobBase
     public void GlobalCleanup()
     {
         Cleanup();
-        Runtime.CleanAll(_runtime).GetAwaiter().GetResult();
+        Runtime.CleanAll(_runtime!).GetAwaiter().GetResult();
     }
 
     /// <summary>
     /// Gets the <see cref="TenantId">tenants</see> configured for the running benchmark.
     /// </summary>
-    protected IEnumerable<TenantId> ConfiguredTenants => _runtime.ConfiguredTenants;
+    protected IEnumerable<TenantId> ConfiguredTenants => _runtime!.ConfiguredTenants;
 
     /// <summary>
     /// Gets the number of tenants to setup.

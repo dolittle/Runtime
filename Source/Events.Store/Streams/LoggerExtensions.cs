@@ -8,25 +8,25 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 
 static class LoggerExtensions
 {
-    static readonly Action<ILogger, ulong, string, Guid, Guid, Exception> _waitForEventAtPosition = LoggerMessage
+    static readonly Action<ILogger, ulong, string, Guid, Guid, Exception?> _waitForEventAtPosition = LoggerMessage
         .Define<ulong, string, Guid, Guid>(
             LogLevel.Trace,
             new EventId(2059664795, nameof(WaitForEventAtPosition)),
             "Start waiting for event coming in at position: {Position} in {IsPublic}stream: {StreamId} in scope: {Scope}");
 
-    static readonly Action<ILogger, string, Guid, Guid, Exception> _waitForEventAppended = LoggerMessage
+    static readonly Action<ILogger, string, Guid, Guid, Exception?> _waitForEventAppended = LoggerMessage
         .Define<string, Guid, Guid>(
             LogLevel.Trace,
             new EventId(2059674795, nameof(WaitForEventAppended)),
             "Start waiting for event to be appended to {IsPublic}stream: {StreamId} in scope: {Scope}");
 
-    static readonly Action<ILogger, ulong, string, Guid, Guid, Exception> _waiterNotifyForEvent = LoggerMessage
+    static readonly Action<ILogger, ulong, string, Guid, Guid, Exception?> _waiterNotifyForEvent = LoggerMessage
         .Define<ulong, string, Guid, Guid>(
             LogLevel.Trace,
             new EventId(255784820, nameof(WaiterNotifyForEvent)),
             "Notifying that an event has been written at position: {Position} in {IsPublic}stream: {StreamId} in scope: {Scope}");
 
-    static readonly Action<ILogger, EventWaiterId, Exception> _waitingTimedOut = LoggerMessage
+    static readonly Action<ILogger, EventWaiterId, Exception?> _waitingTimedOut = LoggerMessage
         .Define<EventWaiterId>(
             LogLevel.Trace,
             new EventId(188707764, nameof(WaitingTimedOut)),
