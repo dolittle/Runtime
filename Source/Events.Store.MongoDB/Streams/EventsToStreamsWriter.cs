@@ -60,13 +60,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             CancellationToken cancellationToken)
             where TEvent : class
         {
+            StreamPosition streamPosition = 0;
             try
             {
                 using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                 try
                 {
                     session.StartTransaction();
-                    var streamPosition = (ulong)await stream.CountDocumentsAsync(
+                    streamPosition = (ulong)await stream.CountDocumentsAsync(
                         session,
                         filter.Empty,
                         cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -87,25 +88,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
             catch (Exception ex) when (typeof(TEvent) == typeof(Events.StreamEvent) && IsDuplicateKeyException(ex))
             {
-                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                try
+                if (streamPosition == 0)
                 {
-                    session.StartTransaction();
-                    var streamPosition = (ulong) await stream.CountDocumentsAsync(
-                        session,
-                        Builders<TEvent>.Filter.Empty,
-                        cancellationToken: cancellationToken).ConfigureAwait(false);
-                    if (streamPosition == 0)
-                    {
-                        throw;
-                    }
-                    return streamPosition - 1;
-                }
-                catch
-                {
-                    await session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
                     throw;
                 }
+                return streamPosition - 1;
             }
         }
 
