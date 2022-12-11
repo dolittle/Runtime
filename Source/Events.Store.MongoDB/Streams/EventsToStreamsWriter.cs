@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using StreamEvent = Dolittle.Runtime.Events.Processing.Contracts.StreamEvent;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
@@ -60,30 +62,62 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             CancellationToken cancellationToken)
             where TEvent : class
         {
-            StreamPosition streamPosition = null;
             try
             {
-                using var session = await _streams.StartSessionAsync().ConfigureAwait(false);
-                await session.WithTransactionAsync(
-                    async (transaction, cancellationToken) =>
-                    {
-                        streamPosition = (ulong)await stream.CountDocumentsAsync(
-                            transaction,
-                            filter.Empty).ConfigureAwait(false);
-
-                        await stream.InsertOneAsync(
-                            transaction,
-                            createStoreEvent(streamPosition),
-                            cancellationToken: cancellationToken).ConfigureAwait(false);
-                        return Task.CompletedTask;
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                return streamPosition;
+                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    session.StartTransaction();
+                    var streamPosition = (ulong)await stream.CountDocumentsAsync(
+                        session,
+                        filter.Empty,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var eventToWrite = createStoreEvent(streamPosition);
+                    await stream.InsertOneAsync(session, eventToWrite, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    await session.CommitTransactionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    return streamPosition;
+                }
+                catch
+                {
+                    await session.AbortTransactionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    throw;
+                }
             }
             catch (MongoWaitQueueFullException ex)
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
+            catch (Exception ex) when (typeof(TEvent) == typeof(Events.StreamEvent) && IsDuplicateKeyException(ex))
+            {
+                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    session.StartTransaction();
+                    var streamPosition = (ulong) await stream.CountDocumentsAsync(
+                        session,
+                        Builders<TEvent>.Filter.Empty,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                    if (streamPosition == 0)
+                    {
+                        throw;
+                    }
+                    return streamPosition - 1;
+                }
+                catch
+                {
+                    await session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
+                    throw;
+                }
+            }
         }
+
+        static bool IsDuplicateKeyException(Exception exception)
+            => exception switch
+            {
+                MongoDuplicateKeyException => true,
+                MongoWriteException writeException => writeException.Message.Contains("duplicate key error"),
+                MongoBulkWriteException bulkWriteException => bulkWriteException.Message.Contains("duplicate key error"),
+                _ => false,
+            };
     }
 }
