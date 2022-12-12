@@ -60,30 +60,49 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             CancellationToken cancellationToken)
             where TEvent : class
         {
-            StreamPosition streamPosition = null;
+            StreamPosition streamPosition = 0;
             try
             {
-                using var session = await _streams.StartSessionAsync().ConfigureAwait(false);
-                await session.WithTransactionAsync(
-                    async (transaction, cancellationToken) =>
-                    {
-                        streamPosition = (ulong)await stream.CountDocumentsAsync(
-                            transaction,
-                            filter.Empty).ConfigureAwait(false);
-
-                        await stream.InsertOneAsync(
-                            transaction,
-                            createStoreEvent(streamPosition),
-                            cancellationToken: cancellationToken).ConfigureAwait(false);
-                        return Task.CompletedTask;
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                return streamPosition;
+                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    session.StartTransaction();
+                    streamPosition = (ulong)await stream.CountDocumentsAsync(
+                        session,
+                        filter.Empty,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var eventToWrite = createStoreEvent(streamPosition);
+                    await stream.InsertOneAsync(session, eventToWrite, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    await session.CommitTransactionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    return streamPosition;
+                }
+                catch
+                {
+                    await session.AbortTransactionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    throw;
+                }
             }
             catch (MongoWaitQueueFullException ex)
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
+            catch (Exception ex) when (typeof(TEvent) == typeof(Events.StreamEvent) && IsDuplicateKeyException(ex))
+            {
+                if (streamPosition == 0)
+                {
+                    throw;
+                }
+                return streamPosition - 1;
+            }
         }
+
+        static bool IsDuplicateKeyException(Exception exception)
+            => exception switch
+            {
+                MongoDuplicateKeyException => true,
+                MongoWriteException writeException => writeException.Message.Contains("duplicate key error"),
+                MongoBulkWriteException bulkWriteException => bulkWriteException.Message.Contains("duplicate key error"),
+                _ => false,
+            };
     }
 }
