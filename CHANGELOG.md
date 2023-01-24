@@ -1,3 +1,35 @@
+# [8.8.1] - 2022-11-30 [PR: #721](https://github.com/dolittle/Runtime/pull/721)
+## Summary
+
+Fixes a bug in the partitioned stream processing that could cause partitioned event handlers that were failing to be called with big retry processing attempts number which would in turn cause the SDK to wait for the maximum amount of time (usually 1 minute) 
+
+### Fixed
+
+- Partitioned stream processing retry processing attempts calculation bug
+
+
+# [8.8.0] - 2022-11-28 [PR: #703](https://github.com/dolittle/Runtime/pull/703)
+## Summary
+
+Implement Contracts versions 7.4.0 adding Client Build Results to handshake and a management API for getting them
+
+### Added
+
+- Management Grpc API for getting client build results
+- Client build results in the handshake request and log them if any
+
+
+# [8.7.2] - 2022-11-22 [PR: #720](https://github.com/dolittle/Runtime/pull/720)
+## Summary
+
+Makes the default runtime logs less noisy, by reducing log levels for Proto Debug and Information logs.
+
+### Changed
+
+- Proto Debug logs demoted to Trace
+- Proto Info logs demoted to Debug
+
+
 # [8.7.1] - 2022-11-10 [PR: #719](https://github.com/dolittle/Runtime/pull/719)
 ## Summary
 
