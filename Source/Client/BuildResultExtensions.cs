@@ -3,7 +3,6 @@
 
 using System.Linq;
 using Dolittle.Runtime.Protobuf;
-using Google.Protobuf.Collections;
 
 namespace Dolittle.Runtime.Client;
 
