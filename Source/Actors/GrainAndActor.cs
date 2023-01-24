@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Proto;
 using Proto.Cluster;
 
@@ -18,5 +21,20 @@ public record GrainAndActor(Type Grain, Type Actor, bool IsPerTenant)
     /// <summary>
     /// The <see cref="ClusterKind.Name"/> of the grain.
     /// </summary>
-    public string Kind => Grain.Name;
+    public string Kind
+    {
+        get
+        {
+            var kind = GetKind(Actor);
+            
+            return kind ?? Grain.Name;
+        }
+    }
+
+    static string? GetKind(Type type)
+    {
+        var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+        return fieldInfos.FirstOrDefault(fi => fi is { IsLiteral: true, IsInitOnly: false, Name:"Kind" })?.GetRawConstantValue()?.ToString();
+    }
 }
