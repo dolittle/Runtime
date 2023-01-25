@@ -54,7 +54,7 @@ public record StreamProcessorState(StreamPosition Position, string FailureReason
         {
             protobuf.Failures.Add(new ProcessingFailure()
             {
-                EventSourceId = "",
+                EventSourceId = PartitionId.None,
                 FailureReason = FailureReason,
                 RetryTime = Timestamp.FromDateTimeOffset(RetryTime),
                 ProcessingAttempts = ProcessingAttempts,
