@@ -20,7 +20,7 @@ public static class TenantActionPerformerExtensions
     /// <param name="performer">This <see cref="IPerformActionsForAllTenants"/>.</param>
     /// <param name="callback">The callback to call with the service for each tenant.</param>
     /// <typeparam name="TService">The type of the service to get from the per-tenant service providers.</typeparam>
-    public static void PerformOn<TService>(this IPerformActionsForAllTenants performer, Action<TService> callback)
+    public static void PerformOn<TService>(this IPerformActionsForAllTenants performer, Action<TService> callback) where TService: notnull
         => performer.Perform((_, services) => callback(services.GetRequiredService<TService>()));
     
     /// <summary>
@@ -30,7 +30,7 @@ public static class TenantActionPerformerExtensions
     /// <param name="callback">The callback to call with the service for each tenant.</param>
     /// <typeparam name="TService">The type of the service to get from the per-tenant service providers.</typeparam>
     /// <returns>The first <see cref="Try"/> that failed, or success if all succeeded.</returns>
-    public static Try TryPerformOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, Try> callback)
+    public static Try TryPerformOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, Try> callback) where TService: notnull
         => performer.TryPerform((_, services) => callback(services.GetRequiredService<TService>()));
     /// <summary>
     /// Perform asynchronous an action on the <typeparamref name="TService"/> for all tenants.
@@ -40,7 +40,7 @@ public static class TenantActionPerformerExtensions
     /// <param name="callback">The callback to call with the service for each tenant.</param>
     /// <typeparam name="TService">The type of the service to get from the per-tenant service providers.</typeparam>
     /// <returns>A <see cref="Task"/> that is resolved when the callback is called for all tenants.</returns>
-    public static Task PerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, Task> callback)
+    public static Task PerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, Task> callback) where TService: notnull
         => performer.PerformAsync((_, services) => callback(services.GetRequiredService<TService>()));
     
     /// <summary>
@@ -51,7 +51,7 @@ public static class TenantActionPerformerExtensions
     /// <param name="callback">The callback to call with the service, tenant and service provider for each tenant.</param>
     /// <typeparam name="TService">The type of the service to get from the per-tenant service providers.</typeparam>
     /// <returns>A <see cref="Task"/> that is resolved when the callback is called for all tenants.</returns>
-    public static Task PerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, TenantId, IServiceProvider, Task> callback)
+    public static Task PerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, TenantId, IServiceProvider, Task> callback) where TService: notnull
         => performer.PerformAsync((tenant, services) => callback(services.GetRequiredService<TService>(), tenant, services));
     
     
@@ -63,7 +63,7 @@ public static class TenantActionPerformerExtensions
     /// <param name="callback">The callback to call with the service for each tenant.</param>
     /// <typeparam name="TService">The type of the service to get from the per-tenant service providers.</typeparam>
     /// <returns>A <see cref="Task"/> that, when resolved, returns the first <see cref="Try"/> that failed, or success if all succeeded.</returns>
-    public static Task<Try> TryPerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, Task<Try>> callback)
+    public static Task<Try> TryPerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, Task<Try>> callback) where TService: notnull
         => performer.TryPerformAsync((_, services) => callback(services.GetRequiredService<TService>()));
     
     /// <summary>
@@ -74,6 +74,6 @@ public static class TenantActionPerformerExtensions
     /// <param name="callback">The callback to call with the service, tenant and service provider for each tenant.</param>
     /// <typeparam name="TService">The type of the service to get from the per-tenant service providers.</typeparam>
     /// <returns>A <see cref="Task"/> that, when resolved, returns the first <see cref="Try"/> that failed, or success if all succeeded.</returns>
-    public static Task<Try> TryPerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, TenantId, IServiceProvider, Task<Try>> callback)
+    public static Task<Try> TryPerformAsyncOn<TService>(this IPerformActionsForAllTenants performer, Func<TService, TenantId, IServiceProvider, Task<Try>> callback) where TService: notnull
         => performer.TryPerformAsync((tenant, services) => callback(services.GetRequiredService<TService>(), tenant, services));
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Client;
 using Dolittle.Runtime.Domain.Platform;
 
 namespace Dolittle.Runtime.Platform.Handshake;
@@ -14,10 +15,12 @@ namespace Dolittle.Runtime.Platform.Handshake;
 /// <param name="ContractsVersion">The version of the Contracts used by the Client SDK.</param>
 /// <param name="Attempt">The handshake attempt number.</param>
 /// <param name="TimeSpent">Time since the first handshake attempt.</param>
+/// <param name="BuildResults">The build results.</param>
 public record Request(
     SDKIdentifier SDK,
     Version SDKVersion,
     Version HeadVersion,
     Version ContractsVersion,
     HandshakeAttempt Attempt,
-    HandshakeTimeSpent TimeSpent);
+    HandshakeTimeSpent TimeSpent,
+    BuildResults BuildResults);

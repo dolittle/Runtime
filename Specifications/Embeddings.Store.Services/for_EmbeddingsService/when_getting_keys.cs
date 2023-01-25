@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
-using static Moq.It;
 using static Moq.Times;
 
 namespace Dolittle.Runtime.Embeddings.Store.Services.for_EmbeddingsService;

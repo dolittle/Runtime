@@ -11,11 +11,9 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
-using Integration.Benchmarks.Events.Store;
 using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,

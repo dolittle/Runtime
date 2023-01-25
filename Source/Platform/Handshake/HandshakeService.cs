@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Client;
 using Dolittle.Runtime.Diagnostics.OpenTelemetry;
 using Dolittle.Runtime.Handshake.Contracts;
 using Dolittle.Runtime.Protobuf;
@@ -25,6 +26,7 @@ public class HandshakeService : HandshakeBase
     readonly IResolvePlatformEnvironment _platformEnvironment;
     readonly IRequestConverter _requestConverter;
     readonly IVerifyContractsCompatibility _contractsCompatibility;
+    readonly IBuildResultsForHeads _buildResultsForHeads;
     readonly IOptions<OpenTelemetryConfiguration> _openTelemetryConfig;
     readonly ILogger _logger;
     
@@ -37,18 +39,21 @@ public class HandshakeService : HandshakeBase
     /// <param name="platformEnvironment">The <see cref="IResolvePlatformEnvironment"/> to use for resolving the current Runtime environment.</param>
     /// <param name="requestConverter">The <see cref="IRequestConverter"/> to use to parse incoming requests.</param>
     /// <param name="contractsCompatibility">The <see cref="IVerifyContractsCompatibility"/> to use to compare Contracts versions.</param>
+    /// <param name="buildResultsForHeads">The <see cref="IBuildResultsForHeads"/>.</param>
     /// <param name="openTelemetryConfig">The <see cref="openTelemetryConfig"/>.</param>
     /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
     public HandshakeService(
         IResolvePlatformEnvironment platformEnvironment,
         IRequestConverter requestConverter,
         IVerifyContractsCompatibility contractsCompatibility,
+        IBuildResultsForHeads buildResultsForHeads,
         IOptions<OpenTelemetryConfiguration> openTelemetryConfig,
         ILogger logger)
     {
         _platformEnvironment = platformEnvironment;
         _requestConverter = requestConverter;
         _contractsCompatibility = contractsCompatibility;
+        _buildResultsForHeads = buildResultsForHeads;
         _openTelemetryConfig = openTelemetryConfig;
         _logger = logger;
 
@@ -66,7 +71,7 @@ public class HandshakeService : HandshakeBase
                 Log.RequestParsingFailed(_logger, failure.Reason);
                 return FailedResponse(failure);
             }
-
+            
             Log.HeadInitiatedHandshake(
                 _logger,
                 parsedRequest.Attempt,
@@ -74,6 +79,11 @@ public class HandshakeService : HandshakeBase
                 parsedRequest.SDK,
                 parsedRequest.SDKVersion,
                 parsedRequest.ContractsVersion);
+
+            if (parsedRequest.BuildResults is not null)
+            {
+                _buildResultsForHeads.AddFor(Guid.Empty, parsedRequest.BuildResults);
+            }
 
             switch (_contractsCompatibility.CheckCompatibility(_runtimeContractsVersion, parsedRequest.ContractsVersion))
             {

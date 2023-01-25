@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStreamProcessor.given;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;

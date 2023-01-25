@@ -8,7 +8,6 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;

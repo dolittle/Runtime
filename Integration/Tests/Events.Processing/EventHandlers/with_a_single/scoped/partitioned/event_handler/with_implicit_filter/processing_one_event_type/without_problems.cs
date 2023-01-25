@@ -3,7 +3,6 @@
 
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.scoped.partitioned.event_handler.with_implicit_filter.processing_one_event_type;

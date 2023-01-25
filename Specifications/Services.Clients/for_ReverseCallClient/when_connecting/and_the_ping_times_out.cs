@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading;
-using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Grpc.Core;
 using Machine.Specifications;

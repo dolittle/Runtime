@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,6 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Tenancy;
-using Microsoft.Extensions.Logging;
 using Proto;
 using Failure = Dolittle.Runtime.Protobuf.Failure;
 
@@ -30,11 +28,10 @@ public class EventStore : EventStoreBase
     readonly TenantId _tenant;
     readonly ICreateProps _propsFactory;
     readonly ITenants _tenants;
-    readonly ILogger<EventStore> _logger;
     readonly Dictionary<ScopeId, PID> _streamSubscriptionManagerPIDs = new();
     
     PID? _committer;
-    bool _failedToStart;
+    bool FailedToStart => _startupFailure is not null;
     Dolittle.Protobuf.Contracts.Failure? _startupFailure;
 
     /// <summary>
@@ -44,14 +41,12 @@ public class EventStore : EventStoreBase
     /// <param name="tenantId"></param>
     /// <param name="propsFactory"></param>
     /// <param name="tenants"></param>
-    /// <param name="logger"></param>
-    public EventStore(IContext context, TenantId tenantId, ICreateProps propsFactory, ITenants tenants, ILogger<EventStore> logger)
+    public EventStore(IContext context, TenantId tenantId, ICreateProps propsFactory, ITenants tenants)
         : base(context)
     {
         _tenant = tenantId;
         _propsFactory = propsFactory;
         _tenants = tenants;
-        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -59,19 +54,16 @@ public class EventStore : EventStoreBase
     {
         if (!_tenants.All.Contains(_tenant))
         {
-            _failedToStart = true;
             _startupFailure = new TenantNotConfigured(_tenant, _tenants.All).ToFailure();
             return Task.CompletedTask;
         }
         if (!TrySpawnSubscriptionManager(ScopeId.Default, out var eventLogSubscriptionPid, out var error))
         {
-            _failedToStart = true;
             _startupFailure = new EventStoreCouldNotBeStarted(_tenant, error, _tenants.All).ToFailure();
             return Task.CompletedTask;
         }
         if (!Context.TrySpawnNamed(_propsFactory.PropsFor<Committer>(), "committer", out _committer, out error))
         {
-            _failedToStart = true;
             _startupFailure = new EventStoreCouldNotBeStarted(_tenant, error, _tenants.All).ToFailure();
             return Task.CompletedTask;
         }
@@ -113,9 +105,9 @@ public class EventStore : EventStoreBase
 
     Task ForwardToCommitter<TRequest, TResponse>(TRequest request, Func<Failure, Task> respondFailure)
     {
-        if (_failedToStart)
+        if (FailedToStart)
         {
-            return respondFailure(_startupFailure);
+            return respondFailure(_startupFailure!);
         }
         Context.Request(_committer!, request!, Context.Sender);
         return Task.CompletedTask;
@@ -124,7 +116,7 @@ public class EventStore : EventStoreBase
     public override Task<CommitExternalEventsResponse> CommitExternal(CommitExternalEventsRequest request)
     {
         var scope = request.ScopeId.ToGuid();
-        if (_failedToStart)
+        if (FailedToStart)
         {
             return Task.FromResult(new CommitExternalEventsResponse{Failure = _startupFailure});
         }
@@ -152,7 +144,7 @@ public class EventStore : EventStoreBase
 
     public override Task RegisterSubscription(EventStoreSubscriptionRequest request, Action<EventStoreSubscriptionAck> respond, Action<string> onError)
     {
-        if (_failedToStart)
+        if (FailedToStart)
         {
             onError(_startupFailure!.Reason);
             return Task.CompletedTask;
@@ -185,7 +177,7 @@ public class EventStore : EventStoreBase
 
     public override Task CancelSubscription(CancelEventStoreSubscription request, Action<CancelEventStoreSubscriptionAck> respond, Action<string> onError)
     {
-        if (_failedToStart)
+        if (FailedToStart)
         {
             onError(_startupFailure!.Reason);
             return Task.CompletedTask;

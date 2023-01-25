@@ -12,7 +12,6 @@ using Nito.AsyncEx;
 using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Dolittle.Artifacts.Contracts;

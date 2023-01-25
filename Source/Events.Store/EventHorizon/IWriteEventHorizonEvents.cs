@@ -3,7 +3,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.EventHorizon;
 

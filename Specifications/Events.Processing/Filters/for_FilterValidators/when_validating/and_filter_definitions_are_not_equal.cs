@@ -3,7 +3,6 @@
 
 using Autofac;
 using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating;
 
