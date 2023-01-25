@@ -1,0 +1,34 @@
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Rudimentary;
+
+namespace Dolittle.Runtime.Events.Store;
+
+public interface IStreamProcessorStateBatchRepository: IStreamProcessorStateRepository
+{
+    /// <summary>
+    /// Gets the <see cref="IStreamProcessorState" /> for the given <see cref="IStreamProcessorId" /> from the correct
+    /// collection, either <see cref="SubscriptionState" /> or <see cref="StreamProcessorState" />.
+    /// </summary>
+    /// <param name="id">The unique <see cref="IStreamProcessorId" /> representing either the <see cref="AbstractScopedStreamProcessor"/>
+    /// or <see cref="SubscriptionId" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" />.</returns>
+    IAsyncEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> GetAll(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId"/> and <see cref="SubscriptionId"/>.
+    /// Handles <see cref="Partitioned.PartitionedStreamProcessorState"/> separately also.
+    /// IsUpsert option creates the document if one isn't found.
+    /// </summary>
+    /// <param name="id">The <see cref="StreamProcessorId" />.</param>
+    /// <param name="baseStreamProcessorState">The <see cref="IStreamProcessorState" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
+    Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState)> streamProcessorStates, CancellationToken cancellationToken);
+}

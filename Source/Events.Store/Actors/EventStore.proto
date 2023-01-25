@@ -11,6 +11,8 @@ import "Protobuf/Failure.proto";
 import "Protobuf/Uuid.proto";
 import "Artifacts/Artifact.proto";
 
+import "google/protobuf/empty.proto";
+
 
 message EventStoreSubscriptionRequest{
     protobuf.Uuid subscription_id = 1;
@@ -77,4 +79,50 @@ service EventStore {
     rpc CommitExternal (CommitExternalEventsRequest) returns (CommitExternalEventsResponse);
     rpc RegisterSubscription(EventStoreSubscriptionRequest) returns (EventStoreSubscriptionAck);
     rpc CancelSubscription(CancelEventStoreSubscription) returns (CancelEventStoreSubscriptionAck);
+}
+
+message StreamSubscriptionId{
+    protobuf.Uuid scope_id = 1;
+    protobuf.Uuid consumer_tenant_id = 2;
+    protobuf.Uuid producer_microservice_id = 3;
+    protobuf.Uuid producer_tenant_id = 4;
+    protobuf.Uuid stream_id = 5;
+    string partition_id = 6;
+}
+
+message StreamProcessorId{
+    protobuf.Uuid scope_id = 1;
+    uint64 current_offset = 2;
+    map<string, uint64> failing_event_sources = 3;
+}
+
+message StreamId{
+    oneof id {
+        StreamProcessorId stream_id = 1;
+        StreamSubscriptionId subscription_id = 2;
+    }
+}
+
+message StreamProcessorStateResponse{
+    StreamId stream_id = 1;
+    uint64 current_offset = 2;
+    map<string, uint64> failing_event_sources = 3;
+}
+
+message SetStreamProcessorStateRequest{
+    StreamId stream_id = 1;
+    uint64 current_offset = 2;
+}
+
+message SetPartitionedStreamProcessorStateRequest{
+    StreamId stream_id = 1;
+    uint64 current_offset = 2;
+    map<string, uint64> failing_event_sources = 3;
+}
+
+
+service StreamProcessorState {
+    rpc Get (StreamId) returns (StreamProcessorStateResponse);
+    rpc SetStreamProcessorState (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
+    rpc SetPartitioned (SetPartitionedStreamProcessorStateRequest) returns (google.protobuf.Empty);
 }
