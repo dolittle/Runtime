@@ -14,6 +14,4 @@ public interface IStreamProcessorId
     ScopeId ScopeId { get; }
 
     Actors.StreamProcessorKey ToProtobuf();
-
-    IStreamProcessorId FromProtobuf(Actors.StreamProcessorKey streamProcessorKey);
 }

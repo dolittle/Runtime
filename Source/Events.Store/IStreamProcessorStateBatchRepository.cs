@@ -30,5 +30,5 @@ public interface IStreamProcessorStateBatchRepository: IStreamProcessorStateRepo
     /// <param name="baseStreamProcessorState">The <see cref="IStreamProcessorState" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState)> streamProcessorStates, CancellationToken cancellationToken);
+    Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> streamProcessorStates, CancellationToken cancellationToken);
 }

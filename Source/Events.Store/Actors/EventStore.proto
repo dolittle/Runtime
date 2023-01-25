@@ -12,6 +12,7 @@ import "Protobuf/Uuid.proto";
 import "Artifacts/Artifact.proto";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 
 message EventStoreSubscriptionRequest{
@@ -92,37 +93,60 @@ message StreamSubscriptionId{
 
 message StreamProcessorId{
     protobuf.Uuid scope_id = 1;
-    uint64 current_offset = 2;
-    map<string, uint64> failing_event_sources = 3;
+    protobuf.Uuid event_processor_id = 2;
+    protobuf.Uuid source_stream_id = 3;
 }
 
-message StreamId{
+message StreamProcessorKey{
     oneof id {
-        StreamProcessorId stream_id = 1;
+        StreamProcessorId stream_processor_id = 1;
         StreamSubscriptionId subscription_id = 2;
     }
 }
 
 message StreamProcessorStateResponse{
-    StreamId stream_id = 1;
-    uint64 current_offset = 2;
-    map<string, uint64> failing_event_sources = 3;
+    StreamProcessorKey stream_key = 1;
+    repeated Bucket bucket = 2;
 }
 
-message SetStreamProcessorStateRequest{
-    StreamId stream_id = 1;
+message SetStreamProcessorPartitionStateRequest{
+    StreamProcessorKey stream_key = 1;
+    Bucket bucket = 2;
+}
+
+message GetStreamProcessorPartitionStateResponse{
+    StreamProcessorKey stream_key = 1;
+    Bucket partition = 2;
+    bool partitioned = 3;
+}
+
+message ProcessingFailure{
+    string event_source_id = 1;
+    uint64 offset = 2;
+    string failure_reason = 3;
+    uint32 processing_attempts = 4;
+    google.protobuf.Timestamp retry_time = 5;
+    google.protobuf.Timestamp last_failed = 6;
+}
+
+
+
+message Bucket{
+    uint32 bucket_id = 1;
     uint64 current_offset = 2;
+    repeated ProcessingFailure failures = 3;
+    google.protobuf.Timestamp last_successfully_processed = 4;
+    bool partitioned = 5;
 }
 
 message SetPartitionedStreamProcessorStateRequest{
-    StreamId stream_id = 1;
+    StreamProcessorKey stream_id = 1;
     uint64 current_offset = 2;
     map<string, uint64> failing_event_sources = 3;
 }
 
 
 service StreamProcessorState {
-    rpc Get (StreamId) returns (StreamProcessorStateResponse);
-    rpc SetStreamProcessorState (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
-    rpc SetPartitioned (SetPartitionedStreamProcessorStateRequest) returns (google.protobuf.Empty);
+    rpc Get (StreamProcessorKey) returns (StreamProcessorStateResponse);
+    rpc SetStreamProcessorPartitionState (SetStreamProcessorPartitionStateRequest) returns (google.protobuf.Empty);
 }

@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
@@ -17,9 +19,19 @@ public record StreamProcessorId(ScopeId ScopeId, EventProcessorId EventProcessor
     /// <inheritdoc />
     public override string ToString() => $"Scope: {ScopeId.Value} Event Processor Id: {EventProcessorId.Value} Source Stream: {SourceStreamId.Value}";
 
-    public IStreamProcessorId FromProtobuf(StreamProcessorKey streamProcessorKey)
-        => throw new System.NotImplementedException();
+    public static IStreamProcessorId FromProtobuf(Dolittle.Runtime.Events.Store.Actors.StreamProcessorId streamProcessorId)
+        => new StreamProcessorId(
+            streamProcessorId.ScopeId.ToGuid(),
+            streamProcessorId.EventProcessorId.ToGuid(),
+            streamProcessorId.SourceStreamId.ToGuid());
 
-    StreamProcessorKey IStreamProcessorId.ToProtobuf()
-        => throw new System.NotImplementedException();
+    StreamProcessorKey IStreamProcessorId.ToProtobuf() => new()
+    {
+        StreamProcessorId = new Store.Actors.StreamProcessorId
+        {
+            ScopeId = ScopeId.ToProtobuf(),
+            EventProcessorId = EventProcessorId.ToProtobuf(),
+            SourceStreamId = SourceStreamId.ToProtobuf()
+        },
+    };
 }
