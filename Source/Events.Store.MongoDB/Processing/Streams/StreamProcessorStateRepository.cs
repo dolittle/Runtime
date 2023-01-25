@@ -201,7 +201,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
         }
     }
 
-    public Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState)> streamProcessorStates, CancellationToken cancellationToken)
+    public Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> streamProcessorStates, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
