@@ -21,4 +21,10 @@ public record SubscriptionId(
 {
     /// <inheritdoc/>
     public override string ToString() => $"Consumer Tenant: {ConsumerTenantId.Value} Producer Microservice: {ProducerMicroserviceId.Value} Producer Tenant: {ProducerTenantId.Value} Scope: {ScopeId.Value} Stream: {StreamId.Value} Partition: {PartitionId.Value}'";
+
+    public StreamProcessorKey ToProtobuf()
+        => throw new System.NotImplementedException();
+
+    public IStreamProcessorId FromProtobuf(StreamProcessorKey streamProcessorKey)
+        => throw new System.NotImplementedException();
 }

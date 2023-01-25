@@ -12,4 +12,8 @@ public interface IStreamProcessorId
     /// Gets the <see cref="ScopeId" />.
     /// </summary>
     ScopeId ScopeId { get; }
+
+    Actors.StreamProcessorKey ToProtobuf();
+
+    IStreamProcessorId FromProtobuf(Actors.StreamProcessorKey streamProcessorKey);
 }
