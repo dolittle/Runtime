@@ -57,7 +57,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
     /// or <see cref="SubscriptionId" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" />.</returns>
-    public async Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId id, CancellationToken cancellationToken)
+    public async Task<Try<IStreamProcessorState>> TryGet(IStreamProcessorId id, CancellationToken cancellationToken)
     {
         _logger.GettingStreamProcessorState(id);
         try
@@ -187,23 +187,23 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
     }
 
     
-    public async IAsyncEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> GetAll([EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         _logger.GettingAllStreamProcessorState();
         var stateCollection = await _streamProcessorStates.Get(ScopeId.Default, cancellationToken).ConfigureAwait(false);
-        IAsyncEnumerable<(StreamProcessorId id, IStreamProcessorState state)> states = stateCollection
+        var states = stateCollection
             .Find(FilterDefinition<AbstractStreamProcessorState>.Empty)
             .ToAsyncEnumerable(cancellationToken: cancellationToken)
-            .Select(document => (new StreamProcessorId(ScopeId.Default, document.EventProcessor, document.SourceStream), document.ToRuntimeRepresentation()));
+            .Select(document => new StreamProcessorStateWithId(new StreamProcessorId(ScopeId.Default, document.EventProcessor, document.SourceStream), document.ToRuntimeRepresentation()));
         await foreach (var state in states.WithCancellation(cancellationToken))
         {
             yield return state;
         }
     }
 
-    public Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> streamProcessorStates, CancellationToken cancellationToken)
+    public async Task Persist(IEnumerable<StreamProcessorStateWithId> streamProcessorStates, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        
     }
     
     

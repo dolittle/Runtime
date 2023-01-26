@@ -28,7 +28,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     public override async Task OnStarted()
     {
-        await foreach (var (id, state) in _repository.GetAll(Context.CancellationToken))
+        await foreach (var (id, state) in _repository.GetAllNonScoped(Context.CancellationToken))
         {
             _processorStates.Add(id.ToProtobuf(), state.ToProtobuf());
         }
@@ -107,7 +107,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     {
         var taskCompletionSource = new TaskCompletionSource<Bucket>();
         var bucketTask = taskCompletionSource.Task;
-        var task = _repository.TryGetFor(SubscriptionId.FromProtobuf(subscriptionId), Context.CancellationToken);
+        var task = _repository.TryGet(SubscriptionId.FromProtobuf(subscriptionId), Context.CancellationToken);
         Context.ReenterAfter(task, _ =>
         {
             try

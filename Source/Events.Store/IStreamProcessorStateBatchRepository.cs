@@ -9,8 +9,19 @@ using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Store;
 
-public interface IStreamProcessorStateBatchRepository: IStreamProcessorStateRepository
+/// <summary>
+/// Defines a repository for <see cref="IStreamProcessorState"/>.
+/// </summary>
+public interface IStreamProcessorStateBatchRepository
 {
+    /// <summary>
+    /// Gets the <see cref="IStreamProcessorState" /> for the given <see cref="IStreamProcessorId" />.
+    /// </summary>
+    /// <param name="streamProcessorId">The unique <see cref="IStreamProcessorId" /> representing the <see cref="AbstractScopedStreamProcessor"/>.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" />.</returns>
+    Task<Try<IStreamProcessorState>> TryGet(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken);
+    
     /// <summary>
     /// Gets the <see cref="IStreamProcessorState" /> for the given <see cref="IStreamProcessorId" /> from the correct
     /// collection, either <see cref="SubscriptionState" /> or <see cref="StreamProcessorState" />.
@@ -19,16 +30,15 @@ public interface IStreamProcessorStateBatchRepository: IStreamProcessorStateRepo
     /// or <see cref="SubscriptionId" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" />.</returns>
-    IAsyncEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> GetAll(CancellationToken cancellationToken);
+    IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped(CancellationToken cancellationToken);
 
     /// <summary>
     /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId"/> and <see cref="SubscriptionId"/>.
     /// Handles <see cref="Partitioned.PartitionedStreamProcessorState"/> separately also.
     /// IsUpsert option creates the document if one isn't found.
     /// </summary>
-    /// <param name="id">The <see cref="StreamProcessorId" />.</param>
-    /// <param name="baseStreamProcessorState">The <see cref="IStreamProcessorState" />.</param>
+    /// <param name="streamProcessorStates">The <see cref="IEnumerable{T}"/> of <see cref="StreamProcessorStateWithId"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task Persist(IEnumerable<(IStreamProcessorId id, IStreamProcessorState state)> streamProcessorStates, CancellationToken cancellationToken);
+    Task Persist(IEnumerable<StreamProcessorStateWithId> streamProcessorStates, CancellationToken cancellationToken);
 }
