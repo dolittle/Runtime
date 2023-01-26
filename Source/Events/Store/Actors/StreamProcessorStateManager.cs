@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.EventHorizon.Consumer;
-using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Services;
+using Microsoft.Extensions.Logging;
 using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
@@ -16,16 +17,29 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 [TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient))]
 public class StreamProcessorStateManager : StreamProcessorStateBase
 {
+    readonly IStreamProcessorStateBatchRepository _repository;
+    readonly ILogger<StreamProcessorStateManager> _logger;
+    readonly IApplicationLifecycleHooks _lifecycleHooks;
+
+
     readonly Dictionary<StreamProcessorKey, Bucket> _processorStates = new();
-    Dictionary<StreamProcessorKey, Bucket> _currentChanges = new();
+
+    // Dictionary<StreamProcessorKey, Bucket> _currentChanges = new();
+    readonly Dictionary<ScopeId, Dictionary<StreamProcessorKey, Bucket>> _currentChangesByScope = new();
+    readonly HashSet<ScopeId> _activeRequests = new();
     readonly Dictionary<StreamSubscriptionId, Task<Bucket>> _waitingForSubscriptionStates = new();
 
-    readonly IStreamProcessorStateBatchRepository _repository;
+
+    IShutdownHook _shutdownHook;
+    bool _shuttingDown;
 
 
-    public StreamProcessorStateManager(IContext context, IStreamProcessorStateBatchRepository repository) : base(context)
+    public StreamProcessorStateManager(IContext context, IStreamProcessorStateBatchRepository repository, ILogger<StreamProcessorStateManager> logger,
+        IApplicationLifecycleHooks lifecycleHooks) : base(context)
     {
         _repository = repository;
+        _logger = logger;
+        _lifecycleHooks = lifecycleHooks;
     }
 
     public override async Task OnStarted()
@@ -34,10 +48,26 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
         {
             _processorStates.Add(id.ToProtobuf(), state.ToProtobuf());
         }
+
+        _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
+        Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
+        {
+            _shuttingDown = true;
+            if (_activeRequests.Count == 0) // No current changes
+            {
+                _shutdownHook.MarkCompleted();
+            }
+        });
     }
 
     public override Task Get(StreamProcessorKey key, Action<StreamProcessorStateResponse> respond, Action<string> onError)
     {
+        if (_shuttingDown)
+        {
+            onError("Runtime is shutting down");
+            return Task.CompletedTask;
+        }
+
         if (_processorStates.TryGetValue(key, out var existingBucket))
         {
             respond(new StreamProcessorStateResponse
@@ -109,8 +139,8 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     Task<Bucket> LoadSubscription(StreamSubscriptionId subscriptionId)
     {
         var taskCompletionSource = new TaskCompletionSource<Bucket>();
-        var bucketTask = taskCompletionSource.Task;
         var task = _repository.TryGet(SubscriptionId.FromProtobuf(subscriptionId), Context.CancellationToken);
+        _waitingForSubscriptionStates.Add(subscriptionId, taskCompletionSource.Task);
         Context.ReenterAfter(task, _ =>
         {
             try
@@ -132,40 +162,75 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
                 _waitingForSubscriptionStates.Remove(subscriptionId);
             }
         });
-        return bucketTask;
+        return taskCompletionSource.Task;
     }
 
     public override Task SetStreamProcessorPartitionState(SetStreamProcessorPartitionStateRequest request)
     {
-        _processorStates[request.StreamKey] = request.Bucket;
-        _currentChanges[request.StreamKey] = request.Bucket;
-        PersistCurrentState();
+        if (_shuttingDown)
+        {
+            throw new RuntimeShuttingDown();
+        }
+
+        var streamProcessorKey = request.StreamKey;
+        var processorState = request.Bucket;
+        _processorStates[streamProcessorKey] = processorState;
+        var scopeId = streamProcessorKey.FromProtobuf().ScopeId;
+
+        AddChange(scopeId, streamProcessorKey, processorState);
+        PersistCurrentState(scopeId);
         return Task.CompletedTask;
     }
 
-    void PersistCurrentState()
+    void AddChange(ScopeId scopeId, StreamProcessorKey streamProcessorKey, Bucket processorState)
     {
-        if (_currentChanges.Count == 0) return;
-        var currentChanges = _currentChanges;
-        _currentChanges = new Dictionary<StreamProcessorKey, Bucket>();
-        Persist(currentChanges);
+        if (!_currentChangesByScope.TryGetValue(scopeId, out var currentChanges))
+        {
+            _currentChangesByScope[scopeId] = currentChanges = new Dictionary<StreamProcessorKey, Bucket>();
+        }
+
+        currentChanges[streamProcessorKey] = processorState;
     }
 
-    void Persist(Dictionary<StreamProcessorKey, Bucket> changes)
+    void PersistCurrentState(ScopeId scopeId)
     {
-        // throw new NotImplementedException();
-        
-        
+        if (_activeRequests.Contains(scopeId))
+        {
+            return;
+        }
+
+        if (_currentChangesByScope.Count == 0) return;
+        if (!_currentChangesByScope.Remove(scopeId, out var currentChanges))
+        {
+            return; // No changes for this scope
+        }
+
+        _activeRequests.Add(scopeId);
+        Persist(currentChanges, scopeId);
+    }
+
+    void Persist(Dictionary<StreamProcessorKey, Bucket> changes, ScopeId scopeId)
+    {
         var streamProcessorStates = changes.ToDictionary(_ => _.Key.FromProtobuf(), _ => _.Value.FromProtobuf());
         var persistTask = _repository.Persist(streamProcessorStates, Context.CancellationToken);
-        //
-        // Context.ReenterAfter(persistTask, _ =>
-        // {
-        //     if (persistTask.IsCompletedSuccessfully)
-        //     {
-        //         PersistCurrentState();
-        //     }
-        // });
+        Context.ReenterAfter(persistTask, _ =>
+        {
+            if (persistTask.IsCompletedSuccessfully)
+            {
+                _activeRequests.Remove(scopeId);
+                PersistCurrentState(scopeId);
+                if (_shuttingDown && _activeRequests.Count == 0)
+                {
+                    _shutdownHook.MarkCompleted();
+                }
+            }
+            else
+            {
+                _logger.FailedToPersistStreamProcessorState(persistTask.Exception!, scopeId);
+                // Try again
+                Persist(changes, scopeId);
+            }
+        });
     }
 
     #region Unused, handled with reentrant overloads
