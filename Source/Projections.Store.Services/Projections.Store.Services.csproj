@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Projections.Store.Services</AssemblyName>
@@ -7,17 +7,16 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <ProjectReference Include="../Artifacts/Artifacts.csproj"/>
-        <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
-        <ProjectReference Include="../Execution/Execution.csproj"/>
-        <ProjectReference Include="../Events.Store/Events.Store.csproj"/>
-        <ProjectReference Include="../Projections.Store/Projections.Store.csproj"/>
-        <ProjectReference Include="../Protobuf/Protobuf.csproj"/>
-        <ProjectReference Include="../Services/Services.csproj"/>
-        <ProjectReference Include="../Tenancy/Tenancy.csproj"/>
+        <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)"/>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
 </Project>

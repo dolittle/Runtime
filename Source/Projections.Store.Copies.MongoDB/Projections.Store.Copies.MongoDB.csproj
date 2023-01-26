@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
         <ProjectReference Include="../Resources/Resources.csproj" />
     </ItemGroup>
 </Project>
