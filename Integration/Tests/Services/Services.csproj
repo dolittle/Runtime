@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="../../../specs.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Integration.Tests.Services</AssemblyName>
+        <RootNamespace>Integration.Tests.Services</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Shared\Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ReverseCalls\when_initiating" />
+    </ItemGroup>
+
+</Project>
