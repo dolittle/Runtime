@@ -23,4 +23,8 @@
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
         <ProjectReference Include="..\Events\Events.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Management" />
+    </ItemGroup>
 </Project>
