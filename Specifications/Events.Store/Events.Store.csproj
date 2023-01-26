@@ -12,7 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../Source/Events.Store/Events.Store.csproj" />
+      <ProjectReference Include="..\..\Source\Domain\Domain.csproj" />
+      <ProjectReference Include="..\..\Source\Events\Events.csproj" />
     </ItemGroup>
 
 </Project>

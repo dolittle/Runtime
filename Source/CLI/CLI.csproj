@@ -16,9 +16,7 @@
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
-        <ProjectReference Include="../Aggregates.Management/Aggregates.Management.csproj" />
-        <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
-        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
         <ProjectReference Include="..\Resources\Resources.csproj" />
     </ItemGroup>
 
