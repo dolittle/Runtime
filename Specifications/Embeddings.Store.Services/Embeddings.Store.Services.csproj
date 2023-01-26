@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Embeddings.Store\Embeddings.Store.csproj" />
+    <ProjectReference Include="../../Source/Embeddings.Store/Embeddings.Store.csproj" />
   </ItemGroup>
 
 </Project>

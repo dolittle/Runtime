@@ -30,7 +30,6 @@
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
-        <ProjectReference Include="..\..\Specifications\Execution\Execution.csproj" />
     </ItemGroup>
 
 

@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Events\Events.csproj" />
+    <ProjectReference Include="../../Source/Events/Events.csproj" />
   </ItemGroup>
 
   <Import Project="../../specs.props" />

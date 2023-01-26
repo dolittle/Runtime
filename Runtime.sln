@@ -141,7 +141,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Source\Client\Cli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Store.Services.Grpc", "Integration\Tests\Events.Store.Services.Grpc\Events.Store.Services.Grpc.csproj", "{4D838304-13DE-4B16-BBDD-E061F2E65300}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Meta", "Meta", "{CAF1D781-37E5-4C33-A114-7991B4AC4299}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".meta", ".meta", "{CAF1D781-37E5-4C33-A114-7991B4AC4299}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		default.props = default.props
@@ -160,6 +160,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{89A4
 		.github\workflows\runtime.yml = .github\workflows\runtime.yml
 		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
 		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{C4446054-773D-4B63-A88B-3D35B71F6F66}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "production", "production", "{A901E5CA-6ED3-465D-AB76-93FB0E20D17E}"
+	ProjectSection(SolutionItems) = preProject
+		Docker\Production\Dockerfile = Docker\Production\Dockerfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "development", "development", "{AC1D9095-A820-4B4B-BD98-A88E08790C16}"
+	ProjectSection(SolutionItems) = preProject
+		Docker\Development\Dockerfile = Docker\Development\Dockerfile
 	EndProjectSection
 EndProject
 Global
@@ -1023,5 +1038,8 @@ Global
 		{0B94A905-F24E-4097-ACEE-D4152A17CFF8} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
 		{ACAF1983-1EFC-4E42-932A-9396D0C4E228} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
 		{4D838304-13DE-4B16-BBDD-E061F2E65300} = {37343684-7BA7-40C1-9904-B8C434B8BD19}
+		{C4446054-773D-4B63-A88B-3D35B71F6F66} = {CAF1D781-37E5-4C33-A114-7991B4AC4299}
+		{A901E5CA-6ED3-465D-AB76-93FB0E20D17E} = {C4446054-773D-4B63-A88B-3D35B71F6F66}
+		{AC1D9095-A820-4B4B-BD98-A88E08790C16} = {C4446054-773D-4B63-A88B-3D35B71F6F66}
 	EndGlobalSection
 EndGlobal

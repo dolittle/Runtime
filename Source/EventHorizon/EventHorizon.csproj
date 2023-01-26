@@ -19,6 +19,6 @@
         <ProjectReference Include="../Microservices/Microservices.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
-        <ProjectReference Include="..\Events\Events.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
     </ItemGroup>
 </Project>
