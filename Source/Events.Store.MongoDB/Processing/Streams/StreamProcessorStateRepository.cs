@@ -110,16 +110,15 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
         }
     }
 
-    public async Task<IEnumerable<Partial<IStreamProcessorId>>> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<IStreamProcessorId, Partial>> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
     {
         var tasksWithIds = streamProcessorStates.Select(_ => (_.Key, Persist(_.Key, _.Value, cancellationToken)));
         var persistResults = await Task.WhenAll(tasksWithIds.Select(_ => _.Item2)).ConfigureAwait(false);
-
-        return persistResults.Where(_ => !_.Success);
+        return persistResults.ToDictionary(_ => _.Item1, _ => _.Item2).AsReadOnly();
     }
     
     
-    async Task<Partial<IStreamProcessorId>> Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
+    async Task<(IStreamProcessorId, Partial)> Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
     {
         _logger.PersistingStreamProcessorState(id);
         try
@@ -148,7 +147,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
                 }
                 else
                 {
-                    return new UnsupportedStreamProcessorStatewithSubscriptionId(subscriptionId, baseStreamProcessorState);
+                    return (id, Partial.Failed(new UnsupportedStreamProcessorStatewithSubscriptionId(subscriptionId, baseStreamProcessorState)));
                 }
             }
             else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState)
@@ -193,14 +192,14 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
             }
             else
             {
-                return new StreamProcessorStateOfUnsupportedType(id, baseStreamProcessorState);
+                return (id, Partial.Failed(new StreamProcessorStateOfUnsupportedType(id, baseStreamProcessorState)));
             }
         }
         catch (MongoWaitQueueFullException ex)
         {
-            return Partial<IStreamProcessorId>.PartialSuccess(id, new EventStoreUnavailable("Mongo wait queue is full", ex));
+            return (id, Partial.PartialSuccess(new EventStoreUnavailable("Mongo wait queue is full", ex)));
         }
-        return Partial<IStreamProcessorId>.Succeeded(id);
+        return (id, Partial.Succeeded());
     }
     
     
