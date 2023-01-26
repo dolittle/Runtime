@@ -64,3 +64,45 @@ public class Partial<TResult> : Try<TResult>
     /// /// /// /// <return><see cref="Try{TResult}" />.</return>
     public static implicit operator Partial<TResult>(Exception exception) => Failed(exception);
 }
+
+/// <summary>
+/// Represents the result of an operation that either succeeds with a result or fails, with a potential exception.
+/// </summary>
+public class Partial : Try
+{
+    protected Partial() : base()
+    {
+    }
+
+    protected Partial(bool isPartial, Exception exception) : base(exception)
+    {
+        IsPartialResult = isPartial;
+    }
+
+    protected Partial(Exception exception) : base(exception) { }
+
+    /// <summary>
+    /// Gets a value indicating whether this is a partial result. 
+    /// </summary>
+    public bool IsPartialResult { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="Partial{TResult}"/> result indicating a successful operation.
+    /// </summary>
+    /// <returns>A new <see cref="Partial{TResult}"/> result.</returns>
+    public static new Partial Succeeded() => new();
+
+    /// <summary>
+    /// Creates a new <see cref="Partial{TResult}"/> result indicating a successful operation.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception"/> that caused the operation to fail.</param>
+    /// <returns>A new <see cref="Partial{TResult}"/> result.</returns>
+    public static Partial PartialSuccess(Exception exception) => new(true, exception);
+
+    /// <summary>
+    /// Creates a new <see cref="Partial{TResult}"/> result indicating a failed operation because of an exception.
+    /// </summary>
+    /// <param name="exception">The <see cref="Exception" /> that caused the operation to fail.</param>
+    /// <returns>A new <see cref="Partial{TResult}"/> result.</returns>
+    public static new Partial Failed(Exception exception) => new(false, exception);
+}
