@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Rudimentary;
 using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
@@ -45,6 +47,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
             });
         }
 
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (key.IdCase)
         {
             case StreamProcessorKey.IdOneofCase.StreamProcessorId:
@@ -150,8 +153,11 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     void Persist(Dictionary<StreamProcessorKey, Bucket> changes)
     {
-        throw new NotImplementedException();
-        // var persistTask = _repository.Persist(changes.Select(_ => (id: _.Key.FromProtobuf(), state: _.Value.FromProtobuf())), Context.CancellationToken);
+        // throw new NotImplementedException();
+        
+        
+        var streamProcessorStates = changes.ToDictionary(_ => _.Key.FromProtobuf(), _ => _.Value.FromProtobuf());
+        var persistTask = _repository.Persist(streamProcessorStates, Context.CancellationToken);
         //
         // Context.ReenterAfter(persistTask, _ =>
         // {
