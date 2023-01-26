@@ -37,8 +37,8 @@ public interface IStreamProcessorStateBatchRepository
     /// Handles <see cref="Partitioned.PartitionedStreamProcessorState"/> separately also.
     /// IsUpsert option creates the document if one isn't found.
     /// </summary>
-    /// <param name="streamProcessorStates">The <see cref="IEnumerable{T}"/> of <see cref="StreamProcessorStateWithId"/>.</param>
+    /// <param name="streamProcessorStates">The <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="IStreamProcessorId"/> and <see cref="IStreamProcessorState"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task Persist(IEnumerable<StreamProcessorStateWithId> streamProcessorStates, CancellationToken cancellationToken);
+    Task<IEnumerable<Partial<IStreamProcessorId>>> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken);
 }

@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -62,48 +61,65 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
         _logger.GettingStreamProcessorState(id);
         try
         {
-            if (id is SubscriptionId subscriptionId)
+            switch (id)
             {
-                var states = await _subscriptionStates.Get(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
-                var persistedState = await states.Find(CreateFilter(subscriptionId))
-                    .FirstOrDefaultAsync(cancellationToken)
-                    .ConfigureAwait(false);
+                case SubscriptionId subscriptionId:
+                {
+                    var states = await _subscriptionStates.Get(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
+                    var persistedState = await states.Find(CreateFilter(subscriptionId))
+                        .FirstOrDefaultAsync(cancellationToken)
+                        .ConfigureAwait(false);
 
-                return persistedState == default
-                    ? new StreamProcessorStateDoesNotExist(subscriptionId)
-                    : persistedState.ToRuntimeRepresentation();
-            }
-            else if (id is StreamProcessorId streamProcessorId)
-            {
-                var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
-                var persistedState = await states.Find(CreateFilter(streamProcessorId))
-                    .FirstOrDefaultAsync(cancellationToken)
-                    .ConfigureAwait(false);
-                return persistedState == default
-                    ? new StreamProcessorStateDoesNotExist(streamProcessorId)
-                    : Try<IStreamProcessorState>.Succeeded(persistedState.ToRuntimeRepresentation());
-            }
-            else
-            {
-                throw new StreamProcessorIdOfUnsupportedType(id);
+                    return persistedState == default
+                        ? new StreamProcessorStateDoesNotExist(subscriptionId)
+                        : persistedState.ToRuntimeRepresentation();
+                }
+
+                case StreamProcessorId streamProcessorId:
+                {
+                    var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
+                    var persistedState = await states.Find(CreateFilter(streamProcessorId))
+                        .FirstOrDefaultAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                    return persistedState == default
+                        ? new StreamProcessorStateDoesNotExist(streamProcessorId)
+                        : Try<IStreamProcessorState>.Succeeded(persistedState.ToRuntimeRepresentation());
+                }
+
+                default:
+                    return new StreamProcessorIdOfUnsupportedType(id);
             }
         }
         catch (MongoWaitQueueFullException ex)
         {
-            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            return new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
     }
 
-    /// <summary>
-    /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId"/> and <see cref="SubscriptionId"/>.
-    /// Handles <see cref="Partitioned.PartitionedStreamProcessorState"/> separately also.
-    /// IsUpsert option creates the document if one isn't found.
-    /// </summary>
-    /// <param name="id">The <see cref="StreamProcessorId" />.</param>
-    /// <param name="baseStreamProcessorState">The <see cref="IStreamProcessorState" />.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    public async Task Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        _logger.GettingAllStreamProcessorState();
+        var stateCollection = await _streamProcessorStates.Get(ScopeId.Default, cancellationToken).ConfigureAwait(false);
+        var states = stateCollection
+            .Find(FilterDefinition<AbstractStreamProcessorState>.Empty)
+            .ToAsyncEnumerable(cancellationToken: cancellationToken)
+            .Select(document => new StreamProcessorStateWithId(new StreamProcessorId(ScopeId.Default, document.EventProcessor, document.SourceStream), document.ToRuntimeRepresentation()));
+        await foreach (var state in states.WithCancellation(cancellationToken))
+        {
+            yield return state;
+        }
+    }
+
+    public async Task<IEnumerable<Partial<IStreamProcessorId>>> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
+    {
+        var tasksWithIds = streamProcessorStates.Select(_ => (_.Key, Persist(_.Key, _.Value, cancellationToken)));
+        var persistResults = await Task.WhenAll(tasksWithIds.Select(_ => _.Item2)).ConfigureAwait(false);
+
+        return persistResults.Where(_ => !_.Success);
+    }
+    
+    
+    async Task<Partial<IStreamProcessorId>> Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
     {
         _logger.PersistingStreamProcessorState(id);
         try
@@ -124,7 +140,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
                         streamProcessorState.LastSuccessfullyProcessed.UtcDateTime,
                         streamProcessorState.IsFailing);
                     var states = await _subscriptionStates.Get(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
-                    var persistedState = await states.ReplaceOneAsync(
+                    await states.ReplaceOneAsync(
                             CreateFilter(subscriptionId),
                             replacementState,
                             new ReplaceOptions { IsUpsert = true })
@@ -132,14 +148,14 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
                 }
                 else
                 {
-                    throw new UnsupportedStreamProcessorStatewithSubscriptionId(subscriptionId, baseStreamProcessorState);
+                    return new UnsupportedStreamProcessorStatewithSubscriptionId(subscriptionId, baseStreamProcessorState);
                 }
             }
             else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState)
             {
                 var streamProcessorId = id as StreamProcessorId;
                 var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
-                var state = await states.ReplaceOneAsync(
+                await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new Partitioned.PartitionedStreamProcessorState(
                             streamProcessorId.EventProcessorId,
@@ -161,7 +177,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
             {
                 var streamProcessorId = id as StreamProcessorId;
                 var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
-                var state = await states.ReplaceOneAsync(
+                await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new StreamProcessorState(
                             streamProcessorId.EventProcessorId,
@@ -177,33 +193,14 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
             }
             else
             {
-                throw new StreamProcessorStateOfUnsupportedType(id, baseStreamProcessorState);
+                return new StreamProcessorStateOfUnsupportedType(id, baseStreamProcessorState);
             }
         }
         catch (MongoWaitQueueFullException ex)
         {
-            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            return Partial<IStreamProcessorId>.PartialSuccess(id, new EventStoreUnavailable("Mongo wait queue is full", ex));
         }
-    }
-
-    
-    public async IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped([EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        _logger.GettingAllStreamProcessorState();
-        var stateCollection = await _streamProcessorStates.Get(ScopeId.Default, cancellationToken).ConfigureAwait(false);
-        var states = stateCollection
-            .Find(FilterDefinition<AbstractStreamProcessorState>.Empty)
-            .ToAsyncEnumerable(cancellationToken: cancellationToken)
-            .Select(document => new StreamProcessorStateWithId(new StreamProcessorId(ScopeId.Default, document.EventProcessor, document.SourceStream), document.ToRuntimeRepresentation()));
-        await foreach (var state in states.WithCancellation(cancellationToken))
-        {
-            yield return state;
-        }
-    }
-
-    public async Task Persist(IEnumerable<StreamProcessorStateWithId> streamProcessorStates, CancellationToken cancellationToken)
-    {
-        
+        return Partial<IStreamProcessorId>.Succeeded(id);
     }
     
     
