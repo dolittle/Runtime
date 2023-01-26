@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DependencyInversion\DependencyInversion.csproj" />
-      <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
+      <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+      <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 
 </Project>

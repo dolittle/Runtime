@@ -16,10 +16,9 @@
         <ProjectReference Include="../Execution/Execution.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
-        <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
-        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Events/Events.csproj" />
     </ItemGroup>
 </Project>
