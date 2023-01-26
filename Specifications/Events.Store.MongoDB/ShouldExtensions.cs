@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB;
@@ -12,27 +13,27 @@ public static class ShouldExtensions
 {
     public static void ShouldBeTheSameAs(this ExecutionContext storedExecutionContext, Execution.ExecutionContext executionContext)
     {
-        storedExecutionContext.Correlation.ShouldEqual(executionContext.CorrelationId.Value);
-        storedExecutionContext.Environment.ShouldEqual(executionContext.Environment.Value);
-        storedExecutionContext.Microservice.ShouldEqual(executionContext.Microservice.Value);
-        storedExecutionContext.Tenant.ShouldEqual(executionContext.Tenant.Value);
+        storedExecutionContext.Correlation.Should().Be(executionContext.CorrelationId.Value);
+        storedExecutionContext.Environment.Should().Be(executionContext.Environment.Value);
+        storedExecutionContext.Microservice.Should().Be(executionContext.Microservice.Value);
+        storedExecutionContext.Tenant.Should().Be(executionContext.Tenant.Value);
         storedExecutionContext.Version.ShouldBeTheSameAs(executionContext.Version);
     }
 
     public static void ShouldBeTheSameAs(this Version storedVersion, Domain.Platform.Version version)
     {
-        storedVersion.Major.ShouldEqual(version.Major);
-        storedVersion.Minor.ShouldEqual(version.Minor);
-        storedVersion.Patch.ShouldEqual(version.Patch);
-        storedVersion.Build.ShouldEqual(version.Build);
-        storedVersion.PreRelease.ShouldEqual(version.PreReleaseString);
+        storedVersion.Major.Should().Be(version.Major);
+        storedVersion.Minor.Should().Be(version.Minor);
+        storedVersion.Patch.Should().Be(version.Patch);
+        storedVersion.Build.Should().Be(version.Build);
+        storedVersion.PreRelease.Should().Be(version.PreReleaseString);
     }
 
     public static void ShouldBeTheSameAs(this Claim storedClaim, Execution.Claim claim)
     {
-        storedClaim.Name.ShouldEqual(claim.Name);
-        storedClaim.Value.ShouldEqual(claim.Value);
-        storedClaim.ValueType.ShouldEqual(claim.ValueType);
+        storedClaim.Name.Should().Be(claim.Name);
+        storedClaim.Value.Should().Be(claim.Value);
+        storedClaim.ValueType.Should().Be(claim.ValueType);
     }
 
     public static void ShouldBeTheSameAs(this IEnumerable<Claim> storedClaims, Execution.Claims claims)
@@ -42,28 +43,28 @@ public static class ShouldExtensions
 
     public static void ShouldBeTheSameAs(this Execution.ExecutionContext executionContext, ExecutionContext storedExecutionContext)
     {
-        executionContext.CorrelationId.Value.ShouldEqual(storedExecutionContext.Correlation);
-        executionContext.Environment.Value.ShouldEqual(storedExecutionContext.Environment);
-        executionContext.Microservice.Value.ShouldEqual(storedExecutionContext.Microservice);
-        executionContext.Tenant.Value.ShouldEqual(storedExecutionContext.Tenant);
+        executionContext.CorrelationId.Value.Should().Be(storedExecutionContext.Correlation);
+        executionContext.Environment.Value.Should().Be(storedExecutionContext.Environment);
+        executionContext.Microservice.Value.Should().Be(storedExecutionContext.Microservice);
+        executionContext.Tenant.Value.Should().Be(storedExecutionContext.Tenant);
         executionContext.Version.ShouldBeTheSameAs(storedExecutionContext.Version);
         executionContext.Claims.ShouldBeTheSameAs(storedExecutionContext.Claims);
     }
 
     public static void ShouldBeTheSameAs(this Domain.Platform.Version version, Version storedVersion)
     {
-        version.Major.ShouldEqual(storedVersion.Major);
-        version.Minor.ShouldEqual(storedVersion.Minor);
-        version.Patch.ShouldEqual(storedVersion.Patch);
-        version.Build.ShouldEqual(storedVersion.Build);
-        version.PreReleaseString.ShouldEqual(storedVersion.PreRelease);
+        version.Major.Should().Be(storedVersion.Major);
+        version.Minor.Should().Be(storedVersion.Minor);
+        version.Patch.Should().Be(storedVersion.Patch);
+        version.Build.Should().Be(storedVersion.Build);
+        version.PreReleaseString.Should().Be(storedVersion.PreRelease);
     }
 
     public static void ShouldBeTheSameAs(this Execution.Claim claim, Claim storedClaim)
     {
-        claim.Name.ShouldEqual(storedClaim.Name);
-        claim.Value.ShouldEqual(storedClaim.Value);
-        claim.ValueType.ShouldEqual(storedClaim.ValueType);
+        claim.Name.Should().Be(storedClaim.Name);
+        claim.Value.Should().Be(storedClaim.Value);
+        claim.ValueType.Should().Be(storedClaim.ValueType);
     }
 
     public static void ShouldBeTheSameAs(this Execution.Claims claims, IEnumerable<Claim> storedClaims)
@@ -73,77 +74,77 @@ public static class ShouldExtensions
 
     public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, Events.Event storedEvent)
     {
-        committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventLogSequenceNumber);
-        committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
+        committedEvent.EventLogSequenceNumber.Value.Should().Be(storedEvent.EventLogSequenceNumber);
+        committedEvent.EventSource.Value.Should().Be(storedEvent.Metadata.EventSource);
         committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
-        committedEvent.Occurred.UtcDateTime.ShouldEqual(storedEvent.Metadata.Occurred);
-        committedEvent.Public.ShouldEqual(storedEvent.Metadata.Public);
-        committedEvent.Type.Id.Value.ShouldEqual(storedEvent.Metadata.TypeId);
-        committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
+        committedEvent.Occurred.UtcDateTime.Should().Be(storedEvent.Metadata.Occurred);
+        committedEvent.Public.Should().Be(storedEvent.Metadata.Public);
+        committedEvent.Type.Id.Value.Should().Be(storedEvent.Metadata.TypeId);
+        committedEvent.Type.Generation.Value.Should().Be(storedEvent.Metadata.TypeGeneration);
     }
 
     public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, Events.Event storedEvent)
     {
         (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
-        committedEvent.AggregateRoot.Id.Value.ShouldEqual(storedEvent.Aggregate.TypeId);
-        committedEvent.AggregateRoot.Generation.Value.ShouldEqual(storedEvent.Aggregate.TypeGeneration);
-        committedEvent.AggregateRootVersion.Value.ShouldEqual(storedEvent.Aggregate.Version);
+        committedEvent.AggregateRoot.Id.Value.Should().Be(storedEvent.Aggregate.TypeId);
+        committedEvent.AggregateRoot.Generation.Value.Should().Be(storedEvent.Aggregate.TypeGeneration);
+        committedEvent.AggregateRootVersion.Value.Should().Be(storedEvent.Aggregate.Version);
     }
 
     public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, MongoDB.Events.Event storedEvent)
     {
         (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
-        committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizon.ExternalEventLogSequenceNumber);
-        committedEvent.Received.UtcDateTime.ShouldEqual(storedEvent.EventHorizon.Received);
-        committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizon.Consent);
+        committedEvent.ExternalEventLogSequenceNumber.Value.Should().Be(storedEvent.EventHorizon.ExternalEventLogSequenceNumber);
+        committedEvent.Received.UtcDateTime.Should().Be(storedEvent.EventHorizon.Received);
+        committedEvent.Consent.Value.Should().Be(storedEvent.EventHorizon.Consent);
     }
 
     public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, StreamEvent storedEvent)
     {
-        committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.Metadata.EventLogSequenceNumber);
-        committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
+        committedEvent.EventLogSequenceNumber.Value.Should().Be(storedEvent.Metadata.EventLogSequenceNumber);
+        committedEvent.EventSource.Value.Should().Be(storedEvent.Metadata.EventSource);
         committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
-        committedEvent.Occurred.UtcDateTime.ShouldEqual(storedEvent.Metadata.Occurred);
-        committedEvent.Public.ShouldEqual(storedEvent.Metadata.Public);
-        committedEvent.Type.Id.Value.ShouldEqual(storedEvent.Metadata.TypeId);
-        committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
+        committedEvent.Occurred.UtcDateTime.Should().Be(storedEvent.Metadata.Occurred);
+        committedEvent.Public.Should().Be(storedEvent.Metadata.Public);
+        committedEvent.Type.Id.Value.Should().Be(storedEvent.Metadata.TypeId);
+        committedEvent.Type.Generation.Value.Should().Be(storedEvent.Metadata.TypeGeneration);
     }
 
     public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, StreamEvent storedEvent)
     {
         (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
-        committedEvent.AggregateRoot.Id.Value.ShouldEqual(storedEvent.Aggregate.TypeId);
-        committedEvent.AggregateRoot.Generation.Value.ShouldEqual(storedEvent.Aggregate.TypeGeneration);
-        committedEvent.AggregateRootVersion.Value.ShouldEqual(storedEvent.Aggregate.Version);
+        committedEvent.AggregateRoot.Id.Value.Should().Be(storedEvent.Aggregate.TypeId);
+        committedEvent.AggregateRoot.Generation.Value.Should().Be(storedEvent.Aggregate.TypeGeneration);
+        committedEvent.AggregateRootVersion.Value.Should().Be(storedEvent.Aggregate.Version);
     }
 
     public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, StreamEvent storedEvent)
     {
         (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
-        committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizon.ExternalEventLogSequenceNumber);
-        committedEvent.Received.ShouldEqual(storedEvent.EventHorizon.Received);
-        committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizon.Consent);
+        committedEvent.ExternalEventLogSequenceNumber.Value.Should().Be(storedEvent.EventHorizon.ExternalEventLogSequenceNumber);
+        committedEvent.Received.Should().Be(storedEvent.EventHorizon.Received);
+        committedEvent.Consent.Value.Should().Be(storedEvent.EventHorizon.Consent);
     }
 
     public static void ShouldBeTheSameAs(this Events.Event storedEvent, CommittedEvent committedEvent)
     {
-        storedEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
+        storedEvent.EventLogSequenceNumber.Should().Be(committedEvent.EventLogSequenceNumber.Value);
         storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
-        storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
-        storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred.UtcDateTime);
-        storedEvent.Metadata.Public.ShouldEqual(committedEvent.Public);
-        storedEvent.Metadata.TypeId.ShouldEqual(committedEvent.Type.Id.Value);
-        storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
+        storedEvent.Metadata.EventSource.Should().Be(committedEvent.EventSource.Value);
+        storedEvent.Metadata.Occurred.Should().Be(committedEvent.Occurred.UtcDateTime);
+        storedEvent.Metadata.Public.Should().Be(committedEvent.Public);
+        storedEvent.Metadata.TypeId.Should().Be(committedEvent.Type.Id.Value);
+        storedEvent.Metadata.TypeGeneration.Should().Be(committedEvent.Type.Generation.Value);
     }
 
     public static void ShouldBeTheSameAs(this StreamEvent storedEvent, CommittedEvent committedEvent)
     {
-        storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
+        storedEvent.Metadata.EventLogSequenceNumber.Should().Be(committedEvent.EventLogSequenceNumber.Value);
         storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
-        storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
-        storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred.UtcDateTime);
-        storedEvent.Metadata.Public.ShouldEqual(committedEvent.Public);
-        storedEvent.Metadata.TypeId.ShouldEqual(committedEvent.Type.Id.Value);
-        storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
+        storedEvent.Metadata.EventSource.Should().Be(committedEvent.EventSource.Value);
+        storedEvent.Metadata.Occurred.Should().Be(committedEvent.Occurred.UtcDateTime);
+        storedEvent.Metadata.Public.Should().Be(committedEvent.Public);
+        storedEvent.Metadata.TypeId.Should().Be(committedEvent.Type.Id.Value);
+        storedEvent.Metadata.TypeGeneration.Should().Be(committedEvent.Type.Generation.Value);
     }
 }

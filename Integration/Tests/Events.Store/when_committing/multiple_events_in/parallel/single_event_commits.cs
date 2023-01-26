@@ -9,6 +9,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
+using FluentAssertions;
 using Machine.Specifications;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
@@ -92,8 +93,8 @@ class single_event_commits : given.a_clean_event_store
             responses = Task.WhenAll(uncommitted_events.Select(_ => event_store.Commit(_, execution_context))).GetAwaiter().GetResult();
         };
         
-        It should_have_at_least_one_failed_commits = () => responses.Count(_ => _.Failure != default).ShouldBeGreaterThanOrEqualTo(1);
-        It should_not_be_able_to_commit_all_events = () => streams.DefaultEventLog.CountDocuments(all_events_filter).ShouldBeLessThan(number_of_parallel_committers);
+        It should_have_at_least_one_failed_commits = () => responses.Count(_ => _.Failure != default).Should().BeGreaterThanOrEqualTo(1);
+        It should_not_be_able_to_commit_all_events = () => streams.DefaultEventLog.CountDocuments(all_events_filter).Should().BeLessThan(number_of_parallel_committers);
         It should_return_the_correct_successfully_committed_event = () => successful_responses.should_be_the_correct_responses(uncommitted_events, execution_context);
         It should_have_committed_the_correct_number_of_events = () => number_of_events_stored_should_be(successful_responses.Length);
         It should_have_stored_the_correct_events = () => successful_responses.Select(_ => _.Events.ToCommittedEvents()).should_have_stored_committed_events(

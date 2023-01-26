@@ -7,6 +7,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
+using FluentAssertions;
 using Machine.Specifications;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
@@ -40,7 +41,7 @@ class an_event : given.a_clean_event_store
         
         Because of = () => response = event_store.Commit(uncommitted_events, execution_context with {Tenant = "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579"}).GetAwaiter().GetResult();
 
-        It should_fail = () => response.Failure.ShouldNotBeNull();
+        It should_fail = () => response.Failure.Should().NotBeNull();
     }
     
     [Tags("IntegrationTest")]
@@ -53,7 +54,7 @@ class an_event : given.a_clean_event_store
         
         Because of = () => response = event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
 
-        It should_not_fail = () => response.Failure.ShouldBeNull();
+        It should_not_fail = () => response.Failure.Should().BeNull();
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial);
 
@@ -81,7 +82,7 @@ class an_event : given.a_clean_event_store
 
         Because of = () => response = event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
 
-        It should_not_fail = () => response.Failure.ShouldBeNull();
+        It should_not_fail = () => response.Failure.Should().BeNull();
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);
 

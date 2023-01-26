@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_converting_to_store_stream_event;
@@ -26,12 +27,12 @@ public class an_aggregate_event : given.an_event_content_converter
     Because of = () => result = event_converter.ToStoreStreamEvent(committed_event, stream_position, partition);
 
     It should_represent_the_same_event = () => result.ShouldBeTheSameAs(committed_event);
-    It should_have_the_correct_stream_position = () => result.StreamPosition.ShouldEqual(stream_position.Value);
-    It should_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.ShouldBeTrue();
-    It should_have_the_same_aggregate_root_type_generation = () => result.Aggregate.TypeGeneration.ShouldEqual(committed_event.AggregateRoot.Generation.Value);
-    It should_have_the_same_aggregate_root_type_id = () => result.Aggregate.TypeId.ShouldEqual(committed_event.AggregateRoot.Id.Value);
-    It should_have_the_same_aggregate_root_version = () => result.Aggregate.Version.ShouldEqual(committed_event.AggregateRootVersion.Value);
-    It should_not_come_from_event_horizon = () => result.EventHorizon.FromEventHorizon.ShouldBeFalse();
-    It should_have_the_content_returned_by_the_content_converter = () => result.Content.ShouldBeTheSameAs(bson_returned_by_event_converter);
+    It should_have_the_correct_stream_position = () => result.StreamPosition.Should().Be(stream_position.Value);
+    It should_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.Should().BeTrue();
+    It should_have_the_same_aggregate_root_type_generation = () => result.Aggregate.TypeGeneration.Should().Be(committed_event.AggregateRoot.Generation.Value);
+    It should_have_the_same_aggregate_root_type_id = () => result.Aggregate.TypeId.Should().Be(committed_event.AggregateRoot.Id.Value);
+    It should_have_the_same_aggregate_root_version = () => result.Aggregate.Version.Should().Be(committed_event.AggregateRootVersion.Value);
+    It should_not_come_from_event_horizon = () => result.EventHorizon.FromEventHorizon.Should().BeFalse();
+    It should_have_the_content_returned_by_the_content_converter = () => result.Content.Should().BeEquivalentTo(bson_returned_by_event_converter);
     It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToBson(committed_event.Content));
 }

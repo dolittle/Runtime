@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_converting_to_runtime_stream_event.an_aggregate;
@@ -31,12 +32,12 @@ public class partitioned_stream_event : given.an_event_content_converter
 
     Because of = () => result = event_converter.ToRuntimeStreamEvent(stored_event, stream, true);
 
-    It should_return_a_committed_aggregate_event = () => result.Event.ShouldBeOfExactType<CommittedAggregateEvent>();
+    It should_return_a_committed_aggregate_event = () => result.Event.Should().BeOfType<CommittedAggregateEvent>();
     It should_have_the_correct_committed_event = () => (result.Event as CommittedAggregateEvent).ShouldBeTheSameAs(stored_event);
-    It should_have_the_correct_stream_position = () => result.Position.ShouldEqual(stream_position);
-    It should_be_partitioned = () => result.Partitioned.ShouldBeTrue();
-    It should_come_from_the_correct_partition = () => result.Partition.ShouldEqual(partition);
-    It should_come_from_the_correct_stream = () => result.Stream.ShouldEqual(stream);
-    It should_have_the_content_returned_by_the_content_converter = () => result.Event.Content.ShouldBeTheSameAs(json_returned_by_event_converter);
+    It should_have_the_correct_stream_position = () => result.Position.Should().Be(stream_position);
+    It should_be_partitioned = () => result.Partitioned.Should().BeTrue();
+    It should_come_from_the_correct_partition = () => result.Partition.Should().Be(partition);
+    It should_come_from_the_correct_stream = () => result.Stream.Should().Be(stream);
+    It should_have_the_content_returned_by_the_content_converter = () => result.Event.Content.Should().Be(json_returned_by_event_converter);
     It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToJson(stored_event.Content));
 }

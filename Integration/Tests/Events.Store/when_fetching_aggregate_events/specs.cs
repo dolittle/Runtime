@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Machine.Specifications;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 
@@ -30,8 +31,8 @@ class specs : given.a_clean_event_store
     {
         Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context with {Tenant = "d48ca32c-bc98-4d6e-9e8d-4eaaf5adb579"}).ToArrayAsync().GetAwaiter().GetResult();
 
-        It should_return_one_batch = () => response.Length.ShouldEqual(1);
-        It should_fail = () => response[0].Failure.ShouldNotBeNull();
+        It should_return_one_batch = () => response.Length.Should().Be(1);
+        It should_fail = () => response[0].Failure.Should().NotBeNull();
     }
     
     [Tags("IntegrationTest")]
@@ -47,12 +48,12 @@ class specs : given.a_clean_event_store
         
         Because of = () => response = event_store.FetchForAggregate(aggregate_root_id, event_source, execution_context).ToArrayAsync().GetAwaiter().GetResult();
 
-        It should_return_one_batch = () => response.Length.ShouldEqual(1);
-        It should_not_fail = () => response[0].Failure.ShouldBeNull();
-        It should_have_the_correct_event_source = () => response[0].Events.EventSourceId.ShouldEqual(event_source.Value);
-        It should_have_the_correct_aggregate_root = () => response[0].Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_have_the_correct_aggregate_root_version = () => response[0].Events.CurrentAggregateRootVersion.ShouldEqual(0UL);
-        It should_have_no_aggregate_events = () => response[0].Events.Events.ShouldBeEmpty();
+        It should_return_one_batch = () => response.Length.Should().Be(1);
+        It should_not_fail = () => response[0].Failure.Should().BeNull();
+        It should_have_the_correct_event_source = () => response[0].Events.EventSourceId.Should().Be(event_source.Value);
+        It should_have_the_correct_aggregate_root = () => response[0].Events.AggregateRootId.ToGuid().Should().Be(aggregate_root_id.Value);
+        It should_have_the_correct_aggregate_root_version = () => response[0].Events.CurrentAggregateRootVersion.Should().Be(0UL);
+        It should_have_no_aggregate_events = () => response[0].Events.Events.Should().BeEmpty();
     }
     
     [Tags("IntegrationTest")]

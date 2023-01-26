@@ -10,6 +10,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
+using FluentAssertions;
 using Machine.Specifications;
 using CommittedEvent = Dolittle.Runtime.Events.Contracts.CommittedEvent;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
@@ -63,7 +64,7 @@ class batch : given.a_clean_event_store
             all_subscription_batch_results = subscribedEvents.GetAwaiter().GetResult();
         };
 
-        It should_not_fail = () => response_before_subscribe.Failure.ShouldBeNull();
+        It should_not_fail = () => response_before_subscribe.Failure.Should().BeNull();
 
         It should_return_the_correct_committed_event = () =>
             response_before_subscribe.should_be_the_correct_response(uncommitted_events, execution_context, EventLogSequenceNumber.Initial);
@@ -82,15 +83,15 @@ class batch : given.a_clean_event_store
         It first_batch_gets_catchup_events = () =>
         {
             var first_batch = all_subscription_batch_results.First();
-            first_batch.From.Value.ShouldEqual((ulong)0);
-            first_batch.To.Value.ShouldEqual((ulong)2);
+            first_batch.From.Value.Should().Be((ulong)0);
+            first_batch.To.Value.Should().Be((ulong)2);
             first_batch.MatchedEvents.should_be_the_same_committed_events(response_before_subscribe.Events);
         };
         
         It next_batch_gets_live_events = () =>
         {
             var second_batch = all_subscription_batch_results[1];
-            second_batch.From.Value.ShouldEqual((ulong)3);
+            second_batch.From.Value.Should().Be((ulong)3);
             var committedEvents = second_batch.MatchedEvents;
             committedEvents.should_be_the_same_committed_events(response_after_subscribe.Events.Take(second_batch.MatchedEvents.Count).ToList());
         };
@@ -115,7 +116,7 @@ class batch : given.a_clean_event_store
 
         Because of = () => response = event_store.Commit(uncommitted_events, execution_context).GetAwaiter().GetResult();
 
-        It should_not_fail = () => response.Failure.ShouldBeNull();
+        It should_not_fail = () => response.Failure.Should().BeNull();
 
         It should_return_the_correct_committed_event = () => response.should_be_the_correct_response(uncommitted_events, execution_context,
             EventLogSequenceNumber.Initial, uncommitted_events.ExpectedAggregateRootVersion);

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_ExecutionContext;
@@ -43,10 +44,10 @@ public class when_creating
         environment,
         claims);
 
-    It should_have_the_correct_correlation = () => result.Correlation.ShouldEqual(correlation);
-    It should_have_the_correct_microservice = () => result.Microservice.ShouldEqual(microservice);
-    It should_have_the_correct_tenant = () => result.Tenant.ShouldEqual(tenant);
-    It should_have_the_correct_version = () => result.Version.ShouldEqual(version);
-    It should_have_the_correct_environment = () => result.Environment.ShouldEqual(environment);
+    It should_have_the_correct_correlation = () => result.Correlation.Should().Be(correlation);
+    It should_have_the_correct_microservice = () => result.Microservice.Should().Be(microservice);
+    It should_have_the_correct_tenant = () => result.Tenant.Should().Be(tenant);
+    It should_have_the_correct_version = () => result.Version.Should().Be(version);
+    It should_have_the_correct_environment = () => result.Environment.Should().Be(environment);
     It should_have_the_correct_claims = () => result.Claims.ShouldContainOnly(claims);
 }

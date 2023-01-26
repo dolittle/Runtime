@@ -10,6 +10,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
+using FluentAssertions;
 using Machine.Specifications;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
@@ -75,7 +76,7 @@ class loop : given.a_clean_event_store
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var reader = event_log_stream.SubscribeAll(ScopeId.Default, 0, cts.Token);
             var hasData = reader.WaitToReadAsync().AsTask().GetAwaiter().GetResult();
-            hasData.ShouldBeTrue(); // Should get a single batch
+            hasData.Should().BeTrue(); // Should get a single batch
 
             reader.TryRead(out var batch);
             var events = responses.Select(_ => _.Events.ToCommittedEvents()).SelectMany(it => it).ToList();

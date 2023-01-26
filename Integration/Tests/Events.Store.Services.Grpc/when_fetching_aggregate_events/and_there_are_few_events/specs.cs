@@ -8,6 +8,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Integration.Shared;
 using Integration.Tests.Events.Store.given;
 using Machine.Specifications;
@@ -44,12 +45,12 @@ class specs : given.a_clean_event_store_and_grpc_service
         
         Because of = () => response = event_store_service.FetchForAggregate(request, server_call_context).GetAwaiter().GetResult();
         
-        It should_not_fail = () => response.Failure.ShouldBeNull();
-        It should_return_the_correct_aggregate_root = () => response.Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_return_the_correct_aggregate_root_version = () => response.Events.CurrentAggregateRootVersion.ShouldEqual(0U);
-        It should_return_the_correct_deprecated_aggregate_root_version = () => response.Events.AggregateRootVersion.ShouldEqual(0U);
-        It should_return_the_correct_event_source = () => response.Events.EventSourceId.ShouldEqual(event_source.Value);
-        It should_return_no_events = () => response.Events.Events.ShouldBeEmpty();
+        It should_not_fail = () => response.Failure.Should().BeNull();
+        It should_return_the_correct_aggregate_root = () => response.Events.AggregateRootId.ToGuid().Should().Be(aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version = () => response.Events.CurrentAggregateRootVersion.Should().Be(0U);
+        It should_return_the_correct_deprecated_aggregate_root_version = () => response.Events.AggregateRootVersion.Should().Be(0U);
+        It should_return_the_correct_event_source = () => response.Events.EventSourceId.Should().Be(event_source.Value);
+        It should_return_no_events = () => response.Events.Events.Should().BeEmpty();
     }
     
     [Tags("IntegrationTest")]
@@ -69,12 +70,12 @@ class specs : given.a_clean_event_store_and_grpc_service
         
         Because of = () => response = event_store_service.FetchForAggregate(request, server_call_context).GetAwaiter().GetResult();
         
-        It should_not_fail = () => response.Failure.ShouldBeNull();
-        It should_return_the_correct_aggregate_root = () => response.Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_return_the_correct_aggregate_root_version = () => response.Events.CurrentAggregateRootVersion.ShouldEqual(1U);
-        It should_return_the_correct_deprecated_aggregate_root_version = () => response.Events.AggregateRootVersion.ShouldEqual(0U);
-        It should_return_the_correct_event_source = () => response.Events.EventSourceId.ShouldEqual(event_source.Value);
-        It should_return_one_event = () => response.Events.Events.Count.ShouldEqual(1);
+        It should_not_fail = () => response.Failure.Should().BeNull();
+        It should_return_the_correct_aggregate_root = () => response.Events.AggregateRootId.ToGuid().Should().Be(aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version = () => response.Events.CurrentAggregateRootVersion.Should().Be(1U);
+        It should_return_the_correct_deprecated_aggregate_root_version = () => response.Events.AggregateRootVersion.Should().Be(0U);
+        It should_return_the_correct_event_source = () => response.Events.EventSourceId.Should().Be(event_source.Value);
+        It should_return_one_event = () => response.Events.Events.Count.Should().Be(1);
     }
     
     [Tags("IntegrationTest")]
@@ -91,12 +92,12 @@ class specs : given.a_clean_event_store_and_grpc_service
         Because of = () => event_store_service.FetchForAggregateInBatches(request, fetch_for_aggregate_response_stream, server_call_context).GetAwaiter().GetResult();
 
         It should_not_fail = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Failure == default);
-        It should_write_one_batch = () => fetch_for_aggregate_written_responses.Count.ShouldEqual(1);
-        It should_return_the_correct_aggregate_root = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_return_the_correct_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.CurrentAggregateRootVersion.ShouldEqual(0U);
-        It should_return_the_correct_deprecated_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootVersion.ShouldEqual(0U);
-        It should_return_the_correct_event_source = () => fetch_for_aggregate_written_responses[0].Events.EventSourceId.ShouldEqual(event_source.Value);
-        It should_return_no_events = () => fetch_for_aggregate_written_responses[0].Events.Events.ShouldBeEmpty();
+        It should_write_one_batch = () => fetch_for_aggregate_written_responses.Count.Should().Be(1);
+        It should_return_the_correct_aggregate_root = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootId.ToGuid().Should().Be(aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.CurrentAggregateRootVersion.Should().Be(0U);
+        It should_return_the_correct_deprecated_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootVersion.Should().Be(0U);
+        It should_return_the_correct_event_source = () => fetch_for_aggregate_written_responses[0].Events.EventSourceId.Should().Be(event_source.Value);
+        It should_return_no_events = () => fetch_for_aggregate_written_responses[0].Events.Events.Should().BeEmpty();
     }
     
     [Tags("IntegrationTest")]
@@ -116,11 +117,11 @@ class specs : given.a_clean_event_store_and_grpc_service
         Because of = () => event_store_service.FetchForAggregateInBatches(request, fetch_for_aggregate_response_stream, server_call_context).GetAwaiter().GetResult();
 
         It should_not_fail = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Failure == default);
-        It should_write_one_batch = () => fetch_for_aggregate_written_responses.Count.ShouldEqual(1);
-        It should_return_the_correct_aggregate_root = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_return_the_correct_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.CurrentAggregateRootVersion.ShouldEqual(1U);
-        It should_return_the_correct_deprecated_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootVersion.ShouldEqual(0U);
-        It should_return_the_correct_event_source = () => fetch_for_aggregate_written_responses[0].Events.EventSourceId.ShouldEqual(event_source.Value);
-        It should_return_one_event = () => fetch_for_aggregate_written_responses[0].Events.Events.Count.ShouldEqual(1);
+        It should_write_one_batch = () => fetch_for_aggregate_written_responses.Count.Should().Be(1);
+        It should_return_the_correct_aggregate_root = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootId.ToGuid().Should().Be(aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.CurrentAggregateRootVersion.Should().Be(1U);
+        It should_return_the_correct_deprecated_aggregate_root_version = () => fetch_for_aggregate_written_responses[0].Events.AggregateRootVersion.Should().Be(0U);
+        It should_return_the_correct_event_source = () => fetch_for_aggregate_written_responses[0].Events.EventSourceId.Should().Be(event_source.Value);
+        It should_return_one_event = () => fetch_for_aggregate_written_responses[0].Events.Events.Count.Should().Be(1);
     }
 }
