@@ -33,8 +33,19 @@ public class StreamProcessorStateClient : IStreamProcessorStates
     {
         try
         {
-            var response = await _streamProcessorStateClient.Get(streamProcessorId.ToProtobuf(), cancellationToken).ConfigureAwait(false);
-            return Try<IStreamProcessorState>.Succeeded(response!.Bucket.Single().FromProtobuf());
+            var processorKey = streamProcessorId.ToProtobuf();
+            switch (processorKey.IdCase)
+            {
+                case StreamProcessorKey.IdOneofCase.StreamProcessorId:
+                    var response = await _streamProcessorStateClient.GetByProcessorId(processorKey.StreamProcessorId, cancellationToken).ConfigureAwait(false);
+                    return Try<IStreamProcessorState>.Succeeded(response!.Bucket.Single().FromProtobuf());
+                case StreamProcessorKey.IdOneofCase.SubscriptionId:
+                    var r = await _streamProcessorStateClient.GetBySubscriptionId(processorKey.SubscriptionId, cancellationToken).ConfigureAwait(false);
+                    return Try<IStreamProcessorState>.Succeeded(r!.Bucket.Single().FromProtobuf());
+                case StreamProcessorKey.IdOneofCase.None:
+                default:
+                    return Try<IStreamProcessorState>.Failed(new ArgumentOutOfRangeException(nameof(streamProcessorId)));
+            }
         }
         catch (Exception e)
         {
@@ -43,12 +54,25 @@ public class StreamProcessorStateClient : IStreamProcessorStates
     }
 
     /// <inheritdoc />
-    public Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+    public async Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
     {
-        return _streamProcessorStateClient.SetStreamProcessorPartitionState(new SetStreamProcessorPartitionStateRequest
+        var processorKey = streamProcessorId.ToProtobuf();
+        var request = new SetStreamProcessorStateRequest
         {
-            StreamKey = streamProcessorId.ToProtobuf(),
+            StreamKey = processorKey,
             Bucket = streamProcessorState.ToProtobuf()
-        }, cancellationToken);
+        };
+        switch (processorKey.IdCase)
+        {
+            case StreamProcessorKey.IdOneofCase.StreamProcessorId:
+                await _streamProcessorStateClient.SetByProcessorId(request, cancellationToken).ConfigureAwait(false);
+                return;
+            case StreamProcessorKey.IdOneofCase.SubscriptionId:
+                await _streamProcessorStateClient.SetBySubscriptionId(request, cancellationToken).ConfigureAwait(false);
+                return;
+            case StreamProcessorKey.IdOneofCase.None:
+            default:
+                throw new ArgumentOutOfRangeException(nameof(streamProcessorId));
+        }
     }
 }
