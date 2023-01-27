@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
 
@@ -40,5 +42,15 @@ public interface IStreamProcessorStateBatchRepository
     /// <param name="streamProcessorStates">The <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="IStreamProcessorId"/> and <see cref="IStreamProcessorState"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task<Try> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken);
+    Task<Try> PersistStreamProcessorStatesForScope(IReadOnlyDictionary<StreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken);
+    
+    /// <summary>
+    /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId"/> and <see cref="SubscriptionId"/>.
+    /// Handles <see cref="Partitioned.PartitionedStreamProcessorState"/> separately also.
+    /// IsUpsert option creates the document if one isn't found.
+    /// </summary>
+    /// <param name="streamProcessorStates">The <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="IStreamProcessorId"/> and <see cref="IStreamProcessorState"/>.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
+    Task<Try> PersistSubscriptionStatesForScope(IReadOnlyDictionary<SubscriptionId, StreamProcessorState> streamProcessorStates, CancellationToken cancellationToken);
 }
