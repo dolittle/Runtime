@@ -32,28 +32,37 @@ public class StreamProcessorStatesClient : IStreamProcessorStates
         _streamSubscriptionStateClient = streamSubscriptionStateClient;
     }
 
+    /// <exception cref="NullReferenceException"></exception>
     /// <inheritdoc />
-    public async Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+    public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
     {
-        try
+        return Try<IStreamProcessorState>.DoAsync(async () =>
         {
             var processorKey = streamProcessorId.ToProtobuf();
             switch (processorKey.IdCase)
             {
                 case StreamProcessorKey.IdOneofCase.StreamProcessorId:
                     var response = await _streamProcessorStateClient.GetByProcessorId(processorKey.StreamProcessorId, cancellationToken).ConfigureAwait(false);
-                    return Try<IStreamProcessorState>.Succeeded(response!.Bucket.Single().FromProtobuf());
+                    return ToResponse(streamProcessorId, response);
+
                 case StreamProcessorKey.IdOneofCase.SubscriptionId:
-                    var r = await _streamSubscriptionStateClient.GetBySubscriptionId(processorKey.SubscriptionId, cancellationToken).ConfigureAwait(false);
-                    return Try<IStreamProcessorState>.Succeeded(r!.Bucket.Single().FromProtobuf());
+                    return ToResponse(streamProcessorId,
+                        await _streamSubscriptionStateClient.GetBySubscriptionId(processorKey.SubscriptionId, cancellationToken).ConfigureAwait(false));
+
                 case StreamProcessorKey.IdOneofCase.None:
                 default:
-                    return Try<IStreamProcessorState>.Failed(new ArgumentOutOfRangeException(nameof(streamProcessorId)));
+                    throw new ArgumentOutOfRangeException(nameof(streamProcessorId));
             }
-        }
-        catch (Exception e)
+        });
+
+        static IStreamProcessorState ToResponse(IStreamProcessorId processorId, StreamProcessorStateResponse? response)
         {
-            return Try<IStreamProcessorState>.Failed(e);
+            return response!.Bucket.Count switch
+            {
+                0 => throw new StreamProcessorStateDoesNotExist(processorId),
+                1 => response!.Bucket.Single().FromProtobuf(),
+                _ => throw new ArgumentOutOfRangeException("State contains more than one bucket, not yet supported")
+            };
         }
     }
 
