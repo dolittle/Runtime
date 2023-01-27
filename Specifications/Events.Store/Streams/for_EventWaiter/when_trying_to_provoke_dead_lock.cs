@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter;
@@ -32,7 +33,7 @@ public class when_trying_to_provoke_dead_lock : given.an_event_waiter
 
     };
 
-    It should_not_be_a_dead_lock = () => token_source.IsCancellationRequested.ShouldBeFalse();
+    It should_not_be_a_dead_lock = () => token_source.IsCancellationRequested.Should().BeFalse();
 
     Cleanup clean = () =>
     {

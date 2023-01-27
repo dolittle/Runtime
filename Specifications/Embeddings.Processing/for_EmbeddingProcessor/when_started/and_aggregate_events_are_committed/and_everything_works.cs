@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -38,7 +39,7 @@ public class and_everything_works : given.all_dependencies
         Thread.Sleep(100);
     };
 
-    It should_be_running = () => result.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+    It should_be_running = () => result.Status.Should().Be(TaskStatus.WaitingForActivation);
     It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
     It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
 }

@@ -5,6 +5,7 @@ using System;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_getting_partition_id;
@@ -22,5 +23,5 @@ public class and_partition_id_is_set
         PartitionIdLegacy = new Guid("2bed04ca-f892-4cb5-8e9d-9e4b18601df0").ToProtobuf()
     }.GetPartitionId();
 
-    It should_get_the_partition_id = () => result.ShouldEqual(partition);
+    It should_get_the_partition_id = () => result.Should().Be(partition);
 }

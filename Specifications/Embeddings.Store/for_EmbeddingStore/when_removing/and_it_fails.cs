@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -34,6 +35,6 @@ public class and_it_fails : given.all_dependencies
 
     Because of = () => result = store.TryRemove(id, key, version, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_fail = () => result.Success.ShouldBeFalse();
-    It should_have_the_correct_exception = () => result.Exception.ShouldEqual(exception);
+    It should_fail = () => result.Success.Should().BeFalse();
+    It should_have_the_correct_exception = () => result.Exception.Should().Be(exception);
 }

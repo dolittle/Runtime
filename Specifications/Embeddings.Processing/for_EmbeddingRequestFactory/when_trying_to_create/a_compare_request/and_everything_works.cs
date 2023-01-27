@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -14,11 +15,11 @@ public class and_everything_works : given.all_dependencies
 
     Because of = () => result = factory.TryCreate(current_state, desired_state);
 
-    It should_be_successful = () => result.Success.ShouldBeTrue();
-    It should_be_a_projection_request = () => result.Result.RequestCase.ShouldEqual(Contracts.EmbeddingRequest.RequestOneofCase.Compare);
-    It should_have_the_correct_type = () => result.Result.Compare.ProjectionState.Type.ShouldEqual(current_state.Type.ToProtobuf());
-    It should_have_the_correct_state = () => result.Result.Compare.ProjectionState.State.ShouldEqual(current_state.State.Value);
-    It should_have_the_correct_key = () => result.Result.Compare.ProjectionState.Key.ShouldEqual(current_state.Key.Value);
-    It should_have_the_correct_desired_state = () => result.Result.Compare.EntityState.ShouldEqual(desired_state.Value);
+    It should_be_successful = () => result.Success.Should().BeTrue();
+    It should_be_a_projection_request = () => result.Result.RequestCase.Should().Be(Contracts.EmbeddingRequest.RequestOneofCase.Compare);
+    It should_have_the_correct_type = () => result.Result.Compare.ProjectionState.Type.Should().Be(current_state.Type.ToProtobuf());
+    It should_have_the_correct_state = () => result.Result.Compare.ProjectionState.State.Should().Be(current_state.State.Value);
+    It should_have_the_correct_key = () => result.Result.Compare.ProjectionState.Key.Should().Be(current_state.Key.Value);
+    It should_have_the_correct_desired_state = () => result.Result.Compare.EntityState.Should().Be(desired_state.Value);
 
 }

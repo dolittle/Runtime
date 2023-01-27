@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -31,6 +32,6 @@ public class and_should_copy_to_mongodb_is_false : given.a_projection_copy_store
 
     Because of = () => exception = Catch.Exception(() => copy_store.TryRemove(projection, projection_key, cancellation_token).GetAwaiter().GetResult());
 
-    It should_fail = () => exception.ShouldBeOfExactType<ProjectionShouldNotBeCopiedToMongoDB>();
+    It should_fail = () => exception.Should().BeOfType<ProjectionShouldNotBeCopiedToMongoDB>();
     It should_not_have_deleted_the_document = () => collection.Verify(_ => _.DeleteOneAsync(Moq.It.IsAny<FilterDefinition<BsonDocument>>(), Moq.It.IsAny<CancellationToken>()), Times.Never);
 }

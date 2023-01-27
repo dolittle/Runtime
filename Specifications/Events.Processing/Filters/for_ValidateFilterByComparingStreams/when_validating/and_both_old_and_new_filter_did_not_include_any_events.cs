@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating;
@@ -22,5 +23,5 @@ public class and_both_old_and_new_filter_did_not_include_any_events : given.all_
     static FilterValidationResult result;
     Because of = () => result = validator.Validate(filter_definition, filter_processor.Object, 1, cancellation_token).GetAwaiter().GetResult();
 
-    It should_not_fail_validation = () => result.Success.ShouldBeTrue();
+    It should_not_fail_validation = () => result.Success.Should().BeTrue();
 }

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Protobuf.for_Extensions;
@@ -21,5 +22,5 @@ public class when_converting_concept_of_guid_back_and_forth
 
     Because of = () => result = concept.ToProtobuf().ToGuid();
 
-    It should_be_exactly_the_same = () => result.ShouldEqual(concept);
+    It should_be_exactly_the_same = () => result.Should().Be(concept);
 }

@@ -8,6 +8,7 @@ using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Machine.Specifications;
 using Microservices;
 using Nito.AsyncEx;
@@ -53,6 +54,6 @@ public class and_it_has_already_started : given.all_dependencies
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
     It should_not_be_connected = () => subscription.State.ShouldNotEqual(SubscriptionState.Connected);
-    It should_get_the_unsuccessfull_response = () => subscription.ConnectionResponse.Result.Success.ShouldBeFalse();
-    It should_have_the_correct_failure = () => subscription.ConnectionResponse.Result.Failure.ShouldEqual(failure);
+    It should_get_the_unsuccessfull_response = () => subscription.ConnectionResponse.Result.Success.Should().BeFalse();
+    It should_have_the_correct_failure = () => subscription.ConnectionResponse.Result.Failure.Should().Be(failure);
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter;
@@ -22,5 +23,5 @@ public class when_creating
 
     Because of = () => result = new EventWaiter(scope, stream);
 
-    It should_have_the_correct_id = () => result.Id.ShouldEqual(expected_id);
+    It should_have_the_correct_id = () => result.Id.Should().Be(expected_id);
 }

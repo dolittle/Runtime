@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;
@@ -105,7 +106,7 @@ public class and_the_ping_times_out : given.a_reverse_call_client
         reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult());
 
     It should_not_call_the_callback = () =>
-        callback_was_called.ShouldBeFalse();
+        callback_was_called.Should().BeFalse();
     It should_throw_an_exception = () =>
-        exception.ShouldBeOfExactType<PingTimedOut>();
+        exception.Should().BeOfType<PingTimedOut>();
 }

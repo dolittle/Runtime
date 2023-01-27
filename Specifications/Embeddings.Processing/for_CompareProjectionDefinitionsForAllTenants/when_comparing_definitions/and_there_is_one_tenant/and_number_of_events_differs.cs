@@ -10,6 +10,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -42,6 +43,6 @@ public class and_number_of_events_differs : given.one_tenant
     Because of = () => results = comparer.DiffersFromPersisted(new_definition, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_only_contain_result_for_tenant = () => results.Keys.ShouldContainOnly(tenant);
-    It should_not_be_a_successful_result = () => results[tenant].Succeeded.ShouldBeFalse();
+    It should_not_be_a_successful_result = () => results[tenant].Succeeded.Should().BeFalse();
 
 }

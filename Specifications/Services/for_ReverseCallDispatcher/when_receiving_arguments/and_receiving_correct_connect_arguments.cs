@@ -9,6 +9,7 @@ using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using System;
+using FluentAssertions;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments;
 
@@ -38,6 +39,6 @@ public class and_receiving_correct_connect_arguments : given.a_dispatcher
 
     Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_return_true = () => result.ShouldBeTrue();
-    It should_have_the_correct_arguments = () => dispatcher.Arguments.ShouldEqual(arguments);
+    It should_return_true = () => result.Should().BeTrue();
+    It should_have_the_correct_arguments = () => dispatcher.Arguments.Should().Be(arguments);
 }

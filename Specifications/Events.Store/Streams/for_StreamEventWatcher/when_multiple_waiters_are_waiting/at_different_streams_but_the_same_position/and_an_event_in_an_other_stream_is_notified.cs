@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.when_multiple_waiters_are_waiting.at_different_streams_but_the_same_position;
@@ -35,6 +36,6 @@ public class and_an_event_in_an_other_stream_is_notified : given.all_dependencie
         Thread.Sleep(100);
     };
 
-    It first_should_not_be_completed = () => first_result.IsCompleted.ShouldBeFalse();
-    It second_should_not_be_completed = () => second_result.IsCompleted.ShouldBeFalse();
+    It first_should_not_be_completed = () => first_result.IsCompleted.Should().BeFalse();
+    It second_should_not_be_completed = () => second_result.IsCompleted.Should().BeFalse();
 }

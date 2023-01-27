@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -44,9 +45,9 @@ public class a_projection_replace_response : given.all_dependencies
         => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Moq.Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_return_a_projection_replace_result = ()
-        => result.ShouldBeOfExactType<ProjectionReplaceResult>();
+        => result.Should().BeOfType<ProjectionReplaceResult>();
     It should_have_the_received_state_in_the_result = ()
-        => (result as ProjectionReplaceResult).State.Value.ShouldEqual(received_state);
+        => (result as ProjectionReplaceResult).State.Value.Should().Be(received_state);
     It should_have_called_the_request_factory = ()
         => request_factory.Verify(_ => _.Create(current_state, @event));
 }

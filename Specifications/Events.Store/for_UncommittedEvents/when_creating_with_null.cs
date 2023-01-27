@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_UncommittedEvents;
@@ -16,6 +17,6 @@ public class when_creating_with_null : given.events
         events = new UncommittedEvents(new[] { event_one, null, event_three });
     });
 
-    It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
-    It should_not_be_created = () => events.ShouldBeNull();
+    It should_throw_an_exception = () => exception.Should().BeOfType<EventCanNotBeNull>();
+    It should_not_be_created = () => events.Should().BeNull();
 }

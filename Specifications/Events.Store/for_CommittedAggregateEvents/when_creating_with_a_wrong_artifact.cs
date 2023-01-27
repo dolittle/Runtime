@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvents;
@@ -18,6 +19,6 @@ public class when_creating_with_a_wrong_artifact : given.events_and_an_artifact
 
     Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, 2, new[] { event_one, event_two, event_three, wrong_aggregate_event }));
 
-    It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventWasAppliedByOtherAggregateRoot>();
-    It should_not_be_created = () => events.ShouldBeNull();
+    It should_throw_an_exception = () => exception.Should().BeOfType<EventWasAppliedByOtherAggregateRoot>();
+    It should_not_be_created = () => events.Should().BeNull();
 }

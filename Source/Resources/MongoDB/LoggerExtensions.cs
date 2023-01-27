@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.Resources.MongoDB;
 
 /// <summary>
-/// Represents a extensions for <see cref="Grpc.Core.Logging.ILogger" />.
+/// Represents a extensions for <see cref="ILogger" />.
 /// </summary>
 static class LoggerExtensions
 {

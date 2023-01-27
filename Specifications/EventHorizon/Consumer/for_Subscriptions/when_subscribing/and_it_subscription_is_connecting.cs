@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 using Microservices;
 
@@ -27,7 +28,7 @@ public class and_it_subscription_is_connecting : given.all_dependencies
         Task.Delay(50).GetAwaiter().GetResult();
     };
 
-    It should_return_the_correct_task = () => result.ShouldEqual(connection_response_completion_source.Task);
+    It should_return_the_correct_task = () => result.Should().Be(connection_response_completion_source.Task);
     It should_not_create_a_new_subscription = () => subscription_factory.Verify(_ => _.Create(
         Moq.It.IsAny<SubscriptionId>(),
         Moq.It.IsAny<MicroserviceAddress>(),

@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection;
@@ -33,6 +34,6 @@ public class when_reverse_call_context_is_not_received : all_dependencies
         metrics,
         logger_factory);
 
-    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
-    It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
+    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.Should().BeTrue();
+    It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.Should().BeEmpty();
 }

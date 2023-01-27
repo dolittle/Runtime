@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -118,7 +119,7 @@ public class and_we_get_2_pings_and_a_request : given.a_reverse_call_client
 
     It should_respond_with_a_pong_twice = () => client_to_server_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyClientMessage>(_ => _.Pong != default)), Moq.Times.Exactly(2));
     It should_call_the_callback = () =>
-        callback_was_called.ShouldBeTrue();
+        callback_was_called.Should().BeTrue();
     It should_call_the_callback_with_the_request = () =>
-        callback_argument.ShouldEqual(request);
+        callback_argument.Should().Be(request);
 }

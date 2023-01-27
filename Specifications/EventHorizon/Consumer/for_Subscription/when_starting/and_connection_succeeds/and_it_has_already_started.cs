@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using Microservices;
 using Nito.AsyncEx;
@@ -45,7 +46,7 @@ public class and_it_has_already_started : given.all_dependencies
         Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
 
-    It should_be_connected = () => subscription.State.ShouldEqual(SubscriptionState.Connected);
-    It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.ShouldBeTrue();
-    It should_have_the_correct_consent = () => subscription.ConnectionResponse.Result.ConsentId.ShouldEqual(consent);
+    It should_be_connected = () => subscription.State.Should().Be(SubscriptionState.Connected);
+    It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.Should().BeTrue();
+    It should_have_the_correct_consent = () => subscription.ConnectionResponse.Result.ConsentId.Should().Be(consent);
 }

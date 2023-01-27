@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -43,7 +44,7 @@ public class and_only_unremoved_keys_are_found : given.all_dependencies
 
     Because of = () => result = store.TryGetKeys(id, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_succeed = () => result.Success.Should().BeTrue();
     It should_get_the_unremoved_keys = () =>
         result.Result.ShouldEachConformTo(result_key => persisted_states
             .Where(_ => !_.Item1.IsRemoved)

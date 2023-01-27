@@ -4,6 +4,7 @@
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store.State;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -28,5 +29,5 @@ public class when_starting_two_processors : given.all_dependencies
     static IEmbeddingProcessor result;
     Because of = () => result = factory.Create(embedding_id, embedding, initial_state, execution_context);
 
-    It should_create_an_embedding_processor = () => result.ShouldNotBeNull();
+    It should_create_an_embedding_processor = () => result.Should().NotBeNull();
 }

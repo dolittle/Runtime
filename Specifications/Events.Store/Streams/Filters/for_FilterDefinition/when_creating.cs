@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_FilterDefinition;
@@ -22,7 +23,7 @@ public class when_creating
 
     Because of = () => definition = new FilterDefinition(source_stream, target_stream, partitioned);
 
-    It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
-    It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
-    It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
+    It should_have_the_correct_source_stream = () => definition.SourceStream.Should().Be(source_stream);
+    It should_have_the_correct_target_stream = () => definition.TargetStream.Should().Be(target_stream);
+    It should_have_the_correct_partitioned_value = () => definition.Partitioned.Should().Be(partitioned);
 }

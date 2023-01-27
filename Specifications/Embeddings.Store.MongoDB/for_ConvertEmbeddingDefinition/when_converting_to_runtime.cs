@@ -6,6 +6,7 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 using Dolittle.Runtime.Projections.Store.State;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -46,7 +47,7 @@ public class when_converting_to_runtime
 
     Because of = () => result_definition = converter.ToRuntime(stored_definition);
 
-    It should_have_the_embedding = () => result_definition.Embedding.ShouldEqual(embedding);
+    It should_have_the_embedding = () => result_definition.Embedding.Should().Be(embedding);
     It should_have_the_event_types = () => result_definition.Events.ShouldContainOnly(event_types.Select(_ => new Artifact(_, ArtifactGeneration.First)));
-    It should_have_the_state = () => result_definition.InititalState.ShouldEqual(initial_state);
+    It should_have_the_state = () => result_definition.InititalState.Should().Be(initial_state);
 }

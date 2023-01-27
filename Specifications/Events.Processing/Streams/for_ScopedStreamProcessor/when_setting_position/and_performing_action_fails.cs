@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.given
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -37,8 +38,8 @@ public class and_performing_action_fails : all_dependencies
         
     It should_not_process_event_again = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_not_fetch_event_again = () => events_fetcher.Verify(_ => _.Fetch((ulong)0, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-    It should_have_current_position_equal_one = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(1));
-    It should_not_be_failing = () => current_stream_processor_state.IsFailing.ShouldBeFalse();
+    It should_have_current_position_equal_one = () => current_stream_processor_state.Position.Should().Be(new StreamPosition(1));
+    It should_not_be_failing = () => current_stream_processor_state.IsFailing.Should().BeFalse();
     It should_try_fetching_next_event = () => events_fetcher.Verify(_ => _.Fetch((ulong)1, Moq.It.IsAny<CancellationToken>()), Moq.Times.AtLeastOnce);
     It should_perform_the_action = () => action_to_perform_before_reprocessing.Verify(_ => _(tenant_id, Moq.It.IsAny<CancellationToken>()), Times.Once);
 }

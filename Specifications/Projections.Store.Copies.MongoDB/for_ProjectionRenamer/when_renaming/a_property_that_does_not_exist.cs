@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -30,5 +31,5 @@ public class a_property_that_does_not_exist : given.a_renamer_and_inputs
         };
     };
 
-    It should_fail = () => exception.ShouldBeOfExactType<DocumentDoesNotHaveProperty>();
+    It should_fail = () => exception.Should().BeOfType<DocumentDoesNotHaveProperty>();
 }

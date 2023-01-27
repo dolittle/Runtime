@@ -5,6 +5,7 @@ using System;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Execution;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvent;
@@ -51,15 +52,15 @@ public class when_creating_event
             is_public,
             content);
 
-    It should_have_the_correct_aggregate_root_artifact_id = () => @event.AggregateRoot.Id.ShouldEqual(aggregate_root_id);
-    It should_have_the_correct_aggregate_root_artifact_generation = () => @event.AggregateRoot.Generation.ShouldEqual(aggregate_root_generation);
-    It should_have_the_correct_aggregate_root_version = () => @event.AggregateRootVersion.ShouldEqual(aggregate_root_version);
-    It should_have_the_correct_event_log_sequence_number = () => @event.EventLogSequenceNumber.ShouldEqual(event_log_sequence_number);
-    It should_have_the_correct_occurred_date = () => @event.Occurred.ShouldEqual(occurred);
-    It should_have_the_correct_event_source = () => @event.EventSource.ShouldEqual(event_source);
-    It should_have_the_correct_execution_context = () => @event.ExecutionContext.ShouldEqual(execution_context);
-    It should_have_the_correct_artifact_id = () => @event.Type.Id.ShouldEqual(artifact_id);
-    It should_have_the_correct_artifact_generation = () => @event.Type.Generation.ShouldEqual(artifact_generation);
-    It should_have_the_correct_is_public_value = () => @event.Public.ShouldEqual(is_public);
-    It should_have_the_correct_content = () => @event.Content.ShouldEqual(content);
+    It should_have_the_correct_aggregate_root_artifact_id = () => @event.AggregateRoot.Id.Should().Be(aggregate_root_id);
+    It should_have_the_correct_aggregate_root_artifact_generation = () => @event.AggregateRoot.Generation.Should().Be(aggregate_root_generation);
+    It should_have_the_correct_aggregate_root_version = () => @event.AggregateRootVersion.Should().Be(aggregate_root_version);
+    It should_have_the_correct_event_log_sequence_number = () => @event.EventLogSequenceNumber.Should().Be(event_log_sequence_number);
+    It should_have_the_correct_occurred_date = () => @event.Occurred.Should().Be(occurred);
+    It should_have_the_correct_event_source = () => @event.EventSource.Should().Be(event_source);
+    It should_have_the_correct_execution_context = () => @event.ExecutionContext.Should().Be(execution_context);
+    It should_have_the_correct_artifact_id = () => @event.Type.Id.Should().Be(artifact_id);
+    It should_have_the_correct_artifact_generation = () => @event.Type.Generation.Should().Be(artifact_generation);
+    It should_have_the_correct_is_public_value = () => @event.Public.Should().Be(is_public);
+    It should_have_the_correct_content = () => @event.Content.Should().Be(content);
 }

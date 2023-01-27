@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -38,7 +39,7 @@ public class and_processor_key_has_not_been_registered_before : given.all_depend
     static Try<StreamProcessor> result;
     Because of = () => result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, event_processor_kind, stream_definition, tenant_id => event_processor.Object, execution_contexts.create(), CancellationToken.None);
 
-    It should_register_stream_processor = () => result.Success.ShouldBeTrue();
+    It should_register_stream_processor = () => result.Success.Should().BeTrue();
     It should_create_the_stream_processor = () => create_stream_processor.Verify(_ => _.Invoke(
         Moq.It.IsAny<StreamProcessorId>(),
         Moq.It.IsAny<EventProcessorKind>(),

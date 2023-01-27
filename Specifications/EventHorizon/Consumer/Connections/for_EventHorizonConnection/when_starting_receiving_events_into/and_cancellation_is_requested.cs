@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.when_starting_receiving_events_into;
@@ -21,6 +22,6 @@ public class and_cancellation_is_requested : given.all_dependencies
         Task.Delay(50).GetAwaiter().GetResult();
     };
 
-    It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
-    It should_not_have_put_anything_in_event_queue = () => event_queue.OutputAvailable().ShouldBeFalse();
+    It should_be_completed = () => result.IsCompleted.Should().BeTrue();
+    It should_not_have_put_anything_in_event_queue = () => event_queue.OutputAvailable().Should().BeFalse();
 }

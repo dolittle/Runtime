@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using Moq;
@@ -20,8 +21,8 @@ public class a_simple_state : given.a_converter_and_inputs
     ";
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_have_the_correct_string = () => result["some_string"].ShouldEqual(new BsonString("hello world"));
-    It should_have_the_correct_int = () => result["some_int"].ShouldEqual(new BsonInt32(42));
-    It should_have_the_correct_bool = () => result["some_bool"].ShouldEqual(new BsonBoolean(true));
-    It should_have_the_correct_date = () => result["some_date"].ShouldEqual(new BsonString("2002-02-02T02:02:02.002Z"));
+    It should_have_the_correct_string = () => result["some_string"].Should().Be(new BsonString("hello world"));
+    It should_have_the_correct_int = () => result["some_int"].Should().Be(new BsonInt32(42));
+    It should_have_the_correct_bool = () => result["some_bool"].Should().Be(new BsonBoolean(true));
+    It should_have_the_correct_date = () => result["some_date"].Should().Be(new BsonString("2002-02-02T02:02:02.002Z"));
 }

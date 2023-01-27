@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState;
@@ -25,8 +26,8 @@ public class when_creating_failing_state
 
     Because of = () => state = new StreamProcessorState(stream_position, failure_reason, retry_time, processing_attempts, DateTimeOffset.MinValue, false);
 
-    It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
-    It should_have_the_correct_failure_reason = () => state.FailureReason.ShouldEqual(failure_reason);
-    It should_have_the_correct_retry_time = () => state.RetryTime.ShouldEqual(retry_time);
-    It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.ShouldEqual(processing_attempts);
+    It should_have_the_correct_stream_position = () => state.Position.Should().Be(stream_position);
+    It should_have_the_correct_failure_reason = () => state.FailureReason.Should().Be(failure_reason);
+    It should_have_the_correct_retry_time = () => state.RetryTime.Should().Be(retry_time);
+    It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.Should().Be(processing_attempts);
 }

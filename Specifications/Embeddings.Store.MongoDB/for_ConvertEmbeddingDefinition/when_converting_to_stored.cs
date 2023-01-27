@@ -7,6 +7,7 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 using Dolittle.Runtime.Projections.Store.State;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -43,7 +44,7 @@ public class when_converting_to_stored
 
     Because of = () => result_definition = converter.ToStored(runtime_definition);
 
-    It should_have_the_embedding = () => result_definition.Embedding.ShouldEqual(embedding.Value);
+    It should_have_the_embedding = () => result_definition.Embedding.Should().Be(embedding.Value);
     It should_have_the_event_selectors = () => result_definition.Events.ShouldContainOnly(event_types.Select(_ => _.Id.Value));
-    It should_have_the_state = () => result_definition.InitialState.ShouldEqual(initial_state.Value);
+    It should_have_the_state = () => result_definition.InitialState.Should().Be(initial_state.Value);
 }

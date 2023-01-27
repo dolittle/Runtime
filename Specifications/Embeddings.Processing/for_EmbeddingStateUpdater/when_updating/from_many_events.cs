@@ -10,6 +10,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -51,7 +52,7 @@ public class from_many_events : given.all_dependencies
     static Try result;
     Because of = () => result = state_updater.TryUpdateAll(execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_succeed = () => result.Success.Should().BeTrue();
     It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
     It should_get_the_last_state_from_the_embedding_store = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key, cancellation_token));
     It should_ask_the_event_store_for_new_events = () => committed_events_fetcher.Verify(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token));

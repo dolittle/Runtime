@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using static Moq.Times;
 
@@ -34,6 +35,6 @@ public class when_getting_keys : given.the_service
 
     It should_create_the_execution_context = () => execution_context_creator.Verify(_ => _.TryCreateUsing(execution_context));
     It should_call_the_embedding_store = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token), Once);
-    It should_return_successfull_result = () => result.Success.ShouldBeTrue();
+    It should_return_successfull_result = () => result.Success.Should().BeTrue();
     It should_return_the_current_state = () => result.Result.ShouldContainOnly(stored_keys);
 }

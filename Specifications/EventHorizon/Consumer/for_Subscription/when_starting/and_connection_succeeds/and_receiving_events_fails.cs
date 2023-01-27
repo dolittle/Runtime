@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using Nito.AsyncEx;
 
@@ -44,6 +45,6 @@ public class and_receiving_events_fails : given.all_dependencies
         Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
         Moq.It.IsAny<CancellationToken>()), Moq.Times.AtLeast(2));
 
-    It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.ShouldBeTrue();
-    It should_have_the_correct_consent = () => subscription.ConnectionResponse.Result.ConsentId.ShouldEqual(consent);
+    It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.Should().BeTrue();
+    It should_have_the_correct_consent = () => subscription.ConnectionResponse.Result.ConsentId.Should().Be(consent);
 }

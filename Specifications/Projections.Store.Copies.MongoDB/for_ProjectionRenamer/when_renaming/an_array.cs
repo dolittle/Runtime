@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -39,5 +40,5 @@ public class an_array : given.a_renamer_and_inputs
     };
 
     It should_have_the_renamed_property = () => result["moved_array"].ShouldBeTheSameAs(array_to_move);
-    It should_not_have_the_old_property = () => result.Contains("array").ShouldBeFalse();
+    It should_not_have_the_old_property = () => result.Contains("array").Should().BeFalse();
 }

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using Moq;
@@ -113,7 +114,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_call_the_converter_eight_times = () => value_converter.Verify(_ => _.Convert(Moq.It.IsAny<BsonString>(), ConversionBSONType.DateAsDate), Times.Exactly(8));
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
-    It should_return_the_correct_document = () => result.ShouldEqual(
+    It should_return_the_correct_document = () => result.Should().BeEquivalentTo(
         new BsonDocument("people", new BsonArray(new []
         {
             new BsonDocument(new []

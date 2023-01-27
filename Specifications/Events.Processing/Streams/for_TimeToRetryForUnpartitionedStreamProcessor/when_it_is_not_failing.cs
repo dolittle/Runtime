@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartitionedStreamProcessor;
@@ -21,6 +22,6 @@ public class when_it_is_not_failing
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
 
-    It should_not_get_it = () => success.ShouldBeFalse();
-    It should_return_the_max_value_of_time_span = () => time_to_retry.ShouldEqual(TimeSpan.MaxValue);
+    It should_not_get_it = () => success.Should().BeFalse();
+    It should_return_the_max_value_of_time_span = () => time_to_retry.Should().Be(TimeSpan.MaxValue);
 }

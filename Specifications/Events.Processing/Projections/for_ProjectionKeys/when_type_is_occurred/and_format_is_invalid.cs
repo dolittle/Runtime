@@ -7,6 +7,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.when_type_is_occurred;
@@ -31,5 +32,5 @@ public class and_format_is_invalid : all_dependencies
     };
     Because of = () => result = projection_keys.TryGetFor(definition, committed_event, partition, out key);
 
-    It should_not_get_key = () => result.ShouldBeFalse();
+    It should_not_get_key = () => result.Should().BeFalse();
 }

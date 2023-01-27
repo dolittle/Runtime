@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connecting;
@@ -43,7 +44,7 @@ public class and_the_server_stream_sends_2_pings_and_a_response : given.a_revers
 
     Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), execution_context, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_return_true = () => result.ShouldBeTrue();
+    It should_return_true = () => result.Should().BeTrue();
     It should_respond_with_a_pong_twice = () => client_to_server_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyClientMessage>(_ => _.Pong != default)), Moq.Times.Exactly(2));
-    It should_set_correct_connect_response = () => reverse_call_client.ConnectResponse.ShouldEqual(connect_response);
+    It should_set_correct_connect_response = () => reverse_call_client.ConnectResponse.Should().Be(connect_response);
 }

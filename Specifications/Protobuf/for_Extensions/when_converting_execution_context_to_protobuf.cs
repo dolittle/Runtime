@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
+using FluentAssertions;
 using Machine.Specifications;
 using Environment = Dolittle.Runtime.Domain.Platform.Environment;
 using ExecutionContextContract = Dolittle.Execution.Contracts.ExecutionContext;
@@ -38,10 +39,10 @@ public class when_converting_execution_context_to_protobuf
 
     Because of = () => result = execution_context.ToProtobuf();
 
-    It should_hold_the_correct_microservice = () => result.MicroserviceId.ToGuid().ShouldEqual(execution_context.Microservice.Value);
-    It should_hold_the_correct_tenant = () => result.TenantId.ToGuid().ShouldEqual(execution_context.Tenant.Value);
-    It should_hold_the_correct_version = () => result.Version.ToVersion().ShouldEqual(execution_context.Version);
-    It should_hold_the_correct_correlation_id = () => result.CorrelationId.ToGuid().ShouldEqual(execution_context.CorrelationId.Value);
-    It should_hold_the_correct_claims = () => result.Claims.ToClaims().ShouldEqual(execution_context.Claims);
-    It should_hold_the_correct_span_id = () => ActivitySpanId.CreateFromBytes(result.SpanId.Span).ShouldEqual(execution_context.SpanId!.Value);
+    It should_hold_the_correct_microservice = () => result.MicroserviceId.ToGuid().Should().Be(execution_context.Microservice.Value);
+    It should_hold_the_correct_tenant = () => result.TenantId.ToGuid().Should().Be(execution_context.Tenant.Value);
+    It should_hold_the_correct_version = () => result.Version.ToVersion().Should().Be(execution_context.Version);
+    It should_hold_the_correct_correlation_id = () => result.CorrelationId.ToGuid().Should().Be(execution_context.CorrelationId.Value);
+    It should_hold_the_correct_claims = () => result.Claims.ToClaims().Should().BeEquivalentTo(execution_context.Claims);
+    It should_hold_the_correct_span_id = () => ActivitySpanId.CreateFromBytes(result.SpanId.Span).Should().Be(execution_context.SpanId!.Value);
 }

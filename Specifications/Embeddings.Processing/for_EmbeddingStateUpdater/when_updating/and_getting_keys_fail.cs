@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -24,7 +25,7 @@ public class and_getting_keys_fail : given.all_dependencies
     static Try result;
     Because of = () => result = state_updater.TryUpdateAll(execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_fail = () => result.Success.ShouldBeFalse();
+    It should_fail = () => result.Success.Should().BeFalse();
     It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);
     It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
 }

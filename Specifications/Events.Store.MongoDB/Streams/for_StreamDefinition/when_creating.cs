@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_StreamDefinition;
@@ -25,8 +26,8 @@ public class when_creating
 
     Because of = () => result = new StreamDefinition(stream_id, filter_definition, partitioned, @public);
 
-    It should_have_the_correct_partitioned_value = () => result.Partitioned.ShouldEqual(partitioned);
-    It should_have_the_correct_public_value = () => result.Public.ShouldEqual(@public);
-    It should_have_the_correct_stream_id = () => result.StreamId.ShouldEqual(stream_id);
-    It should_have_the_correct_filter_definition = () => result.Filter.ShouldEqual(filter_definition);
+    It should_have_the_correct_partitioned_value = () => result.Partitioned.Should().Be(partitioned);
+    It should_have_the_correct_public_value = () => result.Public.Should().Be(@public);
+    It should_have_the_correct_stream_id = () => result.StreamId.Should().Be(stream_id);
+    It should_have_the_correct_filter_definition = () => result.Filter.Should().Be(filter_definition);
 }

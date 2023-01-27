@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -32,16 +33,16 @@ public class that_should_never_be_retried : given.all_dependencies
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
-    It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
-    It should_have_two_failing_partitions = () => result.FailingPartitions.Count.ShouldEqual(2);
-    It should_have_failing_partition_with_first_failing_partition_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).ShouldBeTrue();
-    It should_have_failing_partition_with_second_failing_partition_id = () => result.FailingPartitions.ContainsKey(second_failing_partition_id).ShouldBeTrue();
-    It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).Position.ShouldEqual(first_initial_failing_partition_position);
-    It should_not_change_second_failing_partition_position = () => failing_partition(second_failing_partition_id).Position.ShouldEqual(second_initial_failing_partition_position);
-    It should_not_change_first_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.ShouldEqual(first_initial_failing_partition_reason);
-    It should_not_change_second_failing_partition_reason = () => failing_partition(second_failing_partition_id).Reason.ShouldEqual(second_initial_failing_partition_reason);
-    It should_not_change_first_failing_partition_retry_time = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
-    It should_not_change_second_failing_partition_retry_time = () => failing_partition(second_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
+    It should_return_the_same_stream_position = () => result.Position.Should().Be(stream_processor_state.Position);
+    It should_have_two_failing_partitions = () => result.FailingPartitions.Count.Should().Be(2);
+    It should_have_failing_partition_with_first_failing_partition_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).Should().BeTrue();
+    It should_have_failing_partition_with_second_failing_partition_id = () => result.FailingPartitions.ContainsKey(second_failing_partition_id).Should().BeTrue();
+    It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).Position.Should().Be(first_initial_failing_partition_position);
+    It should_not_change_second_failing_partition_position = () => failing_partition(second_failing_partition_id).Position.Should().Be(second_initial_failing_partition_position);
+    It should_not_change_first_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.Should().Be(first_initial_failing_partition_reason);
+    It should_not_change_second_failing_partition_reason = () => failing_partition(second_failing_partition_id).Reason.Should().Be(second_initial_failing_partition_reason);
+    It should_not_change_first_failing_partition_retry_time = () => failing_partition(first_failing_partition_id).RetryTime.Should().Be(DateTimeOffset.MaxValue);
+    It should_not_change_second_failing_partition_retry_time = () => failing_partition(second_failing_partition_id).RetryTime.Should().Be(DateTimeOffset.MaxValue);
 
     It should_not_process_any_events = () => event_processor.Verify(
         _ => _.Process(

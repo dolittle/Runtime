@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_TimeToRetryForPartitionedStreamProcessor.when_there_are_failing_partitions;
@@ -54,6 +55,6 @@ public class and_earliest_retry_time_is_in_the_future
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
 
-    It should_get_it = () => success.ShouldBeTrue();
-    It should_retry_in_the_future = () => time_to_retry.ShouldBeGreaterThan(TimeSpan.Zero);
+    It should_get_it = () => success.Should().BeTrue();
+    It should_retry_in_the_future = () => time_to_retry.Should().BeGreaterThan(TimeSpan.Zero);
 }

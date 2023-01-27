@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartitionedStreamProcessor.when_failing;
@@ -21,6 +22,6 @@ public class and_retry_time_is_in_the_future
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
 
-    It should_get_it = () => success.ShouldBeTrue();
-    It should_retry_in_the_future = () => time_to_retry.ShouldBeGreaterThan(TimeSpan.Zero);
+    It should_get_it = () => success.Should().BeTrue();
+    It should_retry_in_the_future = () => time_to_retry.Should().BeGreaterThan(TimeSpan.Zero);
 }

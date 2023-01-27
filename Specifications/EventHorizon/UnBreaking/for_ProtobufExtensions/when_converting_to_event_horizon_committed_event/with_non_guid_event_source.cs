@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_converting_to_event_horizon_committed_event.given;
 using Dolittle.Runtime.Events;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_converting_to_event_horizon_committed_event;
@@ -16,6 +17,6 @@ public class with_non_guid_event_source
 
     Because of = () => result = a_committed_event.with_event_source(event_source).ToEventHorizonCommittedEvent();
 
-    It should_not_set_legacy_event_source_field = () => result.EventSourceIdLegacy.ShouldBeNull();
-    It should_set_event_source_field = () => result.EventSourceId.ShouldEqual(event_source.Value);
+    It should_not_set_legacy_event_source_field = () => result.EventSourceIdLegacy.Should().BeNull();
+    It should_set_event_source_field = () => result.EventSourceId.Should().Be(event_source.Value);
 }

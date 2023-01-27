@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -16,7 +17,7 @@ public class when_first_task_completes_first : given.a_group_and_inputs
         second_task = Task.Delay(20);
     };
 
-    It should_not_throw_an_exception = () => exception.ShouldBeNull();
+    It should_not_throw_an_exception = () => exception.Should().BeNull();
     It should_call_first_completed_with_first_task = () => on_first_task_completed.Verify(_ => _(first_task), Times.Once);
     It should_call_all_completed = () => on_all_tasks_completed.Verify(_ => _(), Times.Once);
     It should_not_call_first_failure = () => on_first_task_failure.VerifyNoOtherCalls();

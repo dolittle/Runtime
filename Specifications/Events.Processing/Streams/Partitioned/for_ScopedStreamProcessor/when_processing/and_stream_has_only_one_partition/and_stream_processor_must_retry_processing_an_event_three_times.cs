@@ -50,6 +50,6 @@ public class and_stream_processor_must_retry_processing_an_event_three_times : g
     It should_have_the_correct_position_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].Position.Should().Be(new StreamPosition(0));
 
     It should_have_the_correct_reason_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].Reason.Should().Be(failure_reason);
-    It should_have_the_correct_retry_time_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].RetryTime.ShouldBeGreaterThan(DateTimeOffset.UtcNow);
+    It should_have_the_correct_retry_time_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].RetryTime.Should().BeAfter(DateTimeOffset.UtcNow);
         
 }

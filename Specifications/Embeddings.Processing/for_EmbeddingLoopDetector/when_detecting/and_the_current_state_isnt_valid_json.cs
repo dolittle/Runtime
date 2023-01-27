@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -28,8 +29,8 @@ public class and_the_current_state_isnt_valid_json : given.all_dependencies
 
     Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
 
-    It should_fail = () => result.Success.ShouldBeFalse();
-    It should_have_the_correct_exception = () => result.Exception.ShouldEqual(exception);
+    It should_fail = () => result.Success.Should().BeFalse();
+    It should_have_the_correct_exception = () => result.Exception.Should().Be(exception);
     It should_call_the_comparer = () =>
         comparer.Verify(_ =>
                 _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state),

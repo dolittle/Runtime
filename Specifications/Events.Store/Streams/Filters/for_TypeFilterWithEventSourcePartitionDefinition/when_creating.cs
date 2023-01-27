@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_TypeFilterWithEventSourcePartitionDefinition;
@@ -27,8 +28,8 @@ public class when_creating
 
     Because of = () => definition = new TypeFilterWithEventSourcePartitionDefinition(source_stream, target_stream, types, partitioned);
 
-    It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
-    It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
-    It should_have_the_correct_types = () => definition.Types.ShouldContain(types);
-    It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
+    It should_have_the_correct_source_stream = () => definition.SourceStream.Should().Be(source_stream);
+    It should_have_the_correct_target_stream = () => definition.TargetStream.Should().Be(target_stream);
+    It should_have_the_correct_types = () => definition.Types.Should().Contain(types);
+    It should_have_the_correct_partitioned_value = () => definition.Partitioned.Should().Be(partitioned);
 }

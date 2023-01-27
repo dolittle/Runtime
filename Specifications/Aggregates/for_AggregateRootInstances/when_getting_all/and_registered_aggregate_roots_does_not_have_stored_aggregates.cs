@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -22,7 +23,7 @@ public class and_registered_aggregate_roots_does_not_have_stored_aggregates : gi
     Because of = () => result = aggregate_root_instances.GetAll().GetAwaiter().GetResult();
 
     It should_get_the_correct_aggregate_roots = () => result.Select(_ => _.Identifier).ShouldContainOnly(an_aggregate_root_id);
-    It should_not_have_any_aggregates = () => result.SelectMany(_ => _.Instances).ShouldBeEmpty();
+    It should_not_have_any_aggregates = () => result.SelectMany(_ => _.Instances).Should().BeEmpty();
         
     It should_fetch_the_aggregates_for_the_correct_root = () => aggregates_fetcher.Verify(_ => _.FetchFor(an_aggregate_root_id), Times.Once);
 }

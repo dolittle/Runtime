@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using Dolittle.Runtime.Projections.Store;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.when_extracting_from_existing_property;
@@ -20,6 +21,6 @@ public class and_property_is_pascal_cased : given.all_dependencies
 
     Because of = () => result = extractor.TryExtract(JsonSerializer.Serialize(json_object), nameof(json_object.CaseSensitive), out key);
 
-    It should_return_true = () => result.ShouldBeTrue();
-    It should_set_key_correct_value = () => key.Value.ShouldEqual("CaseSensitive");
+    It should_return_true = () => result.Should().BeTrue();
+    It should_set_key_correct_value = () => key.Value.Should().Be("CaseSensitive");
 }

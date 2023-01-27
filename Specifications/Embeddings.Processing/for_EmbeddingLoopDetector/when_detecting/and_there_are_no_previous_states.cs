@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -23,8 +24,8 @@ public class and_there_are_no_previous_states : given.all_dependencies
 
     Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
-    It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
+    It should_succeed = () => result.Success.Should().BeTrue();
+    It should_not_detect_a_loop = () => result.Result.Should().BeFalse();
 
     It should_not_call_the_comparer = () =>
         comparer.Verify(_ =>

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -39,5 +40,5 @@ public class a_simple_property : given.a_renamer_and_inputs
 
     It should_have_the_renamed_property = () => result["another_string"].ShouldBeTheSameAs(string_to_rename);
     It should_not_move_the_other_property = () => result["other_string"].ShouldBeTheSameAs(string_to_leave);
-    It should_not_have_the_old_property = () => result.Contains("some_string").ShouldBeFalse();
+    It should_not_have_the_old_property = () => result.Contains("some_string").Should().BeFalse();
 }

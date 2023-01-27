@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling;
@@ -53,5 +54,5 @@ public class and_it_receives_a_response_with_another_callid : given.a_dispatcher
     };
 
     It should_write_a_message_with_the_request = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.Request == request)), Moq.Times.Once);
-    It should_not_have_received_a_response = () => response.IsCompleted.ShouldBeFalse();
+    It should_not_have_received_a_response = () => response.IsCompleted.Should().BeFalse();
 }

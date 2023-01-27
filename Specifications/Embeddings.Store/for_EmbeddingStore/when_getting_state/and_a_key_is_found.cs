@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -35,10 +36,10 @@ public class and_a_key_is_found : given.all_dependencies
 
     Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
-    It should_get_the_state = () => result.Result.State.ShouldEqual(persisted_state.State);
-    It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
-    It should_have_the_same_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
-    It should_get_a_persisted_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
+    It should_succeed = () => result.Success.Should().BeTrue();
+    It should_get_the_state = () => result.Result.State.Should().Be(persisted_state.State);
+    It should_get_the_key = () => result.Result.Key.Should().Be(key);
+    It should_have_the_same_aggregate_version = () => result.Result.Version.Should().Be(persisted_state.Version);
+    It should_get_a_persisted_state = () => result.Result.Type.Should().Be(EmbeddingCurrentStateType.Persisted);
 
 }

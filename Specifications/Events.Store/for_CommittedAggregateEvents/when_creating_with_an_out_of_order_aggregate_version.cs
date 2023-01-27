@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvents;
@@ -16,6 +17,6 @@ public class when_creating_with_an_out_of_order_aggregate_version : given.events
 
     Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, 2, new[] { event_one, event_two, event_three, out_of_order_event }));
 
-    It should_throw_an_exception = () => exception.ShouldBeOfExactType<AggregateRootVersionIsOutOfOrder>();
-    It should_not_be_created = () => events.ShouldBeNull();
+    It should_throw_an_exception = () => exception.Should().BeOfType<AggregateRootVersionIsOutOfOrder>();
+    It should_not_be_created = () => events.Should().BeNull();
 }

@@ -7,6 +7,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -40,6 +41,6 @@ public class and_persisting_succeeds_for_all : given.all_dependencies
     static Try result;
     Because of = () => result = persister.TryPersist(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_be_successful = () => result.Success.ShouldBeTrue();
+    It should_be_successful = () => result.Success.Should().BeTrue();
 
 }

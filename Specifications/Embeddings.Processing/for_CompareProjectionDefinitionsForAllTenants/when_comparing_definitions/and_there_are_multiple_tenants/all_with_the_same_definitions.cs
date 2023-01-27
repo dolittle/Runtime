@@ -10,6 +10,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -44,6 +45,6 @@ public class all_with_the_same_definitions : given.all_dependencies
     Because of = () => results = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_only_contain_result_for_configured_tenants = () => results.Keys.ShouldContainOnly(tenants.All);
-    It should_have_no_unsuccessful_results = () => results.Any(_ => !_.Value.Succeeded).ShouldBeFalse();
+    It should_have_no_unsuccessful_results = () => results.Any(_ => !_.Value.Succeeded).Should().BeFalse();
 
 }

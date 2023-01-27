@@ -7,6 +7,7 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters.for_TypePartitionFilterDefinition;
@@ -34,10 +35,10 @@ public class when_converting_to_runtime_representation
 
     Because of = () => result = filter_definition.AsRuntimeRepresentation(stream_id, partitioned, true);
 
-    It should_be_a_type_partition_filter_definition = () => result.ShouldBeOfExactType<TypeFilterWithEventSourcePartitionDefinition>();
-    It should_be_partitioned = () => result.Partitioned.ShouldBeTrue();
-    It should_not_be_public = () => result.Public.ShouldBeFalse();
-    It should_have_the_event_log_as_source_stream = () => result.SourceStream.ShouldEqual(StreamId.EventLog);
-    It should_have_the_correct_target_stream = () => result.TargetStream.Value.ShouldEqual(stream_id);
+    It should_be_a_type_partition_filter_definition = () => result.Should().BeOfType<TypeFilterWithEventSourcePartitionDefinition>();
+    It should_be_partitioned = () => result.Partitioned.Should().BeTrue();
+    It should_not_be_public = () => result.Public.Should().BeFalse();
+    It should_have_the_event_log_as_source_stream = () => result.SourceStream.Should().Be(StreamId.EventLog);
+    It should_have_the_correct_target_stream = () => result.TargetStream.Value.Should().Be(stream_id);
     It should_have_the_correct_types = () => (result as TypeFilterWithEventSourcePartitionDefinition).Types.ShouldContainOnly(types.Select(_ => new ArtifactId(_)));
 }

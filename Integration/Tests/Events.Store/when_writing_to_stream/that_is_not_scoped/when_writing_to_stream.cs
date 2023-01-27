@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Driver;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
@@ -47,8 +48,8 @@ class when_writing_to_stream : given.a_clean_event_store
     {
         Because of = () => failure = Catch.Exception(() => events_to_streams_writer.Write(committed_events.Select(_ => (_, partition with {Value = "partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult());
         
-        It should_not_fail = () => failure.ShouldBeNull();
-        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(4);
+        It should_not_fail = () => failure.Should().BeNull();
+        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).Should().Be(4);
         
     }
     
@@ -59,8 +60,8 @@ class when_writing_to_stream : given.a_clean_event_store
         
         Because of = () => failure = Catch.Exception(() => events_to_streams_writer.Write(committed_events.Skip(2).Select(_ => (_, partition with {Value = "partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult());
 
-        It should_not_fail = () => failure.ShouldBeNull();
-        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(4);
+        It should_not_fail = () => failure.Should().BeNull();
+        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).Should().Be(4);
     }
     
     [Tags("IntegrationTest")]
@@ -70,8 +71,8 @@ class when_writing_to_stream : given.a_clean_event_store
         
         Because of = () => failure = Catch.Exception(() => events_to_streams_writer.Write(committed_events.Select(_ => (_, partition with {Value = "partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult());
 
-        It should_not_fail = () => failure.ShouldBeNull();
-        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(4);
+        It should_not_fail = () => failure.Should().BeNull();
+        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).Should().Be(4);
     }
     
     [Tags("IntegrationTest")]
@@ -81,8 +82,8 @@ class when_writing_to_stream : given.a_clean_event_store
         
         Because of = () => failure = Catch.Exception(() => events_to_streams_writer.Write(committed_events.Select(_ => (_, partition with {Value = "another partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult());
 
-        It should_fail = () => failure.ShouldNotBeNull();
-        It should_have_only_3_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(3);
+        It should_fail = () => failure.Should().NotBeNull();
+        It should_have_only_3_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).Should().Be(3);
     }
     
     [Tags("IntegrationTest")]
@@ -92,7 +93,7 @@ class when_writing_to_stream : given.a_clean_event_store
         
         Because of = () => failure = Catch.Exception(() => events_to_streams_writer.Write(committed_events.Skip(3).Select(_ => (_, partition with {Value = "partition"})), scope, stream, CancellationToken.None).GetAwaiter().GetResult());
 
-        It should_not_fail = () => failure.ShouldBeNull();
-        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).ShouldEqual(4);
+        It should_not_fail = () => failure.Should().BeNull();
+        It should_have_4_events_in_the_stream = () => mongo_stream.CountDocuments(all_filter).Should().Be(4);
     }
 }

@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_converting_EventHorizonCommittedEvent_to_runtime;
@@ -20,5 +21,5 @@ public class and_event_source_id_is_set : given.a_committed_event
 
     Because of = () => result = committed_event.ToCommittedEvent();
 
-    It should_have_the_correct_event_source = () => result.EventSource.ShouldEqual(event_source);
+    It should_have_the_correct_event_source = () => result.EventSource.Should().Be(event_source);
 }

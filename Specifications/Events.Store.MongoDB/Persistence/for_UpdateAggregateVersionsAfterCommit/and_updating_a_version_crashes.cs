@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Driver;
 using Moq;
@@ -33,5 +34,5 @@ public class and_updating_a_version_crashes : given.all_dependencies
 
     It should_update_aggregate_version = () => verify_updated_aggregate_root_version_for(Times.Once(), (event_source, aggregate_root), (expected_version, expected_version + 1));
     It should_update_no_other_versions = verify_no_more_updates;
-    It should_catch_the_exception = () => catched_exception.ShouldEqual(exception);
+    It should_catch_the_exception = () => catched_exception.Should().Be(exception);
 }

@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -36,6 +37,6 @@ public class and_the_states_have_different_casing
 
     Because of = () => result = comparer.TryCheckEquality(left, right);
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
-    It should_not_be_equal = () => result.Result.ShouldBeFalse();
+    It should_succeed = () => result.Success.Should().BeTrue();
+    It should_not_be_equal = () => result.Result.Should().BeFalse();
 }

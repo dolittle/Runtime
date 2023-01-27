@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -30,6 +31,6 @@ public class and_fetching_current_state_fails : given.all_dependencies_and_a_des
 
     Because of = () => result = embedding_processor.Update(key, desired_state, execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
-    It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
+    It should_still_be_running = () => task.Status.Should().Be(TaskStatus.WaitingForActivation);
+    It should_return_the_failure = () => result.Exception.Should().Be(exception);
 }

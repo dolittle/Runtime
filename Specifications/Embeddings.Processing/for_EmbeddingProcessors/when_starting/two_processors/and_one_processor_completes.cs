@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Embeddings.Store;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -41,7 +42,7 @@ public class and_one_processor_completes : given.two_tenants_and_processors
     static Try result;
     Because of = () => result = processors.TryStartEmbeddingProcessorForAllTenants(embedding, factory.Object, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_be_successful = () => result.Success.ShouldBeTrue();
-    It should_cancel_the_other_processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
-    It should_have_unregistered_processors = () => processors.HasEmbeddingProcessors(embedding).ShouldBeFalse();
+    It should_be_successful = () => result.Success.Should().BeTrue();
+    It should_cancel_the_other_processor = () => processor_a_cancellation_token.IsCancellationRequested.Should().BeTrue();
+    It should_have_unregistered_processors = () => processors.HasEmbeddingProcessors(embedding).Should().BeFalse();
 }

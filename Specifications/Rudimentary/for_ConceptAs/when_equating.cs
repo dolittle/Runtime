@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Rudimentary.for_ConceptAs;
@@ -34,12 +35,12 @@ public class when_equating : Dolittle.Runtime.Rudimentary.given.concepts
             = value_as_a_long.Equals(value_as_an_int);
     };
 
-    It should_not_equate_two_differing_concepts = () => result_of_equality.ShouldBeFalse();
-    It should_equate_the_same_reference = () => result_of_equality_on_same_reference.ShouldBeTrue();
-    It should_equate_the_same_value = () => result_of_equality_on_same_value.ShouldBeTrue();
-    It should_not_equate_by_operator_two_differing_concepts = () => result_of_operator_equality.ShouldBeFalse();
-    It should_equate_by_operator_the_same_value = () => result_of_operator_equality_on_same_value.ShouldBeTrue();
-    It should_not_equate_two_differing_concepts_by_inequality_operator = () => result_of_inequality_operator.ShouldBeTrue();
-    It should_equate_the_same_value_by_inequality_operator = () => result_of_inequality_operator_on_same_value.ShouldBeFalse();
-    It should_not_equate_different_types_based_on_same_value_of_underlying_type = () => result_of_equality_on_two_different_concept_types_based_on_same_underlying_type_with_same_values.ShouldBeFalse();
+    It should_not_equate_two_differing_concepts = () => result_of_equality.Should().BeFalse();
+    It should_equate_the_same_reference = () => result_of_equality_on_same_reference.Should().BeTrue();
+    It should_equate_the_same_value = () => result_of_equality_on_same_value.Should().BeTrue();
+    It should_not_equate_by_operator_two_differing_concepts = () => result_of_operator_equality.Should().BeFalse();
+    It should_equate_by_operator_the_same_value = () => result_of_operator_equality_on_same_value.Should().BeTrue();
+    It should_not_equate_two_differing_concepts_by_inequality_operator = () => result_of_inequality_operator.Should().BeTrue();
+    It should_equate_the_same_value_by_inequality_operator = () => result_of_inequality_operator_on_same_value.Should().BeFalse();
+    It should_not_equate_different_types_based_on_same_value_of_underlying_type = () => result_of_equality_on_two_different_concept_types_based_on_same_underlying_type_with_same_values.Should().BeFalse();
 }

@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Store.Streams;

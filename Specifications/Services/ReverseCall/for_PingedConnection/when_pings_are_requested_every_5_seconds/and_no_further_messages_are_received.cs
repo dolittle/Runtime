@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_5_seconds;

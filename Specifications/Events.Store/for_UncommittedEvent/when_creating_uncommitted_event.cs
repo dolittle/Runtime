@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_UncommittedEvent;
@@ -27,8 +28,8 @@ public class when_creating_uncommitted_event
 
     Because of = () => uncommitted_event = new UncommittedEvent(event_source_id, new Artifact(artifact_id, artifact_generation), is_public, content);
 
-    It should_have_the_correct_artifact_id = () => uncommitted_event.Type.Id.ShouldEqual(artifact_id);
-    It should_have_the_correct_artifact_generation = () => uncommitted_event.Type.Generation.ShouldEqual(artifact_generation);
-    It should_have_the_correct_is_public_value = () => uncommitted_event.Public.ShouldEqual(is_public);
-    It should_have_the_correct_content = () => uncommitted_event.Content.ShouldEqual(content);
+    It should_have_the_correct_artifact_id = () => uncommitted_event.Type.Id.Should().Be(artifact_id);
+    It should_have_the_correct_artifact_generation = () => uncommitted_event.Type.Generation.Should().Be(artifact_generation);
+    It should_have_the_correct_is_public_value = () => uncommitted_event.Public.Should().Be(is_public);
+    It should_have_the_correct_content = () => uncommitted_event.Content.Should().Be(content);
 }

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -45,6 +46,6 @@ public class two_properties : given.a_renamer_and_inputs
 
     It should_have_moved_the_first_property = () => result["new first"].ShouldBeTheSameAs(first_value);
     It should_have_moved_the_second_property = () => result["new second"].ShouldBeTheSameAs(second_value);
-    It should_not_have_the_first_property_anymore = () => result.Contains("first").ShouldBeFalse();
-    It should_not_have_the_second_property_anymore = () => result.Contains("second").ShouldBeFalse();
+    It should_not_have_the_first_property_anymore = () => result.Contains("first").Should().BeFalse();
+    It should_not_have_the_second_property_anymore = () => result.Contains("second").Should().BeFalse();
 }

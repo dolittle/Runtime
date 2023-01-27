@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -36,6 +37,6 @@ public class and_the_dispatcher_fails : given.all_dependencies
 
     It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
-    It should_return_failure = () => result.Success.ShouldBeFalse();
-    It should_return_the_correct_error = () => result.Exception.ShouldEqual(error);
+    It should_return_failure = () => result.Success.Should().BeFalse();
+    It should_return_the_correct_error = () => result.Exception.Should().Be(error);
 }

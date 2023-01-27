@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_12_seconds;
@@ -27,5 +28,5 @@ public class and_next_message_is_received_after_36_seconds : given.all_dependenc
 
     It should_have_written_pings = () => scenario.WrittenMessageTimes.ShouldContainOnly(20, 32, 44);
     It should_have_set_the_initial_refresh_time = () => scenario.RefreshedTokenTimes.ShouldContainOnly(20);
-    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
+    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.Should().BeTrue();
 }

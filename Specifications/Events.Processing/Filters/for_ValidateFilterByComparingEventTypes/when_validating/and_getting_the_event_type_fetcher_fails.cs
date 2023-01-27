@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingEventTypes.when_validating;
@@ -35,5 +36,5 @@ public class and_getting_the_event_type_fetcher_fails : given.all_dependencies
     static FilterValidationResult result;
     Because of = () => result = validator.Validate(new_filter_definition, filter_processor, 87, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_fail_validation = () => result.Success.ShouldBeFalse();
+    It should_fail_validation = () => result.Success.Should().BeFalse();
 }

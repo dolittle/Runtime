@@ -7,6 +7,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalculator.when_converging;
@@ -46,13 +47,13 @@ public class and_desired_state_is_reached_after_one_compare : given.all_dependen
     static Try<UncommittedAggregateEvents> result;
     Because of = () => result = calculator.TryConverge(current_state, desired_state, execution_context, cancellation).GetAwaiter().GetResult();
 
-    It should_not_return_a_failure = () => result.Success.ShouldBeTrue();
+    It should_not_return_a_failure = () => result.Success.Should().BeTrue();
     It should_only_compare_once = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, execution_context, cancellation), Moq.Times.Once);
     It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();
     It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, execution_context, cancellation), Moq.Times.Once);
     It should_not_project_anything_else = () => project_many_events.VerifyNoOtherCalls();
     It should_return_the_same_events = () => result.Result.ShouldContainOnly(events);
-    It should_return_uncommitted_events_with_correct_aggregate_root_id = () => result.Result.AggregateRoot.Id.Value.ShouldEqual(identifier.Value);
-    It should_return_uncommitted_events_with_correct_event_source_id = () => result.Result.EventSource.Value.ShouldEqual(current_state.Key.Value);
-    It should_return_uncommitted_events_with_correct_aggregate_root_version = () => result.Result.ExpectedAggregateRootVersion.Value.ShouldEqual<ulong>(1);
+    It should_return_uncommitted_events_with_correct_aggregate_root_id = () => result.Result.AggregateRoot.Id.Value.Should().Be(identifier.Value);
+    It should_return_uncommitted_events_with_correct_event_source_id = () => result.Result.EventSource.Value.Should().Be(current_state.Key.Value);
+    It should_return_uncommitted_events_with_correct_aggregate_root_version = () => result.Result.ExpectedAggregateRootVersion.Value.Should().Be(1L);
 }

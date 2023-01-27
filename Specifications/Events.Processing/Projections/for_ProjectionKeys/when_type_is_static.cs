@@ -5,6 +5,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys;
@@ -29,6 +30,6 @@ public class when_type_is_static : given.all_dependencies
     };
     Because of = () => result = projection_keys.TryGetFor(definition, committed_event, partition, out key);
 
-    It should_get_key = () => result.ShouldBeTrue();
-    It should_have_key_be_the_static_key = () => key.ShouldEqual(static_key);
+    It should_get_key = () => result.Should().BeTrue();
+    It should_have_key_be_the_static_key = () => key.Should().Be(static_key);
 }

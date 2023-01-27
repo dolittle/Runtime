@@ -10,6 +10,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -50,7 +51,7 @@ public class and_one_definition_differs : given.all_dependencies
     Because of = () => results = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_only_contain_result_for_configured_tenants = () => results.Keys.ShouldContainOnly(tenants.All);
-    It should_have_unsuccessful_results = () => results.Any(_ => !_.Value.Succeeded).ShouldBeTrue();
-    It should_have_the_correct_differing_tenant = () => results.Single(_ => !_.Value.Succeeded).Key.ShouldEqual(differing_tenant);
+    It should_have_unsuccessful_results = () => results.Any(_ => !_.Value.Succeeded).Should().BeTrue();
+    It should_have_the_correct_differing_tenant = () => results.Single(_ => !_.Value.Succeeded).Key.Should().Be(differing_tenant);
 
 }

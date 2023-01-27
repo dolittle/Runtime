@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_TimeToRetryForPartitionedStreamProcessor;
@@ -23,6 +24,6 @@ public class when_there_are_no_failing_partitions
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
 
-    It should_not_get_it = () => success.ShouldBeFalse();
-    It should_return_the_max_value_of_time_span = () => time_to_retry.ShouldEqual(TimeSpan.MaxValue);
+    It should_not_get_it = () => success.Should().BeFalse();
+    It should_return_the_max_value_of_time_span = () => time_to_retry.Should().Be(TimeSpan.MaxValue);
 }

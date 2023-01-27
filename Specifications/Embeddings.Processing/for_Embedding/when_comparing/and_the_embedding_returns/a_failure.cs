@@ -7,6 +7,7 @@ using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -51,7 +52,7 @@ public class and_the_embedding_returns_a_failure : given.all_dependencies
         => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
 
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
-    It should_return_a_failed_result = () => result.Success.ShouldBeFalse();
+    It should_return_a_failed_result = () => result.Success.Should().BeFalse();
 
-    It should_fail_because_embedding_delete_failed = () => result.Exception.ShouldBeOfExactType<EmbeddingRemoteCompareCallFailed>();
+    It should_fail_because_embedding_delete_failed = () => result.Exception.Should().BeOfType<EmbeddingRemoteCompareCallFailed>();
 }

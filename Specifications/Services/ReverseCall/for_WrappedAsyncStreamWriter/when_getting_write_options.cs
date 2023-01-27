@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Grpc.Core;
 using Machine.Specifications;
 
@@ -22,5 +23,5 @@ public class when_getting_write_options : given.a_wrapped_stream_writer
     Because of = () => result = wrapped_writer.WriteOptions;
 
     It should_get_the_options_of_the_original_stream = () => original_writer.VerifyGet(_ => _.WriteOptions);
-    It should_return_the_options_from_the_original_stream = () => result.ShouldEqual(options);
+    It should_return_the_options_from_the_original_stream = () => result.Should().Be(options);
 }

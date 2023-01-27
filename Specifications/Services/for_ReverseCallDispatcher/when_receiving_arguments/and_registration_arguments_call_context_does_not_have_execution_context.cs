@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments;
@@ -21,6 +22,6 @@ public class and_registration_arguments_call_context_does_not_have_execution_con
 
     Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_return_false = () => result.ShouldBeFalse();
-    It should_not_set_arguments = () => dispatcher.Arguments.ShouldBeNull();
+    It should_return_false = () => result.Should().BeFalse();
+    It should_not_set_arguments = () => dispatcher.Arguments.Should().BeNull();
 }

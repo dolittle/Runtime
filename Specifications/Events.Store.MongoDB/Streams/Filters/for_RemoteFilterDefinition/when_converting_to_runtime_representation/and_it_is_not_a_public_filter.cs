@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters.for_RemoteFilterDefinition.when_converting_to_runtime_representation;
@@ -24,9 +25,9 @@ public class and_it_is_not_a_public_filter
 
     Because of = () => result = filter_definition.AsRuntimeRepresentation(stream_id, partitioned, false);
 
-    It should_be_a_filter_definition = () => result.ShouldBeOfExactType<FilterDefinition>();
-    It should_have_the_correct_partitioned_value = () => result.Partitioned.ShouldEqual(partitioned);
-    It should_not_be_public = () => result.Public.ShouldBeFalse();
-    It should_have_the_event_log_as_source_stream = () => result.SourceStream.ShouldEqual(StreamId.EventLog);
-    It should_have_the_correct_target_stream = () => result.TargetStream.Value.ShouldEqual(stream_id);
+    It should_be_a_filter_definition = () => result.Should().BeOfType<FilterDefinition>();
+    It should_have_the_correct_partitioned_value = () => result.Partitioned.Should().Be(partitioned);
+    It should_not_be_public = () => result.Public.Should().BeFalse();
+    It should_have_the_event_log_as_source_stream = () => result.SourceStream.Should().Be(StreamId.EventLog);
+    It should_have_the_correct_target_stream = () => result.TargetStream.Value.Should().Be(stream_id);
 }

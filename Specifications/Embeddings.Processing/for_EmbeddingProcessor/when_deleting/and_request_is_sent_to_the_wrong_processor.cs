@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting;
@@ -20,6 +21,6 @@ public class and_request_is_sent_to_the_wrong_processor : given.all_dependencies
 
     Because of = () => result = Catch.Exception(() => embedding_processor.Delete(key, execution_context with{ Tenant = "36b31638-e7b0-4e14-9116-92267237d8e4"}, cancellation_token).GetAwaiter().GetResult());
     
-    It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
-    It should_fail = () => result.ShouldBeOfExactType<EmbeddingRequestWorkScheduledForWrongTenant>();
+    It should_still_be_running = () => task.Status.Should().Be(TaskStatus.WaitingForActivation);
+    It should_fail = () => result.Should().BeOfType<EmbeddingRequestWorkScheduledForWrongTenant>();
 }

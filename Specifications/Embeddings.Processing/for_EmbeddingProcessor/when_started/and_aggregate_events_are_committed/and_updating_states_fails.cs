@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -24,7 +25,7 @@ public class and_updating_states_fails : given.all_dependencies
 
     Because of = () => result = embedding_processor.Start(cancellation_token);
 
-    It should_return_a_failure = () => result.Result.Success.ShouldBeFalse();
+    It should_return_a_failure = () => result.Result.Success.Should().BeFalse();
     It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>()), Times.Exactly(1));
     It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, Moq.It.IsAny<CancellationToken>()), Times.Exactly(0));
 }

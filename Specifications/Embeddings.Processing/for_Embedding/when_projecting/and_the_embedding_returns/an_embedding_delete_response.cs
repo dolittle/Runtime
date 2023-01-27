@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -41,8 +42,8 @@ public class an_embedding_delete_response : given.all_dependencies
         => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_return_a_projection_failed_result = ()
-        => result.ShouldBeOfExactType<ProjectionFailedResult>();
+        => result.Should().BeOfType<ProjectionFailedResult>();
 
     It should_return_a_projection_failed_result_with_the_correct_exception_type = ()
-        => ((ProjectionFailedResult)result).Exception.ShouldBeOfExactType<UnexpectedEmbeddingResponse>();
+        => ((ProjectionFailedResult)result).Exception.Should().BeOfType<UnexpectedEmbeddingResponse>();
 }

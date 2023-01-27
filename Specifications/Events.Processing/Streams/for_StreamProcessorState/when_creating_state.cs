@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState;
@@ -19,5 +20,5 @@ public class when_creating_state
 
     Because of = () => state = new StreamProcessorState(stream_position, DateTimeOffset.UtcNow);
 
-    It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
+    It should_have_the_correct_stream_position = () => state.Position.Should().Be(stream_position);
 }

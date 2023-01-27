@@ -9,6 +9,7 @@ using System;
 using Machine.Specifications;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.when_connecting;
 
@@ -36,9 +37,9 @@ public class and_producer_responds_with_failure : given.all_dependencies
     static SubscriptionResponse result;
 
     Because of = () => result = connection.Connect(subscription, 0, cancellation_token).GetAwaiter().GetResult();
-    It should_return_failed_response = () => result.Success.ShouldBeFalse();
-    It should_return_failed_response_with_correct_failure_id = () => result.Failure.Id.Value.ShouldEqual(failure.Id.ToGuid());
-    It should_return_failed_response_with_correct_failure_reason = () => result.Failure.Reason.Value.ShouldEqual(failure.Reason);
+    It should_return_failed_response = () => result.Success.Should().BeFalse();
+    It should_return_failed_response_with_correct_failure_id = () => result.Failure.Id.Value.Should().Be(failure.Id.ToGuid());
+    It should_return_failed_response_with_correct_failure_reason = () => result.Failure.Reason.Value.Should().Be(failure.Reason);
     It should_call_connect_on_reverse_call_client = () => reverse_call_client.Verify(_ => _.Connect(
         Moq.It.IsAny<ConsumerSubscriptionRequest>(),
         execution_context,

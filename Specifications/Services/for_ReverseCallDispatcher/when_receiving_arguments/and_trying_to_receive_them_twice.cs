@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;
 using Moq;
@@ -43,6 +44,6 @@ public class and_trying_to_receive_them_twice : given.a_dispatcher
         exception = Catch.Exception(() => dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult());
     };
 
-    It should_throw_exception_on_second_try = () => exception.ShouldBeOfExactType<ReverseCallDispatcherAlreadyTriedToReceiveArguments>();
+    It should_throw_exception_on_second_try = () => exception.Should().BeOfType<ReverseCallDispatcherAlreadyTriedToReceiveArguments>();
     It shouldnt_have_tried_to_read_the_stream_again = () => client_to_runtime_stream.Verify(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()), Times.Once);
 }

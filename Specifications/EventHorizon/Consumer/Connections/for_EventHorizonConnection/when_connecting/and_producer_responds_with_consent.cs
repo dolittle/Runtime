@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Events.Store.EventHorizon;
+using FluentAssertions;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnection.when_connecting;
 
@@ -30,8 +31,8 @@ public class and_producer_responds_with_consent : given.all_dependencies
     static SubscriptionResponse result;
 
     Because of = () => result = connection.Connect(subscription, 0, cancellation_token).GetAwaiter().GetResult();
-    It should_return_successful_response = () => result.Success.ShouldBeTrue();
-    It should_return_the_consent = () => result.ConsentId.ShouldEqual(consent);
+    It should_return_successful_response = () => result.Success.Should().BeTrue();
+    It should_return_the_consent = () => result.ConsentId.Should().Be(consent);
     It should_call_connect_on_reverse_call_client = () => reverse_call_client.Verify(_ => _.Connect(
         Moq.It.IsAny<ConsumerSubscriptionRequest>(),
         execution_context, 

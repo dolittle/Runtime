@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -37,11 +38,11 @@ public class when_creating
         event_horizon_metadata,
         content);
 
-    It should_have_the_correct_stream_position = () => result.StreamPosition.ShouldEqual(stream_position);
-    It should_have_the_correct_partition = () => result.Partition.ShouldEqual(partition);
-    It should_have_the_correct_execution_context = () => result.ExecutionContext.ShouldEqual(execution_context);
-    It should_have_the_correct_stream_event_metadata = () => result.Metadata.ShouldEqual(stream_event_metadata);
-    It should_have_the_correct_aggregate_metadata = () => result.Aggregate.ShouldEqual(aggregate_metadata);
-    It should_have_the_correct_event_horizon_metadata = () => result.EventHorizon.ShouldEqual(event_horizon_metadata);
-    It should_have_the_correct_content = () => result.Content.ShouldEqual(content);
+    It should_have_the_correct_stream_position = () => result.StreamPosition.Should().Be(stream_position);
+    It should_have_the_correct_partition = () => result.Partition.Should().Be(partition);
+    It should_have_the_correct_execution_context = () => result.ExecutionContext.Should().Be(execution_context);
+    It should_have_the_correct_stream_event_metadata = () => result.Metadata.Should().Be(stream_event_metadata);
+    It should_have_the_correct_aggregate_metadata = () => result.Aggregate.Should().Be(aggregate_metadata);
+    It should_have_the_correct_event_horizon_metadata = () => result.EventHorizon.Should().Be(event_horizon_metadata);
+    It should_have_the_correct_content = () => result.Content.Should().BeEquivalentTo(content);
 }

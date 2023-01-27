@@ -11,6 +11,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Execution;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
@@ -65,7 +66,7 @@ static class should_extensions
     {
         var committedEvents = response.Events.ToCommittedEvents();
 
-        committedEvents.Count.ShouldEqual(uncommitted_events.Count);
+        committedEvents.Count.Should().Be(uncommitted_events.Count);
         if (uncommitted_events.Count == 0)
         {
             return;
@@ -78,14 +79,14 @@ static class should_extensions
 
             if (start_sequence_number != null)
             {
-                committedEvent.EventLogSequenceNumber.ShouldEqual(new EventLogSequenceNumber(start_sequence_number + (ulong)i));
+                committedEvent.EventLogSequenceNumber.Should().Be(new EventLogSequenceNumber(start_sequence_number + (ulong)i));
             }
             
-            committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            JToken.DeepEquals(JToken.Parse(committedEvent.Content), JToken.Parse(uncommittedEvent.Content)).ShouldBeTrue();
-            committedEvent.Public.ShouldEqual(uncommittedEvent.Public);
-            committedEvent.Type.ShouldEqual(uncommittedEvent.Type);
-            committedEvent.EventSource.ShouldEqual(uncommittedEvent.EventSource);
+            committedEvent.ExecutionContext.Should().Be(execution_context);
+            JToken.DeepEquals(JToken.Parse(committedEvent.Content), JToken.Parse(uncommittedEvent.Content)).Should().BeTrue();
+            committedEvent.Public.Should().Be(uncommittedEvent.Public);
+            committedEvent.Type.Should().Be(uncommittedEvent.Type);
+            committedEvent.EventSource.Should().Be(uncommittedEvent.EventSource);
         }
     }
     public static void should_be_the_correct_response(
@@ -111,14 +112,14 @@ static class should_extensions
         EventLogSequenceNumber start_sequence_number = null,
         AggregateRootVersion start_aggregate_root_version = null)
     {
-        committed_events.Count.ShouldEqual(uncommitted_events.Count);
+        committed_events.Count.Should().Be(uncommitted_events.Count);
         if (uncommitted_events.Count == 0)
         {
             return;
         }
 
-        committed_events.AggregateRoot.ShouldEqual(uncommitted_events.AggregateRoot.Id);
-        committed_events.EventSource.ShouldEqual(uncommitted_events.EventSource);
+        committed_events.AggregateRoot.Should().Be(uncommitted_events.AggregateRoot.Id);
+        committed_events.EventSource.Should().Be(uncommitted_events.EventSource);
 
         for (var i = 0; i < committed_events.Count; i++)
         {
@@ -127,19 +128,19 @@ static class should_extensions
 
             if (start_sequence_number != null)
             {
-                committedEvent.EventLogSequenceNumber.ShouldEqual(new EventLogSequenceNumber(start_sequence_number + (ulong)i));
+                committedEvent.EventLogSequenceNumber.Should().Be(new EventLogSequenceNumber(start_sequence_number + (ulong)i));
             }
             if (start_aggregate_root_version != null)
             {
-                committedEvent.AggregateRootVersion.ShouldEqual(new AggregateRootVersion(start_aggregate_root_version + (ulong)i));
+                committedEvent.AggregateRootVersion.Should().Be(new AggregateRootVersion(start_aggregate_root_version + (ulong)i));
             }
 
-            committedEvent.AggregateRoot.ShouldEqual(uncommitted_events.AggregateRoot);
-            committedEvent.ExecutionContext.ShouldEqual(execution_context);
-            JToken.DeepEquals(JToken.Parse(committedEvent.Content), JToken.Parse(uncommittedEvent.Content)).ShouldBeTrue();
-            committedEvent.Public.ShouldEqual(uncommittedEvent.Public);
-            committedEvent.Type.ShouldEqual(uncommittedEvent.Type);
-            committedEvent.EventSource.ShouldEqual(uncommittedEvent.EventSource);
+            committedEvent.AggregateRoot.Should().Be(uncommitted_events.AggregateRoot);
+            committedEvent.ExecutionContext.Should().Be(execution_context);
+            JToken.DeepEquals(JToken.Parse(committedEvent.Content), JToken.Parse(uncommittedEvent.Content)).Should().BeTrue();
+            committedEvent.Public.Should().Be(uncommittedEvent.Public);
+            committedEvent.Type.Should().Be(uncommittedEvent.Type);
+            committedEvent.EventSource.Should().Be(uncommittedEvent.EventSource);
         }
     }
     
@@ -191,7 +192,7 @@ static class should_extensions
     }
     static void should_have_stored_committed_events(IEventContentConverter event_content_converter, CommittedAggregateEvents aggregate_events, List<Event> stored_events)
     {
-        stored_events.Count.ShouldEqual(aggregate_events.Count);
+        stored_events.Count.Should().Be(aggregate_events.Count);
         if (stored_events.Count == 0)
         {
             return;
@@ -207,14 +208,14 @@ static class should_extensions
             var storedEvent = stored_events[i];
             var committedEvent = aggregate_events[i];
 
-            storedEvent.Aggregate.Version.ShouldEqual(committedEvent.AggregateRootVersion.Value);
+            storedEvent.Aggregate.Version.Should().Be(committedEvent.AggregateRootVersion.Value);
             should_be_the_same_base_committed_event(event_content_converter, committedEvent, storedEvent);
         }
     }
     
     static void should_have_stored_committed_events(IEventContentConverter event_content_converter, CommittedEvents events, List<Event> stored_events)
     {
-        stored_events.Count.ShouldEqual(events.Count);
+        stored_events.Count.Should().Be(events.Count);
         if (stored_events.Count == 0)
         {
             return;
@@ -230,29 +231,29 @@ static class should_extensions
 
     static void should_have_same_execution_context(ExecutionContext execution_context, Dolittle.Runtime.Events.Store.MongoDB.Events.ExecutionContext stored_execution_context)
     {
-        stored_execution_context.Correlation.ShouldEqual(execution_context.CorrelationId.Value);
-        stored_execution_context.Environment.ShouldEqual(execution_context.Environment.Value);
-        stored_execution_context.Microservice.ShouldEqual(execution_context.Microservice.Value);
-        stored_execution_context.Tenant.ShouldEqual(execution_context.Tenant.Value);
+        stored_execution_context.Correlation.Should().Be(execution_context.CorrelationId.Value);
+        stored_execution_context.Environment.Should().Be(execution_context.Environment.Value);
+        stored_execution_context.Microservice.Should().Be(execution_context.Microservice.Value);
+        stored_execution_context.Tenant.Should().Be(execution_context.Tenant.Value);
         should_have_the_same_version(execution_context.Version, stored_execution_context.Version);
         should_have_the_same_claims(execution_context.Claims, stored_execution_context.Claims);
     }
     
     static void should_be_the_same_base_committed_event(IEventContentConverter event_content_converter, CommittedEvent committed_event, Event stored_event)
     {
-        JToken.DeepEquals(JToken.Parse(event_content_converter.ToJson(stored_event.Content)), JToken.Parse(committed_event.Content)).ShouldBeTrue();
+        JToken.DeepEquals(JToken.Parse(event_content_converter.ToJson(stored_event.Content)), JToken.Parse(committed_event.Content)).Should().BeTrue();
         stored_event.Metadata.Occurred.ShouldBeCloseTo(committed_event.Occurred.UtcDateTime, TimeSpan.FromSeconds(1));
-        stored_event.Metadata.Public.ShouldEqual(committed_event.Public);
-        stored_event.Metadata.EventSource.ShouldEqual(committed_event.EventSource.Value);
-        stored_event.Metadata.TypeGeneration.ShouldEqual(committed_event.Type.Generation.Value);
-        stored_event.Metadata.TypeId.ShouldEqual(committed_event.Type.Id.Value);
+        stored_event.Metadata.Public.Should().Be(committed_event.Public);
+        stored_event.Metadata.EventSource.Should().Be(committed_event.EventSource.Value);
+        stored_event.Metadata.TypeGeneration.Should().Be(committed_event.Type.Generation.Value);
+        stored_event.Metadata.TypeId.Should().Be(committed_event.Type.Id.Value);
         should_have_same_execution_context(committed_event.ExecutionContext, stored_event.ExecutionContext);
-        stored_event.EventLogSequenceNumber.ShouldEqual(committed_event.EventLogSequenceNumber.Value);
+        stored_event.EventLogSequenceNumber.Should().Be(committed_event.EventLogSequenceNumber.Value);
     }
 
     public static void should_be_the_same_committed_events(this IReadOnlyList<Dolittle.Runtime.Events.Contracts.CommittedEvent> actual, IReadOnlyList<Dolittle.Runtime.Events.Contracts.CommittedEvent> expected)
     {
-        actual.Count.ShouldEqual(expected.Count);
+        actual.Count.Should().Be(expected.Count);
             
         for (var i = 0; i < actual.Count; i++)
         {
@@ -264,7 +265,7 @@ static class should_extensions
     
     public static void should_be_the_same_committed_events(this IReadOnlyList<CommittedEvent> actual, IReadOnlyList<CommittedEvent> expected)
     {
-        actual.Count.ShouldEqual(expected.Count);
+        actual.Count.Should().Be(expected.Count);
             
         for (var i = 0; i < actual.Count; i++)
         {
@@ -276,32 +277,32 @@ static class should_extensions
     
     public static void should_be_the_same_committed_event(this CommittedEvent actual, CommittedEvent expected)
     {
-        JToken.DeepEquals(JToken.Parse(actual.Content), JToken.Parse(expected.Content)).ShouldBeTrue();
+        JToken.DeepEquals(JToken.Parse(actual.Content), JToken.Parse(expected.Content)).Should().BeTrue();
         actual.Occurred.UtcDateTime.ShouldBeCloseTo(expected.Occurred.UtcDateTime, TimeSpan.FromMilliseconds(1));
-        actual.Public.ShouldEqual(expected.Public);
-        actual.EventSource.Value.ShouldEqual(expected.EventSource.Value);
-        actual.Type.Generation.Value.ShouldEqual(expected.Type.Generation.Value);
-        actual.Type.Id.Value.ShouldEqual(expected.Type.Id.Value);
-        actual.ExecutionContext.ShouldEqual(expected.ExecutionContext);
-        actual.EventLogSequenceNumber.Value.ShouldEqual(expected.EventLogSequenceNumber.Value);
+        actual.Public.Should().Be(expected.Public);
+        actual.EventSource.Value.Should().Be(expected.EventSource.Value);
+        actual.Type.Generation.Value.Should().Be(expected.Type.Generation.Value);
+        actual.Type.Id.Value.Should().Be(expected.Type.Id.Value);
+        actual.ExecutionContext.Should().Be(expected.ExecutionContext);
+        actual.EventLogSequenceNumber.Value.Should().Be(expected.EventLogSequenceNumber.Value);
     }
 
     static void should_have_the_same_version(Version version, Dolittle.Runtime.Events.Store.MongoDB.Events.Version stored_version)
     {
-        version.Build.ShouldEqual(stored_version.Build);
-        version.Major.ShouldEqual(stored_version.Major);
-        version.Minor.ShouldEqual(stored_version.Minor);
-        version.Patch.ShouldEqual(stored_version.Patch);
-        version.PreReleaseString.ShouldEqual(stored_version.PreRelease);
+        version.Build.Should().Be(stored_version.Build);
+        version.Major.Should().Be(stored_version.Major);
+        version.Minor.Should().Be(stored_version.Minor);
+        version.Patch.Should().Be(stored_version.Patch);
+        version.PreReleaseString.Should().Be(stored_version.PreRelease);
     }
     static void should_have_the_same_claims(Claims claims, IEnumerable<Dolittle.Runtime.Events.Store.MongoDB.Events.Claim> stored_claims)
     {
-        stored_claims.Count().ShouldEqual(claims.Count());
+        stored_claims.Count().Should().Be(claims.Count());
         foreach (var claim in claims)
         {
             stored_claims.Any(stored_claim => stored_claim.Name.Equals(claim.Name)
                 && stored_claim.Value.Equals(claim.Value)
-                && stored_claim.ValueType.Equals(claim.ValueType)).ShouldBeTrue();
+                && stored_claim.ValueType.Equals(claim.ValueType)).Should().BeTrue();
         }
     }
 }

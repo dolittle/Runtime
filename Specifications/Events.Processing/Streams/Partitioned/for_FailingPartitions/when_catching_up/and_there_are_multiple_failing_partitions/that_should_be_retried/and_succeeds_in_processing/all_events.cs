@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -27,8 +28,8 @@ public class all_events : given.all_dependencies
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
-    It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
-    It should_not_have_any_failing_partitions = () => result.FailingPartitions.ShouldBeEmpty();
+    It should_return_the_same_stream_position = () => result.Position.Should().Be(stream_processor_state.Position);
+    It should_not_have_any_failing_partitions = () => result.FailingPartitions.Should().BeEmpty();
 
     It should_have_first_failing_partition_process_two_events = () => event_processor.Verify(
         _ => _.Process(

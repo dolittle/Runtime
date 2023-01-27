@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.when_type_is_occurred;
@@ -32,6 +33,6 @@ public class and_format_is_yyyy_MM_dd : all_dependencies
     };
     Because of = () => result = projection_keys.TryGetFor(definition, committed_event, partition, out key);
 
-    It should_get_key = () => result.ShouldBeTrue();
-    It should_have_key_be_the_occurred_format = () => key.Value.ShouldEqual("2020-05-01");
+    It should_get_key = () => result.Should().BeTrue();
+    It should_have_key_be_the_occurred_format = () => key.Value.Should().Be("2020-05-01");
 }

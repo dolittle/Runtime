@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.when_reading;
@@ -46,10 +47,10 @@ public class and_there_are_two_messages : all_dependencies
         third_read = wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
     };
 
-    It should_return_true_for_the_first_read = () => first_read.ShouldBeTrue();
-    It should_return_the_first_message_after_the_first_read = () => first_result.ShouldEqual(first_message);
-    It should_return_the_first_message_after_the_first_read_when_current_is_read_again = () => first_result_read_again.ShouldEqual(first_message);
-    It should_return_true_for_the_second_read = () => second_read.ShouldBeTrue();
-    It should_return_the_first_message_after_the_second_result = () => second_result.ShouldEqual(second_message);
-    It should_return_true_for_the_third_read = () => third_read.ShouldBeFalse();
+    It should_return_true_for_the_first_read = () => first_read.Should().BeTrue();
+    It should_return_the_first_message_after_the_first_read = () => first_result.Should().Be(first_message);
+    It should_return_the_first_message_after_the_first_read_when_current_is_read_again = () => first_result_read_again.Should().Be(first_message);
+    It should_return_true_for_the_second_read = () => second_read.Should().BeTrue();
+    It should_return_the_first_message_after_the_second_result = () => second_result.Should().Be(second_message);
+    It should_return_true_for_the_third_read = () => third_read.Should().BeFalse();
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEventMetadata;
@@ -34,10 +35,10 @@ public class when_creating
         type_generation,
         is_public);
 
-    It should_have_the_correct_event_log_sequence_number = () => result.EventLogSequenceNumber.ShouldEqual(event_log_sequence_number);
-    It should_have_the_correct_occurred_value = () => result.Occurred.ShouldEqual(occurred);
-    It should_have_the_correct_event_source = () => result.EventSource.ShouldEqual(event_source);
-    It should_have_the_correct_type_id = () => result.TypeId.ShouldEqual(type_id);
-    It should_have_the_correct_type_generation = () => result.TypeGeneration.ShouldEqual(type_generation);
-    It should_have_the_correct_public_value = () => result.Public.ShouldEqual(is_public);
+    It should_have_the_correct_event_log_sequence_number = () => result.EventLogSequenceNumber.Should().Be(event_log_sequence_number);
+    It should_have_the_correct_occurred_value = () => result.Occurred.Should().Be(occurred);
+    It should_have_the_correct_event_source = () => result.EventSource.Should().Be(event_source);
+    It should_have_the_correct_type_id = () => result.TypeId.Should().Be(type_id);
+    It should_have_the_correct_type_generation = () => result.TypeGeneration.Should().Be(type_generation);
+    It should_have_the_correct_public_value = () => result.Public.Should().Be(is_public);
 }

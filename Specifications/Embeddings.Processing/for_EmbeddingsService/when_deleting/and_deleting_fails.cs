@@ -9,6 +9,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_deleting;
@@ -47,6 +48,6 @@ public class and_deleting_fails : given.all_dependencies
     {
         result = embedding_service.Delete(request, call_context).GetAwaiter().GetResult();
     };
-    It should_have_a_failure = () => result.Failure.ShouldNotBeNull();
-    It should_have_a_failure_with_correct_failure_id = () => result.Failure.Id.ShouldEqual(EmbeddingFailures.FailedToDeleteEmbedding.ToProtobuf());
+    It should_have_a_failure = () => result.Failure.Should().NotBeNull();
+    It should_have_a_failure_with_correct_failure_id = () => result.Failure.Id.Should().Be(EmbeddingFailures.FailedToDeleteEmbedding.ToProtobuf());
 }

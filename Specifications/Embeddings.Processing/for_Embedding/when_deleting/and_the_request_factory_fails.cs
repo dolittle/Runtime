@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -28,6 +29,6 @@ public class and_the_request_factory_fails : given.all_dependencies
     It should_have_called_the_request_factory = ()
         => request_factory.Verify(_ => _.TryCreate(current_state));
     It should_not_do_anything_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
-    It should_return_failure = () => result.Success.ShouldBeFalse();
-    It should_return_the_correct_error = () => result.Exception.ShouldEqual(error);
+    It should_return_failure = () => result.Success.Should().BeFalse();
+    It should_return_the_correct_error = () => result.Exception.Should().Be(error);
 }

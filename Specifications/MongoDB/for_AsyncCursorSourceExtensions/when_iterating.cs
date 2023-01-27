@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Driver;
 using Moq;

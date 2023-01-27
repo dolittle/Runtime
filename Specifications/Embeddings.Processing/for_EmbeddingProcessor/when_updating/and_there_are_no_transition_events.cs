@@ -7,6 +7,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
@@ -39,10 +40,10 @@ public class and_there_are_no_transition_events : given.all_dependencies_and_a_d
 
     Because of = () => result = embedding_processor.Update(key, desired_state, execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+    It should_still_be_running = () => task.Status.Should().Be(TaskStatus.WaitingForActivation);
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
     It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryConverge(current_state, desired_state, execution_context, Moq.It.IsAny<CancellationToken>()));
     It should_not_commit_any_events = () => event_store.Verify(_ => _.CommitAggregateEvents(Moq.It.IsAny<CommitAggregateEventsRequest>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
-    It should_return_success = () => result.Success.ShouldBeTrue();
-    It should_not_return_a_projection_state = () => result.Result.ShouldEqual(desired_state);
+    It should_return_success = () => result.Success.Should().BeTrue();
+    It should_not_return_a_projection_state = () => result.Result.Should().Be(desired_state);
 }

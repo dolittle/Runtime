@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -52,6 +53,6 @@ public class and_it_receives_a_response_with_the_correct_callid : given.a_dispat
     Because of = () => response = dispatcher.Call(request, execution_context, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_write_a_message_with_the_request = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.Request == request)), Moq.Times.Once);
-    It should_set_the_current_execution_context_in_the_request = () => execution_context_in_request.ShouldEqual(execution_context);
-    It should_return_the_received_response = () => response.ShouldEqual(response_from_client);
+    It should_set_the_current_execution_context_in_the_request = () => execution_context_in_request.Should().Be(execution_context);
+    It should_return_the_received_response = () => response.Should().Be(response_from_client);
 }

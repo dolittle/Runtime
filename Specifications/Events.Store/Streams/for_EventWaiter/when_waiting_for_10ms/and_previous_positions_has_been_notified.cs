@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for_10ms;
@@ -29,7 +30,7 @@ public class and_previous_positions_has_been_notified : given.an_event_waiter
         Thread.Sleep(100);
     };
 
-    It should_wait_for_event = () => result.IsCompleted.ShouldBeFalse();
+    It should_wait_for_event = () => result.IsCompleted.Should().BeFalse();
 
     Cleanup clean = () =>
     {

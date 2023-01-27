@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamDefinition;
@@ -23,8 +24,8 @@ public class from_public_filter_definition
 
     Because of = () => stream_definition = new StreamDefinition(filter_definition);
 
-    It should_be_partitioned = () => stream_definition.Partitioned.ShouldBeTrue();
-    It should_be_public = () => stream_definition.Public.ShouldBeTrue();
-    It should_have_the_correct_stream_id = () => stream_definition.StreamId.ShouldEqual(target_stream_id);
-    It should_have_the_correct_filter_definition = () => stream_definition.FilterDefinition.ShouldEqual(filter_definition);
+    It should_be_partitioned = () => stream_definition.Partitioned.Should().BeTrue();
+    It should_be_public = () => stream_definition.Public.Should().BeTrue();
+    It should_have_the_correct_stream_id = () => stream_definition.StreamId.Should().Be(target_stream_id);
+    It should_have_the_correct_filter_definition = () => stream_definition.FilterDefinition.Should().Be(filter_definition);
 }

@@ -7,6 +7,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using static Moq.It;
 using static Moq.Times;
@@ -52,7 +53,7 @@ public class and_it_fails_registering_event_processor : given.an_event_handler
 
     It should_not_accept_event_handler = () => reverse_call_dispatcher.Verify(_ => _.Accept(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>()), Never);
 
-    It should_reject_with_failed_to_register_event_handler = () => failure.Id.ShouldEqual(EventHandlersFailures.FailedToRegisterEventHandler);
+    It should_reject_with_failed_to_register_event_handler = () => failure.Id.Should().Be(EventHandlersFailures.FailedToRegisterEventHandler);
 
     It should_try_to_register_filter_processor = () => stream_processors.Verify(_ => _
         .TryCreateAndRegister(

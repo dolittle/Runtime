@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -49,12 +50,12 @@ public class a_processor_failure : given.all_dependencies
 
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
     It should_return_a_projection_failed_result = ()
-        => result.ShouldBeOfExactType<ProjectionFailedResult>();
+        => result.Should().BeOfType<ProjectionFailedResult>();
 
     It should_return_a_projection_failed_result_with_correct_exception_type = ()
-        => (result as ProjectionFailedResult).Exception.ShouldBeOfExactType<ProjectionFailed>();
+        => (result as ProjectionFailedResult).Exception.Should().BeOfType<ProjectionFailed>();
 
     It should_have_the_failure_reason_in_the_result = ()
         => (result as ProjectionFailedResult).Exception.Message
-        .ShouldEqual(new ProjectionFailed(failure_reason).Message);
+        .Should().Be(new ProjectionFailed(failure_reason).Message);
 }

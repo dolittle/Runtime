@@ -7,6 +7,7 @@ using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -55,16 +56,16 @@ public class an_embedding_compare_response : given.all_dependencies
 
     It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
-    It should_return_a_successful_result = () => result.Success.ShouldBeTrue();
+    It should_return_a_successful_result = () => result.Success.Should().BeTrue();
     It should_return_the_event = () =>
     {
         var events = result.Result;
-        events.Count.ShouldEqual(1);
-        events[0].Content.ShouldEqual(pb_uncommitted_event.Content);
-        events[0].EventSource.Value.ShouldEqual(current_state.Key.Value);
-        events[0].Public.ShouldEqual(pb_uncommitted_event.Public);
-        events[0].Type.Id.Value.ShouldEqual(pb_uncommitted_event.EventType.Id.ToGuid());
-        events[0].Type.Generation.Value.ShouldEqual(pb_uncommitted_event.EventType.Generation);
+        events.Count.Should().Be(1);
+        events[0].Content.Should().Be(pb_uncommitted_event.Content);
+        events[0].EventSource.Value.Should().Be(current_state.Key.Value);
+        events[0].Public.Should().Be(pb_uncommitted_event.Public);
+        events[0].Type.Id.Value.Should().Be(pb_uncommitted_event.EventType.Id.ToGuid());
+        events[0].Type.Generation.Value.Should().Be(pb_uncommitted_event.EventType.Generation);
     };
     It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.TryCreate(current_state, desired_state));
 }

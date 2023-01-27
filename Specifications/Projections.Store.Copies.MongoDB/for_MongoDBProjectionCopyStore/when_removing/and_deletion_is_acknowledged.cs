@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -19,5 +20,5 @@ public class and_deletion_is_acknowledged : given.a_projection_copy_store_and_a_
     It should_delete_the_document_with_the_correct_filter = () => collection.Verify(_ => _.DeleteOneAsync(
         IsFilter(document => document["_dolittle_projection_key"].AsString == projection_key.Value),
         cancellation_token), Times.Once);
-    It should_return_true = () => result.ShouldBeTrue();
+    It should_return_true = () => result.Should().BeTrue();
 }

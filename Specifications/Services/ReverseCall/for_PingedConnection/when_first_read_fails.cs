@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection;
@@ -30,7 +31,7 @@ public class when_first_read_fails : all_dependencies
         metrics,
         logger_factory);
 
-    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
-    It should_have_passed_along_the_read_exception = () => scenario.RuntimeStreamMoveNextException.ShouldEqual(exception);
-    It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
+    It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.Should().BeTrue();
+    It should_have_passed_along_the_read_exception = () => scenario.RuntimeStreamMoveNextException.Should().Be(exception);
+    It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.Should().BeEmpty();
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.Domain.Tenancy;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_initializing;
@@ -20,5 +21,5 @@ public class twice : given.all_dependencies
 
     Because of = () => exception = Catch.Exception(() => stream_processor.Initialize().GetAwaiter().GetResult());
 
-    It should_fail_because_it_is_already_initialized = () => exception.ShouldBeOfExactType<StreamProcessorAlreadyInitialized>();
+    It should_fail_because_it_is_already_initialized = () => exception.Should().BeOfType<StreamProcessorAlreadyInitialized>();
 }

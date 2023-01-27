@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting;
@@ -28,5 +29,5 @@ public class and_the_token_is_cancelled_after_receiving_the_first_message : give
     };
 
     It should_move_client_stream_once = () => client_to_runtime_stream.Verify(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-    It should_return_from_the_accept_call = () => task.IsCompleted.ShouldBeTrue();
+    It should_return_from_the_accept_call = () => task.IsCompleted.Should().BeTrue();
 }

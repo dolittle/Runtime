@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_writing;
@@ -82,27 +83,27 @@ public class concurrently : given.a_wrapped_stream_writer
 
     It should_not_have_completed_any_writes_after_the_first_check = () =>
     {
-        first_write_first_check.ShouldBeFalse();
-        second_write_first_check.ShouldBeFalse();
-        third_write_first_check.ShouldBeFalse();
+        first_write_first_check.Should().BeFalse();
+        second_write_first_check.Should().BeFalse();
+        third_write_first_check.Should().BeFalse();
     };
     It should_have_completed_the_first_after_the_second_check = () =>
     {
-        first_write_second_check.ShouldBeTrue();
-        second_write_second_check.ShouldBeFalse();
-        third_write_second_check.ShouldBeFalse();
+        first_write_second_check.Should().BeTrue();
+        second_write_second_check.Should().BeFalse();
+        third_write_second_check.Should().BeFalse();
     };
     It should_have_completed_all_writes_after_the_third_check = () =>
     {
-        first_write_third_check.ShouldBeTrue();
-        second_write_third_check.ShouldBeTrue();
-        third_write_third_check.ShouldBeTrue();
+        first_write_third_check.Should().BeTrue();
+        second_write_third_check.Should().BeTrue();
+        third_write_third_check.Should().BeTrue();
     };
 
     It should_call_write_on_the_original_stream_in_order = () =>
     {
-        call_order[0].ShouldEqual(1);
-        call_order[1].ShouldEqual(2);
-        call_order[2].ShouldEqual(3);
+        call_order[0].Should().Be(1);
+        call_order[1].Should().Be(2);
+        call_order[2].Should().Be(3);
     };
 }

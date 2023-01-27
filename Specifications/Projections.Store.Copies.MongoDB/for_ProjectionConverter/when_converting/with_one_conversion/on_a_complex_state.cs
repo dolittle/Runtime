@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using Moq;
@@ -132,7 +133,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
     It should_have_the_third_converted_value = () => result["people"][1]["works"][0]["released"].ShouldBeTheSameAs(converted_three);
     It should_have_the_fourth_converted_value = () => result["people"][1]["works"][1]["released"].ShouldBeTheSameAs(converted_four);
     It should_have_the_fifth_converted_value = () => result["people"][2]["works"][0]["released"].ShouldBeTheSameAs(converted_five);
-    It should_otherwise_leave_the_document_untouched = () => result.ShouldEqual(
+    It should_otherwise_leave_the_document_untouched = () => result.Should().BeEquivalentTo(
         new BsonDocument("people", new BsonArray(new []
         {
             new BsonDocument(new []

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using Nito.AsyncEx;
 
@@ -83,7 +84,7 @@ public class and_connection_response_changes_once : given.all_dependencies
         Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
 
-    It should_be_connected = () => subscription.State.ShouldEqual(SubscriptionState.Connected);
-    It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.ShouldBeTrue();
-    It should_have_the_second_consent = () => subscription.ConnectionResponse.Result.ConsentId.ShouldEqual(second_consent);
+    It should_be_connected = () => subscription.State.Should().Be(SubscriptionState.Connected);
+    It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.Should().BeTrue();
+    It should_have_the_second_consent = () => subscription.ConnectionResponse.Result.ConsentId.Should().Be(second_consent);
 }

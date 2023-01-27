@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -32,5 +33,5 @@ public class and_event_is_included : given.all_dependencies
 
     Because of = () => result = filter_processor.Object.Process(committed_event, partition, committed_event.ExecutionContext, CancellationToken.None).GetAwaiter().GetResult();
     It should_write_it_to_target_stream = () => events_to_streams_writer.Verify(_ => _.Write(committed_event, scope_id, filter_processor.Object.Definition.TargetStream, partition, Moq.It.IsAny<CancellationToken>()), Times.Once);
-    It should_returned_successful_processing_result = () => result.Succeeded.ShouldBeTrue();
+    It should_returned_successful_processing_result = () => result.Succeeded.Should().BeTrue();
 }

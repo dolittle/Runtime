@@ -8,6 +8,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -36,5 +37,5 @@ public class a_clean_event_store : a_runtime_with_a_single_tenant
         events_to_streams_writer = runtime.Host.Services.GetRequiredService<Func<TenantId, IWriteEventsToStreams>>()(execution_context.Tenant);
     };
     
-    protected static void number_of_events_stored_should_be(int num_events) => streams.DefaultEventLog.CountDocuments(Builders<Event>.Filter.Empty).ShouldEqual(num_events);
+    protected static void number_of_events_stored_should_be(int num_events) => streams.DefaultEventLog.CountDocuments(Builders<Event>.Filter.Empty).Should().Be(num_events);
 }

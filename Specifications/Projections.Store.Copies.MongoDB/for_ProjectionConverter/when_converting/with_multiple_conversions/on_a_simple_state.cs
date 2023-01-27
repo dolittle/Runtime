@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using Moq;
@@ -71,6 +72,6 @@ public class on_a_simple_state : given.a_converter_and_inputs
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
     It should_have_the_correct_string = () => result["some_string"].ShouldBeTheSameAs(converted_string);
     It should_have_the_correct_int = () => result["some_int"].ShouldBeTheSameAs(converted_int);
-    It should_have_the_correct_bool = () => result["some_bool"].ShouldEqual(new BsonBoolean(true));
+    It should_have_the_correct_bool = () => result["some_bool"].Should().Be(new BsonBoolean(true));
     It should_have_the_correct_date = () => result["some_date"].ShouldBeTheSameAs(converted_date);
 }

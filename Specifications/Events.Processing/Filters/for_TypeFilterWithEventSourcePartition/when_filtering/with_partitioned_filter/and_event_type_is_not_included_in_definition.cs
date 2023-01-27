@@ -6,6 +6,7 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 
@@ -29,8 +30,8 @@ public class and_event_type_is_not_included_in_definition : given.all_dependenci
 
     Because of = () => result = filter.Filter(given.committed_events.single(partition.Value), "some partition id", Guid.NewGuid(), execution_contexts.create(), default).GetAwaiter().GetResult();
 
-    It should_have_the_correct_partition = () => result.Partition.ShouldEqual(partition);
-    It should_be_successful = () => result.Succeeded.ShouldBeTrue();
-    It should_not_retry = () => result.Retry.ShouldBeFalse();
-    It should_not_be_included = () => result.IsIncluded.ShouldBeFalse();
+    It should_have_the_correct_partition = () => result.Partition.Should().Be(partition);
+    It should_be_successful = () => result.Succeeded.Should().BeTrue();
+    It should_not_retry = () => result.Retry.Should().BeFalse();
+    It should_not_be_included = () => result.IsIncluded.Should().BeFalse();
 }

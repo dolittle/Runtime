@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.when_subscribing_to_message_received;
@@ -40,7 +41,7 @@ public class and_stream_throws_an_exception : all_dependencies
         second_read = Catch.Exception(() => wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult());
     };
 
-    It should_return_true_for_the_first_read = () => first_read.ShouldBeTrue();
-    It should_return_the_first_message_after_the_first_read = () => first_result.ShouldEqual(message);
-    It should_throw_exception_for_the_second_read = () => second_read.ShouldEqual(exception);
+    It should_return_true_for_the_first_read = () => first_read.Should().BeTrue();
+    It should_return_the_first_message_after_the_first_read = () => first_result.Should().Be(message);
+    It should_throw_exception_for_the_second_read = () => second_read.Should().Be(exception);
 }

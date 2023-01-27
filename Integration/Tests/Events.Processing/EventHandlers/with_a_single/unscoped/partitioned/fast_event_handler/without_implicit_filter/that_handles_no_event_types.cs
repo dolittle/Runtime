@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.fast_event_handler.without_implicit_filter;
@@ -23,5 +24,5 @@ class that_handles_no_event_types : given.single_tenant_and_event_handlers
         exception = Catch.Exception(() => commit_events_after_starting_event_handler((2, "some_source")));
     };
 
-    It should_fail_starting_event_handler = () => exception.ShouldNotBeNull();
+    It should_fail_starting_event_handler = () => exception.Should().NotBeNull();
 }

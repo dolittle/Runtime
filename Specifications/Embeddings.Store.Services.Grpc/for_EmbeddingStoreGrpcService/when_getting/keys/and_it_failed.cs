@@ -9,6 +9,7 @@ using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 using static Moq.Times;
 
@@ -39,6 +40,6 @@ public class and_it_failed : given.the_service
     Because of = () => result = grpc_service.GetKeys(request, call_context).GetAwaiter().GetResult();
 
     It should_call_the_service = () => embeddings_service.Verify(_ => _.TryGetKeys(embedding, execution_context, cancellation_token), Once);
-    It should_have_a_failure = () => result.Failure.ShouldNotBeNull();
-    It should_return_the_correct_exception = () => result.Failure.ShouldEqual(exception.ToFailure().ToProtobuf());
+    It should_have_a_failure = () => result.Failure.Should().NotBeNull();
+    It should_return_the_correct_exception = () => result.Failure.Should().Be(exception.ToFailure().ToProtobuf());
 }

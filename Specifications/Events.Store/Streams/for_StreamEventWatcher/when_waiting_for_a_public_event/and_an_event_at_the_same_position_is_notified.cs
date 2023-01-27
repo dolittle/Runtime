@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.when_waiting_for_a_public_event;
@@ -27,5 +28,5 @@ public class and_an_event_at_the_same_position_is_notified : given.all_dependenc
         Thread.Sleep(100);
     };
 
-    It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
+    It should_be_completed = () => result.IsCompleted.Should().BeTrue();
 }

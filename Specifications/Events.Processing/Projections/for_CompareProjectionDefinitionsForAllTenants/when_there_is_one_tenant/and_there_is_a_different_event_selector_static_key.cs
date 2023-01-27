@@ -9,6 +9,7 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant;
@@ -45,5 +46,5 @@ public class and_there_is_a_different_event_selector_static_key : given.all_depe
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
     It should_have_result_for_tenant = () => result.ContainsKey(TenantId.Development);
-    It should_not_be_a_successful_result = () => result[tenant].Succeeded.ShouldBeFalse();
+    It should_not_be_a_successful_result = () => result[tenant].Succeeded.Should().BeFalse();
 }

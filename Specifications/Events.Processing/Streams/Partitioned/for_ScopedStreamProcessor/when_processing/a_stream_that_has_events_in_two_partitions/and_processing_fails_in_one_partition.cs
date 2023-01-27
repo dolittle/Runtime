@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -48,10 +49,10 @@ public class and_processing_fails_in_one_partition : given.all_dependencies
     It should_process_fourth_event = () => event_processor.Verify(_ => _.Process(fourth_event.Event, second_partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_not_retry_processing = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
-    It should_have_persisted_the_correct_position = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(4));
-    It should_have_persisted_state_with_one_failing_partition = () => current_stream_processor_state.FailingPartitions.Count.ShouldEqual(1);
-    It should_have_persisted_state_with_correct_first_failing_partition = () => current_stream_processor_state.FailingPartitions.ContainsKey(first_partition_id).ShouldBeTrue();
-    It should_have_persisted_correct_position_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].Position.ShouldEqual(new StreamPosition(0));
-    It should_have_persisted_correct_retry_time_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
-    It should_have_persisted_correct_reason_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].Reason.ShouldEqual(reason);
+    It should_have_persisted_the_correct_position = () => current_stream_processor_state.Position.Should().Be(new StreamPosition(4));
+    It should_have_persisted_state_with_one_failing_partition = () => current_stream_processor_state.FailingPartitions.Count.Should().Be(1);
+    It should_have_persisted_state_with_correct_first_failing_partition = () => current_stream_processor_state.FailingPartitions.ContainsKey(first_partition_id).Should().BeTrue();
+    It should_have_persisted_correct_position_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].Position.Should().Be(new StreamPosition(0));
+    It should_have_persisted_correct_retry_time_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].RetryTime.Should().Be(DateTimeOffset.MaxValue);
+    It should_have_persisted_correct_reason_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].Reason.Should().Be(reason);
 }

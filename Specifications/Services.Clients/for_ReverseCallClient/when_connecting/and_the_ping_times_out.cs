@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using FluentAssertions;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;
@@ -37,5 +38,5 @@ public class and_the_ping_times_out : given.a_reverse_call_client
     Because of = () => exception = Catch.Exception(() => reverse_call_client.Connect(new MyConnectArguments(), execution_context, CancellationToken.None).GetAwaiter().GetResult());
 
     It should_throw_an_exception = () =>
-        exception.ShouldBeOfExactType<PingTimedOut>();
+        exception.Should().BeOfType<PingTimedOut>();
 }

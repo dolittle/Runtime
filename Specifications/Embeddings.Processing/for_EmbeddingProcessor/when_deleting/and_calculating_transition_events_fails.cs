@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -33,7 +34,7 @@ public class and_calculating_transition_events_fails : given.all_dependencies_an
 
     Because of = () => result = embedding_processor.Delete(key, execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+    It should_still_be_running = () => task.Status.Should().Be(TaskStatus.WaitingForActivation);
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
-    It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
+    It should_return_the_failure = () => result.Exception.Should().Be(exception);
 }

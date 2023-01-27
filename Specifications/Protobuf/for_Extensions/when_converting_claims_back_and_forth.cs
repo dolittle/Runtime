@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Execution;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Protobuf.for_Extensions;
@@ -22,5 +23,5 @@ public class when_converting_claims_back_and_forth
 
     Because of = () => result = claims.ToProtobuf().ToClaims();
 
-    It should_be_exactly_the_same = () => result.ShouldEqual(claims);
+    It should_be_exactly_the_same = () => result.Should().BeEquivalentTo(claims);
 }

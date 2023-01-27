@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -23,5 +24,5 @@ public class and_replacing_is_acknowledged : given.a_projection_copy_store_and_a
         Moq.It.Is<BsonDocument>(document => document == converted_bson_document && document["_dolittle_projection_key"].AsString == projection_key.Value),
         Moq.It.Is<ReplaceOptions>(options => options.IsUpsert == true),
         cancellation_token), Times.Once);
-    It should_return_true = () => result.ShouldBeTrue();
+    It should_return_true = () => result.Should().BeTrue();
 }

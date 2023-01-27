@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating;
@@ -22,5 +23,5 @@ public class and_getting_the_stream_processor_state_fails : given.all_dependenci
     static FilterValidationResult result;
     Because of = () => result = filter_validators_with_services(_ => _.RegisterInstance(filter_validator.Object)).Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
-    It should_fail_validation = () => result.Success.ShouldBeFalse();
+    It should_fail_validation = () => result.Success.Should().BeFalse();
 }

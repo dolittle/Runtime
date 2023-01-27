@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using static Moq.Times;
 
@@ -37,6 +38,6 @@ public class and_it_failed : given.the_service
     Because of = () => result = grpc_service.GetAll(request, call_context).GetAwaiter().GetResult();
 
     It should_call_the_service = () => embeddings_service.Verify(_ => _.TryGetAll(embedding, execution_context, cancellation_token), Once);
-    It should_have_a_failure = () => result.Failure.ShouldNotBeNull();
-    It should_have_the_correct_failure = () => result.Failure.ShouldEqual(exception.ToFailure().ToProtobuf());
+    It should_have_a_failure = () => result.Failure.Should().NotBeNull();
+    It should_have_the_correct_failure = () => result.Failure.Should().Be(exception.ToFailure().ToProtobuf());
 }

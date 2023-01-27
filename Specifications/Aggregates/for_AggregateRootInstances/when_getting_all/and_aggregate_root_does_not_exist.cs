@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -19,7 +20,7 @@ public class and_there_are_no_registered_or_stored_aggregates : given.all_depend
 
     Because of = () => result = aggregate_root_instances.GetAll().GetAwaiter().GetResult();
 
-    It should_not_get_any_aggregates = () => result.ShouldBeEmpty();
+    It should_not_get_any_aggregates = () => result.Should().BeEmpty();
     It should_not_try_fetch_any_aggregates = () => aggregates_fetcher.VerifyNoOtherCalls();
         
 }

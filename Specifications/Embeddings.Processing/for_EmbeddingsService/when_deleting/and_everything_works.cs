@@ -9,6 +9,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_deleting;
@@ -50,5 +51,5 @@ public class and_everything_works : given.all_dependencies
 
     It should_delete_once = () => embedding_processor.Verify(_ => _.Delete(key, execution_context, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_not_do_anything_else_with_processor = () => embedding_processor.VerifyNoOtherCalls();
-    It should_not_have_a_failure = () => result.Failure.ShouldBeNull();
+    It should_not_have_a_failure = () => result.Failure.Should().BeNull();
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Execution.for_Claims.when_equating_and_getting_hashcode;
@@ -41,8 +42,8 @@ public class two_claims_with_different_claims
         hash_code_is_equal = first.GetHashCode() == second.GetHashCode();
     };
 
-    It should_not_be_equal_when_using_the_Equals_method = () => is_equal_by_method.ShouldBeFalse();
-    It should_not_be_equal_when_using_the_equals_operator = () => is_equal_by_operator.ShouldBeFalse();
-    It should_not_be_equal_when_using_the_not_equals_operator = () => is_not_equal_by_operator.ShouldBeTrue();
-    It should_not_have_the_same_hashcode = () => hash_code_is_equal.ShouldBeFalse();
+    It should_not_be_equal_when_using_the_Equals_method = () => is_equal_by_method.Should().BeFalse();
+    It should_not_be_equal_when_using_the_equals_operator = () => is_equal_by_operator.Should().BeFalse();
+    It should_not_be_equal_when_using_the_not_equals_operator = () => is_not_equal_by_operator.Should().BeTrue();
+    It should_not_have_the_same_hashcode = () => hash_code_is_equal.Should().BeFalse();
 }

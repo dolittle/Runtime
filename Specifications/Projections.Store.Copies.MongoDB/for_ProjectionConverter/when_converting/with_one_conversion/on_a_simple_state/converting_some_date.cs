@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 using Moq;
@@ -43,9 +44,9 @@ public class converting_some_date : given.a_converter_and_inputs
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.DateAsDate), Times.Once);
-    It should_have_the_correct_string = () => result["some_string"].ShouldEqual(new BsonString("hello world"));
-    It should_have_the_correct_int = () => result["some_int"].ShouldEqual(new BsonInt32(42));
-    It should_have_the_correct_bool = () => result["some_bool"].ShouldEqual(new BsonBoolean(true));
+    It should_have_the_correct_string = () => result["some_string"].Should().Be(new BsonString("hello world"));
+    It should_have_the_correct_int = () => result["some_int"].Should().Be(new BsonInt32(42));
+    It should_have_the_correct_bool = () => result["some_bool"].Should().Be(new BsonBoolean(true));
     It should_have_the_converted_value = () => result["some_date"].ShouldBeTheSameAs(converted_value);
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
 }

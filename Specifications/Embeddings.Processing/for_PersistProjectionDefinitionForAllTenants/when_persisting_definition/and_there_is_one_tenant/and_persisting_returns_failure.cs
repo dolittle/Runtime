@@ -7,6 +7,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -35,7 +36,7 @@ public class and_persisting_returns_failure : given.one_tenant
     static Try result;
     Because of = () => result = persister.TryPersist(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_fail = () => result.Success.ShouldBeFalse();
-    It should_return_the_correct_exception = () => result.Exception.ShouldBeOfExactType<FailedPersistingEmbeddingDefinition>();
+    It should_fail = () => result.Success.Should().BeFalse();
+    It should_return_the_correct_exception = () => result.Exception.Should().BeOfType<FailedPersistingEmbeddingDefinition>();
 
 }

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -32,12 +33,12 @@ public class but_fails_on_last_event : given.all_dependencies
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
-    It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
-    It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
-    It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).ShouldBeTrue();
-    It should_have_the_correct_position_on_failing_partition = () => failing_partition(first_failing_partition_id).Position.ShouldEqual(new StreamPosition(first_initial_failing_partition_position + 2));
-    It should_have_new_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.ShouldEqual(new_failure_reason);
-    It should_not_retry_failing_partition = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
+    It should_return_the_same_stream_position = () => result.Position.Should().Be(stream_processor_state.Position);
+    It should_have_one_failing_partition = () => result.FailingPartitions.Count.Should().Be(1);
+    It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).Should().BeTrue();
+    It should_have_the_correct_position_on_failing_partition = () => failing_partition(first_failing_partition_id).Position.Should().Be(new StreamPosition(first_initial_failing_partition_position + 2));
+    It should_have_new_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.Should().Be(new_failure_reason);
+    It should_not_retry_failing_partition = () => failing_partition(first_failing_partition_id).RetryTime.Should().Be(DateTimeOffset.MaxValue);
 
     It should_have_retried_processeing_three_times = () => event_processor.Verify(
         _ => _.Process(

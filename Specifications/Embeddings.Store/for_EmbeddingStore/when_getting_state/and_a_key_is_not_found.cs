@@ -11,6 +11,7 @@ using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -46,9 +47,9 @@ public class and_a_key_is_not_found : given.all_dependencies
 
     Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
-    It should_get_the_initial_state_state = () => result.Result.State.ShouldEqual(initial_state);
-    It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
-    It should_have_an_aggregate_version_of_0 = () => result.Result.Version.Value.ShouldEqual((ulong)0);
-    It should_get_an_initial_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.CreatedFromInitialState);
+    It should_succeed = () => result.Success.Should().BeTrue();
+    It should_get_the_initial_state_state = () => result.Result.State.Should().Be(initial_state);
+    It should_get_the_key = () => result.Result.Key.Should().Be(key);
+    It should_have_an_aggregate_version_of_0 = () => result.Result.Version.Value.Should().Be((ulong)0);
+    It should_get_an_initial_state = () => result.Result.Type.Should().Be(EmbeddingCurrentStateType.CreatedFromInitialState);
 }

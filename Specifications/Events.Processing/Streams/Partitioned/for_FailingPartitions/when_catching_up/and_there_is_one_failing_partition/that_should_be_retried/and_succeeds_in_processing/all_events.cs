@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -21,9 +22,9 @@ public class all_events : given.all_dependencies
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
-    It should_return_a_state_of_the_expected_type = () => result.ShouldBeOfExactType<StreamProcessorState>();
-    It should_return_a_state_with_the_same_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
-    It should_return_a_state_with_the_correct_partitioned_value = () => result.Partitioned.ShouldEqual(stream_processor_state.Partitioned);
+    It should_return_a_state_of_the_expected_type = () => result.Should().BeOfType<StreamProcessorState>();
+    It should_return_a_state_with_the_same_position = () => result.Position.Should().Be(stream_processor_state.Position);
+    It should_return_a_state_with_the_correct_partitioned_value = () => result.Partitioned.Should().Be(stream_processor_state.Partitioned);
 
     It should_not_process_any_events = () => event_processor.Verify(
         _ => _.Process(

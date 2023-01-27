@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.when_reading;
@@ -23,5 +24,5 @@ public class and_there_are_no_messages : all_dependencies
     static bool result;
     Because of = () => result = wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
 
-    It should_return_false = () => result.ShouldBeFalse();
+    It should_return_false = () => result.Should().BeFalse();
 }

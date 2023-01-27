@@ -7,6 +7,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Integration.Shared;
 using Integration.Tests.Events.Store.given;
 using Machine.Specifications;
@@ -48,12 +49,12 @@ class specs : given.a_clean_event_store_and_grpc_service
         
         Because of = () => response = event_store_service.FetchForAggregate(request, server_call_context).GetAwaiter().GetResult();
         
-        It should_not_fail = () => response.Failure.ShouldBeNull();
-        It should_return_the_correct_aggregate_root = () => response.Events.AggregateRootId.ToGuid().ShouldEqual(aggregate_root_id.Value);
-        It should_return_the_correct_aggregate_root_version = () => response.Events.CurrentAggregateRootVersion.ShouldEqual(3U);
-        It should_return_the_correct_deprecated_aggregate_root_version = () => response.Events.AggregateRootVersion.ShouldEqual(2U);
-        It should_return_the_correct_event_source = () => response.Events.EventSourceId.ShouldEqual(event_source.Value);
-        It should_return_all_events = () => response.Events.Events.Count.ShouldEqual(3);
+        It should_not_fail = () => response.Failure.Should().BeNull();
+        It should_return_the_correct_aggregate_root = () => response.Events.AggregateRootId.ToGuid().Should().Be(aggregate_root_id.Value);
+        It should_return_the_correct_aggregate_root_version = () => response.Events.CurrentAggregateRootVersion.Should().Be(3U);
+        It should_return_the_correct_deprecated_aggregate_root_version = () => response.Events.AggregateRootVersion.Should().Be(2U);
+        It should_return_the_correct_event_source = () => response.Events.EventSourceId.Should().Be(event_source.Value);
+        It should_return_all_events = () => response.Events.Events.Count.Should().Be(3);
     }
     
     [Tags("IntegrationTest")]
@@ -76,7 +77,7 @@ class specs : given.a_clean_event_store_and_grpc_service
         Because of = () => event_store_service.FetchForAggregateInBatches(request, fetch_for_aggregate_response_stream, server_call_context).GetAwaiter().GetResult();
 
         It should_not_fail = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Failure == default);
-        It should_write_three_batches = () => fetch_for_aggregate_written_responses.Count.ShouldEqual(3);
+        It should_write_three_batches = () => fetch_for_aggregate_written_responses.Count.Should().Be(3);
         It should_return_the_correct_aggregate_root = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Events.AggregateRootId.ToGuid() == aggregate_root_id.Value);
         It should_return_the_correct_aggregate_root_version = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Events.CurrentAggregateRootVersion == 3U);
         It should_return_the_correct_deprecated_aggregate_root_version = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Events.AggregateRootVersion == 2U);
@@ -105,7 +106,7 @@ class specs : given.a_clean_event_store_and_grpc_service
         Because of = () => event_store_service.FetchForAggregateInBatches(request, fetch_for_aggregate_response_stream, server_call_context).GetAwaiter().GetResult();
 
         It should_not_fail = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Failure == default);
-        It should_write_two_batches = () => fetch_for_aggregate_written_responses.Count.ShouldEqual(2);
+        It should_write_two_batches = () => fetch_for_aggregate_written_responses.Count.Should().Be(2);
         It should_return_the_correct_aggregate_root = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Events.AggregateRootId.ToGuid() == aggregate_root_id.Value);
         It should_return_the_correct_aggregate_root_version = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Events.CurrentAggregateRootVersion == 2U);
         It should_return_the_correct_deprecated_aggregate_root_version = () => fetch_for_aggregate_written_responses.ShouldEachConformTo(_ => _.Events.AggregateRootVersion == 1U);

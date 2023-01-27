@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.when_waiting_for_a_private_event.to_be_appended;
@@ -28,5 +29,5 @@ public class and_timeout_is_reached : given.all_dependencies
         Thread.Sleep(100);
     };
 
-    It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
+    It should_be_completed = () => result.IsCompleted.Should().BeTrue();
 }

@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing;
@@ -25,6 +26,6 @@ public class and_the_states_arent_valid_json
 
     Because of = () => result = comparer.TryCheckEquality(left, right);
 
-    It should_fail = () => result.Success.ShouldBeFalse();
-    It should_not_be_equal = () => result.Result.ShouldBeFalse();
+    It should_fail = () => result.Success.Should().BeFalse();
+    It should_not_be_equal = () => result.Result.Should().BeFalse();
 }

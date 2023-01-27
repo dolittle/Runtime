@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Events.Processing.Projections;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -37,6 +38,6 @@ public class a_projection_delete_response : given.all_dependencies
 
     It should_call_the_dispatcher = () => dispatcher.Verify(_ => _.Call(embedding_request, execution_context, cancellation), Times.Once);
     It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
-    It should_return_a_projection_delete_result = () => result.ShouldBeOfExactType<ProjectionDeleteResult>();
+    It should_return_a_projection_delete_result = () => result.Should().BeOfType<ProjectionDeleteResult>();
     It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.Create(current_state, @event));
 }

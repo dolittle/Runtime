@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established;
@@ -39,5 +40,5 @@ public class and_handle_is_called_multiple_times : given.a_reverse_call_client
 
     Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, execution_context, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
 
-    It should_fail_because_handling_has_already_started = () => exception.ShouldBeOfExactType<ReverseCallClientAlreadyStartedHandling>();
+    It should_fail_because_handling_has_already_started = () => exception.Should().BeOfType<ReverseCallClientAlreadyStartedHandling>();
 }

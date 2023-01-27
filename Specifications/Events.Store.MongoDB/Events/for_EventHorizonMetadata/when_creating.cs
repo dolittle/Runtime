@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventHorizonMetadata;
@@ -25,7 +26,7 @@ public class when_creating
         received,
         consent);
 
-    It should_have_the_correct_external_event_log_sequence_number = () => result.ExternalEventLogSequenceNumber.ShouldEqual(external_event_log_sequence_number);
-    It should_have_the_correct_received_value = () => result.Received.ShouldEqual(received);
-    It should_have_the_correct_consent = () => result.Consent.ShouldEqual(consent);
+    It should_have_the_correct_external_event_log_sequence_number = () => result.ExternalEventLogSequenceNumber.Should().Be(external_event_log_sequence_number);
+    It should_have_the_correct_received_value = () => result.Received.Should().Be(received);
+    It should_have_the_correct_consent = () => result.Consent.Should().Be(consent);
 }

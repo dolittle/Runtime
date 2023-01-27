@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -37,5 +38,5 @@ public class two_properties_to_the_same_property : given.a_renamer_and_inputs
         };
     };
 
-    It should_fail = () => exception.ShouldBeOfExactType<DocumentAlreadyContainsProperty>();
+    It should_fail = () => exception.Should().BeOfType<DocumentAlreadyContainsProperty>();
 }

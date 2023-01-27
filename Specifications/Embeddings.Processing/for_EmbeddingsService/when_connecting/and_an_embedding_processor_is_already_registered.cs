@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
+using FluentAssertions;
 using Machine.Specifications;
 using static Moq.Times;
 using static Moq.It;
@@ -42,7 +43,7 @@ public class and_an_embedding_processor_is_already_registered : given.all_depend
         Task.Delay(50).GetAwaiter().GetResult();
     };
 
-    It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
+    It should_be_completed = () => result.IsCompleted.Should().BeTrue();
     It should_have_connected_the_reverse_call_client = () => reverse_call_services.Verify(
         _ => _.Connect(
             runtime_stream.Object,

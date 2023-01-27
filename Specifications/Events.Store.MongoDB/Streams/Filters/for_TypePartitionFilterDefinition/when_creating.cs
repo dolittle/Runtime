@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters.for_TypePartitionFilterDefinition;

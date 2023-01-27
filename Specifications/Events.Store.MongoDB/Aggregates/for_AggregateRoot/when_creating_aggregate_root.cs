@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoot;
@@ -24,7 +25,7 @@ public class when_creating_aggregate_root
 
     Because of = () => aggregate_root = new AggregateRoot(event_source, aggregate_type, version);
 
-    It should_have_the_correct_event_source = () => aggregate_root.EventSource.ShouldEqual(event_source.Value);
-    It should_have_the_correct_aggregate_type = () => aggregate_root.AggregateType.ShouldEqual(aggregate_type.Value);
-    It should_have_the_correct_version = () => aggregate_root.Version.ShouldEqual(version.Value);
+    It should_have_the_correct_event_source = () => aggregate_root.EventSource.Should().Be(event_source.Value);
+    It should_have_the_correct_aggregate_type = () => aggregate_root.AggregateType.Should().Be(aggregate_type.Value);
+    It should_have_the_correct_version = () => aggregate_root.Version.Should().Be(version.Value);
 }

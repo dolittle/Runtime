@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -77,7 +78,7 @@ public class a_property_inside_an_array : given.a_renamer_and_inputs
         };
     };
 
-    It should_return_the_correct_document = () => result.ShouldEqual(new BsonDocument(new[]
+    It should_return_the_correct_document = () => result.Should().BeEquivalentTo(new BsonDocument(new[]
     {
         new BsonElement("document", new BsonDocument(new[]
         {

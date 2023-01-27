@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connecting;
@@ -29,5 +30,5 @@ public class multiple_times : given.a_reverse_call_client
 
     Because of = () => exception = Catch.Exception(() => reverse_call_client.Connect(connect_arguments, execution_context, CancellationToken.None).GetAwaiter().GetResult());
 
-    It should_fail_because_you_cannot_connect_twice = () => exception.ShouldBeOfExactType<ReverseCallClientAlreadyCalledConnect>();
+    It should_fail_because_you_cannot_connect_twice = () => exception.Should().BeOfType<ReverseCallClientAlreadyCalledConnect>();
 }

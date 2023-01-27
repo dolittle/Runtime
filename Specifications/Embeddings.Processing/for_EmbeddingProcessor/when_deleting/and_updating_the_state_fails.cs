@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -45,10 +46,10 @@ public class and_updating_the_state_fails : given.all_dependencies_and_a_key
 
     Because of = () => result = embedding_processor.Delete(key, execution_context, cancellation_token).GetAwaiter().GetResult();
 
-    It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+    It should_still_be_running = () => task.Status.Should().Be(TaskStatus.WaitingForActivation);
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
     It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryDelete(current_state, execution_context, Moq.It.IsAny<CancellationToken>()));
     It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(commit_request, Moq.It.IsAny<CancellationToken>()));
     It should_remove_the_state = () => embedding_store.Verify(_ => _.TryRemove(embedding, key, aggregate_root_version, Moq.It.IsAny<CancellationToken>()));
-    It should_return_success = () => result.Success.ShouldBeTrue();
+    It should_return_success = () => result.Success.Should().BeTrue();
 }

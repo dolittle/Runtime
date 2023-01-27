@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.when_processing;
@@ -48,9 +49,9 @@ public class and_stream_processor_must_retry_processing_an_event_three_times : g
     It should_retry_processing_first_event_first_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 0, Moq.It.IsAny<ExecutionContext>(),Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_retry_processing_first_event_second_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 1, Moq.It.IsAny<ExecutionContext>(),Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_retry_processing_first_event_third_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 2, Moq.It.IsAny<ExecutionContext>(),Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-    It should_have_current_position_equal_zero = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(0));
-    It should_be_failing = () => current_stream_processor_state.IsFailing.ShouldBeTrue();
-    It should_have_the_correct_retry_time = () => current_stream_processor_state.RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
-    It should_have_the_correct_reason = () => current_stream_processor_state.FailureReason.ShouldEqual(failure_reason);
-    It should_have_four_processing_attempts = () => current_stream_processor_state.ProcessingAttempts.ShouldEqual(4u);
+    It should_have_current_position_equal_zero = () => current_stream_processor_state.Position.Should().Be(new StreamPosition(0));
+    It should_be_failing = () => current_stream_processor_state.IsFailing.Should().BeTrue();
+    It should_have_the_correct_retry_time = () => current_stream_processor_state.RetryTime.Should().Be(DateTimeOffset.MaxValue);
+    It should_have_the_correct_reason = () => current_stream_processor_state.FailureReason.Should().Be(failure_reason);
+    It should_have_four_processing_attempts = () => current_stream_processor_state.ProcessingAttempts.Should().Be(4u);
 }

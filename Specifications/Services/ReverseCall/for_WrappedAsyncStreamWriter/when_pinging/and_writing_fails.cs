@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_pinging;
@@ -31,5 +32,5 @@ public class and_writing_fails : given.a_wrapped_stream_writer
     Because of = () => result = Catch.Exception(() => wrapped_writer.MaybeWritePing());
 
     It should_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message));
-    It should_fail_with_the_original_exception = () => result.ShouldEqual(exception);
+    It should_fail_with_the_original_exception = () => result.Should().Be(exception);
 }

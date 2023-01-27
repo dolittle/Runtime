@@ -38,6 +38,6 @@ public class and_setting_position_to_failing_event : all_dependencies
     It should_have_the_correct_failing_partition = () => current_stream_processor_state.FailingPartitions.ContainsKey(partition_id).Should().BeTrue();
     It should_have_the_correct_position_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].Position.Should().Be(new StreamPosition(0));
     It should_have_the_correct_reason_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].Reason.Should().Be(failure_reason);
-    It should_have_the_correct_retry_time_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].RetryTime.ShouldBeGreaterThan(DateTimeOffset.UtcNow);
+    It should_have_the_correct_retry_time_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].RetryTime.Should().BeAfter(DateTimeOffset.UtcNow);
     It should_perform_the_action = () => action_to_perform_before_reprocessing.Verify(_ => _(tenant_id, Moq.It.IsAny<CancellationToken>()), Times.Once);
 }

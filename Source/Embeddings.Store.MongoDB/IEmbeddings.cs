@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Projections.Store;
 using MongoDB.Driver;
 
@@ -18,7 +19,7 @@ public interface IEmbeddings : IEmbeddingsConnection
     /// </summary>
     /// <param name="projectionId">The <see cref="ProjectionId" />.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="IMongoCollection{TDocument}" /> with <see cref="State.Projection" />.</returns>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="IMongoCollection{TDocument}" /> with <see cref="Projection" />.</returns>
     Task<IMongoCollection<State.Embedding>> GetStates(EmbeddingId embeddingId, CancellationToken token);
 
     /// <summary>

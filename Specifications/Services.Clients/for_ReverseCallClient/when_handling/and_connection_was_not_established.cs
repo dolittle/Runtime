@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling;
@@ -23,5 +24,5 @@ public class and_connection_was_not_established : given.a_reverse_call_client
 
     Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, _, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
 
-    It should_fail_because_no_connection_was_established = () => exception.ShouldBeOfExactType<ReverseCallClientNotConnected>();
+    It should_fail_because_no_connection_was_established = () => exception.Should().BeOfType<ReverseCallClientNotConnected>();
 }

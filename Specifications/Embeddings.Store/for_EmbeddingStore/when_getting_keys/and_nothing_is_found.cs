@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -31,6 +32,6 @@ public class and_nothing_is_found : given.all_dependencies
 
     Because of = () => result = store.TryGetKeys(id, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_fail = () => result.Success.ShouldBeFalse();
-    It should_return_a_failure = () => result.Exception.ShouldNotBeNull();
+    It should_fail = () => result.Success.Should().BeFalse();
+    It should_return_a_failure = () => result.Exception.Should().NotBeNull();
 }

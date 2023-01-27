@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -38,6 +39,6 @@ public class without_conversions : given.a_renamer_and_inputs
         });
     };
 
-    It should_return_a_document_that_is_equal = () => result.ShouldEqual(document_to_rename);
-    It should_not_return_the_same_document = () => result.ShouldNotBeTheSameAs(document_to_rename);
+    It should_return_a_document_that_is_equal = () => result.Should().BeEquivalentTo(document_to_rename);
+    It should_not_return_the_same_document = () => result.Should().NotBeSameAs(document_to_rename);
 }

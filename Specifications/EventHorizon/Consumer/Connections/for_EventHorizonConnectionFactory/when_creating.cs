@@ -5,6 +5,7 @@ using System;
 using Machine.Specifications;
 using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
+using FluentAssertions;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonConnectionFactory;
 
@@ -22,7 +23,7 @@ public class when_creating : given.all_dependencies
     };
     static IEventHorizonConnection result;
     Because of = () => result = factory.Create(microservice_address, execution_contexts.create());
-    It should_return_the_connection = () => result.ShouldNotBeNull();
+    It should_return_the_connection = () => result.Should().NotBeNull();
     It should_create_the_reverse_call_client = () => reverse_call_clients.Verify(_ => _.GetFor(
         Moq.It.IsAny<EventHorizonProtocol>(),
         microservice_address.Host,

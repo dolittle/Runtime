@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_writing;
@@ -27,5 +28,5 @@ public class and_writing_fails : given.a_wrapped_stream_writer
     Because of = () => result = Catch.Exception(() => wrapped_writer.WriteAsync(message).GetAwaiter().GetResult());
 
     It should_write_the_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(message));
-    It should_fail_with_the_original_exception = () => result.ShouldEqual(exception);
+    It should_fail_with_the_original_exception = () => result.Should().Be(exception);
 }

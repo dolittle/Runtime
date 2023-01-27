@@ -4,6 +4,7 @@
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -28,14 +29,14 @@ public class and_everything_works : given.all_dependencies
 
     Because of = () => result = factory.Create(current_state, @event);
 
-    It should_be_a_projection_request = () => result.RequestCase.ShouldEqual(Contracts.EmbeddingRequest.RequestOneofCase.Projection);
-    It should_have_the_correct_type = () => result.Projection.CurrentState.Type.ShouldEqual(current_state.Type.ToProtobuf());
-    It should_have_the_correct_state = () => result.Projection.CurrentState.State.ShouldEqual(current_state.State.Value);
-    It should_have_the_correct_key = () => result.Projection.CurrentState.Key.ShouldEqual(current_state.Key.Value);
-    It should_have_the_correct_event_source_id = () => result.Projection.Event.EventSourceId.ShouldEqual(@event.EventSource.Value);
-    It should_have_the_correct_event_artifact_id = () => result.Projection.Event.EventType.Id.ShouldEqual(@event.Type.Id.Value.ToProtobuf());
-    It should_have_the_correct_event_artifact_generation = () => result.Projection.Event.EventType.Generation.ShouldEqual(@event.Type.Generation.Value);
-    It should_have_the_correct_event_content = () => result.Projection.Event.Content.ShouldEqual(@event.Content);
-    It should_have_the_correct_event_public_value = () => result.Projection.Event.Public.ShouldEqual(@event.Public);
+    It should_be_a_projection_request = () => result.RequestCase.Should().Be(Contracts.EmbeddingRequest.RequestOneofCase.Projection);
+    It should_have_the_correct_type = () => result.Projection.CurrentState.Type.Should().Be(current_state.Type.ToProtobuf());
+    It should_have_the_correct_state = () => result.Projection.CurrentState.State.Should().Be(current_state.State.Value);
+    It should_have_the_correct_key = () => result.Projection.CurrentState.Key.Should().Be(current_state.Key.Value);
+    It should_have_the_correct_event_source_id = () => result.Projection.Event.EventSourceId.Should().Be(@event.EventSource.Value);
+    It should_have_the_correct_event_artifact_id = () => result.Projection.Event.EventType.Id.Should().Be(@event.Type.Id.Value.ToProtobuf());
+    It should_have_the_correct_event_artifact_generation = () => result.Projection.Event.EventType.Generation.Should().Be(@event.Type.Generation.Value);
+    It should_have_the_correct_event_content = () => result.Projection.Event.Content.Should().Be(@event.Content);
+    It should_have_the_correct_event_public_value = () => result.Projection.Event.Public.Should().Be(@event.Public);
 
 }

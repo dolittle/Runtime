@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using MongoDB.Bson;
 
@@ -38,5 +39,5 @@ public class a_property_on_a_primitive : given.a_renamer_and_inputs
         };
     };
 
-    It should_fail = () => exception.ShouldBeOfExactType<ValueIsNotDocument>();
+    It should_fail = () => exception.Should().BeOfType<ValueIsNotDocument>();
 }

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 
@@ -23,7 +24,7 @@ public class when_creating_filter : given.a_public_event_filter
         Moq.Mock.Of<IWriteEventsToPublicStreams>(),
         Moq.Mock.Of<ILogger>());
 
-    It should_have_the_correct_identifier = () => filter.Identifier.Value.ShouldEqual(filter_definition.TargetStream.Value);
-    It should_have_the_correct_source_stream = () => filter.Definition.SourceStream.ShouldEqual(filter_definition.SourceStream);
-    It should_have_the_correct_target_stream = () => filter.Definition.TargetStream.ShouldEqual(filter_definition.TargetStream);
+    It should_have_the_correct_identifier = () => filter.Identifier.Value.Should().Be(filter_definition.TargetStream.Value);
+    It should_have_the_correct_source_stream = () => filter.Definition.SourceStream.Should().Be(filter_definition.SourceStream);
+    It should_have_the_correct_target_stream = () => filter.Definition.TargetStream.Should().Be(filter_definition.TargetStream);
 }

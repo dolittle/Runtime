@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -43,7 +44,7 @@ public class and_all_are_found : given.all_dependencies
 
     Because of = () => result = store.TryGetKeys(id, true, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_succeed = () => result.Success.Should().BeTrue();
     It should_get_the_keys = () =>
         result.Result.ShouldEachConformTo(result_key => persisted_states.Any(_ => _.Item2 == result_key));
 }

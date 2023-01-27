@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -19,6 +20,6 @@ public class twice : given.all_dependencies
         result = embedding_processor.Start(CancellationToken.None);
     };
 
-    It should_fail_the_second_time = () => result.Result.Success.ShouldBeFalse();
-    It should_fail_because_it_is_already_started = () => result.Result.Exception.ShouldBeOfExactType<EmbeddingProcessorAlreadyStarted>();
+    It should_fail_the_second_time = () => result.Result.Success.Should().BeFalse();
+    It should_fail_because_it_is_already_started = () => result.Result.Exception.Should().BeOfType<EmbeddingProcessorAlreadyStarted>();
 }

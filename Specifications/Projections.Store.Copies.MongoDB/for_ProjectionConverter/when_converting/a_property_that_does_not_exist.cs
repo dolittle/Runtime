@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using FluentAssertions;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -33,5 +34,5 @@ public class a_property_that_does_not_exist : given.a_converter_and_inputs
     };
 
     It should_not_call_the_renamer = () => property_renamer.VerifyNoOtherCalls();
-    It should_fail = () => exception.ShouldBeOfExactType<DocumentDoesNotHaveProperty>();
+    It should_fail = () => exception.Should().BeOfType<DocumentDoesNotHaveProperty>();
 }

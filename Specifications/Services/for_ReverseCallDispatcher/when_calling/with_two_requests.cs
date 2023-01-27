@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling;
@@ -69,6 +70,6 @@ public class with_two_requests : given.a_dispatcher
 
     It should_write_a_message_with_the_first_request = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.Request == first_request)), Moq.Times.Once);
     It should_write_a_message_with_the_second_request = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.Request == second_request)), Moq.Times.Once);
-    It should_return_the_first_response_to_the_first_request = () => first_response.ShouldEqual(response_to_first_from_client);
-    It should_return_the_second_response_to_the_second_request = () => second_response.ShouldEqual(response_to_second_from_client);
+    It should_return_the_first_response_to_the_first_request = () => first_response.Should().Be(response_to_first_from_client);
+    It should_return_the_second_response_to_the_second_request = () => second_response.Should().Be(response_to_second_from_client);
 }

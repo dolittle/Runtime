@@ -7,6 +7,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_registering;
@@ -40,6 +41,6 @@ public class and_processor_key_has_been_registered_before : given.all_dependenci
         second_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, event_processor_kind, stream_definition, tenant_id => event_processor.Object, execution_contexts.create(), CancellationToken.None);
     };
 
-    It should_have_registered_the_first_time = () => first_registration_result.Success.ShouldBeTrue();
-    It should_not_have_registered_the_second_time = () => second_registration_result.Success.ShouldBeFalse();
+    It should_have_registered_the_first_time = () => first_registration_result.Success.Should().BeTrue();
+    It should_not_have_registered_the_second_time = () => second_registration_result.Success.Should().BeFalse();
 }

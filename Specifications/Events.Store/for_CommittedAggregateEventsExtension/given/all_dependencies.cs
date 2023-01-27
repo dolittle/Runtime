@@ -8,6 +8,7 @@ using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
+using FluentAssertions;
 using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;
 using Environment = Dolittle.Runtime.Domain.Platform.Environment;
@@ -84,14 +85,14 @@ public class all_dependencies
         var committed_event = result[index];
         var protobuf_committed_event = protobuf_committed_events.Events[index];
 
-        committed_event.AggregateRoot.ShouldEqual(new Artifact(protobuf_committed_events.AggregateRootId.ToGuid(), ArtifactGeneration.First));
-        committed_event.AggregateRootVersion.ShouldEqual(expected_version);
-        committed_event.Content.ShouldEqual(protobuf_committed_event.Content);
-        committed_event.Occurred.ShouldEqual(protobuf_committed_event.Occurred.ToDateTimeOffset());
-        committed_event.Public.ShouldEqual(protobuf_committed_event.Public);
-        committed_event.Type.ShouldEqual(protobuf_committed_event.EventType.ToArtifact());
-        committed_event.EventSource.Value.ShouldEqual(protobuf_committed_events.EventSourceId);
-        committed_event.ExecutionContext.ShouldEqual(protobuf_committed_event.ExecutionContext.ToExecutionContext());
-        committed_event.EventLogSequenceNumber.Value.ShouldEqual(protobuf_committed_event.EventLogSequenceNumber);
+        committed_event.AggregateRoot.Should().Be(new Artifact(protobuf_committed_events.AggregateRootId.ToGuid(), ArtifactGeneration.First));
+        committed_event.AggregateRootVersion.Should().Be(expected_version);
+        committed_event.Content.Should().Be(protobuf_committed_event.Content);
+        committed_event.Occurred.Should().Be(protobuf_committed_event.Occurred.ToDateTimeOffset());
+        committed_event.Public.Should().Be(protobuf_committed_event.Public);
+        committed_event.Type.Should().Be(protobuf_committed_event.EventType.ToArtifact());
+        committed_event.EventSource.Value.Should().Be(protobuf_committed_events.EventSourceId);
+        committed_event.ExecutionContext.Should().Be(protobuf_committed_event.ExecutionContext.ToExecutionContext());
+        committed_event.EventLogSequenceNumber.Value.Should().Be(protobuf_committed_event.EventLogSequenceNumber);
     }
 }

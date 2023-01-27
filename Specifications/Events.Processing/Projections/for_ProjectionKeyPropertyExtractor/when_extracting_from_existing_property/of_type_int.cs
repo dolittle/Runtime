@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using Dolittle.Runtime.Projections.Store;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.when_extracting_from_existing_property;
@@ -20,6 +21,6 @@ public class of_type_int : given.all_dependencies
 
     Because of = () => result = extractor.TryExtract(JsonSerializer.Serialize(json_object), nameof(json_object.a_number_property), out key);
 
-    It should_return_true = () => result.ShouldBeTrue();
-    It should_set_key_correct_value = () => key.Value.ShouldEqual("41");
+    It should_return_true = () => result.Should().BeTrue();
+    It should_set_key_correct_value = () => key.Value.Should().Be("41");
 }

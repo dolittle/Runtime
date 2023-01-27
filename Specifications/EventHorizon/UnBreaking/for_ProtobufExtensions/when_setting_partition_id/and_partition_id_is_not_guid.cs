@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.UnBreaking.for_ProtobufExtensions.when_setting_partition_id;
@@ -23,5 +24,5 @@ public class and_partition_id_is_not_guid
 
     Because of = () => request.TrySetPartitionIdLegacy();
 
-    It should_not_set_legacy_partition_id = () => request.PartitionIdLegacy.ShouldBeNull();
+    It should_not_set_legacy_partition_id = () => request.PartitionIdLegacy.Should().BeNull();
 }

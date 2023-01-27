@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_CommittedEvents;
@@ -12,6 +13,6 @@ public class when_creating_empty
 
     Because of = () => events = new CommittedEvents(Array.Empty<CommittedEvent>());
 
-    It should_not_have_events = () => events.HasEvents.ShouldBeFalse();
-    It should_have_a_count_of_zero = () => events.Count.ShouldEqual(0);
+    It should_not_have_events = () => events.HasEvents.Should().BeFalse();
+    It should_have_a_count_of_zero = () => events.Count.Should().Be(0);
 }

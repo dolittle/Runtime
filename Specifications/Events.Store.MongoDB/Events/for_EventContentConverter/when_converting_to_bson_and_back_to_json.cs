@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventContentConverter;
@@ -76,5 +77,5 @@ public class when_converting_to_bson_and_back_to_json
 
     Because of = () => recovered_json = content_converter.ToJson(content_converter.ToBson(original_json)).FormatJson();
 
-    It should_recover_the_same_contents = () => recovered_json.ShouldEqual(original_json);
+    It should_recover_the_same_contents = () => recovered_json.Should().Be(original_json);
 }
