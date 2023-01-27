@@ -110,7 +110,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
         }
     }
 
-    public async Task<IReadOnlyDictionary<IStreamProcessorId, Partial>> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<IStreamProcessorId, Partial>> PersistStreamProcessorStatesForScope(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
     {
         var tasksWithIds = streamProcessorStates.Select(_ => (_.Key, Persist(_.Key, _.Value, cancellationToken)));
         var persistResults = await Task.WhenAll(tasksWithIds.Select(_ => _.Item2)).ConfigureAwait(false);

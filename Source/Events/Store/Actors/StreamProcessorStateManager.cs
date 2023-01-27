@@ -212,7 +212,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     void Persist(Dictionary<StreamProcessorKey, Bucket> changes, ScopeId scopeId)
     {
         var streamProcessorStates = changes.ToDictionary(_ => _.Key.FromProtobuf(), _ => _.Value.FromProtobuf());
-        var persistTask = _repository.Persist(streamProcessorStates, Context.CancellationToken);
+        var persistTask = _repository.PersistStreamProcessorStatesForScope(streamProcessorStates, Context.CancellationToken);
         Context.ReenterAfter(persistTask, _ =>
         {
             if (persistTask.IsCompletedSuccessfully)
