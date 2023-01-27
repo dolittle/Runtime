@@ -4,13 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
-using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Microsoft.Extensions.Logging;
 using Proto;

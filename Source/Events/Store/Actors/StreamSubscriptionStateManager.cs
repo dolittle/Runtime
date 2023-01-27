@@ -3,20 +3,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-[TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient))]
+[TenantGrain(typeof(StreamSubscriptionActor), typeof(StreamSubscriptionStateClient))]
 public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 {
     readonly ISubscriptionStateRepository _repository;
