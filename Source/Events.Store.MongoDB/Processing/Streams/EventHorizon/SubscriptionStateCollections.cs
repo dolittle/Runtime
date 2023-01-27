@@ -11,19 +11,19 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 
 /// <summary>
-/// Represents an implementation of <see cref="ISubscriptionStates" />.
+/// Represents an implementation of <see cref="ISubscriptionStateCollections" />.
 /// </summary>
 [Singleton, PerTenant]
-public class SubscriptionStates : EventStoreConnection, ISubscriptionStates
+public class SubscriptionStateCollections : EventStoreConnection, ISubscriptionStateCollections
 {
     readonly ILogger _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SubscriptionStates"/> class.
+    /// Initializes a new instance of the <see cref="SubscriptionStateCollections"/> class.
     /// </summary>
     /// <param name="connection">The <see cref="IDatabaseConnection" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
-    public SubscriptionStates(IDatabaseConnection connection, ILogger logger)
+    public SubscriptionStateCollections(IDatabaseConnection connection, ILogger logger)
         : base(connection)
     {
         _logger = logger;

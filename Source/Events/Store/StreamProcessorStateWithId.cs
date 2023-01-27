@@ -10,4 +10,6 @@ namespace Dolittle.Runtime.Events.Store;
 /// </summary>
 /// <param name="Id">The <see cref="IStreamProcessorId"/>.</param>
 /// <param name="State">The <see cref="IStreamProcessorState"/>.</param>
-public record StreamProcessorStateWithId(IStreamProcessorId Id, IStreamProcessorState State);
+public record StreamProcessorStateWithId<TId, TState>(IStreamProcessorId Id, IStreamProcessorState State)
+    where TId : IStreamProcessorId
+    where TState : IStreamProcessorState;

@@ -11,10 +11,10 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 
 /// <summary>
-/// Represents an implementation of <see cref="IStreamProcessorStatesCollectionSelector" />.
+/// Represents an implementation of <see cref="IStreamProcessorStateCollections" />.
 /// </summary>
 [Singleton, PerTenant]
-public class StreamProcessorStatesCollectionSelector : EventStoreConnection, IStreamProcessorStatesCollectionSelector
+public class StreamProcessorStateCollections : EventStoreConnection, IStreamProcessorStateCollections
 {
     const string StreamProcessorStateCollectionName = "stream-processor-states";
 
@@ -22,11 +22,11 @@ public class StreamProcessorStatesCollectionSelector : EventStoreConnection, ISt
     readonly IMongoCollection<MongoDB.Processing.Streams.AbstractStreamProcessorState> _streamProcessorStates;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StreamProcessorStatesCollectionSelector"/> class.
+    /// Initializes a new instance of the <see cref="StreamProcessorStateCollections"/> class.
     /// </summary>
     /// <param name="connection">The <see cref="IDatabaseConnection" />.</param>
     /// <param name="logger">The <see cref="ILogger" />.</param>
-    public StreamProcessorStatesCollectionSelector(IDatabaseConnection connection, ILogger logger)
+    public StreamProcessorStateCollections(IDatabaseConnection connection, ILogger logger)
         : base(connection)
     {
         _logger = logger;

@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 [TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient))]
 public class StreamProcessorStateManager : StreamProcessorStateBase
 {
-    readonly IStreamProcessorStateBatchRepository _repository;
+    readonly IStreamProcessorStateRepository _repository;
     readonly ILogger<StreamProcessorStateManager> _logger;
     readonly IApplicationLifecycleHooks _lifecycleHooks;
 
@@ -34,7 +34,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     bool _shuttingDown;
 
 
-    public StreamProcessorStateManager(IContext context, IStreamProcessorStateBatchRepository repository, ILogger<StreamProcessorStateManager> logger,
+    public StreamProcessorStateManager(IContext context, IStreamProcessorStateRepository repository, ILogger<StreamProcessorStateManager> logger,
         IApplicationLifecycleHooks lifecycleHooks) : base(context)
     {
         _repository = repository;
@@ -44,7 +44,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     public override async Task OnStarted()
     {
-        await foreach (var (id, state) in _repository.GetAllNonScoped(Context.CancellationToken))
+        await foreach (var (id, state) in _repository.GetNonScoped(Context.CancellationToken))
         {
             _processorStates.Add(id.ToProtobuf(), state.ToProtobuf());
         }
@@ -212,7 +212,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     void Persist(Dictionary<StreamProcessorKey, Bucket> changes, ScopeId scopeId)
     {
         var streamProcessorStates = changes.ToDictionary(_ => _.Key.FromProtobuf(), _ => _.Value.FromProtobuf());
-        var persistTask = _repository.PersistStreamProcessorStatesForScope(streamProcessorStates, Context.CancellationToken);
+        var persistTask = _repository.PersistForScope(streamProcessorStates, Context.CancellationToken);
         Context.ReenterAfter(persistTask, _ =>
         {
             if (persistTask.IsCompletedSuccessfully)
