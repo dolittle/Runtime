@@ -25,8 +25,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     readonly Dictionary<StreamProcessorId, Bucket> _processorStates = new();
     Dictionary<StreamProcessorId, Bucket> _changedProcessorStates = new();
 
-    bool _activeRequest = false;
-    readonly Dictionary<StreamSubscriptionId, Task<Bucket>> _waitingForSubscriptionStates = new();
+    bool _activeRequest;
 
 
     IShutdownHook _shutdownHook;
@@ -54,6 +53,8 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
             _processorStates.Add(streamProcessorKey.StreamProcessorId, state.ToProtobuf());
         }
+
+        _logger.LogInformation("Retrieved the state of {Count} stream processors", _processorStates.Count);
 
         _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
         Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
@@ -94,8 +95,22 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
         }
 
         var streamProcessorId = request.StreamKey.StreamProcessorId;
+
+        if (_processorStates.TryGetValue(streamProcessorId, out var existing))
+        {
+            if (existing.Equals(request.Bucket))
+            {
+                // no change, return;
+                return Task.CompletedTask;
+            }
+        }
+
         _processorStates[streamProcessorId] = request.Bucket;
         _changedProcessorStates[streamProcessorId] = request.Bucket;
+        // _logger.LogInformation("Set state for {StreamProcessorId}, offset {Offset}. {Count} changes waiting to be saved",
+        //     streamProcessorId.EventProcessorId.ToGuid(),
+        //     request.Bucket.CurrentOffset, _changedProcessorStates.Count);
+        PersistCurrentState();
         return Task.CompletedTask;
     }
 
@@ -122,7 +137,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     void Persist(Dictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> changes)
     {
-
+        _logger.LogInformation("Persisting {Count} changes", changes.Count);
         var persistTask = _repository.PersistForScope(ScopeId.Default, changes, Context.CancellationToken);
         Context.ReenterAfter(persistTask, _ =>
         {
@@ -143,5 +158,4 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
             }
         });
     }
-
 }

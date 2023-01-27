@@ -25,7 +25,7 @@ public record StreamProcessorId(ScopeId ScopeId, EventProcessorId EventProcessor
             streamProcessorId.EventProcessorId.ToGuid(),
             streamProcessorId.SourceStreamId.ToGuid());
 
-    StreamProcessorKey IStreamProcessorId.ToProtobuf() => new()
+    public  StreamProcessorKey ToProtobuf() => new()
     {
         StreamProcessorId = new Store.Actors.StreamProcessorId
         {

@@ -130,21 +130,39 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
         var subscriptionId = request.StreamKey.SubscriptionId;
         ScopeId scopeId = subscriptionId.ScopeId.ToGuid();
 
-        SetSubscriptionState(scopeId, subscriptionId, request.Bucket);
+        if (!TrySetSubscriptionState(scopeId, subscriptionId, request.Bucket))
+        {
+            // No change, so no update
+            return Task.CompletedTask;
+        }
+
         AddChange(scopeId, subscriptionId, request.Bucket);
 
         PersistCurrentSubscriptionState(scopeId);
         return Task.CompletedTask;
     }
 
-    void SetSubscriptionState(ScopeId scope, StreamSubscriptionId subscriptionId, Bucket state)
+    /// <summary>
+    /// Update current in-memory state
+    /// </summary>
+    /// <returns>true if there were real changes, false otherwise</returns>
+    bool TrySetSubscriptionState(ScopeId scope, StreamSubscriptionId subscriptionId, Bucket state)
     {
         if (!_subscriptionStates.TryGetValue(scope, out var scopedSubscriptionStates))
         {
             _subscriptionStates.Add(scope, scopedSubscriptionStates = new());
         }
 
+        if (scopedSubscriptionStates.TryGetValue(subscriptionId, out var existing))
+        {
+            if (existing.Equals(state))
+            {
+                return false; // No change
+            }
+        }
+
         scopedSubscriptionStates[subscriptionId] = state;
+        return true;
     }
 
     void AddChange(ScopeId scope, StreamSubscriptionId subscriptionId, Bucket state)
