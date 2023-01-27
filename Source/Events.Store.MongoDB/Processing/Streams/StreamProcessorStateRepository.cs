@@ -20,28 +20,28 @@ using Dolittle.Runtime.MongoDB;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 
 /// <summary>
-/// Represents an implementation of <see cref="IStreamProcessorStateRepository" />.
+/// Represents an implementation of <see cref="Store.Streams.IStreamProcessorStates" />.
 /// </summary>
 public class StreamProcessorStateRepository : IStreamProcessorStateBatchRepository
 {
     readonly FilterDefinitionBuilder<AbstractStreamProcessorState> _streamProcessorFilter;
     readonly FilterDefinitionBuilder<MongoSubscriptionState> _subscriptionFilter;
-    readonly IStreamProcessorStates _streamProcessorStates;
+    readonly IStreamProcessorStatesCollectionSelector _streamProcessorStatesCollectionSelector;
     readonly ISubscriptionStates _subscriptionStates;
     readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamProcessorStateRepository"/> class.
     /// </summary>
-    /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
+    /// <param name="streamProcessorStatesCollectionSelector">The <see cref="IStreamProcessorStatesCollectionSelector" />.</param>
     /// <param name="subscriptionStates">The <see cref="ISubscriptionStates" />.</param>
     /// <param name="logger">An <see cref="ILogger"/>.</param>
     public StreamProcessorStateRepository(
-        IStreamProcessorStates streamProcessorStates,
+        IStreamProcessorStatesCollectionSelector streamProcessorStatesCollectionSelector,
         ISubscriptionStates subscriptionStates,
         ILogger logger)
     {
-        _streamProcessorStates = streamProcessorStates;
+        _streamProcessorStatesCollectionSelector = streamProcessorStatesCollectionSelector;
         _subscriptionStates = subscriptionStates;
         _streamProcessorFilter = Builders<AbstractStreamProcessorState>.Filter;
         _subscriptionFilter = Builders<MongoSubscriptionState>.Filter;
@@ -77,7 +77,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
 
                 case StreamProcessorId streamProcessorId:
                 {
-                    var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
+                    var states = await _streamProcessorStatesCollectionSelector.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var persistedState = await states.Find(CreateFilter(streamProcessorId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
@@ -99,26 +99,28 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
     public async IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         _logger.GettingAllStreamProcessorState();
-        var stateCollection = await _streamProcessorStates.Get(ScopeId.Default, cancellationToken).ConfigureAwait(false);
+        var stateCollection = await _streamProcessorStatesCollectionSelector.Get(ScopeId.Default, cancellationToken).ConfigureAwait(false);
         var states = stateCollection
             .Find(FilterDefinition<AbstractStreamProcessorState>.Empty)
             .ToAsyncEnumerable(cancellationToken: cancellationToken)
-            .Select(document => new StreamProcessorStateWithId(new StreamProcessorId(ScopeId.Default, document.EventProcessor, document.SourceStream), document.ToRuntimeRepresentation()));
+            .Select(document => new StreamProcessorStateWithId(new StreamProcessorId(ScopeId.Default, document.EventProcessor, document.SourceStream),
+                document.ToRuntimeRepresentation()));
         await foreach (var state in states.WithCancellation(cancellationToken))
         {
             yield return state;
         }
     }
 
-    public async Task<IReadOnlyDictionary<IStreamProcessorId, Partial>> PersistStreamProcessorStatesForScope(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
+    public async Task<Try> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken)
     {
         var tasksWithIds = streamProcessorStates.Select(_ => (_.Key, Persist(_.Key, _.Value, cancellationToken)));
-        var persistResults = await Task.WhenAll(tasksWithIds.Select(_ => _.Item2)).ConfigureAwait(false);
-        return persistResults.ToDictionary(_ => _.Item1, _ => _.Item2).AsReadOnly();
+        await Task.WhenAll(tasksWithIds.Select(_ => _.Item2)).ConfigureAwait(false);
+        return Try.Succeeded();
     }
-    
-    
-    async Task<(IStreamProcessorId, Partial)> Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
+
+
+    async Task<(IStreamProcessorId, Partial)> Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState,
+        CancellationToken cancellationToken)
     {
         _logger.PersistingStreamProcessorState(id);
         try
@@ -153,7 +155,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
             else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState)
             {
                 var streamProcessorId = id as StreamProcessorId;
-                var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
+                var states = await _streamProcessorStatesCollectionSelector.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new Partitioned.PartitionedStreamProcessorState(
@@ -175,7 +177,7 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
             else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
             {
                 var streamProcessorId = id as StreamProcessorId;
-                var states = await _streamProcessorStates.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
+                var states = await _streamProcessorStatesCollectionSelector.Get(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new StreamProcessorState(
@@ -199,10 +201,11 @@ public class StreamProcessorStateRepository : IStreamProcessorStateBatchReposito
         {
             return (id, Partial.PartialSuccess(new EventStoreUnavailable("Mongo wait queue is full", ex)));
         }
+
         return (id, Partial.Succeeded());
     }
-    
-    
+
+
     FilterDefinition<AbstractStreamProcessorState> CreateFilter(StreamProcessorId id) =>
         _streamProcessorFilter.Eq(_ => _.EventProcessor, id.EventProcessorId.Value)
         & _streamProcessorFilter.Eq(_ => _.SourceStream, id.SourceStreamId.Value);

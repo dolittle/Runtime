@@ -13,7 +13,7 @@ public class all_dependencies
 {
     protected static SubscriptionId subscription_id;
     protected static CancellationToken cancellation_token;
-    protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
+    protected static Mock<IStreamProcessorStates> stream_processor_states;
     protected static GetNextEventToReceiveForSubscription get_next_event;
 
     Establish context = () =>
@@ -27,7 +27,7 @@ public class all_dependencies
             "064749fc-8d13-4b12-a3c4-584e34596b99"
         );
         cancellation_token = CancellationToken.None;
-        stream_processor_states = new Mock<IStreamProcessorStateRepository>();
+        stream_processor_states = new Mock<IStreamProcessorStates>();
         get_next_event = new GetNextEventToReceiveForSubscription(stream_processor_states.Object);
     };
 }

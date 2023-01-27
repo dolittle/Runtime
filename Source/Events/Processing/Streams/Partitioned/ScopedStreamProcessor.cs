@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 /// </summary>
 public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 {
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly IFailingPartitions _failingPartitions;
     readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
@@ -30,7 +30,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     /// <param name="sourceStreamDefinition">The source stream <see cref="StreamDefinition" />.</param>
     /// <param name="initialState">The <see cref="StreamProcessorState" />.</param>
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-    /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
+    /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
     /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
     /// <param name="failingPartitionsFactory">The factory to use to create the <see cref="IFailingPartitions" />.</param>
@@ -44,7 +44,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         IStreamDefinition sourceStreamDefinition,
         StreamProcessorState initialState,
         IEventProcessor processor,
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
         ExecutionContext executionContext,
         Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,

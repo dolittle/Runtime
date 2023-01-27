@@ -12,10 +12,10 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.Events.Store.Streams;
 
 /// <summary>
-/// Represents an implementation of <see cref="IStreamProcessorStateRepository"/>.
+/// Represents an implementation of <see cref="IStreamProcessorStates"/>.
 /// </summary>
 [PerTenant]
-public class StreamProcessorStateClient : IStreamProcessorStateRepository
+public class StreamProcessorStateClient : IStreamProcessorStates
 {
     readonly Actors.StreamProcessorStateClient _streamProcessorStateClient;
 

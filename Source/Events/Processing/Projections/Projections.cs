@@ -216,7 +216,7 @@ public class Projections : IProjections
 
             try
             {
-                var streamProcessorStates = services.GetRequiredService<IStreamProcessorStateRepository>();
+                var streamProcessorStates = services.GetRequiredService<IStreamProcessorStates>();
                 await streamProcessorStates.Persist(
                     new StreamProcessorId(definition.Scope, definition.Projection.Value, StreamId.EventLog),
                     StreamProcessorState.New,

@@ -12,9 +12,11 @@ using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing;
 
-public class in_memory_stream_processor_state_repository : IStreamProcessorStateBatchRepository
+public class in_memory_stream_processor_states : IStreamProcessorStates
 {
     readonly Dictionary<IStreamProcessorId, IStreamProcessorState> states = new();
+
+    public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken) => throw new NotImplementedException();
 
     public Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
     {

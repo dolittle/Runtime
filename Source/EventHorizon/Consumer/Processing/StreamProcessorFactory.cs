@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 [Singleton, PerTenant]
 public class StreamProcessorFactory : IStreamProcessorFactory
 {
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly ICommitExternalEvents _externalEventsCommitter;
     readonly IEventFetcherPolicies _eventsFetcherPolicy;
     readonly IMetricsCollector _metrics;
@@ -27,13 +27,13 @@ public class StreamProcessorFactory : IStreamProcessorFactory
     /// <summary>
     /// Initializes an instance of the <see cref="StreamProcessor" /> class.
     /// </summary>
-    /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
+    /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
     /// <param name="externalEventsCommitter">The <see cref="ICommitExternalEvents"/></param>
     /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}"/> <see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
     public StreamProcessorFactory(
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         ICommitExternalEvents externalEventsCommitter,
         IEventFetcherPolicies eventsFetcherPolicy,
         IMetricsCollector metrics,
