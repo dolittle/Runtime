@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 using Proto;
 
@@ -21,12 +21,12 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     readonly ILogger<StreamProcessorStateManager> _logger;
     readonly IApplicationLifecycleHooks _lifecycleHooks;
 
+    readonly Dictionary<ScopeId, Dictionary<StreamProcessorId, Bucket>> _processorStates = new();
+    readonly Dictionary<ScopeId, Dictionary<StreamProcessorId, Bucket>> _changedSubscriptionStates = new();
 
-    readonly Dictionary<StreamProcessorId, Bucket> _processorStates = new();
-    Dictionary<StreamProcessorId, Bucket> _changedProcessorStates = new();
+    readonly Dictionary<ScopeId, Task> _loadingScopes = new();
 
-    bool _activeRequest;
-
+    readonly HashSet<ScopeId> _activeRequests = new();
 
     IShutdownHook _shutdownHook;
     bool _shuttingDown;
@@ -42,6 +42,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     public override async Task OnStarted()
     {
+        var defaultStates = new Dictionary<StreamProcessorId, Bucket>();
         await foreach (var (id, state) in _repository.GetNonScoped(Context.CancellationToken))
         {
             var streamProcessorKey = id.ToProtobuf();
@@ -51,41 +52,130 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
                 continue;
             }
 
-            _processorStates.Add(streamProcessorKey.StreamProcessorId, state.ToProtobuf());
+            defaultStates.Add(streamProcessorKey.StreamProcessorId, state.ToProtobuf());
         }
+        _processorStates.Add(ScopeId.Default, defaultStates);
 
-        _logger.LogInformation("Retrieved the state of {Count} stream processors", _processorStates.Count);
+        _logger.LogInformation("Retrieved the state of {Count} stream processors", defaultStates.Count);
 
         _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
         Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
         {
             _shuttingDown = true;
-            if (!_activeRequest) // No current changes
+            if (_activeRequests.Count == 0) // No current changes
             {
                 _shutdownHook.MarkCompleted();
             }
         });
     }
 
-    public override Task<StreamProcessorStateResponse> GetByProcessorId(StreamProcessorId requestId)
+
+    public override Task GetByProcessorId(StreamProcessorId processorId, Action<StreamProcessorStateResponse> respond, Action<string> onError)
     {
         if (_shuttingDown)
         {
-            throw new RuntimeShuttingDown();
+            onError("Runtime is shutting down");
+            return Task.CompletedTask;
         }
 
-        var response = new StreamProcessorStateResponse
+        ScopeId scopeId = processorId.ScopeId.ToGuid();
+        if (TrySendResponse(scopeId, processorId, respond))
         {
-            StreamKey = new StreamProcessorKey { StreamProcessorId = requestId },
-        };
-
-        if (_processorStates.TryGetValue(requestId, out var existingBucket))
-        {
-            response.Bucket.Add(existingBucket);
+            return Task.CompletedTask;
         }
 
-        return Task.FromResult(response);
+        if (!_loadingScopes.TryGetValue(scopeId, out var scopeHasLoadedTask))
+        {
+            scopeHasLoadedTask = LoadScope(scopeId);
+        }
+
+
+        Context.ReenterAfter(scopeHasLoadedTask, _ =>
+        {
+            if (_.IsCompletedSuccessfully && TrySendResponse(scopeId, processorId, respond))
+            {
+                // All OK
+            }
+            else
+            {
+                onError("Failed to get subscription state: " + scopeHasLoadedTask.Exception?.Message);
+            }
+        });
+        return Task.CompletedTask;
     }
+
+    bool TrySendResponse(ScopeId scopeId, StreamProcessorId processorId, Action<StreamProcessorStateResponse> respond)
+    {
+        {
+            if (!_processorStates.TryGetValue(scopeId, out var scopeStates))
+            {
+                // Scope has not been loaded
+                return false;
+            }
+
+            // The scope is already loaded
+            SendResponse(scopeStates.TryGetValue(processorId, out var bucket) ? bucket : null);
+            return true;
+        }
+
+        void SendResponse(Bucket? bucket)
+        {
+            var streamProcessorStateResponse = new StreamProcessorStateResponse
+            {
+                StreamKey = new StreamProcessorKey
+                {
+                    StreamProcessorId = processorId
+                },
+            };
+            if(bucket is not null)
+            {
+                streamProcessorStateResponse.Bucket.Add(bucket);
+            }
+            respond(streamProcessorStateResponse);
+        }
+    }
+
+
+    Task LoadScope(ScopeId scopeId)
+    {
+        var taskCompletionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _loadingScopes.Add(scopeId, taskCompletionSource.Task);
+        return LoadScopeInternal(scopeId, taskCompletionSource);
+    }
+
+    Task LoadScopeInternal(ScopeId scopeId, TaskCompletionSource taskCompletionSource)
+    {
+        var scopeTask = _repository.GetForScope(scopeId, Context.CancellationToken).ToListAsync().AsTask();
+        Context.ReenterAfter(scopeTask, _ =>
+        {
+            if (scopeTask.IsCompletedSuccessfully)
+            {
+                var buckets = new Dictionary<StreamProcessorId, Bucket>();
+                foreach (var streamProcessorStateWithId in scopeTask.Result)
+                {
+                    var streamProcessorKey = streamProcessorStateWithId.Id.ToProtobuf();
+                    if (streamProcessorKey.IdCase == StreamProcessorKey.IdOneofCase.SubscriptionId)
+                    {
+                        buckets[streamProcessorKey.StreamProcessorId] = streamProcessorStateWithId.State.ToProtobuf();
+                    }
+                }
+
+                _processorStates[scopeId] = buckets;
+                taskCompletionSource.SetResult();
+                _loadingScopes.Remove(scopeId);
+            }
+            else
+            {
+                _logger.LogError(scopeTask.Exception, "Failed to load scope {ScopeId}", scopeId);
+                if (!Context.CancellationToken.IsCancellationRequested && !_shuttingDown)
+                {
+                    LoadScopeInternal(scopeId, taskCompletionSource);
+                }
+            }
+        });
+        return taskCompletionSource.Task;
+    }
+
 
     public override Task SetByProcessorId(SetStreamProcessorStateRequest request)
     {
@@ -94,68 +184,114 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
             throw new ArgumentException("Can only set processor state by processor id");
         }
 
-        var streamProcessorId = request.StreamKey.StreamProcessorId;
+        var key = request.StreamKey.StreamProcessorId;
+        ScopeId scopeId = key.ScopeId.ToGuid();
+        TrySetProcessorState(scopeId, key, request.Bucket);
 
-        if (_processorStates.TryGetValue(streamProcessorId, out var existing))
+        if (!TrySetProcessorState(scopeId, key, request.Bucket))
         {
-            if (existing.Equals(request.Bucket))
-            {
-                // no change, return;
-                return Task.CompletedTask;
-            }
+            // No change, so no update
+            return Task.CompletedTask;
         }
 
-        _processorStates[streamProcessorId] = request.Bucket;
-        _changedProcessorStates[streamProcessorId] = request.Bucket;
-        // _logger.LogInformation("Set state for {StreamProcessorId}, offset {Offset}. {Count} changes waiting to be saved",
-        //     streamProcessorId.EventProcessorId.ToGuid(),
-        //     request.Bucket.CurrentOffset, _changedProcessorStates.Count);
-        PersistCurrentState();
+        AddChange(scopeId, key, request.Bucket);
+        PersistCurrentProcessorState(scopeId);
         return Task.CompletedTask;
     }
 
-    void PersistCurrentState()
+    /// <summary>
+    /// Update current in-memory state
+    /// </summary>
+    /// <returns>true if there were real changes, false otherwise</returns>
+    bool TrySetProcessorState(ScopeId scope, StreamProcessorId processorId, Bucket state)
     {
-        if (_activeRequest)
+        if (!_processorStates.TryGetValue(scope, out var scopedSubscriptionStates))
+        {
+            _processorStates.Add(scope, scopedSubscriptionStates = new());
+        }
+
+        if (scopedSubscriptionStates.TryGetValue(processorId, out var existing))
+        {
+            if (existing.Equals(state))
+            {
+                return false; // No change
+            }
+        }
+
+        scopedSubscriptionStates[processorId] = state;
+        return true;
+    }
+
+    void AddChange(ScopeId scope, StreamProcessorId id, Bucket state)
+    {
+        if (!_changedSubscriptionStates.TryGetValue(scope, out var changedScopedSubscriptionStates))
+        {
+            _changedSubscriptionStates.Add(scope, changedScopedSubscriptionStates = new());
+        }
+
+        changedScopedSubscriptionStates[id] = state;
+    }
+
+    void PersistCurrentProcessorState(ScopeId scopeId)
+    {
+        if (_activeRequests.Contains(scopeId))
         {
             return;
         }
 
-        if (_changedProcessorStates.Count == 0) return;
-        var currentChanges = _changedProcessorStates;
-        _changedProcessorStates = new Dictionary<StreamProcessorId, Bucket>();
+        if (_changedSubscriptionStates.Count == 0) return;
+        if (!_changedSubscriptionStates.Remove(scopeId, out var currentChanges))
+        {
+            return; // No changes for this scope
+        }
 
+        _activeRequests.Add(scopeId);
+        var changes = FromProtobuf(currentChanges);
 
-        _activeRequest = true;
-        Persist(FromProtobuf(currentChanges));
+        Persist(changes, scopeId);
     }
 
-    static Dictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> FromProtobuf(Dictionary<StreamProcessorId, Bucket> currentChanges) =>
-        currentChanges.ToDictionary(
-            _ => Processing.Streams.StreamProcessorId.FromProtobuf(_.Key),
-            _ => _.Value.FromProtobuf());
-
-    void Persist(Dictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> changes)
+    void Persist(IReadOnlyDictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> changes, ScopeId scopeId)
     {
-        _logger.LogInformation("Persisting {Count} changes", changes.Count);
-        var persistTask = _repository.PersistForScope(ScopeId.Default, changes, Context.CancellationToken);
+        _logger.LogInformation("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
+        var persistTask = _repository.PersistForScope(scopeId, changes, Context.CancellationToken);
         Context.ReenterAfter(persistTask, _ =>
         {
             if (persistTask.IsCompletedSuccessfully)
             {
-                _activeRequest = false;
-                PersistCurrentState();
-                if (_shuttingDown && !_activeRequest)
+                _activeRequests.Remove(scopeId);
+                PersistCurrentProcessorState(scopeId);
+                if (_shuttingDown && _activeRequests.Count == 0)
                 {
                     _shutdownHook.MarkCompleted();
                 }
             }
             else
             {
-                _logger.FailedToPersistStreamProcessorState(persistTask.Exception!);
+                _logger.FailedToPersistStreamSubscriptionState(persistTask.Exception!, scopeId);
                 // Try again
-                Persist(changes);
+                Persist(changes, scopeId);
             }
         });
     }
+
+    IReadOnlyDictionary<Dolittle.Runtime.Events.Processing.Streams.StreamProcessorId, IStreamProcessorState> FromProtobuf(
+        IDictionary<StreamProcessorId, Bucket> changes)
+    {
+        var dict = new Dictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState>();
+        foreach (var change in changes)
+        {
+            var streamProcessorId = Processing.Streams.StreamProcessorId.FromProtobuf(change.Key);
+            var state = change.Value.FromProtobuf();
+            dict.Add(streamProcessorId, state);
+        }
+
+        return dict;
+    }
+
+    #region Unused
+
+    public override Task<StreamProcessorStateResponse> GetByProcessorId(StreamProcessorId processorId) => throw new NotImplementedException("unused");
+
+    #endregion
 }

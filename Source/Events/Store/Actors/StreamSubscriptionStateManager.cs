@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
@@ -26,7 +27,7 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
     readonly Dictionary<ScopeId, Dictionary<StreamSubscriptionId, Bucket>> _changedSubscriptionStates = new();
 
     readonly HashSet<ScopeId> _activeRequests = new();
-    readonly Dictionary<StreamSubscriptionId, Task<Bucket>> _waitingForSubscriptionStates = new();
+    readonly Dictionary<ScopeId, Task> _loadingScopes = new();
 
 
     IShutdownHook _shutdownHook;
@@ -43,6 +44,7 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 
     public override Task OnStarted()
     {
+        LoadScope(ScopeId.Default);
         _shutdownHook = _lifecycleHooks.RegisterShutdownHook();
         Context.ReenterAfter(_shutdownHook.ShuttingDown, () =>
         {
@@ -64,57 +66,99 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
             return Task.CompletedTask;
         }
 
-        if (!_waitingForSubscriptionStates.TryGetValue(subscriptionId, out var resultTask))
+        ScopeId scopeId = subscriptionId.ScopeId.ToGuid();
+        if (TrySendResponse(scopeId, subscriptionId, respond))
         {
-            resultTask = LoadSubscription(subscriptionId);
+            return Task.CompletedTask;
         }
 
-        Context.ReenterAfter(resultTask, _ =>
+        if (!_loadingScopes.TryGetValue(scopeId, out var scopeHasLoadedTask))
         {
-            if (_.IsCompletedSuccessfully)
+            scopeHasLoadedTask = LoadScope(scopeId);
+        }
+
+
+        Context.ReenterAfter(scopeHasLoadedTask, _ =>
+        {
+            if (_.IsCompletedSuccessfully && TrySendResponse(scopeId, subscriptionId, respond))
             {
-                respond(new StreamProcessorStateResponse
-                {
-                    StreamKey = new StreamProcessorKey
-                    {
-                        SubscriptionId = subscriptionId
-                    },
-                    Bucket = { resultTask!.Result }
-                });
+                // All OK
             }
             else
             {
-                onError("Failed to get subscription state: " + resultTask.Exception?.Message);
+                onError("Failed to get subscription state: " + scopeHasLoadedTask.Exception?.Message);
             }
         });
         return Task.CompletedTask;
     }
 
-
-    Task<Bucket> LoadSubscription(StreamSubscriptionId subscriptionId)
+    bool TrySendResponse(ScopeId scopeId, StreamSubscriptionId subscriptionId, Action<StreamProcessorStateResponse> respond)
     {
-        var taskCompletionSource = new TaskCompletionSource<Bucket>();
-        var task = _repository.TryGet(SubscriptionId.FromProtobuf(subscriptionId), Context.CancellationToken);
-        _waitingForSubscriptionStates.Add(subscriptionId, taskCompletionSource.Task);
-        Context.ReenterAfter(task, _ =>
         {
-            try
+            if (!_subscriptionStates.TryGetValue(scopeId, out var scopeStates))
             {
-                if (task is { IsCompletedSuccessfully: true, Result.Success: true })
+                // Scope has not been loaded
+                return false;
+            }
+
+            // The scope is already loaded
+            SendResponse(scopeStates.TryGetValue(subscriptionId, out var bucket) ? bucket : null);
+            return true;
+        }
+
+        void SendResponse(Bucket? bucket)
+        {
+            var streamProcessorStateResponse = new StreamProcessorStateResponse
+            {
+                StreamKey = new StreamProcessorKey
                 {
-                    taskCompletionSource.SetResult(task.Result.Result.ToProtobuf());
-                }
-                else
+                    SubscriptionId = subscriptionId
+                },
+            };
+            if(bucket is not null)
+            {
+                streamProcessorStateResponse.Bucket.Add(bucket);
+            }
+            respond(streamProcessorStateResponse);
+        }
+    }
+
+
+    Task LoadScope(ScopeId scopeId)
+    {
+        var taskCompletionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _loadingScopes.Add(scopeId, taskCompletionSource.Task);
+        return LoadScopeInternal(scopeId, taskCompletionSource);
+    }
+
+    Task LoadScopeInternal(ScopeId scopeId, TaskCompletionSource taskCompletionSource)
+    {
+        var scopeTask = _repository.GetForScope(scopeId, Context.CancellationToken).ToListAsync().AsTask();
+        Context.ReenterAfter(scopeTask, _ =>
+        {
+            if (scopeTask.IsCompletedSuccessfully)
+            {
+                var buckets = new Dictionary<StreamSubscriptionId, Bucket>();
+                foreach (var streamProcessorStateWithId in scopeTask.Result)
                 {
-                    if (task.Exception is not null)
+                    var streamProcessorKey = streamProcessorStateWithId.Id.ToProtobuf();
+                    if (streamProcessorKey.IdCase == StreamProcessorKey.IdOneofCase.SubscriptionId)
                     {
-                        taskCompletionSource.SetException(task.Exception);
+                        buckets[streamProcessorKey.SubscriptionId] = streamProcessorStateWithId.State.ToProtobuf();
                     }
                 }
+
+                _subscriptionStates[scopeId] = buckets;
+                taskCompletionSource.SetResult();
+                _loadingScopes.Remove(scopeId);
             }
-            finally
+            else
             {
-                _waitingForSubscriptionStates.Remove(subscriptionId);
+                _logger.LogError(scopeTask.Exception, "Failed to load scope {ScopeId}", scopeId);
+                if (!Context.CancellationToken.IsCancellationRequested && !_shuttingDown)
+                {
+                    LoadScopeInternal(scopeId, taskCompletionSource);
+                }
             }
         });
         return taskCompletionSource.Task;
@@ -196,6 +240,7 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 
     void Persist(IReadOnlyDictionary<SubscriptionId, StreamProcessorState> changes, ScopeId scopeId)
     {
+        _logger.LogInformation("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
         var persistTask = _repository.PersistForScope(scopeId, changes, Context.CancellationToken);
         Context.ReenterAfter(persistTask, _ =>
         {
