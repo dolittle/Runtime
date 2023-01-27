@@ -147,8 +147,11 @@ message SetPartitionedStreamProcessorStateRequest{
 
 
 service StreamProcessorState {
-    rpc GetBySubscriptionId (StreamSubscriptionId) returns (StreamProcessorStateResponse);
     rpc GetByProcessorId (StreamProcessorId) returns (StreamProcessorStateResponse);
     rpc SetByProcessorId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
+}
+
+service StreamSubscriptionState {
+    rpc GetBySubscriptionId (StreamSubscriptionId) returns (StreamProcessorStateResponse);
     rpc SetBySubscriptionId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
 }

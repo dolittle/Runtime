@@ -30,6 +30,9 @@ static partial class Log
     internal static partial void AggregateRootConcurrencyConflictWithConsistentCache(this ILogger logger, ArtifactId aggregateRootId,
         EventSourceId eventSourceId, AggregateRootVersion expectedAggregateRootVersion, AggregateRootVersion cachedVersion);
 
-    [LoggerMessage(0, LogLevel.Error, "Failed to persist stream processor states for scope {ScopeId}")]
-    internal static partial void FailedToPersistStreamProcessorState(this ILogger logger, Exception e, ScopeId scopeId);
+    [LoggerMessage(0, LogLevel.Error, "Failed to persist stream subcription states for scope {ScopeId}")]
+    internal static partial void FailedToPersistStreamSubscriptionState(this ILogger logger, Exception e, ScopeId scopeId);
+    
+    [LoggerMessage(0, LogLevel.Error, "Failed to persist stream processor states")]
+    internal static partial void FailedToPersistStreamProcessorState(this ILogger logger, Exception e);
 }
