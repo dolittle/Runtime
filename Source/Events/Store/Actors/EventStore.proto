@@ -109,7 +109,7 @@ message StreamProcessorStateResponse{
     repeated Bucket bucket = 2;
 }
 
-message SetStreamProcessorPartitionStateRequest{
+message SetStreamProcessorStateRequest{
     StreamProcessorKey stream_key = 1;
     Bucket bucket = 2;
 }
@@ -147,6 +147,8 @@ message SetPartitionedStreamProcessorStateRequest{
 
 
 service StreamProcessorState {
-    rpc Get (StreamProcessorKey) returns (StreamProcessorStateResponse);
-    rpc SetStreamProcessorPartitionState (SetStreamProcessorPartitionStateRequest) returns (google.protobuf.Empty);
+    rpc GetBySubscriptionId (StreamSubscriptionId) returns (StreamProcessorStateResponse);
+    rpc GetByProcessorId (StreamProcessorId) returns (StreamProcessorStateResponse);
+    rpc SetByProcessorId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
+    rpc SetBySubscriptionId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
 }
