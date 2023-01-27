@@ -56,7 +56,7 @@ public class all_dependencies
             Mock.Of<ILogger>());
         cancellation_token = CancellationToken.None;
 
-        state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+        state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded));
         event_waiter.Setup(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, It.IsAny<CancellationToken>())).Returns<ScopeId, StreamId, CancellationToken>((_scope, _stream, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken));
     };
     

@@ -29,7 +29,7 @@ public class and_everything_works : given.all_dependencies
                     _ => Task.Delay(Timeout.Infinite)
                 };
             });
-        state_updater.Setup(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+        state_updater.Setup(_ => _.TryUpdateAll(execution_context, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded));
     };
 
     Because of = () =>

@@ -91,7 +91,7 @@ public class SubscriptionStateRepository : ISubscriptionStateRepository
     {
         // var tasksWithIds = streamProcessorStates.Select(_ => (_.Key, Persist(_.Key, _.Value, cancellationToken)));
         // await Task.WhenAll(tasksWithIds.Select(_ => _.Item2)).ConfigureAwait(false);
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
 

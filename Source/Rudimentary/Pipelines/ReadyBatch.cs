@@ -17,7 +17,7 @@ public record ReadyBatch<TBatch>(TBatch Batch, TaskCompletionSource<Try> Complet
     /// <summary>
     /// Completes the batch.
     /// </summary>
-    public void Complete() => Completion.TrySetResult(Try.Succeeded());
+    public void Complete() => Completion.TrySetResult(Try.Succeeded);
 
     /// <summary>
     /// Fails the batch.

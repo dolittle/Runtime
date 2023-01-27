@@ -1,28 +1,23 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
-using System;
-using System.Linq;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Processing;
 
 public class in_memory_stream_processor_state_repository : IStreamProcessorStateRepository
 {
-    readonly Dictionary<IStreamProcessorId, IStreamProcessorState> states = new();
+    readonly Dictionary<StreamProcessorId, IStreamProcessorState> states = new();
 
-    public Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
-    {
-        states[streamProcessorId] = streamProcessorState;
-        return Task.CompletedTask;
-    }
 
-    public Task<Try<IStreamProcessorState>> TryGet(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+    public Task<Try<IStreamProcessorState>> TryGet(StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
     {
         if (states.TryGetValue(streamProcessorId, out var state))
         {
@@ -32,24 +27,22 @@ public class in_memory_stream_processor_state_repository : IStreamProcessorState
         return Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception()));
     }
 
-    public IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped(CancellationToken cancellationToken)
-    {
-        return states
-            .Where(kv => kv.Key.ScopeId.Equals(ScopeId.Default))
-            .Select(kv => new StreamProcessorStateWithId(kv.Key, kv.Value))
-            .ToAsyncEnumerable();
-    }
+    public IAsyncEnumerable<StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState>> GetForScope(ScopeId scopeId,
+        CancellationToken cancellationToken) => throw new System.NotImplementedException();
 
-    public async Task<Try> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates,
+    public async Task<Try> PersistForScope(ScopeId scope, IReadOnlyDictionary<StreamProcessorId, IStreamProcessorState> streamProcessorStates,
         CancellationToken cancellationToken)
     {
         await Task.Yield();
-
-        foreach (var (key, value) in streamProcessorStates)
+        
+        foreach (var (streamProcessorId, streamProcessorState) in streamProcessorStates)
         {
-            states[key] = value;
+            states[streamProcessorId] = streamProcessorState;
         }
 
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
+
+    public IAsyncEnumerable<StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState>> GetNonScoped(CancellationToken cancellationToken) =>
+        GetForScope(ScopeId.Default, cancellationToken);
 }

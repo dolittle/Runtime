@@ -127,7 +127,7 @@ public class EmbeddingStore : IEmbeddingStore
         {
             _logger.ErrorRemovingEmbedding(embedding, key, version, tryMarkAsRemoved.Exception);
         }
-        return tryMarkAsRemoved.Success ? Try.Succeeded() : tryMarkAsRemoved.Exception;
+        return tryMarkAsRemoved.Success ? Try.Succeeded : tryMarkAsRemoved.Exception;
 
     }
 
@@ -147,7 +147,7 @@ public class EmbeddingStore : IEmbeddingStore
         {
             _logger.ErrorReplacingEmbedding(embedding, key, version, state, tryReplace.Exception);
         }
-        return tryReplace.Success ? Try.Succeeded() : tryReplace.Exception;
+        return tryReplace.Success ? Try.Succeeded : tryReplace.Exception;
     }
 
     Task<Try<EmbeddingCurrentState>> TryGetInitialState(

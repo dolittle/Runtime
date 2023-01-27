@@ -50,7 +50,7 @@ public class TenantActionPerformer : IPerformActionsForAllTenants
             }
         }
 
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
     /// <inheritdoc />
@@ -74,6 +74,6 @@ public class TenantActionPerformer : IPerformActionsForAllTenants
             }
         }
         
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 }

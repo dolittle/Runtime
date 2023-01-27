@@ -35,7 +35,7 @@ public class and_everything_works : given.all_dependencies_and_a_key
             .ReturnsAsync(SuccessfulCommitResponse(committed_events));
         embedding_store
             .Setup(_ => _.TryRemove(embedding, key, aggregate_root_version, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
     };
 
     static Try result;

@@ -68,7 +68,7 @@ public class all_dependencies
         action_to_perform_before_reprocessing = new Mock<Func<TenantId, CancellationToken, Task<Try>>>();
         action_to_perform_before_reprocessing
             .Setup(_ => _(It.IsAny<TenantId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Try.Succeeded());
+            .ReturnsAsync(Try.Succeeded);
     };
         
     Cleanup clean = () => cancellation_token_source.Dispose();

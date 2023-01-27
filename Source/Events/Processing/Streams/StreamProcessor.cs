@@ -182,14 +182,14 @@ public class StreamProcessor : IDisposable
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
     public Task<Try<StreamPosition>> SetToPosition(TenantId tenant, StreamPosition position)
-        => PerformActionAndSetToPosition(tenant, position, (_, _) => Task.FromResult(Try.Succeeded()));
+        => PerformActionAndSetToPosition(tenant, position, (_, _) => Task.FromResult(Try.Succeeded));
 
     /// <summary>
     /// Sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
     /// </summary>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
     public Task<IDictionary<TenantId, Try<StreamPosition>>> SetToInitialPositionForAllTenants()
-        => PerformActionAndSetToInitialPositionForAllTenants((_, _) => Task.FromResult(Try.Succeeded()));
+        => PerformActionAndSetToInitialPositionForAllTenants((_, _) => Task.FromResult(Try.Succeeded));
 
     /// <summary>
     /// Performs an action, then sets the position of the stream processor for a tenant.

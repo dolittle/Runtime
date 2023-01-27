@@ -183,6 +183,6 @@ public class EventHandlersService : EventHandlersBase
         }
 
         eventHandlerId = new EventHandlerId(scope.ToGuid(), eventHandler.ToGuid());
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 }

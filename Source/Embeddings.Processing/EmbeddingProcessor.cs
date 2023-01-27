@@ -133,7 +133,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
         {
             await CancelRemainingJobs().ConfigureAwait(false);
         }
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
     async Task<Try> DoWork(
@@ -163,7 +163,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
             }
             if (uncommittedEvents.Result.Count <= 0)
             {
-                return Try.Succeeded();
+                return Try.Succeeded;
             }
             _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
             var response = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result.ToCommitRequest(executionContext), cancellationToken).ConfigureAwait(false);
@@ -174,7 +174,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
 
             var committedEvents = response.Events.ToCommittedEvents();
             await replaceOrRemoveEmbedding(committedEvents.AggregateRootVersion).ConfigureAwait(false);
-            return Try.Succeeded();
+            return Try.Succeeded;
         }
         catch (Exception ex)
         {

@@ -56,7 +56,7 @@ public class two_keys : given.all_dependencies
             .Returns(Task.FromResult<Partial<EmbeddingCurrentState>>(projection_result_a));
         embedding_store
             .Setup(_ => _.TryRemove(embedding, projection_key_a, projection_result_a.Version, cancellation_token))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
 
         embedding_store
             .Setup(_ => _.TryGet(embedding, projection_key_b, cancellation_token))
@@ -69,7 +69,7 @@ public class two_keys : given.all_dependencies
             .Returns(Task.FromResult<Partial<EmbeddingCurrentState>>(projection_result_b));
         embedding_store
             .Setup(_ => _.TryReplace(embedding, projection_key_b, projection_result_b.Version, projection_result_b.State, cancellation_token))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
     };
 
     static Try result;

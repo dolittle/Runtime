@@ -279,7 +279,7 @@ public class Committer : IActor
                 _metrics.IncrementTotalAggregateRootVersionCacheInconsistenciesResolved();
                 _logger.AggregateRootVersionCacheInconsistencyResolved(aggregate.AggregateRoot, aggregate.EventSourceId, expectedAggregateRootVersion);
                 _aggregateRootVersionCache[aggregate] = expectedAggregateRootVersion;
-                return Try.Succeeded();
+                return Try.Succeeded;
             }
             if (newCurrentAggregateRootVersion != cachedAggregateRootVersion)
             {

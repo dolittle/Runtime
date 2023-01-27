@@ -167,6 +167,6 @@ public class ProjectionsService : ProjectionsBase
         scopeId = scope.ToGuid();
         projectionId = projection.ToGuid();
 
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 }
