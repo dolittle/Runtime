@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using System;
-using System.Linq;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing;
 
@@ -16,42 +14,17 @@ public class in_memory_stream_processor_states : IStreamProcessorStates
 {
     readonly Dictionary<IStreamProcessorId, IStreamProcessorState> states = new();
 
-    public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken) => throw new NotImplementedException();
-
-    public Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
-    {
-        states[streamProcessorId] = streamProcessorState;
-        return Task.CompletedTask;
-    }
-
-    public Task<Try<IStreamProcessorState>> TryGet(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
-    {
-        if (states.TryGetValue(streamProcessorId, out var state))
-        {
-            return Task.FromResult(Try<IStreamProcessorState>.Succeeded(state));
-        }
-
-        return Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception()));
-    }
-
-    public IAsyncEnumerable<StreamProcessorStateWithId> GetAllNonScoped(CancellationToken cancellationToken)
-    {
-        return states
-            .Where(kv => kv.Key.ScopeId.Equals(ScopeId.Default))
-            .Select(kv => new StreamProcessorStateWithId(kv.Key, kv.Value))
-            .ToAsyncEnumerable();
-    }
-
-    public async Task<Try> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates,
-        CancellationToken cancellationToken)
+    public async Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
     {
         await Task.Yield();
+        return states.TryGetValue(streamProcessorId, out var state)
+            ? Try<IStreamProcessorState>.Succeeded(state)
+            : Try<IStreamProcessorState>.Failed(new Exception());
+    }
 
-        foreach (var (key, value) in streamProcessorStates)
-        {
-            states[key] = value;
-        }
-
-        return Try.Succeeded();
+    public async Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+    {
+        await Task.Yield();
+        states[streamProcessorId] = streamProcessorState;
     }
 }
