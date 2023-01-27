@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 /// <summary>
 /// Defines a system that knows about the Subscription State repositories.
 /// </summary>
-public interface ISubscriptionStates : IEventStoreConnection
+public interface ISubscriptionStateCollections : IEventStoreConnection
 {
     /// <summary>
     /// Gets a Subscription collection.

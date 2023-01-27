@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 /// <summary>
 /// Defines a system that knows about the Stream Processor State repositories.
 /// </summary>
-public interface IStreamProcessorStatesCollectionSelector : IEventStoreConnection
+public interface IStreamProcessorStateCollections : IEventStoreConnection
 {
     /// <summary>
     /// Gets a Stream Processor State collection.

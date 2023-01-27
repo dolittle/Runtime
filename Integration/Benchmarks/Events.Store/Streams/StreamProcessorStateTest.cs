@@ -24,7 +24,7 @@ namespace Integration.Benchmarks.Events.Store.Streams;
 /// </summary>
 public class StreamProcessorStateTest : JobBase
 {
-    Dictionary<TenantId, (IStreamProcessorStates, IStreamProcessorStatesCollectionSelector)> _statesCollections;
+    Dictionary<TenantId, (IStreamProcessorStates, IStreamProcessorStateCollections)> _statesCollections;
 
     (StreamProcessorId, StreamProcessorState)[] _states;
 
@@ -32,7 +32,7 @@ public class StreamProcessorStateTest : JobBase
     protected override void Setup(IServiceProvider services)
     {
         _statesCollections = ConfiguredTenants.ToDictionary(tenant => tenant, tenant =>
-            (services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant), services.GetRequiredService<Func<TenantId, IStreamProcessorStatesCollectionSelector>>()(tenant)));
+            (services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant), services.GetRequiredService<Func<TenantId, IStreamProcessorStateCollections>>()(tenant)));
     }
 
     [IterationSetup]

@@ -12,7 +12,7 @@ using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing;
 
-public class in_memory_stream_processor_state_repository : IStreamProcessorStateBatchRepository
+public class in_memory_stream_processor_state_repository : IStreamProcessorStateRepository
 {
     readonly Dictionary<IStreamProcessorId, IStreamProcessorState> states = new();
 
