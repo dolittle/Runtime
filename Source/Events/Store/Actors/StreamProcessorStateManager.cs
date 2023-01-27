@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Microsoft.Extensions.Logging;
@@ -18,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 [TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient))]
 public class StreamProcessorStateManager : StreamProcessorStateBase
 {
-    readonly IStreamProcessorStateBatchRepository _repository;
+    readonly IStreamProcessorStateRepository _repository;
     readonly ILogger<StreamProcessorStateManager> _logger;
     readonly IApplicationLifecycleHooks _lifecycleHooks;
 
@@ -34,7 +36,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     bool _shuttingDown;
 
 
-    public StreamProcessorStateManager(IContext context, IStreamProcessorStateBatchRepository repository, ILogger<StreamProcessorStateManager> logger,
+    public StreamProcessorStateManager(IContext context, IStreamProcessorStateRepository repository, ILogger<StreamProcessorStateManager> logger,
         IApplicationLifecycleHooks lifecycleHooks) : base(context)
     {
         _repository = repository;
@@ -44,7 +46,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     public override async Task OnStarted()
     {
-        await foreach (var (id, state) in _repository.GetAllNonScoped(Context.CancellationToken))
+        await foreach (var (id, state) in _repository.GetNonScoped(Context.CancellationToken))
         {
             var streamProcessorKey = id.ToProtobuf();
             if (streamProcessorKey.IdCase != StreamProcessorKey.IdOneofCase.StreamProcessorId)
@@ -113,36 +115,36 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
 
         _activeRequest = true;
-        // Persist(currentChanges);
+        Persist(FromProtobuf(currentChanges));
     }
 
-    // void Persist(Dictionary<StreamProcessorId, Bucket> changes)
-    // {
-    //     var streamProcessorStates = changes.ToDictionary(_ => _.Key.FromProtobuf(), _ => _.Value.FromProtobuf());
-    //     var persistTask = _repository.Persist(streamProcessorStates, Context.CancellationToken);
-    //     Context.ReenterAfter(persistTask, _ =>
-    //     {
-    //         if (persistTask.IsCompletedSuccessfully)
-    //         {
-    //             _activeRequest = false;
-    //             PersistCurrentState();
-    //             if (_shuttingDown && !_activeRequest)
-    //             {
-    //                 _shutdownHook.MarkCompleted();
-    //             }
-    //         }
-    //         else
-    //         {
-    //             _logger.FailedToPersistStreamProcessorState(persistTask.Exception!);
-    //             // Try again
-    //             Persist(changes);
-    //         }
-    //     });
-    // }
+    static Dictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> FromProtobuf(Dictionary<StreamProcessorId, Bucket> currentChanges) =>
+        currentChanges.ToDictionary(
+            _ => Processing.Streams.StreamProcessorId.FromProtobuf(_.Key),
+            _ => _.Value.FromProtobuf());
 
-    #region Unused, handled with reentrant overloads
+    void Persist(Dictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> changes)
+    {
 
-    public override Task<StreamProcessorStateResponse> GetBySubscriptionId(StreamSubscriptionId request) => throw new NotImplementedException("unused");
+        var persistTask = _repository.PersistForScope(ScopeId.Default, changes, Context.CancellationToken);
+        Context.ReenterAfter(persistTask, _ =>
+        {
+            if (persistTask.IsCompletedSuccessfully)
+            {
+                _activeRequest = false;
+                PersistCurrentState();
+                if (_shuttingDown && !_activeRequest)
+                {
+                    _shutdownHook.MarkCompleted();
+                }
+            }
+            else
+            {
+                _logger.FailedToPersistStreamProcessorState(persistTask.Exception!);
+                // Try again
+                Persist(changes);
+            }
+        });
+    }
 
-    #endregion
 }

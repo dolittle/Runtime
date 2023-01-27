@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 using Proto;
@@ -17,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 [TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient))]
 public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 {
-    readonly IStreamProcessorStateBatchRepository _repository;
+    readonly ISubscriptionStateRepository _repository;
     readonly ILogger<StreamSubscriptionStateManager> _logger;
     readonly IApplicationLifecycleHooks _lifecycleHooks;
 
@@ -33,7 +35,7 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
     bool _shuttingDown;
 
 
-    public StreamSubscriptionStateManager(IContext context, IStreamProcessorStateBatchRepository repository, ILogger<StreamSubscriptionStateManager> logger,
+    public StreamSubscriptionStateManager(IContext context, ISubscriptionStateRepository repository, ILogger<StreamSubscriptionStateManager> logger,
         IApplicationLifecycleHooks lifecycleHooks) : base(context)
     {
         _repository = repository;
@@ -171,32 +173,52 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
         }
 
         _activeRequests.Add(scopeId);
-        // Persist(currentChanges, scopeId);
+        var changes = FromProtobuf(currentChanges);
+
+        Persist(changes, scopeId);
     }
 
-    // void Persist(Dictionary<SubscriptionId, Bucket> changes, ScopeId scopeId)
-    // {
-    //     var streamProcessorStates = changes.ToDictionary(_ => _.Key.FromProtobuf(), _ => _.Value.FromProtobuf());
-    //     var persistTask = _repository.Persist(streamProcessorStates, Context.CancellationToken);
-    //     Context.ReenterAfter(persistTask, _ =>
-    //     {
-    //         if (persistTask.IsCompletedSuccessfully)
-    //         {
-    //             _activeRequests.Remove(scopeId);
-    //             PersistCurrentSubscriptionState(scopeId);
-    //             if (_shuttingDown && _activeRequests.Count == 0)
-    //             {
-    //                 _shutdownHook.MarkCompleted();
-    //             }
-    //         }
-    //         else
-    //         {
-    //             _logger.FailedToPersistStreamProcessorState(persistTask.Exception!, scopeId);
-    //             // Try again
-    //             Persist(changes, scopeId);
-    //         }
-    //     });
-    // }
+    void Persist(IReadOnlyDictionary<SubscriptionId, StreamProcessorState> changes, ScopeId scopeId)
+    {
+        var persistTask = _repository.PersistForScope(scopeId, changes, Context.CancellationToken);
+        Context.ReenterAfter(persistTask, _ =>
+        {
+            if (persistTask.IsCompletedSuccessfully)
+            {
+                _activeRequests.Remove(scopeId);
+                PersistCurrentSubscriptionState(scopeId);
+                if (_shuttingDown && _activeRequests.Count == 0)
+                {
+                    _shutdownHook.MarkCompleted();
+                }
+            }
+            else
+            {
+                _logger.FailedToPersistStreamSubscriptionState(persistTask.Exception!, scopeId);
+                // Try again
+                Persist(changes, scopeId);
+            }
+        });
+    }
+
+    IReadOnlyDictionary<SubscriptionId, StreamProcessorState> FromProtobuf(IDictionary<StreamSubscriptionId, Bucket> changes)
+    {
+        var dict = new Dictionary<SubscriptionId, StreamProcessorState>();
+        foreach (var change in changes)
+        {
+            var state = change.Value.FromProtobuf();
+            if (state is StreamProcessorState streamProcessorState)
+            {
+                dict.Add(SubscriptionId.FromProtobuf(change.Key), streamProcessorState);
+            }
+            else
+            {
+                _logger.LogWarning("Unecpected state type: {stateType}", state.GetType().FullName);
+            }
+        }
+
+        return dict;
+    }
 
     #region Unused, handled with reentrant overloads
 

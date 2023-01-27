@@ -19,8 +19,8 @@ public record StreamProcessorId(ScopeId ScopeId, EventProcessorId EventProcessor
     /// <inheritdoc />
     public override string ToString() => $"Scope: {ScopeId.Value} Event Processor Id: {EventProcessorId.Value} Source Stream: {SourceStreamId.Value}";
 
-    public static IStreamProcessorId FromProtobuf(Dolittle.Runtime.Events.Store.Actors.StreamProcessorId streamProcessorId)
-        => new StreamProcessorId(
+    public static StreamProcessorId FromProtobuf(Dolittle.Runtime.Events.Store.Actors.StreamProcessorId streamProcessorId)
+        => new(
             streamProcessorId.ScopeId.ToGuid(),
             streamProcessorId.EventProcessorId.ToGuid(),
             streamProcessorId.SourceStreamId.ToGuid());

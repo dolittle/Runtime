@@ -15,17 +15,21 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 /// Represents an implementation of <see cref="IStreamProcessorStates"/>.
 /// </summary>
 [PerTenant]
-public class StreamProcessorStateClient : IStreamProcessorStates
+public class StreamProcessorStatesClient : IStreamProcessorStates
 {
-    readonly Actors.StreamProcessorStateClient _streamProcessorStateClient;
+    readonly StreamProcessorStateClient _streamProcessorStateClient;
+    readonly StreamSubscriptionStateClient _streamSubscriptionStateClient;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StreamProcessorStateClient"/> class. 
+    /// Initializes a new instance of the <see cref="StreamProcessorStatesClient"/> class. 
     /// </summary>
     /// <param name="streamProcessorStateClient">The <see cref="Actors.StreamProcessorStateClient"/>.</param>
-    public StreamProcessorStateClient(Actors.StreamProcessorStateClient streamProcessorStateClient)
+    /// <param name="streamSubscriptionStateClient">The <see cref="Actors.StreamSubscriptionStateClient"/>.</param>
+    public StreamProcessorStatesClient(StreamProcessorStateClient streamProcessorStateClient,
+        StreamSubscriptionStateClient streamSubscriptionStateClient)
     {
         _streamProcessorStateClient = streamProcessorStateClient;
+        _streamSubscriptionStateClient = streamSubscriptionStateClient;
     }
 
     /// <inheritdoc />
@@ -40,7 +44,7 @@ public class StreamProcessorStateClient : IStreamProcessorStates
                     var response = await _streamProcessorStateClient.GetByProcessorId(processorKey.StreamProcessorId, cancellationToken).ConfigureAwait(false);
                     return Try<IStreamProcessorState>.Succeeded(response!.Bucket.Single().FromProtobuf());
                 case StreamProcessorKey.IdOneofCase.SubscriptionId:
-                    var r = await _streamProcessorStateClient.GetBySubscriptionId(processorKey.SubscriptionId, cancellationToken).ConfigureAwait(false);
+                    var r = await _streamSubscriptionStateClient.GetBySubscriptionId(processorKey.SubscriptionId, cancellationToken).ConfigureAwait(false);
                     return Try<IStreamProcessorState>.Succeeded(r!.Bucket.Single().FromProtobuf());
                 case StreamProcessorKey.IdOneofCase.None:
                 default:
@@ -68,7 +72,7 @@ public class StreamProcessorStateClient : IStreamProcessorStates
                 await _streamProcessorStateClient.SetByProcessorId(request, cancellationToken).ConfigureAwait(false);
                 return;
             case StreamProcessorKey.IdOneofCase.SubscriptionId:
-                await _streamProcessorStateClient.SetBySubscriptionId(request, cancellationToken).ConfigureAwait(false);
+                await _streamSubscriptionStateClient.SetBySubscriptionId(request, cancellationToken).ConfigureAwait(false);
                 return;
             case StreamProcessorKey.IdOneofCase.None:
             default:
