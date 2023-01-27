@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 /// </summary>
 public class FailingPartitions : IFailingPartitions
 {
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly IEventProcessor _eventProcessor;
     readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
     readonly Func<StreamEvent, ExecutionContext> _createExecutionContextForEvent;
@@ -26,13 +26,13 @@ public class FailingPartitions : IFailingPartitions
     /// <summary>
     /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
     /// </summary>
-    /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
+    /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
     /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
     /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromPartitionedStream" />.</param>
     /// <param name="createExecutionContextForEvent">The factory to use to create execution contexts for event processing.</param>
     /// <param name="eventFetcherPolicies">The policies to use for fetching events.</param>
     public FailingPartitions(
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         IEventProcessor eventProcessor,
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
         Func<StreamEvent, ExecutionContext> createExecutionContextForEvent, //TODO: Oh man, here we go again.

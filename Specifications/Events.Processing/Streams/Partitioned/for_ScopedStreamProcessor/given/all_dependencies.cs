@@ -28,7 +28,7 @@ public class all_dependencies
     protected static TenantId tenant_id;
     protected static StreamId source_stream_id;
     protected static StreamProcessorId stream_processor_id;
-    protected static IResilientStreamProcessorStateRepository stream_processor_state_repository;
+    protected static IStreamProcessorStates stream_processor_state_repository;
     protected static Mock<ICanFetchEventsFromPartitionedStream> events_fetcher;
     protected static IFailingPartitions failing_partitiones;
     protected static Mock<IStreamProcessors> stream_processors;
@@ -41,7 +41,7 @@ public class all_dependencies
     {
         execution_context = execution_contexts.create();
         cancellation_token_source = new CancellationTokenSource();
-        var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
+        var in_memory_stream_processor_state_repository = new in_memory_stream_processor_states();
         event_processor_id = Guid.NewGuid();
         scope_id = Guid.NewGuid();
         tenant_id = Guid.NewGuid();

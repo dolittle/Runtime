@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 [Singleton, PerTenant]
 public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProcessors
 {
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly IStreamEventWatcher _streamWatcher;
     readonly IEventLogStream _eventLogStream;
     readonly Func<ChannelReader<EventLogBatch>, StreamProcessorId, bool, StreamProcessorState, ScopedFilterStreamProcessor> _createFilterStreamProcessor;
@@ -36,7 +36,7 @@ public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProce
     /// <param name="eventLogStream">The <see cref="IEventLogStream"/>.</param>
     /// <param name="createFilterStreamProcessor">The factory to use to create instances of unpartitioned stream processors.</param>
     public CreateScopedFilterStreamProcessors(
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         IStreamEventWatcher streamWatcher,
         IEventLogStream eventLogStream,
         Func<ChannelReader<EventLogBatch>, StreamProcessorId, bool, StreamProcessorState, ScopedFilterStreamProcessor> createFilterStreamProcessor)

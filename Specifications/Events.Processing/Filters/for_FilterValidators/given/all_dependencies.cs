@@ -34,7 +34,7 @@ public class all_dependencies
     protected static StreamProcessorState stream_processor_state;
     
     // protected static Mock<IContainer> container;
-    protected static Mock<IStreamProcessorStateRepository> stream_processor_state_repository;
+    protected static Mock<IStreamProcessorStates> stream_processor_state_repository;
     protected static Mock<IFilterDefinitions> filter_definitions;
     protected static Mock<ICompareFilterDefinitions> definition_comparer;
     protected static CancellationToken cancellation_token;
@@ -71,7 +71,7 @@ public class all_dependencies
 
         stream_processor_state = new StreamProcessorState(10, DateTimeOffset.Now);
 
-        stream_processor_state_repository = mocks.Create<IStreamProcessorStateRepository>();
+        stream_processor_state_repository = mocks.Create<IStreamProcessorStates>();
         stream_processor_state_repository
             .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
             .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(stream_processor_state)));

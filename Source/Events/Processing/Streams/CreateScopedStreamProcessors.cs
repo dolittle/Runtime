@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
 {
     readonly IEventFetchers _eventFetchers;
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly IStreamEventWatcher _streamWatcher;
     readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, ExecutionContext, Partitioned.ScopedStreamProcessor> _createPartitionedStreamProcessor;
     readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ExecutionContext, ScopedStreamProcessor> _createUnpartitionedStreamProcessor;
@@ -34,7 +34,7 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
     /// <param name="createUnpartitionedStreamProcessor">The factory to use to create instances of unpartitioned stream processors.</param>
     public CreateScopedStreamProcessors(
         IEventFetchers eventFetchers,
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         IStreamEventWatcher streamWatcher,
         Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, ExecutionContext, Partitioned.ScopedStreamProcessor> createPartitionedStreamProcessor,
         Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ExecutionContext, ScopedStreamProcessor> createUnpartitionedStreamProcessor)

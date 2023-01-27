@@ -20,7 +20,7 @@ public class StreamProcessor : IStreamProcessor
     readonly SubscriptionId _identifier;
     readonly ExecutionContext _executionContext;
     readonly IEventProcessor _eventProcessor;
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly EventsFromEventHorizonFetcher _eventsFetcher;
     readonly IEventFetcherPolicies _eventsFetcherPolicy;
     readonly IMetricsCollector _metrics;
@@ -44,7 +44,7 @@ public class StreamProcessor : IStreamProcessor
         ExecutionContext executionContext,
         IEventProcessor eventProcessor,
         EventsFromEventHorizonFetcher eventsFetcher,
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         IEventFetcherPolicies eventsFetcherPolicy,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)

@@ -23,6 +23,6 @@ public class TenantServices : ICanAddTenantServices
 {
     public void AddFor(TenantId tenant, IServiceCollection services)
     {
-        services.AddTransient<IResilientStreamProcessorStateRepository, ResilientStreamProcessorStateRepository>();
+        // services.AddTransient<IStreamProcessorStates, ResilientStreamProcessorStateRepository>();
     }
 }

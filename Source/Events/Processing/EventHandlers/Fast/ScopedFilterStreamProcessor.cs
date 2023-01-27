@@ -23,7 +23,7 @@ public class ScopedFilterStreamProcessor
     readonly ChannelReader<EventLogBatch> _eventLogStream;
     readonly StreamId _streamId;
     readonly IWriteEventsToStreams _eventsWriter;
-    readonly IResilientStreamProcessorStateRepository _stateProcessorStates;
+    readonly IStreamProcessorStates _stateProcessorStates;
     readonly TenantId _tenantId;
     readonly bool _partitioned;
     readonly ILogger _logger;
@@ -35,7 +35,7 @@ public class ScopedFilterStreamProcessor
         ChannelReader<EventLogBatch> eventLogStream,
         StreamProcessorId streamProcessorId,
         IWriteEventsToStreams eventsWriter,
-        IResilientStreamProcessorStateRepository stateProcessorStates,
+        IStreamProcessorStates stateProcessorStates,
         TenantId tenantId,
         bool partitioned,
         StreamProcessorState currentState,

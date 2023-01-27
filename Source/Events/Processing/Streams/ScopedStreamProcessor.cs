@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 /// </summary>
 public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 {
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
     /// <summary>
@@ -28,7 +28,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     /// <param name="sourceStreamDefinition">The source stream <see cref="IStreamDefinition" />.</param>
     /// <param name="initialState">The <see cref="StreamProcessorState" />.</param>
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-    /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
+    /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
     /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
     /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
     /// <param name="eventFetcherPolicies">The policies to use while fetching events.</param>
@@ -41,7 +41,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         IStreamDefinition sourceStreamDefinition,
         StreamProcessorState initialState,
         IEventProcessor processor,
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         ICanFetchEventsFromStream eventsFromStreamsFetcher,
         ExecutionContext executionContext,
         IEventFetcherPolicies eventFetcherPolicies,

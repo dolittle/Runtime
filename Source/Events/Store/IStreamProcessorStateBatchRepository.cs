@@ -40,5 +40,5 @@ public interface IStreamProcessorStateBatchRepository
     /// <param name="streamProcessorStates">The <see cref="IReadOnlyDictionary{TKey, TValue}"/> of <see cref="IStreamProcessorId"/> and <see cref="IStreamProcessorState"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task<IReadOnlyDictionary<IStreamProcessorId, Partial>> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken);
+    Task<Try> Persist(IReadOnlyDictionary<IStreamProcessorId, IStreamProcessorState> streamProcessorStates, CancellationToken cancellationToken);
 }
