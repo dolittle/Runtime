@@ -98,7 +98,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
             }
             else
             {
-                onError("Failed to get subscription state: " + scopeHasLoadedTask.Exception?.Message);
+                onError("Failed to get subscription state: " + _.Exception?.Message);
             }
         });
         return Task.CompletedTask;
@@ -154,7 +154,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
                 foreach (var streamProcessorStateWithId in scopeTask.Result)
                 {
                     var streamProcessorKey = streamProcessorStateWithId.Id.ToProtobuf();
-                    if (streamProcessorKey.IdCase == StreamProcessorKey.IdOneofCase.SubscriptionId)
+                    if (streamProcessorKey.IdCase == StreamProcessorKey.IdOneofCase.StreamProcessorId)
                     {
                         buckets[streamProcessorKey.StreamProcessorId] = streamProcessorStateWithId.State.ToProtobuf();
                     }
@@ -254,10 +254,9 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
     void Persist(IReadOnlyDictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> changes, ScopeId scopeId)
     {
         _logger.LogInformation("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
-        var persistTask = _repository.PersistForScope(scopeId, changes, Context.CancellationToken);
-        Context.ReenterAfter(persistTask, _ =>
+        Context.ReenterAfter(_repository.PersistForScope(scopeId, changes, Context.CancellationToken), _ =>
         {
-            if (persistTask.IsCompletedSuccessfully)
+            if (_.IsCompletedSuccessfully)
             {
                 _activeRequests.Remove(scopeId);
                 PersistCurrentProcessorState(scopeId);
@@ -268,7 +267,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
             }
             else
             {
-                _logger.FailedToPersistStreamSubscriptionState(persistTask.Exception!, scopeId);
+                _logger.FailedToPersistStreamSubscriptionState(_.Exception!, scopeId);
                 // Try again
                 Persist(changes, scopeId);
             }
