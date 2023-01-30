@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.DependencyInversion.Building;
+using Dolittle.Runtime.Diagnostics.OpenTelemetry;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Execution;
@@ -42,12 +43,17 @@ public static class Runtime
     {
         var mongoClient = new MongoClient("mongodb://localhost:27017");
         ThrowIfCannotConnectToMongoDB(mongoClient);
-        
+
+        var cfg = new ConfigurationManager()
+            .AddEnvironmentVariables()
+            .Build();
+
         var configuration = new Dictionary<string, string>();
         var (databases, tenants) = CreateRuntimeConfiguration(configuration, numberOfTenants);
 
         var runtimeHost = Host.CreateDefaultBuilder()
             .UseDolittleServices()
+            .ConfigureOpenTelemetry(cfg)
             .ConfigureHostConfiguration(_ =>
             {
                 _.Sources.Clear();
@@ -71,7 +77,7 @@ public static class Runtime
 
         runtimeHost.PerformBootstrap().GetAwaiter().GetResult();
         runtimeHost.Start();
-        
+
 
         return new RunningRuntime(runtimeHost, tenants, mongoClient, databases);
     }
@@ -82,7 +88,7 @@ public static class Runtime
     public static Task DropAllDatabases(RunningRuntime runtime)
         => Task.WhenAll(runtime.Databases.Select(database => runtime.MongoClient.DropDatabaseAsync(database, CancellationToken.None)));
 
-    
+
     /// <summary>
     /// Creates a new <see cref="Dolittle.Runtime.Execution.ExecutionContext"/> for the specified tenant to be used in the benchmark.
     /// </summary>
@@ -90,13 +96,14 @@ public static class Runtime
     /// <returns>The newly created <see cref="Dolittle.Runtime.Execution.ExecutionContext"/>.</returns>
     public static Dolittle.Runtime.Execution.ExecutionContext CreateExecutionContextFor(TenantId tenant)
         => new(_microserviceId, tenant, Version.NotSet, _environment, Guid.NewGuid(), null, Claims.Empty, CultureInfo.InvariantCulture);
-    
-    static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string> configuration, int numberOfTenants)
+
+    static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string> configuration,
+        int numberOfTenants)
     {
         configuration["dolittle:runtime:eventstore:backwardscompatibility:version"] = "V7";
         configuration["dolittle:runtime:platform:microserviceID"] = _microserviceId.ToString();
         configuration["dolittle:runtime:platform:environment"] = _environment.ToString();
-        
+
         var tenants = Enumerable.Range(0, numberOfTenants).Select(_ => new TenantId(Guid.NewGuid())).ToArray();
         var databases = new List<string>();
         foreach (var tenant in tenants)
@@ -105,22 +112,23 @@ public static class Runtime
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:eventStore:servers:0"] = "localhost";
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:eventStore:database"] = eventStoreName;
             databases.Add(eventStoreName);
-            
+
             var projectionsName = Guid.NewGuid().ToString();
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:projections:servers:0"] = "localhost";
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:projections:database"] = projectionsName;
             databases.Add(projectionsName);
-            
+
             var embeddingsName = Guid.NewGuid().ToString();
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:embeddings:servers:0"] = "localhost";
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:embeddings:database"] = embeddingsName;
             databases.Add(embeddingsName);
-            
+
             var readModelsName = Guid.NewGuid().ToString();
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:readModels:host"] = "mongodb://localhost:27017";
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:readModels:database"] = readModelsName;
             databases.Add(readModelsName);
         }
+
         return (databases, tenants);
     }
 
