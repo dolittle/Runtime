@@ -35,6 +35,6 @@ class partitioned : given.a_clean_event_store
     It should_have_the_correct_stream_processor_state_type = () =>
         retrieved_stream_processor_state.Result.Should().BeOfType<Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState>();
 
-    It should_have_the_correct_stream_processor_states = () => retrieved_stream_processor_state.Result.Should().BeEquivalentTo(stream_processor_state);
+    It should_have_the_correct_stream_processor_state = () => retrieved_stream_processor_state.Result.Should().BeEquivalentTo(stream_processor_state);
     static Try<IStreamProcessorState> retrieved_stream_processor_state;
 }

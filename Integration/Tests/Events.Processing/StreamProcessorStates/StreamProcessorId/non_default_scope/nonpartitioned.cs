@@ -10,15 +10,16 @@ using Dolittle.Runtime.Rudimentary;
 using FluentAssertions;
 using Machine.Specifications;
 
-namespace Integration.Tests.Events.Processing.StreamProcessorStates.StreamProcessorId.with_default_scope;
+namespace Integration.Tests.Events.Processing.StreamProcessorStates.StreamProcessorId.non_default_scope;
 
 class nonpartitioned : given.a_clean_event_store
 {
+    static readonly ScopeId scope_id = Guid.Parse("abef5f64-9916-4762-a234-527990bc6c7c");
     static readonly Guid event_processor_id = Guid.Parse("07f1ee20-ec03-41a1-8bf5-c66cf6359cdf");
     static readonly Guid source_stream_id = Guid.Parse("c9294a5d-2e85-4ae2-8411-878d5d4fb4ac");
     static readonly DateTimeOffset last_successfully_processed = DateTimeOffset.Now;
 
-    static readonly Dolittle.Runtime.Events.Processing.Streams.StreamProcessorId stream_processor_id = new(ScopeId.Default, event_processor_id,
+    static readonly Dolittle.Runtime.Events.Processing.Streams.StreamProcessorId stream_processor_id = new(scope_id, event_processor_id,
         source_stream_id);
 
 
@@ -33,7 +34,6 @@ class nonpartitioned : given.a_clean_event_store
     };
 
     It should_have_retrieved_the_state_successfully = () => retrieved_stream_processor_state.Success.Should().BeTrue();
-
 
     It should_have_the_correct_stream_processor_state_type = () =>
         retrieved_stream_processor_state.Result.Should().BeOfType<StreamProcessorState>();
