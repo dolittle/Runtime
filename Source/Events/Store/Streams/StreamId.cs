@@ -26,6 +26,12 @@ public record StreamId(Guid Value) : ConceptAs<Guid>(Value)
     /// </summary>
     /// <param name="streamId"><see cref="Guid"/> representation.</param>
     public static implicit operator StreamId(Guid streamId) => new(streamId);
+    
+    /// <summary>
+    /// Implicitly convert from a <see cref="string"/> to a <see cref="StreamId"/>.
+    /// </summary>
+    /// <param name="streamId"><see cref="string"/> representation.</param>
+    public static implicit operator StreamId(string streamId) => new(Guid.Parse(streamId));
 
     /// <summary>
     /// Creates a new instance of <see cref="StreamId"/> with a unique id.
