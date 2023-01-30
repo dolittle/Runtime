@@ -17,18 +17,19 @@ public partial class Bucket
 
     IStreamProcessorState FromProtobufNonPartitioned()
     {
+        var lastSuccessfullyProcessed = LastSuccessfullyProcessed.ToDateTimeOffset();
         switch (Failures.Count)
         {
-            case 0: return new StreamProcessorState(Position(), LastSuccessfullyProcessed.ToDateTimeOffset());
+            case 0: return new StreamProcessorState(Position(), "", lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false );
             case 1:
                 var failure = Failures[0];
                 return new StreamProcessorState(Position(), failure.FailureReason, failure.RetryTime.ToDateTimeOffset(), failure.ProcessingAttempts,
-                    LastSuccessfullyProcessed.ToDateTimeOffset(), true);
+                    lastSuccessfullyProcessed, true);
             default:
                 // This is probably invalid, as this should not be able to represent more than a single failure
                 var fail = Failures[0];
                 return new StreamProcessorState(Position(), fail.FailureReason, fail.RetryTime.ToDateTimeOffset(), fail.ProcessingAttempts,
-                    LastSuccessfullyProcessed.ToDateTimeOffset(), true);
+                    lastSuccessfullyProcessed, true);
         }
     }
 
