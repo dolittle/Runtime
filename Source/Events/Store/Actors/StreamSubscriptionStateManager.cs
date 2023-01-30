@@ -15,7 +15,7 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-[TenantGrain(typeof(StreamSubscriptionActor), typeof(StreamSubscriptionStateClient))]
+[TenantGrain(typeof(StreamSubscriptionStateActor), typeof(StreamSubscriptionStateClient))]
 public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 {
     readonly ISubscriptionStateRepository _repository;
