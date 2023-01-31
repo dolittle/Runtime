@@ -252,7 +252,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     void Persist(IReadOnlyDictionary<Processing.Streams.StreamProcessorId, IStreamProcessorState> changes, ScopeId scopeId)
     {
-        _logger.LogInformation("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
+        _logger.LogTrace("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
         Context.ReenterAfter(_repository.PersistForScope(scopeId, changes, Context.CancellationToken), _ =>
         {
             if (_.IsCompletedSuccessfully)

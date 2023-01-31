@@ -149,7 +149,7 @@ public class EventStore : EventStoreBase
             onError(_startupFailure!.Reason);
             return Task.CompletedTask;
         }
-        var scope = request.ScopeId.ToGuid();
+        ScopeId scope = request.ScopeId?.ToGuid() ?? ScopeId.Default;
         if (!_streamSubscriptionManagerPIDs.TryGetValue(scope, out var pid))
         {
             if (!TrySpawnSubscriptionManager(scope, out pid, out var error))
@@ -182,7 +182,7 @@ public class EventStore : EventStoreBase
             onError(_startupFailure!.Reason);
             return Task.CompletedTask;
         }
-        var scope = request.ScopeId.ToGuid();
+        ScopeId scope = request.ScopeId?.ToGuid() ?? ScopeId.Default;
         if (!_streamSubscriptionManagerPIDs.TryGetValue(scope, out var pid))
         {
             onError("Subscription does not exist");

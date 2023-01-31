@@ -70,7 +70,7 @@ public class CreateScopedFilterStreamProcessors : ICreateScopedFilterStreamProce
                 streamProcessorId.ScopeId,
                 processorState.Position.Value,
                 new ReadOnlyCollection<ArtifactId>(filterDefinition.Types.ToList()),
-                CancellationToken.None),
+                cancellationToken),
             streamProcessorId,
             filterDefinition.Partitioned,
             unpartitionedProcessorState);
