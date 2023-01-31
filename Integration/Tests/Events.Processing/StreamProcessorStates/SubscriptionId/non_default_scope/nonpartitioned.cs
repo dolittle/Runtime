@@ -28,6 +28,7 @@ class nonpartitioned : given.a_clean_event_store
 
     static Dolittle.Runtime.EventHorizon.Consumer.SubscriptionId subscription_id;
     static StreamProcessorState stream_processor_state;
+    static StreamProcessorState retrieved_stream_processor_state;
 
 
     Establish context = () =>
@@ -49,14 +50,17 @@ class nonpartitioned : given.a_clean_event_store
         stream_processor_state = new(new StreamPosition(10), "", last_successfully_processed, 0, last_successfully_processed, false);
 
         stream_processor_states.Persist(subscription_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
-        retrieved_stream_processor_state = stream_processor_states.TryGetFor(subscription_id, CancellationToken.None).GetAwaiter().GetResult();
+        retrieved_stream_processor_state_response = stream_processor_states.TryGetFor(subscription_id, CancellationToken.None).GetAwaiter().GetResult();
+
+        retrieved_stream_processor_state = (StreamProcessorState)retrieved_stream_processor_state_response.Result;
     };
 
-    It should_have_retrieved_the_state_successfully = () => retrieved_stream_processor_state.Success.Should().BeTrue();
+    It should_have_retrieved_the_state_successfully = () => retrieved_stream_processor_state_response.Success.Should().BeTrue();
+
 
     It should_have_the_correct_stream_processor_state_type = () =>
-        retrieved_stream_processor_state.Result.Should().BeOfType<StreamProcessorState>();
+        retrieved_stream_processor_state_response.Result.Should().BeOfType<StreamProcessorState>();
 
-    It should_have_the_correct_stream_processor_state = () => retrieved_stream_processor_state.Result.Should().BeEquivalentTo(stream_processor_state);
-    static Try<IStreamProcessorState> retrieved_stream_processor_state;
+    It should_have_the_correct_stream_processor_state = () => retrieved_stream_processor_state.Should().BeEquivalentTo(stream_processor_state);
+    static Try<IStreamProcessorState> retrieved_stream_processor_state_response;
 }
