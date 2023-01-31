@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: bad-aggregate
+  PRERELEASE_BRANCHES: hadhafang
 
 on:
   pull_request:
