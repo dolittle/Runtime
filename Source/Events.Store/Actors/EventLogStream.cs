@@ -141,6 +141,7 @@ public class EventLogStreamActor : IActor
         _channelWriter.Complete();
         await _eventStoreClient.CancelSubscription(new CancelEventStoreSubscription
         {
+            ScopeId = _scope,
             SubscriptionId = _subscriptionId
         }, CancellationTokens.FromSeconds(5)).ConfigureAwait(false);
     }
