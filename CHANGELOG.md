@@ -1,3 +1,9 @@
+# [8.8.2] - 2023-1-31 [PR: #727](https://github.com/dolittle/Runtime/pull/727)
+### Fixed
+
+- Fixes correct unregistering of eventlog streams. Was only possible to trigger with fast event handlers enabled, which consumes the stream directly.
+
+
 # [8.8.1] - 2022-11-30 [PR: #721](https://github.com/dolittle/Runtime/pull/721)
 ## Summary
 
