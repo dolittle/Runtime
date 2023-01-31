@@ -78,7 +78,7 @@ public class Try<TResult> : Try
     /// </summary>
     /// <param name="result">The <see cref="TResult"/> of the operation.</param>
     /// <returns>A new <see cref="Try{TResult}"/> result.</returns>
-    public static Try<TResult> Succeeded(TResult result) => new(result);
+    public static new Try<TResult> Succeeded(TResult result) => new(result);
 
     /// <summary>
     /// Creates a new <see cref="Try{TResult}"/> result indicating a failed operation because of an exception.

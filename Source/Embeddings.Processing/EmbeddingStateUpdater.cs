@@ -59,7 +59,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
             return keys;
         }
 
-        var result = Try.Succeeded();
+        var result = Try.Succeeded;
         foreach (var key in keys.Result)
         {
             _logger.UpdatingEmbeddingStateFor(_embedding, key);
@@ -88,7 +88,7 @@ public class EmbeddingStateUpdater : IUpdateEmbeddingStates
         }
         if (!unprocessedEvents.Result.Any())
         {
-            return Try.Succeeded();
+            return Try.Succeeded;
         }
 
         var projectedState = await _projectManyEvents.TryProject(currentState, unprocessedEvents, executionContext, cancellationToken).ConfigureAwait(false);

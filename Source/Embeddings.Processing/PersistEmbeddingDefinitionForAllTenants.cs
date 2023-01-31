@@ -62,7 +62,7 @@ public class PersistEmbeddingDefinitionForAllTenants : IPersistEmbeddingDefiniti
             return new FailedPersistingEmbeddingDefinition(definition.Embedding);
         }
 
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
 }

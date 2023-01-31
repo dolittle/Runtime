@@ -154,7 +154,7 @@ public class Projections : IProjections
             }
         }
         
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
     async Task<Try> ResetProjectionIfDefinitionHasChanged(ProjectionIdentifier identifier, ProjectionDefinition definition, CancellationToken cancellationToken)
@@ -173,7 +173,7 @@ public class Projections : IProjections
             return persistence.Exception;
         }
         
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
     async Task<IEnumerable<TenantId>> GetTenantsWhereDefinitionHasChanged(ProjectionIdentifier identifier, ProjectionDefinition definition, CancellationToken cancellationToken)
@@ -201,7 +201,7 @@ public class Projections : IProjections
         {
             if (!tenants.Contains(tenant))
             {
-                return Try.Succeeded();
+                return Try.Succeeded;
             }
             
             Log.ResettingStreamProcessorForTenant(_logger, newDefinition.Scope, newDefinition.Projection, tenant);
@@ -216,7 +216,7 @@ public class Projections : IProjections
 
             try
             {
-                var streamProcessorStates = services.GetRequiredService<IStreamProcessorStateRepository>();
+                var streamProcessorStates = services.GetRequiredService<IStreamProcessorStates>();
                 await streamProcessorStates.Persist(
                     new StreamProcessorId(definition.Scope, definition.Projection.Value, StreamId.EventLog),
                     StreamProcessorState.New,
@@ -235,7 +235,7 @@ public class Projections : IProjections
                 return new CouldNotResetProjectionStates(newDefinition, tenant);
             }
 
-            return Try.Succeeded();
+            return Try.Succeeded;
         });
 
     Task<Try> PersistDefinitionForAllTenants(ProjectionDefinition definition, CancellationToken cancellationToken)
@@ -247,7 +247,7 @@ public class Projections : IProjections
             {
                 return new CouldNotPersistProjectionDefinition(definition, tenant);
             }
-            return Try.Succeeded();
+            return Try.Succeeded;
         });
 
     Func<TenantId, CancellationToken, Task<Try>> DropStateAndResetStreamProcessorForTenantCallback(ProjectionProcessor processor)

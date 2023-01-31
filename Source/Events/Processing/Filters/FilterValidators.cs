@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters;
 public class FilterValidators : IFilterValidators
 {
     readonly TenantId _tenant;
-    readonly IStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly IFilterDefinitions _filterDefinitions;
     readonly ICompareFilterDefinitions _definitionComparer;
     readonly IServiceProvider _serviceProvider;
@@ -42,7 +42,7 @@ public class FilterValidators : IFilterValidators
     /// <param name="logger">The logger to use for logging.</param>
     public FilterValidators(
         TenantId tenant,
-        IStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         IFilterDefinitions filterDefinitions,
         ICompareFilterDefinitions definitionComparer,
         IServiceProvider serviceProvider,

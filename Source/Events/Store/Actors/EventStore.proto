@@ -11,6 +11,9 @@ import "Protobuf/Failure.proto";
 import "Protobuf/Uuid.proto";
 import "Artifacts/Artifact.proto";
 
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
 
 message EventStoreSubscriptionRequest{
     protobuf.Uuid subscription_id = 1;
@@ -77,4 +80,78 @@ service EventStore {
     rpc CommitExternal (CommitExternalEventsRequest) returns (CommitExternalEventsResponse);
     rpc RegisterSubscription(EventStoreSubscriptionRequest) returns (EventStoreSubscriptionAck);
     rpc CancelSubscription(CancelEventStoreSubscription) returns (CancelEventStoreSubscriptionAck);
+}
+
+message StreamSubscriptionId{
+    protobuf.Uuid scope_id = 1;
+    protobuf.Uuid consumer_tenant_id = 2;
+    protobuf.Uuid producer_microservice_id = 3;
+    protobuf.Uuid producer_tenant_id = 4;
+    protobuf.Uuid stream_id = 5;
+    string partition_id = 6;
+}
+
+message StreamProcessorId{
+    protobuf.Uuid scope_id = 1;
+    protobuf.Uuid event_processor_id = 2;
+    protobuf.Uuid source_stream_id = 3;
+}
+
+message StreamProcessorKey{
+    oneof id {
+        StreamProcessorId stream_processor_id = 1;
+        StreamSubscriptionId subscription_id = 2;
+    }
+}
+
+message StreamProcessorStateResponse{
+    StreamProcessorKey stream_key = 1;
+    repeated Bucket bucket = 2;
+}
+
+message SetStreamProcessorStateRequest{
+    StreamProcessorKey stream_key = 1;
+    Bucket bucket = 2;
+}
+
+message GetStreamProcessorPartitionStateResponse{
+    StreamProcessorKey stream_key = 1;
+    Bucket partition = 2;
+    bool partitioned = 3;
+}
+
+message ProcessingFailure{
+    string event_source_id = 1;
+    uint64 offset = 2;
+    string failure_reason = 3;
+    uint32 processing_attempts = 4;
+    google.protobuf.Timestamp retry_time = 5;
+    google.protobuf.Timestamp last_failed = 6;
+}
+
+
+
+message Bucket{
+    uint32 bucket_id = 1;
+    uint64 current_offset = 2;
+    repeated ProcessingFailure failures = 3;
+    google.protobuf.Timestamp last_successfully_processed = 4;
+    bool partitioned = 5;
+}
+
+message SetPartitionedStreamProcessorStateRequest{
+    StreamProcessorKey stream_id = 1;
+    uint64 current_offset = 2;
+    map<string, uint64> failing_event_sources = 3;
+}
+
+
+service StreamProcessorState {
+    rpc GetByProcessorId (StreamProcessorId) returns (StreamProcessorStateResponse);
+    rpc SetByProcessorId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
+}
+
+service StreamSubscriptionState {
+    rpc GetBySubscriptionId (StreamSubscriptionId) returns (StreamProcessorStateResponse);
+    rpc SetBySubscriptionId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
 }

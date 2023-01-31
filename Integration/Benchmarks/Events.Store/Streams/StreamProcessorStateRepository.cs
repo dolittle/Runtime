@@ -21,14 +21,14 @@ namespace Integration.Benchmarks.Events.Store.Streams;
 /// </summary>
 public class StreamProcessorStateRepository : JobBase
 {
-    Dictionary<TenantId, IResilientStreamProcessorStateRepository> _streamProcessorStates;
+    Dictionary<TenantId, IStreamProcessorStates> _streamProcessorStates;
     (StreamProcessorId, StreamProcessorState)[] _nonPartitionedStates;
     (StreamProcessorId, PartitionedStreamProcessorState)[] _partitionedStates;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
     {
-        _streamProcessorStates = ConfiguredTenants.ToDictionary(tenant => tenant, tenant => services.GetRequiredService<Func<TenantId, IResilientStreamProcessorStateRepository>>()(tenant));
+        _streamProcessorStates = ConfiguredTenants.ToDictionary(tenant => tenant, tenant => services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant));
     }
 
     [IterationSetup]

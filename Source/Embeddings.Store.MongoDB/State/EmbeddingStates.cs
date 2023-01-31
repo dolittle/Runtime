@@ -184,7 +184,7 @@ public class EmbeddingStates : IEmbeddingStates
                     return deleteResult.IsAcknowledged;
                 },
                 token).ConfigureAwait(false);
-            return Try.Succeeded();
+            return Try.Succeeded;
         }
         catch (Exception ex)
         {

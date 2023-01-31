@@ -26,7 +26,7 @@ public class all_dependencies
     protected static TenantId tenant_id;
     protected static StreamId source_stream_id;
     protected static StreamProcessorId stream_processor_id;
-    protected static IResilientStreamProcessorStateRepository stream_processor_state_repository;
+    protected static IStreamProcessorStates stream_processor_state_repository;
     protected static Mock<ICanFetchEventsFromStream> events_fetcher;
     protected static Mock<IStreamProcessors> stream_processors;
     protected static Mock<IEventProcessor> event_processor;
@@ -37,13 +37,13 @@ public class all_dependencies
     Establish context = () =>
     {
         cancellation_token_source = new CancellationTokenSource();
-        var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
+        var in_memory_stream_processor_states = new in_memory_stream_processor_states();
         event_processor_id = Guid.NewGuid();
         scope_id = Guid.NewGuid();
         tenant_id = Guid.NewGuid();
         source_stream_id = Guid.NewGuid();
         stream_processor_id = new StreamProcessorId(scope_id, event_processor_id, source_stream_id);
-        stream_processor_state_repository = in_memory_stream_processor_state_repository;
+        stream_processor_state_repository = in_memory_stream_processor_states;
         events_fetcher = new Mock<ICanFetchEventsFromStream>(MockBehavior.Strict);
         event_processor = new Mock<IEventProcessor>(MockBehavior.Strict);
         event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
@@ -68,7 +68,7 @@ public class all_dependencies
         action_to_perform_before_reprocessing = new Mock<Func<TenantId, CancellationToken, Task<Try>>>();
         action_to_perform_before_reprocessing
             .Setup(_ => _(It.IsAny<TenantId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Try.Succeeded());
+            .ReturnsAsync(Try.Succeeded);
     };
         
     Cleanup clean = () => cancellation_token_source.Dispose();

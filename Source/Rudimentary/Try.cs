@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Rudimentary;
@@ -22,12 +23,13 @@ public class Try
     /// <summary>
     /// Gets a value indicating whether the operation succeeded.
     /// </summary>
+    [MemberNotNullWhen(false, nameof(Exception))]
     public bool Success { get; }
 
     /// <summary>
     /// Gets the <see cref="Exception" /> that caused the operation to fail.
     /// </summary>
-    public Exception Exception { get; }
+    public Exception? Exception { get; }
 
     /// <summary>
     /// Appends the result if the operation succeeded, or returns the original failure if the operation failed.
@@ -50,7 +52,7 @@ public class Try
         try
         {
             @try();
-            return Succeeded();
+            return Succeeded;
         }
         catch (Exception ex)
         {
@@ -68,7 +70,7 @@ public class Try
         try
         {
             await @try().ConfigureAwait(false);
-            return Succeeded();
+            return Succeeded;
         }
         catch (Exception ex)
         {
@@ -87,7 +89,7 @@ public class Try
     /// Creates a new <see cref="Try"/> result indicating a successful operation.
     /// </summary>
     /// <returns>A new <see cref="Try"/> result.</returns>
-    public static Try Succeeded() => new();
+    public static Try Succeeded { get; } = new();
 
     /// <summary>
     /// Creates a new <see cref="Try"/> result indicating a failed operation because of an exception.

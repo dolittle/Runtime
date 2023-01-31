@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 /// <summary>
 /// Defines a system repository for <see cref="IStreamProcessorState" >stream processor states</see>.
 /// </summary>
-public interface IStreamProcessorStateRepository
+public interface IStreamProcessorStates
 {
     /// <summary>
     /// Gets the <see cref="IStreamProcessorState" /> for the given <see cref="IStreamProcessorId" />.

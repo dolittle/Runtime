@@ -92,7 +92,7 @@ public class ManagementClient : IManagementClient
             return new ReplayProjectionFailed(scope, projection, response.Failure.Reason);
         }
 
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 
     ProjectionStatus CreateProjectionStatus(ManagementContracts.ProjectionStatus status)
