@@ -339,16 +339,13 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                 var filterProcessorId = info.GetFilterStreamId();
                 var eventProcessorId = info.GetEventProcessorStreamId();
                 persisted_stream_processor_states[filterProcessorId] = stream_processor_states.TryGetFor(filterProcessorId, CancellationToken.None).Result;
-                ;
                 persisted_stream_processor_states[eventProcessorId] = stream_processor_states.TryGetFor(eventProcessorId, CancellationToken.None).Result;
-                ;
             }
         }
 
         if (!persisted_stream_processor_states.ContainsKey(stream_processor_id))
         {
             persisted_stream_processor_states[stream_processor_id] = stream_processor_states.TryGetFor(stream_processor_id, CancellationToken.None).Result;
-            ;
         }
 
         return persisted_stream_processor_states[stream_processor_id];

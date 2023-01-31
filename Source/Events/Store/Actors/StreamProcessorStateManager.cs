@@ -186,7 +186,6 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
         var key = request.StreamKey.StreamProcessorId;
         ScopeId scopeId = key.ScopeId.ToGuid();
-        TrySetProcessorState(scopeId, key, request.Bucket);
 
         if (!TrySetProcessorState(scopeId, key, request.Bucket))
         {

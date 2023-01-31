@@ -40,6 +40,7 @@ public record StreamProcessorState(StreamPosition Position, IDictionary<Partitio
                 return new ProcessingFailure
                 {
                     EventSourceId = eventSourceId,
+                    Offset = _.Value.Position.Value,
                     FailureReason = failingPartitionState.Reason,
                     ProcessingAttempts = failingPartitionState.ProcessingAttempts,
                     RetryTime = Timestamp.FromDateTimeOffset(failingPartitionState.RetryTime),

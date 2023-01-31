@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.Streams;
 using FluentAssertions;
@@ -8,18 +10,19 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Mappings;
 
-public class mapping_a_failing_partitioned_state : given.a_partitioned_streamprocessorstate
+public class mapping_a_failing_partitioned_state : given.a_failing_partitioned_streamprocessorstate
 {
-    static IStreamProcessorState before;
+    static StreamProcessorState before;
     static Bucket as_protobuf;
-    static IStreamProcessorState after;
+    static StreamProcessorState after;
 
 
     private Establish context = () =>
     {
         before = stream_processor_state;
         as_protobuf = stream_processor_state.ToProtobuf();
-        after = as_protobuf.FromProtobuf();
+        after = (StreamProcessorState)as_protobuf.FromProtobuf();
+        Console.WriteLine(after);
     };
 
     It should_not_be_lossy = () => after.Should().BeEquivalentTo(before);
