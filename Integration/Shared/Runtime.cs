@@ -17,6 +17,7 @@ using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,8 +65,16 @@ public static class Runtime
                 _.Sources.Clear();
                 _.AddInMemoryCollection(configuration);
             })
-            .ConfigureServices(_ => _
-                .AddLogging(_ => _.ClearProviders()))
+            .ConfigureServices(_ =>
+            {
+                _.AddLogging(_ => _.ClearProviders());
+                _.AddOptions<EndpointsConfiguration>().Configure(builder =>
+                {
+                    builder.Management = new EndpointConfiguration { Port = 0 };
+                    builder.Private = new EndpointConfiguration { Port = 0 };
+                    builder.Public = new EndpointConfiguration { Port = 0 };
+                });
+            })
             .AddActorSystem()
             .AddMetrics()
             .AddGrpcHost(EndpointVisibility.Private)
