@@ -26,7 +26,7 @@ public record StreamProcessorState(StreamPosition Position, string FailureReason
     /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
     /// <param name="lastSuccessfullyProcessed">Timestamp of last successfull Stream process.</param>
     public StreamProcessorState(StreamPosition streamPosition, DateTimeOffset lastSuccessfullyProcessed) : this(streamPosition, string.Empty,
-        DateTimeOffset.UtcNow, 0, lastSuccessfullyProcessed, false)
+        lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false)
     {
     }
 
