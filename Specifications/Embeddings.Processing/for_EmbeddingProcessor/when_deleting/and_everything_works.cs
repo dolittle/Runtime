@@ -8,7 +8,6 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using It = Machine.Specifications.It;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 

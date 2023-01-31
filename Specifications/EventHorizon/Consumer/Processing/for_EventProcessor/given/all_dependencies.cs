@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
@@ -11,8 +10,6 @@ using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
-using Proto;
-using Proto.Cluster;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.given;
 

@@ -9,7 +9,6 @@ using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using It = Machine.Specifications.It;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 

@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
@@ -9,7 +8,6 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
-using CommittedAggregateEvents = Dolittle.Runtime.Events.Store.CommittedAggregateEvents;
 using It = Machine.Specifications.It;
 using UncommittedAggregateEvents = Dolittle.Runtime.Events.Store.UncommittedAggregateEvents;
 
