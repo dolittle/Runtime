@@ -135,7 +135,7 @@ public class EventHandlersService : EventHandlersBase
         return response;
     }
 
-    EventHandlerStatus CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant = null)
+    EventHandlerStatus CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant)
     {
         var status = new EventHandlerStatus
         {   

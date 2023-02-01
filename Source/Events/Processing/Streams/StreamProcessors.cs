@@ -113,7 +113,7 @@ public class StreamProcessors : IStreamProcessors
 
     void Unregister(StreamProcessorId id)
     {
-        StreamProcessor existing;
+        StreamProcessor? existing;
         do
         {
             _streamProcessors.TryRemove(id, out existing);

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Rudimentary;
@@ -19,7 +20,9 @@ public class Try<TResult> : Try
     /// <summary>
     /// Gets the <typeparamref name="TResult">result</typeparamref>.
     /// </summary>
-    public TResult Result { get; protected set; }
+    public TResult? Result { get; protected set; }
+    
+    
 
     /// <summary>
     /// Projects the successfull result if the operation succeeded, or returns the original failure if the operation failed.
@@ -99,14 +102,14 @@ public class Try<TResult> : Try
     /// </summary>
     /// <param name="try">The <see cref="Try{TResult}" /> to convert.</param>
     /// <return><see cref="Try{TResult}.Result" />.</return>
-    public static implicit operator TResult(Try<TResult> @try) => @try.Result;
+    public static implicit operator TResult?(Try<TResult> @try) => @try.Result;
 
     /// <summary>
     /// Implicitly convert <see cref="Try{TResult}" /> to <see cref="Try{TResult}.Exception" />.
     /// </summary>
     /// <param name="try">The <see cref="Try{TResult}" /> to convert.</param>
     /// <return><see cref="Try{TResult}.Exception" />.</return>
-    public static implicit operator Exception(Try<TResult> @try) => @try.Exception;
+    public static implicit operator Exception?(Try<TResult> @try) => @try.Exception;
 
     /// <summary>
     /// Implicitly convert <typeparamref name="TResult">result</typeparamref> to <see cref="Try{TResult}" />.
