@@ -66,7 +66,7 @@ public class EventProcessor : IEventProcessor
         Log.EventProcessorIsProcessing(_logger, Identifier, @event.Type.Id, partitionId);
         if (!ShouldProcessEvent(@event))
         {
-            return new SuccessfulProcessing();
+            return SuccessfulProcessing.Instance;
         }
 
         var tryGetCurrentState = await TryGetCurrentState(@event, partitionId, cancellationToken).ConfigureAwait(false);
@@ -86,7 +86,7 @@ public class EventProcessor : IEventProcessor
         Log.EventProcessorIsProcessingAgain(_logger, Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
         if (!ShouldProcessEvent(@event))
         {
-            return new SuccessfulProcessing();
+            return SuccessfulProcessing.Instance;
         }
 
 
@@ -119,12 +119,12 @@ public class EventProcessor : IEventProcessor
         {
             ProjectionReplaceResult replace => await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, CancellationToken.None).ConfigureAwait(false) switch
             {
-                true => new SuccessfulProcessing(),
+                true => SuccessfulProcessing.Instance,
                 false => new FailedProcessing($"Failed to replace state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
             },
             ProjectionDeleteResult => await _projectionPersister.TryRemove(_projectionDefinition, key, CancellationToken.None).ConfigureAwait(false) switch
             {
-                true => new SuccessfulProcessing(),
+                true => SuccessfulProcessing.Instance,
                 false => new FailedProcessing($"Failed to remove state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
             },
             _ => result

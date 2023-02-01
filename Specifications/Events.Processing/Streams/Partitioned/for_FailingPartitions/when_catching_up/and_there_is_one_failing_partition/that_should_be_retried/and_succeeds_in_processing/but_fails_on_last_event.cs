@@ -20,10 +20,10 @@ public class but_fails_on_last_event : given.all_dependencies
     {
         event_processor
             .Setup(_ => _.Process(eventStream[0].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(eventStream[1].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(eventStream[2].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)));

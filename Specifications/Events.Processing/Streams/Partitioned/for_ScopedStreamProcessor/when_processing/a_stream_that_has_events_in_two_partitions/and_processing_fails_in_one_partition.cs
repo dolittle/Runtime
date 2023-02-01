@@ -31,7 +31,7 @@ public class and_processing_fails_in_one_partition : given.all_dependencies
         fourth_event = new StreamEvent(committed_events.single(), 3u, Guid.NewGuid(), second_partition_id, true);
         event_processor
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), second_partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), first_partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));

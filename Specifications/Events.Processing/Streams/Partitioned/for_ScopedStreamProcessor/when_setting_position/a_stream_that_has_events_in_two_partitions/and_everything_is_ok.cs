@@ -30,7 +30,7 @@ public class and_everything_is_ok : all_dependencies
         second_event = new StreamEvent(committed_events.single(), 1u, Guid.NewGuid(), second_partition_id, true);
         event_processor
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         setup_event_stream(first_event, second_event);
     };
 

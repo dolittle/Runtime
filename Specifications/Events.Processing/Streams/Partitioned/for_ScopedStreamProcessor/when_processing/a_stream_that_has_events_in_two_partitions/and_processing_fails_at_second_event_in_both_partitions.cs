@@ -35,7 +35,7 @@ public class and_processing_fails_at_second_event_in_both_partitions : given.all
                 Moq.It.IsAny<PartitionId>(),
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(
                 Moq.It.Is<CommittedEvent>(_ => _ == third_event.Event || _ == fourth_event.Event),

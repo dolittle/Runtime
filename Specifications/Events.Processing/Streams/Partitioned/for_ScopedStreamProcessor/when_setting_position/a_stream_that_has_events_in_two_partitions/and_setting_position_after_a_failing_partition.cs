@@ -33,7 +33,7 @@ public class and_processing_fails_at_second_event_in_both_partitions : all_depen
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
         event_processor
             .Setup(_ => _.Process(second_event.Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         setup_event_stream(first_event, second_event);
     };
 

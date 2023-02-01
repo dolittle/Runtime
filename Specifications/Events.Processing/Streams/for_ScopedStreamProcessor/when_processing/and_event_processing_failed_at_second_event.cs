@@ -22,7 +22,7 @@ public class and_event_processing_failed_at_second_event : given.all_dependencie
     {
         event_processor
             .Setup(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(second_event, partition_id, Moq.It.IsAny<ExecutionContext>(),Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));

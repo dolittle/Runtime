@@ -27,7 +27,7 @@ public class but_fails_on_last_event : given.all_dependencies
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
             .Returns<CommittedEvent, PartitionId, string, uint, ExecutionContext, CancellationToken>((@event, partition, reason, retryCount, _, _) =>
-                @event == eventStream[2].Event ? Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)) : Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+                @event == eventStream[2].Event ? Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)) : Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
     };
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
