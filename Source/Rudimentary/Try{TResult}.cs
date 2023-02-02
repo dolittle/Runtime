@@ -21,8 +21,9 @@ public class Try<TResult> : Try
     /// Gets the <typeparamref name="TResult">result</typeparamref>.
     /// </summary>
     public TResult? Result { get; protected set; }
-    
-    
+
+    [MemberNotNullWhen(true, nameof(Result))]
+    public new bool Success => base.Success;
 
     /// <summary>
     /// Projects the successfull result if the operation succeeded, or returns the original failure if the operation failed.
