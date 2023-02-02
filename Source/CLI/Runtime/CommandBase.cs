@@ -41,7 +41,7 @@ public abstract class CommandBase : CLI.CommandBase
     /// The "--runtime" argument used to provide an address for to a Runtime to connect to.
     /// </summary>
     [Option("--runtime", CommandOptionType.SingleValue, Description = "The <host[:port]> to use to connect to the management endpoint of a Runtime")]
-    MicroserviceAddress Runtime { get; init; }
+    public MicroserviceAddress Runtime { get; init; }
         
     protected IEnumerable<EventType> EventTypes
     {
