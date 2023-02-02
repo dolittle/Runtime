@@ -37,7 +37,7 @@ public class DolittleConfiguration : IDolittleConfiguration
     {
         var config = _fullyParsedConfig.DeepClone();
         var token = config.SelectToken(include, errorWhenNoMatch: false);
-        return AsExpandoObject(token ?? new JObject());
+        return AsExpandoObject(token is not null ? RemoveEmptyChildren(token) : new JObject());
     }
 
     /// <inheritdoc />
@@ -48,7 +48,7 @@ public class DolittleConfiguration : IDolittleConfiguration
         {
             config.Remove(ignore);
         }
-        return AsExpandoObject(config);
+        return AsExpandoObject(RemoveEmptyChildren(config));
     }
 
     ExpandoObject AsExpandoObject(JToken token) => JsonConvert.DeserializeObject<ExpandoObject>(token.ToString(Formatting.Indented), _jsonSerializerSettings)!;
@@ -100,7 +100,52 @@ public class DolittleConfiguration : IDolittleConfiguration
             }
         }
 
-        return result;
+        return (JObject)RemoveEmptyChildren(result);
+    }
+
+    static JToken RemoveEmptyChildren(JToken token)
+    {
+        switch (token.Type)
+        {
+            case JTokenType.Object:
+            {
+                var copy = new JObject();
+                foreach (var prop in token.Children<JProperty>())
+                {
+                    var child = prop.Value;
+                    if (child.HasValues)
+                    {
+                        child = RemoveEmptyChildren(child);
+                    }
+                    if (child.Type != JTokenType.Object || child.HasValues)
+                    {
+                        copy.Add(prop.Name, child);
+                    }
+                }
+                return copy;
+            }
+
+            case JTokenType.Array:
+            {
+                var copy = new JArray();
+                foreach (var item in token.Children())
+                {
+                    var child = item;
+                    if (child.HasValues)
+                    {
+                        child = RemoveEmptyChildren(child);
+                    }
+                    if (child.Type != JTokenType.Object || child.HasValues)
+                    {
+                        copy.Add(child);
+                    }
+                }
+                return copy;
+            }
+
+            default:
+                return token;
+        }
     }
 
     static (string propertyName, string[] childPropertyNames) GetPropertyNameAndChildren(string path)
