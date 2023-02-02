@@ -1,3 +1,14 @@
+# [8.9.0] - 2023-2-2 [PR: #728](https://github.com/dolittle/Runtime/pull/728)
+## Summary
+
+Getting the current configuration of a running Runtime is useful.
+
+### Added
+
+- `dolittle runtime config` CLI command that gets the current running configuration.
+- grpc and grpc-web api for getting the current running configuration.
+
+
 # [8.8.2] - 2023-1-31 [PR: #727](https://github.com/dolittle/Runtime/pull/727)
 ### Fixed
 
