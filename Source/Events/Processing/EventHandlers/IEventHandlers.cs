@@ -44,13 +44,13 @@ public interface IEventHandlers
     /// <param name="tenant">The <see cref="TenantId"/>.</param>
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-    Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position);
+    Task<Try<ProcessingPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, ProcessingPosition position);
         
     /// <summary>
     /// Reprocesses all the events for an event handler for all tenants.
     /// </summary>
     /// <param name="eventHandlerId">The <see cref="EventHandlerId"/> of the identifying the event handler.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
-    Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId);
+    Task<Try<IDictionary<TenantId, Try<ProcessingPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId);
     
 }

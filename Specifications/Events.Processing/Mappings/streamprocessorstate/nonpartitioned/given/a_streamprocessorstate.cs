@@ -10,5 +10,5 @@ namespace Dolittle.Runtime.Events.Processing.Mappings.given;
 
 public class a_streamprocessorstate
 {
-    protected static readonly StreamProcessorState stream_processor_state = new(new StreamPosition(10), DateTimeOffset.Now);
+    protected static readonly StreamProcessorState stream_processor_state = new(new StreamPosition(10), 15, DateTimeOffset.Now);
 }

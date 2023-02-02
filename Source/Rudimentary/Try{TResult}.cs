@@ -15,18 +15,23 @@ public class Try<TResult> : Try
 {
     protected Try(TResult result) => Result = result;
 
-    protected Try(Exception exception) : base(exception) { }
+    protected Try(Exception exception) : base(exception)
+    {
+    }
 
     /// <summary>
     /// Gets the <typeparamref name="TResult">result</typeparamref>.
     /// </summary>
     public TResult? Result { get; protected set; }
 
+    public new Exception? Exception => base.Exception;
+
     [MemberNotNullWhen(true, nameof(Result))]
+    [MemberNotNullWhen(false, nameof(Exception))]
     public new bool Success => base.Success;
 
     /// <summary>
-    /// Projects the successfull result if the operation succeeded, or returns the original failure if the operation failed.
+    /// Projects the successful result if the operation succeeded, or returns the original failure if the operation failed.
     /// </summary>
     /// <param name="selector">A transform function to apply to the result.</param>
     /// <typeparam name="TSelectResult">The type of the projected result.</typeparam>

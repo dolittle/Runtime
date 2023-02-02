@@ -34,5 +34,5 @@ public interface IEventHandlerFactory
     /// <param name="dispatcher">The <see cref="ReverseCallDispatcher"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="IEventHandler"/>.</returns>
-    FastEventHandler CreateFast(EventHandlerRegistrationArguments arguments, bool implicitFilter, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken);
+    // FastEventHandler CreateFast(EventHandlerRegistrationArguments arguments, bool implicitFilter, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken);
 }

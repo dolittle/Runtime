@@ -74,6 +74,7 @@ public class StreamProcessorStateTest : JobBase
                     id.EventProcessorId,
                     id.SourceStreamId,
                     state.Position,
+                    state.EventLogPosition,
                     state.RetryTime.UtcDateTime,
                     state.FailureReason,
                     state.ProcessingAttempts,

@@ -93,7 +93,7 @@ public class ProjectionProcessor : IDisposable
     public async Task<Try> ReplayEventsForTenant(TenantId tenant, Func<TenantId, CancellationToken, Task<Try>> dropStates)
     {
         Log.ReplayingEventsForTenant(_logger, Definition.Scope, Definition.Projection, tenant);
-        return await _streamProcessor.PerformActionAndSetToPosition(tenant, StreamPosition.Start, dropStates);
+        return await _streamProcessor.PerformActionAndSetToPosition(tenant, ProcessingPosition.Initial, dropStates);
     }
 
     /// <summary>

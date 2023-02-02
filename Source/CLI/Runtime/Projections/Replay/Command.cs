@@ -67,7 +67,7 @@ public class Command : CommandBase
             return;
         }
 
-        var getIdentity= await _resolver.Resolve(runtimeAddress, IdentifierOrAlias, Scope);
+        var getIdentity= await _resolver.Resolve(runtimeAddress.Result, IdentifierOrAlias, Scope);
         if (!getIdentity.Success)
         {
             throw getIdentity.Exception;

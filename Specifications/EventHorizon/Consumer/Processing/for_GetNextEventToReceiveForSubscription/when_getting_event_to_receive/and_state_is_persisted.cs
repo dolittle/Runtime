@@ -15,7 +15,7 @@ public class and_state_is_persisted : given.all_dependencies
     static IStreamProcessorState subscription_state;
     Establish context = () =>
     {
-        subscription_state = new StreamProcessorState(4, DateTimeOffset.UtcNow);
+        subscription_state = new StreamProcessorState(4, 10, DateTimeOffset.UtcNow);
         stream_processor_states
             .Setup(_ => _.TryGetFor(subscription_id, cancellation_token))
             .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(subscription_state)));

@@ -30,7 +30,7 @@ static partial class Log
     internal static partial void ScopedStreamProcessorPerformingSetToPositionActionFailed(ILogger logger, IStreamProcessorId streamProcessorId, Exception exception);
 
     [LoggerMessage(0, LogLevel.Information, "Stream Processor: {StreamProcessorId} position has been set to {Position}")]
-    internal static partial void ScopedStreamProcessorSetToPosition(ILogger logger, IStreamProcessorId streamProcessorId, StreamPosition position);
+    internal static partial void ScopedStreamProcessorSetToPosition(ILogger logger, IStreamProcessorId streamProcessorId, ProcessingPosition position);
 
     [LoggerMessage(0, LogLevel.Warning, "There is already registered a Stream processor with id: {StreamProcessorId}")]
     internal static partial void StreamProcessorAlreadyRegistered(ILogger logger, StreamProcessorId streamProcessorId);

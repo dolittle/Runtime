@@ -24,7 +24,7 @@ public class and_earliest_retry_time_is_in_the_past
             {
                 "9b025684-130c-4789-b904-878a8e26c2d0",
                 new FailingPartitionState(
-                    0,
+                    0, 0,
                     DateTimeOffset.UtcNow.AddSeconds(-10),
                     "reason",
                     0,
@@ -33,7 +33,7 @@ public class and_earliest_retry_time_is_in_the_past
             {
                 "e90f7d42-0a21-4d90-93a8-e56bca822b67",
                 new FailingPartitionState(
-                    0,
+                    0, 0,
                     DateTimeOffset.UtcNow.AddSeconds(64),
                     "reason",
                     0,
@@ -42,14 +42,14 @@ public class and_earliest_retry_time_is_in_the_past
             {
                 "36975349-318d-4c01-bbbb-4f1aeaf4e7ea",
                 new FailingPartitionState(
-                    0,
+                    0, 0,
                     DateTimeOffset.UtcNow.AddSeconds(78),
                     "reason",
                     0,
                     DateTimeOffset.UtcNow)
             }
         };
-        state = new StreamProcessorState(0, failing_partitions, DateTimeOffset.UtcNow);
+        state = new StreamProcessorState(ProcessingPosition.Initial, failing_partitions, DateTimeOffset.UtcNow);
     };
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);

@@ -15,6 +15,8 @@ public interface IStreamProcessorState
     /// </summary>
     StreamPosition Position { get; }
 
+    EventLogSequenceNumber EventLogPosition { get; }
+
     /// <summary>
     /// Gets a value indicating whether this <see cref="AbstractScopedStreamProcessor" /> is partitioned or not.
     /// </summary>

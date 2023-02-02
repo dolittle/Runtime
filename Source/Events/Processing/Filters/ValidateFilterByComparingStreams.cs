@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -101,7 +102,7 @@ public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefi
         }
     }
 
-    static bool EventsAreNotEqual(IFilterDefinition filterDefinition, StreamEvent newEvent, StreamEvent oldEvent, out FilterValidationResult failedResult)
+    static bool EventsAreNotEqual(IFilterDefinition filterDefinition, StreamEvent newEvent, StreamEvent oldEvent, [NotNullWhen(true)] out FilterValidationResult? failedResult)
     {
         failedResult = default;
         if (newEvent.Event.EventLogSequenceNumber != oldEvent.Event.EventLogSequenceNumber)

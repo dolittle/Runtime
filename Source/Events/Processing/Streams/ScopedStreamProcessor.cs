@@ -48,7 +48,8 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         IStreamEventWatcher eventWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, eventWatcher, logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies,
+            eventWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _timeToRetryGetter = timeToRetryGetter;
@@ -78,7 +79,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
                 }
 
                 var eventToRetry = getNextEvents.Result.First();
-                
+
                 var executionContext = GetExecutionContextForEvent(eventToRetry);
                 streamProcessorState = await RetryProcessingEvent(
                     eventToRetry,
@@ -92,7 +93,9 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
                 {
                     continue;
                 }
-                var newStreamProcessorState = await ProcessEvents(getNextEvents.Result.Skip(1).Select(_ => (_, GetExecutionContextForEvent(_))), streamProcessorState, cancellationToken).ConfigureAwait(false);
+
+                var newStreamProcessorState = await ProcessEvents(getNextEvents.Result.Skip(1).Select(_ => (_, GetExecutionContextForEvent(_))),
+                    streamProcessorState, cancellationToken).ConfigureAwait(false);
                 streamProcessorState = newStreamProcessorState as StreamProcessorState;
             }
         }
@@ -101,11 +104,13 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
         var oldState = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
             oldState.Position,
+            oldState.EventLogPosition,
             failedProcessing.FailureReason,
             DateTimeOffset.MaxValue,
             oldState.ProcessingAttempts + 1,
@@ -116,11 +121,13 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
         var oldState = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
             oldState.Position,
+            oldState.EventLogPosition,
             failedProcessing.FailureReason,
             DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
             oldState.ProcessingAttempts + 1,
@@ -131,9 +138,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
-        var newState = new StreamProcessorState(processedEvent.Position + 1, DateTimeOffset.UtcNow);
+        var newState = new StreamProcessorState(processedEvent.Position + 1, processedEvent.Event.EventLogSequenceNumber + 1, DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
@@ -144,9 +152,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 
 
     /// <inheritdoc />
-    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
+    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, ProcessingPosition position)
     {
-        var newState = new StreamProcessorState(position, ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
+        var newState = new StreamProcessorState(position.StreamPosition, position.EventLogPosition,
+            ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }

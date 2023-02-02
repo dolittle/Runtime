@@ -11,8 +11,8 @@ public class all_dependencies : when_catching_up.given.all_dependencies
 {
     protected static PartitionId first_failing_partition_id;
     protected static PartitionId second_failing_partition_id;
-    protected static StreamPosition first_initial_failing_partition_position;
-    protected static StreamPosition second_initial_failing_partition_position;
+    protected static ProcessingPosition first_initial_failing_partition_position;
+    protected static ProcessingPosition second_initial_failing_partition_position;
     protected static string first_initial_failing_partition_reason;
     protected static string second_initial_failing_partition_reason;
     protected static DateTimeOffset first_initial_failing_partition_retry_time;
@@ -24,7 +24,7 @@ public class all_dependencies : when_catching_up.given.all_dependencies
     {
         first_failing_partition_id = "first failing partition";
         second_failing_partition_id = "the second failing partiton";
-        first_initial_failing_partition_position = second_initial_failing_partition_position = 0;
+        first_initial_failing_partition_position = second_initial_failing_partition_position = ProcessingPosition.Initial;
         first_initial_failing_partition_reason = second_initial_failing_partition_reason = "some reason";
         first_initial_failing_partition_retry_time = second_initial_failing_partition_retry_time = DateTimeOffset.UtcNow;
         first_failing_partition_state = new FailingPartitionState(first_initial_failing_partition_position, first_initial_failing_partition_retry_time, first_initial_failing_partition_reason, 1, DateTimeOffset.MinValue);

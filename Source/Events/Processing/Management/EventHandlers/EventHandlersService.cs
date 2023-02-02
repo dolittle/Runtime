@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Artifacts;
@@ -11,6 +12,9 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Legacy;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services.Hosting;
@@ -30,6 +34,7 @@ public class EventHandlersService : EventHandlersBase
     readonly IEventHandlers _eventHandlers;
     readonly IExceptionToFailureConverter _exceptionToFailureConverter;
     readonly IConvertStreamProcessorStatuses _streamProcessorStatusConverter;
+    readonly IMapStreamPositionToEventLogPosition _streamPositionToEventLogSequenceService;
     readonly ILogger _logger;
 
     /// <summary>
@@ -43,12 +48,13 @@ public class EventHandlersService : EventHandlersBase
         IEventHandlers eventHandlers,
         IExceptionToFailureConverter exceptionToFailureConverter,
         IConvertStreamProcessorStatuses streamProcessorStatusConverter,
-        ILogger logger)
+        ILogger logger, IMapStreamPositionToEventLogPosition streamPositionToEventLogSequenceService)
     {
         _eventHandlers = eventHandlers;
         _exceptionToFailureConverter = exceptionToFailureConverter;
         _streamProcessorStatusConverter = streamProcessorStatusConverter;
         _logger = logger;
+        _streamPositionToEventLogSequenceService = streamPositionToEventLogSequenceService;
     }
 
     /// <inheritdoc />
@@ -105,8 +111,16 @@ public class EventHandlersService : EventHandlersBase
         
         TenantId tenant = request.TenantId.ToGuid(); 
         Log.ReprocessEventsFrom(_logger, eventHandler.EventHandler, eventHandler.Scope, tenant, request.StreamPosition);
-        
-        var reprocessing = await _eventHandlers.ReprocessEventsFrom(eventHandler, tenant, request.StreamPosition).ConfigureAwait(false);
+
+        var eventLogPosition = await _streamPositionToEventLogSequenceService.TryGetEventLogPosition(new StreamProcessorId(eventHandler.Scope, eventHandler.EventHandler, StreamId.EventLog), request.StreamPosition, CancellationToken.None);
+        if (!eventLogPosition.Success)
+        {
+            Log.FailedDuringReprocessing(_logger, eventLogPosition.Exception);
+            response.Failure = _exceptionToFailureConverter.ToFailure(eventLogPosition.Exception);
+            return response;
+        }
+
+        var reprocessing = await _eventHandlers.ReprocessEventsFrom(eventHandler, tenant, new ProcessingPosition(request.StreamPosition, eventLogPosition.Result)).ConfigureAwait(false);
         if (!reprocessing.Success)
         {
             Log.FailedDuringReprocessing(_logger, reprocessing.Exception);

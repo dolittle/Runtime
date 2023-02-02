@@ -18,7 +18,7 @@ public class when_there_are_no_failing_partitions
     Establish context = () =>
     {
         time_to_retry_getter = new TimeToRetryForPartitionedStreamProcessor();
-        state = new StreamProcessorState(0, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
+        state = new StreamProcessorState(ProcessingPosition.Initial, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
     };
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);

@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState;
 
 public class when_creating_failing_state
 {
-    static StreamPosition stream_position;
+    static ProcessingPosition stream_position;
     static string failure_reason;
     static DateTimeOffset retry_time;
     static uint processing_attempts;
@@ -17,7 +17,7 @@ public class when_creating_failing_state
 
     Establish context = () =>
     {
-        stream_position = 0;
+        stream_position = ProcessingPosition.Initial;
         failure_reason = "";
         retry_time = DateTimeOffset.UtcNow;
         processing_attempts = 0;
@@ -25,7 +25,7 @@ public class when_creating_failing_state
 
     Because of = () => state = new StreamProcessorState(stream_position, failure_reason, retry_time, processing_attempts, DateTimeOffset.MinValue, false);
 
-    It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
+    It should_have_the_correct_stream_position = () => state.ProcessingPosition.ShouldEqual(stream_position);
     It should_have_the_correct_failure_reason = () => state.FailureReason.ShouldEqual(failure_reason);
     It should_have_the_correct_retry_time = () => state.RetryTime.ShouldEqual(retry_time);
     It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.ShouldEqual(processing_attempts);

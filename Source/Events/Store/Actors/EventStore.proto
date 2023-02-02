@@ -123,10 +123,11 @@ message GetStreamProcessorPartitionStateResponse{
 message ProcessingFailure{
     string event_source_id = 1;
     uint64 offset = 2;
-    string failure_reason = 3;
-    uint32 processing_attempts = 4;
-    google.protobuf.Timestamp retry_time = 5;
-    google.protobuf.Timestamp last_failed = 6;
+    uint64 event_log_offset = 3;
+    string failure_reason = 4;
+    uint32 processing_attempts = 5;
+    google.protobuf.Timestamp retry_time = 6;
+    google.protobuf.Timestamp last_failed = 7;
 }
 
 
@@ -134,15 +135,17 @@ message ProcessingFailure{
 message Bucket{
     uint32 bucket_id = 1;
     uint64 current_offset = 2;
-    repeated ProcessingFailure failures = 3;
-    google.protobuf.Timestamp last_successfully_processed = 4;
-    bool partitioned = 5;
+    uint64 current_event_log_offset = 3;
+    repeated ProcessingFailure failures = 4;
+    google.protobuf.Timestamp last_successfully_processed = 5;
+    bool partitioned = 6;
 }
 
 message SetPartitionedStreamProcessorStateRequest{
     StreamProcessorKey stream_id = 1;
     uint64 current_offset = 2;
-    map<string, uint64> failing_event_sources = 3;
+    uint64 current_event_log_offset = 3;
+    map<string, uint64> failing_event_sources = 4;
 }
 
 

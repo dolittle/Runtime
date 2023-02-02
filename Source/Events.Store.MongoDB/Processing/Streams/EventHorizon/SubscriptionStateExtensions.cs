@@ -19,6 +19,7 @@ public static class SubscriptionStateExtensions
     public static runtime.StreamProcessorState ToRuntimeRepresentation(this SubscriptionState state) =>
         new(
             state.Position,
+            state.Position,
             state.FailureReason,
             state.RetryTime,
             state.ProcessingAttempts,

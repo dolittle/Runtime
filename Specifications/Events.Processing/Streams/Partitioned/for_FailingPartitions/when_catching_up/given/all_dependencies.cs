@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
 public class all_dependencies : for_FailingPartitions.given.an_instance_of_failing_partitions
 {
-    protected static readonly StreamPosition initial_stream_processor_position = 3;
+    protected static readonly ProcessingPosition initial_stream_processor_position = new(3,3);
     protected static StreamProcessorId stream_processor_id;
     protected static StreamProcessorState stream_processor_state;
     protected static IReadOnlyList<StreamEvent> eventStream;

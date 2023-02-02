@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
 public class when_creating_state
 {
-    static StreamPosition position;
+    static ProcessingPosition position;
     static string reason;
     static DateTimeOffset retry_time;
     static FailingPartitionState state;
@@ -17,16 +17,16 @@ public class when_creating_state
 
     Establish context = () =>
     {
-        position = 0;
+        position = ProcessingPosition.Initial;
         reason = "reason";
         retry_time = DateTimeOffset.Now;
         processing_attempts = 0;
     };
 
     Because of = () =>
-        state = new FailingPartitionState(position, retry_time, reason, processing_attempts, DateTimeOffset.UtcNow);
+        state = new FailingPartitionState(position.StreamPosition, position.EventLogPosition, retry_time, reason, processing_attempts, DateTimeOffset.UtcNow);
 
-    It should_have_the_correct_position = () => state.Position.ShouldEqual(position);
+    It should_have_the_correct_position = () => state.ProcessingPosition.ShouldEqual(position);
     It should_have_the_correct_reason = () => state.Reason.ShouldEqual(reason);
     It should_have_the_correct_retry_time = () => state.RetryTime.ShouldEqual(retry_time);
     It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.ShouldEqual(processing_attempts);

@@ -134,15 +134,15 @@ public class EventHandler : IEventHandler
             : new EventHandlerNotRegistered(Info.Id);
         
     /// <inheritdoc />
-    public Task<Try<StreamPosition>> ReprocessEventsFrom(TenantId tenant, StreamPosition position)
+    public Task<Try<ProcessingPosition>> ReprocessEventsFrom(TenantId tenant, ProcessingPosition position)
         => EventProcessorStreamProcessor.SetToPosition(tenant, position);
 
     /// <inheritdoc />
-    public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents()
+    public async Task<Try<IDictionary<TenantId, Try<ProcessingPosition>>>> ReprocessAllEvents()
     {
         try
         {
-            return Try<IDictionary<TenantId, Try<StreamPosition>>>.Succeeded(await EventProcessorStreamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false));
+            return Try<IDictionary<TenantId, Try<ProcessingPosition>>>.Succeeded(await EventProcessorStreamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false));
         }
         catch (Exception ex)
         {

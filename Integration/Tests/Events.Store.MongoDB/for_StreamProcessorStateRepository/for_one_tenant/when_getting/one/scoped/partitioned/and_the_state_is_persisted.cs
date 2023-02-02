@@ -24,11 +24,13 @@ public class and_the_state_is_persisted : given.all_dependencies
         };
 
         var failing_partitions = new Dictionary<PartitionId, FailingPartitionState>();
-        failing_partitions.Add("d2b8f91d-e838-4b34-b0a3-0468dc29ca0e", new FailingPartitionState(2, DateTimeOffset.UtcNow, "Some reason", 2, DateTimeOffset.UtcNow));
-        
+        failing_partitions.Add("d2b8f91d-e838-4b34-b0a3-0468dc29ca0e",
+            new FailingPartitionState(2, 5, DateTimeOffset.UtcNow, "Some reason", 2, DateTimeOffset.UtcNow));
+
         stored_state = a_partitioned_state() with
         {
             Position = 2,
+            EventLogPosition = 5,
             FailingPartitions = failing_partitions
         };
         another_stored_processor = (stream_processor_id with
@@ -39,7 +41,7 @@ public class and_the_state_is_persisted : given.all_dependencies
         var to_store = new Dictionary<StreamProcessorId, IStreamProcessorState>();
         to_store.Add(stream_processor_id, stored_state);
         to_store.Add(another_stored_processor.id, another_stored_processor.state);
-        
+
         stream_processor_state_repository.PersistForScope(another_stored_processor.id.ScopeId, to_store, CancellationToken.None).GetAwaiter().GetResult();
     };
 
@@ -47,6 +49,9 @@ public class and_the_state_is_persisted : given.all_dependencies
 
     It should_get_the_state = () => retrieved_state.Success.ShouldBeTrue();
     It should_get_unpartitioned_state = () => retrieved_state.Result.Partitioned.ShouldBeTrue();
-    It should_get_unpartitioned_state_type = () => retrieved_state.Result.ShouldBeOfExactType<Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState>();
+
+    It should_get_unpartitioned_state_type = () =>
+        retrieved_state.Result.ShouldBeOfExactType<Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState>();
+
     It should_get_the_correct_state = () => retrieved_state.Result.should_be_the_same_partitioned_state_as(stored_state);
 }

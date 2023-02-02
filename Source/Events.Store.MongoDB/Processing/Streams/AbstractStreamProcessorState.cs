@@ -24,17 +24,20 @@ public abstract class AbstractStreamProcessorState
     /// </summary>
     /// <param name="eventProcessorId">The <see cref="EventProcessor" />.</param>
     /// <param name="sourceStreamId">The <see cref="SourceStream" />.</param>
-    /// <param name="position">The position.</param>
+    /// <param name="position">The position in the stream (how many processed events).</param>
+    /// <param name="eventLogPosition">The position in the event log</param>
     /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
     protected AbstractStreamProcessorState(
         Guid eventProcessorId,
         Guid sourceStreamId,
         ulong position,
+        ulong eventLogPosition,
         DateTime lastSuccessfullyProcessed)
     {
         EventProcessor = eventProcessorId;
         SourceStream = sourceStreamId;
         Position = position;
+        EventLogPosition = eventLogPosition;
         LastSuccessfullyProcessed = lastSuccessfullyProcessed;
     }
 
@@ -53,6 +56,12 @@ public abstract class AbstractStreamProcessorState
     /// </summary>
     [BsonRepresentation(BsonType.Decimal128)]
     public ulong Position { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the position.
+    /// </summary>
+    [BsonRepresentation(BsonType.Decimal128)]
+    public ulong EventLogPosition { get; set; }
 
     /// <summary>
     /// Gets or sets the timestamp when the StreamProcessor has processed the stream.

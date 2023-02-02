@@ -38,7 +38,7 @@ public class Command : CommandBase
     /// The "--tenant" argument used to provide a Tenant Id.
     /// </summary>
     [Option("--tenant", CommandOptionType.SingleValue, Description = "Only show Event Handler information for the specified Tenant")]
-    TenantId Tenant { get; init; }
+    TenantId? Tenant { get; init; }
 
     /// <summary>
     /// The entrypoint for the "dolittle runtime eventhandlers list" command.

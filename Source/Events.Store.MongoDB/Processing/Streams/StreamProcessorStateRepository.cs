@@ -45,10 +45,12 @@ public class StreamProcessorStateRepository : StreamProcessorStateRepositoryBase
                 id.EventProcessorId,
                 id.SourceStreamId,
                 partitionedStreamProcessorState.Position,
+                partitionedStreamProcessorState.EventLogPosition,
                 partitionedStreamProcessorState.FailingPartitions.ToDictionary(
                     kvp => kvp.Key.Value.ToString(),
                     kvp => new FailingPartitionState(
                         kvp.Value.Position,
+                        kvp.Value.EventLogPosition,
                         kvp.Value.RetryTime.UtcDateTime,
                         kvp.Value.Reason,
                         kvp.Value.ProcessingAttempts,
@@ -58,6 +60,7 @@ public class StreamProcessorStateRepository : StreamProcessorStateRepositoryBase
                 id.EventProcessorId,
                 id.SourceStreamId,
                 streamProcessorState.Position,
+                streamProcessorState.EventLogPosition,
                 streamProcessorState.RetryTime.UtcDateTime,
                 streamProcessorState.FailureReason,
                 streamProcessorState.ProcessingAttempts,

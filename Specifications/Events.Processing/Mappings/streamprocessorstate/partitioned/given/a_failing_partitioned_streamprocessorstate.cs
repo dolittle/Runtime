@@ -22,8 +22,8 @@ public class a_failing_partitioned_streamprocessorstate
 
     private static readonly Dictionary<PartitionId, FailingPartitionState> FailingPartitionStates = new()
     {
-        { failing_partition_id, new FailingPartitionState(new StreamPosition(5), retry_time, "testing", 2, last_failed) }
+        { failing_partition_id, new FailingPartitionState(new StreamPosition(5), 7, retry_time, "testing", 2, last_failed) }
     };
 
-    protected static readonly StreamProcessorState stream_processor_state = new(new StreamPosition(10), FailingPartitionStates, DateTimeOffset.Now);
+    protected static readonly StreamProcessorState stream_processor_state = new(new StreamPosition(10), 20, FailingPartitionStates, DateTimeOffset.Now);
 }

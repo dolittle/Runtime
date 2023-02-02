@@ -29,7 +29,7 @@ public class and_setting_position_to_failing_event : all_dependencies
         setup_event_stream(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true));
     };
 
-    Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100), 0, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
+    Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100), ProcessingPosition.Initial, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
 
     It should_process_first_event_twice = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
     It should_have_current_position_equal_one = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(1));

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartitionedStreamProcessor.when_failing;
@@ -16,7 +17,7 @@ public class and_retry_time_is_in_the_future
     Establish context = () =>
     {
         time_to_retry_getter = new TimeToRetryForUnpartitionedStreamProcessor();
-        state = new StreamProcessorState(0, "reason", DateTimeOffset.UtcNow.AddSeconds(60), 0, DateTimeOffset.UtcNow, true);
+        state = new StreamProcessorState(ProcessingPosition.Initial, "reason", DateTimeOffset.UtcNow.AddSeconds(60), 0, DateTimeOffset.UtcNow, true);
     };
 
     Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);

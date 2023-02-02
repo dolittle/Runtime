@@ -10,21 +10,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_StreamProce
 
 public class when_creating_state
 {
-    static StreamPosition stream_position;
+    static ProcessingPosition stream_position;
     static IDictionary<PartitionId, FailingPartitionState> failing_partitions;
     static StreamProcessorState state;
     static DateTimeOffset last_successfully_processed;
 
     Establish context = () =>
     {
-        stream_position = 0;
+        stream_position = ProcessingPosition.Initial;
         failing_partitions = new Dictionary<PartitionId, FailingPartitionState>();
         last_successfully_processed = DateTimeOffset.UtcNow;
     };
 
-    Because of = () => state = new StreamProcessorState(stream_position, failing_partitions, last_successfully_processed);
+    Because of = () => state = new StreamProcessorState(stream_position.StreamPosition, stream_position.EventLogPosition, failing_partitions, last_successfully_processed);
 
-    It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
+    It should_have_the_correct_stream_position = () => state.ProcessingPosition.ShouldEqual(stream_position);
     It should_have_the_correct_failing_partitions = () => state.FailingPartitions.ShouldEqual(failing_partitions);
     It should_be_partitioned = () => state.Partitioned.ShouldBeTrue();
     It should_have_the_correct_last_successfuly_processed_value = () => state.LastSuccessfullyProcessed.ShouldEqual(last_successfully_processed);

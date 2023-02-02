@@ -33,7 +33,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
     It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
     It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
     It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(failing_partition_id).ShouldBeTrue();
-    It should_not_change_failing_partition_position = () => failing_partition(failing_partition_id).Position.ShouldEqual(initial_failing_partition_position);
+    It should_not_change_failing_partition_position = () => failing_partition(failing_partition_id).Position.ShouldEqual(initial_failing_partition_position.StreamPosition);
     It should_have_new_failing_partition_reason = () => failing_partition(failing_partition_id).Reason.ShouldEqual(new_failing_reason);
     It should_not_retry_failing_partition = () => failing_partition(failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
 

@@ -78,7 +78,7 @@ public class all_dependencies
         cancellation_token_source.CancelAfter(cancelAfter);
         return stream_processor.Start(cancellation_token_source.Token);
     }
-    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
+    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, ProcessingPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
     {
         var result = stream_processor.Start(cancellation_token_source.Token);
         Task.Delay(setPositionAfter).GetAwaiter().GetResult();

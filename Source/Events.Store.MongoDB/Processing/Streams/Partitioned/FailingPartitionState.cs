@@ -15,19 +15,27 @@ public class FailingPartitionState
     /// <summary>
     /// Initializes a new instance of the <see cref="FailingPartitionState"/> class.
     /// </summary>
-    /// <param name="position">The position.</param>
+    /// <param name="position">The position in the stream.</param>
+    /// <param name="eventLogPosition">The position in the event log</param>
     /// <param name="retryTime">The retry time.</param>
     /// <param name="reason">The reason for failure.</param>
     /// <param name="processingAttempts">The number of times the event at position has been processed.</param>
     /// <param name="lastFailed">The timestamp of when this partition last failed.</param>
-    public FailingPartitionState(ulong position, DateTime retryTime, string reason, uint processingAttempts, DateTime lastFailed)
+    public FailingPartitionState(ulong position, ulong eventLogPosition, DateTime retryTime, string reason, uint processingAttempts, DateTime lastFailed)
     {
         Position = position;
+        EventLogPosition = eventLogPosition;
         RetryTime = retryTime;
         Reason = reason;
         ProcessingAttempts = processingAttempts;
         LastFailed = lastFailed;
     }
+
+    /// <summary>
+    /// Gets or sets the EventLogPosition.
+    /// </summary>
+    [BsonRepresentation(BsonType.Decimal128)]
+    public ulong EventLogPosition { get; set; }
 
     /// <summary>
     /// Gets or sets the position.
