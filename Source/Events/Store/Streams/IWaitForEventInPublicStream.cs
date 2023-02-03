@@ -20,7 +20,7 @@ public interface IWaitForEventInPublicStream
     /// <param name="timeout">The <see cref="Timeout" /> for waiting.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>The <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task WaitForEvent(StreamId stream, ProcessingPosition position, TimeSpan timeout, CancellationToken token);
+    Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token);
 
     /// <summary>
     /// Waits for an event to be at a <see cref="StreamPosition" /> in a publis tream with a default timeout of 1 min.
@@ -29,5 +29,5 @@ public interface IWaitForEventInPublicStream
     /// <param name="position">The <see cref="StreamPosition" /> of the event.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>The <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task WaitForEvent(StreamId stream, ProcessingPosition position, CancellationToken token);
+    Task WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token);
 }

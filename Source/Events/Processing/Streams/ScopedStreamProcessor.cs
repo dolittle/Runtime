@@ -45,9 +45,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         ICanFetchEventsFromStream eventsFromStreamsFetcher,
         ExecutionContext executionContext,
         IEventFetcherPolicies eventFetcherPolicies,
+        IStreamEventWatcher eventWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, eventWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _timeToRetryGetter = timeToRetryGetter;
@@ -148,9 +149,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 
 
     /// <inheritdoc />
-    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, ProcessingPosition position)
+    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
     {
-        var newState = new StreamProcessorState(position.StreamPosition, position.EventLogPosition,
+        // 
+        var newState = new StreamProcessorState(position, 0,
             ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;

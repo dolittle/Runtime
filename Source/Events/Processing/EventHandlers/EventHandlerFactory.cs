@@ -27,8 +27,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// </summary>
 public class EventHandlerFactory : IEventHandlerFactory
 {
-    readonly IStreamProcessors _streamProcessors;
-    readonly IValidateFilterForAllTenants _filterValidator;
     readonly Func<TenantId, IWriteEventsToStreams> _getEventsToStreamsWriter;   
     readonly IStreamDefinitions _streamDefinitions;
     readonly IMetricsCollector _metrics;
@@ -38,7 +36,6 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// Initializes a new instance of the <see cref="EventHandlerFactory"/> class.
     /// </summary>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors"/>.</param>
-    /// <param name="filterValidator">The <see cref="IValidateFilterForAllTenants"/>.</param>
     /// <param name="getEventsToStreamsWriter">The <see cref="Func{TResult}"/> for getting a tenant scoped <see cref="IWriteEventsToStreams"/>.</param>
     /// <param name="streamDefinitions">The <see cref="IStreamDefinitions"/>.</param>
     /// <param name="metrics">The collector to use for metrics.</param>
@@ -46,15 +43,10 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
     public EventHandlerFactory(
         IStreamProcessors streamProcessors,
-        IValidateFilterForAllTenants filterValidator,
-        Func<TenantId, IWriteEventsToStreams> getEventsToStreamsWriter,
         IStreamDefinitions streamDefinitions,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
     {
-        _streamProcessors = streamProcessors;
-        _filterValidator = filterValidator;
-        _getEventsToStreamsWriter = getEventsToStreamsWriter;
         _streamDefinitions = streamDefinitions;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
@@ -63,8 +55,6 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <inheritdoc />
     public IEventHandler Create(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
         => new EventHandler(
-            _streamProcessors,
-            _filterValidator,
             _streamDefinitions,
             arguments,
             tenant => new TypeFilterWithEventSourcePartition(

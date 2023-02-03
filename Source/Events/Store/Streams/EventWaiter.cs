@@ -62,7 +62,7 @@ public class EventWaiter
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
-    public async Task Wait(ProcessingPosition position, CancellationToken token)
+    public async Task Wait(StreamPosition position, CancellationToken token)
     {
         if (IsAlreadyNotifiedOfPosition(position))
         {
@@ -75,7 +75,7 @@ public class EventWaiter
             {
                 return;
             }
-            tcs = GetOrAddTaskCompletionSourceLocking(position.StreamPosition);
+            tcs = GetOrAddTaskCompletionSourceLocking(position);
         }
         await tcs.Task.WaitAsync(token).ConfigureAwait(false);
     }
@@ -84,7 +84,7 @@ public class EventWaiter
     /// Notifies that an event has been written in a <see cref="StreamPosition" /> in a stream.
     /// </summary>
     /// <param name="position">The <see cref="StreamPosition" />.</param>
-    public void Notify(ProcessingPosition position)
+    public void Notify(StreamPosition position)
     {
         if (NeverNotifiedOrNotNotifiedOfPosition(position))
         {
@@ -93,7 +93,7 @@ public class EventWaiter
             {
                 if (NeverNotifiedOrNotNotifiedOfPosition(position))
                 {
-                    _lastNotified = position.StreamPosition;
+                    _lastNotified = position;
                     shouldUpdate = true;
                 }
             }
@@ -104,14 +104,14 @@ public class EventWaiter
         }
     }
 
-    void RemoveAllAtAndBelowLocking(ProcessingPosition position)
+    void RemoveAllAtAndBelowLocking(StreamPosition position)
     {
         lock (_lock)
         {
             var keys = _taskCompletionSources.Keys.ToArray();
             foreach (var storedPosition in keys)
             {
-                if (storedPosition.Value <= position.StreamPosition.Value)
+                if (storedPosition.Value <= position.Value)
                 {
                     _taskCompletionSources[storedPosition].TrySetResult(true);
                     _taskCompletionSources.Remove(storedPosition);
@@ -141,9 +141,9 @@ public class EventWaiter
         return tcs;
     }
 
-    bool NeverNotifiedOrNotNotifiedOfPosition(ProcessingPosition position)
-        => _lastNotified == null || _lastNotified.Value < position.StreamPosition.Value;
+    bool NeverNotifiedOrNotNotifiedOfPosition(StreamPosition position)
+        => _lastNotified == null || _lastNotified.Value < position.Value;
 
-    bool IsAlreadyNotifiedOfPosition(ProcessingPosition position)
-        => _lastNotified != null && _lastNotified.Value >= position.StreamPosition.Value;
+    bool IsAlreadyNotifiedOfPosition(StreamPosition position)
+        => _lastNotified != null && _lastNotified.Value >= position.Value;
 }

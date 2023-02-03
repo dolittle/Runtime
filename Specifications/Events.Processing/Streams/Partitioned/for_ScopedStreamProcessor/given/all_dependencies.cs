@@ -90,7 +90,7 @@ public class all_dependencies
         cancellation_token_source.CancelAfter(cancelAfter);
         return stream_processor.Start(cancellation_token_source.Token);
     }
-    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, ProcessingPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
+    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
     {
         var result = stream_processor.Start(cancellation_token_source.Token);
         Task.Delay(setPositionAfter).GetAwaiter().GetResult();
@@ -109,7 +109,7 @@ public class all_dependencies
     protected static void setup_event_stream(params StreamEvent[] streamEvents)
     {
         events_fetcher
-            .Setup(_ => _.Fetch(It.IsAny<ProcessingPosition>(), It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Fetch(It.IsAny<StreamPosition>(), It.IsAny<CancellationToken>()))
             .Returns<StreamPosition, CancellationToken>((position, ct) =>
             {
                 var events = streamEvents.Skip((int) position.Value);
@@ -126,6 +126,6 @@ public class all_dependencies
                     ? Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(events))
                     : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
-        event_waiter.NotifyForEvent(source_stream_id, streamEvents.Last().CurrentProcessingPosition);
+        event_waiter.NotifyForEvent(source_stream_id, (ulong)(streamEvents.Length - 1));
     }
 }

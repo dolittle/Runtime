@@ -7,7 +7,7 @@ using System.Threading;
 namespace Dolittle.Runtime.Events.Store.Streams;
 
 
-public interface IStreamSubscriber
+public interface IStreamEventSubscriber
 {
     public IAsyncEnumerable<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken);
 }

@@ -45,5 +45,5 @@ public interface IEventLogStream
     /// <param name="from">From offset, inclusive</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<EventLogBatch> SubscribePublic(ScopeId scopeId, EventLogSequenceNumber from, CancellationToken cancellationToken);
+    ChannelReader<EventLogBatch> SubscribePublic(EventLogSequenceNumber from, CancellationToken cancellationToken);
 }

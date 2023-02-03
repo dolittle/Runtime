@@ -49,9 +49,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         ExecutionContext executionContext,
         Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,
         IEventFetcherPolicies eventFetcherPolicies,
+        IStreamEventWatcher streamWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, streamWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _failingPartitions = failingPartitionsFactory(processor, eventsFromStreamsFetcher, GetExecutionContextForEvent);
@@ -129,19 +130,19 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
 
     /// <inheritdoc />
-    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, ProcessingPosition position)
+    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
     {
         var state = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
-            position,
+            new ProcessingPosition(position, 0),
             FailingPartitionsIgnoringPartitionsToReprocess(state, position),
             state.LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
 
-    static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, ProcessingPosition position)
+    static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, StreamPosition position)
         => state.FailingPartitions
-            .Where(_ => _.Value.Position.StreamPosition < position.StreamPosition)
+            .Where(_ => _.Value.Position.StreamPosition < position)
             .ToDictionary(_ => _.Key, _ => _.Value);
 }

@@ -32,14 +32,14 @@ static class LoggerExtensions
             new EventId(188707764, nameof(WaitingTimedOut)),
             "Waiting timedout for: {WaiterId}");
 
-    internal static void WaitForEventAtPosition(this ILogger logger, ProcessingPosition position, bool isPublicStream, StreamId stream, ScopeId scope)
-        => _waitForEventAtPosition(logger, position.StreamPosition, isPublicStream ? "public " : string.Empty, stream, scope, null);
+    internal static void WaitForEventAtPosition(this ILogger logger, StreamPosition position, bool isPublicStream, StreamId stream, ScopeId scope)
+        => _waitForEventAtPosition(logger, position, isPublicStream ? "public " : string.Empty, stream, scope, null);
 
     internal static void WaitForEventAppended(this ILogger logger, bool isPublicStream, StreamId stream, ScopeId scope)
         => _waitForEventAppended(logger, isPublicStream ? "public " : string.Empty, stream, scope, null);
 
-    internal static void WaiterNotifyForEvent(this ILogger logger, ProcessingPosition position, bool isPublicStream, StreamId stream, ScopeId scope)
-        => _waiterNotifyForEvent(logger, position.StreamPosition, isPublicStream ? "public " : string.Empty, stream, scope, null);
+    internal static void WaiterNotifyForEvent(this ILogger logger, StreamPosition position, bool isPublicStream, StreamId stream, ScopeId scope)
+        => _waiterNotifyForEvent(logger, position, isPublicStream ? "public " : string.Empty, stream, scope, null);
 
     internal static void WaitingTimedOut(this ILogger logger, EventWaiterId eventWaiter)
         => _waitingTimedOut(logger, eventWaiter, null);

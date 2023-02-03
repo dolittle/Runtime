@@ -13,5 +13,5 @@ public interface INotifyOfPublicStreamEvents
     /// </summary>
     /// <param name="stream">The <see cref="StreamId" /> of the stream.</param>
     /// <param name="position">The <see cref="StreamPosition" /> of the event.</param>
-    void NotifyForEvent(StreamId stream, ProcessingPosition position);
+    void NotifyForEvent(StreamId stream, StreamPosition position);
 }
