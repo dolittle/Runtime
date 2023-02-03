@@ -1,3 +1,9 @@
+# [8.9.1] - 2023-2-3 [PR: #729](https://github.com/dolittle/Runtime/pull/729)
+## Summary
+
+Don't include a platform config with Production environment in production docker image.It ended up overwriting the environment for all Runtimes
+
+
 # [8.9.0] - 2023-2-2 [PR: #728](https://github.com/dolittle/Runtime/pull/728)
 ## Summary
 
