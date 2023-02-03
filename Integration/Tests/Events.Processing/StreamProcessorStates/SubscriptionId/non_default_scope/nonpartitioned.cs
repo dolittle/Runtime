@@ -47,7 +47,7 @@ class nonpartitioned : given.a_clean_event_store
             stream_id,
             partition_id);
 
-        stream_processor_state = new(new StreamPosition(10), 15, "", last_successfully_processed, 0, last_successfully_processed, false);
+        stream_processor_state = new(new ProcessingPosition(10, 15), "", last_successfully_processed, 0, last_successfully_processed, false);
 
         stream_processor_states.Persist(subscription_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
         retrieved_stream_processor_state_response = stream_processor_states.TryGetFor(subscription_id, CancellationToken.None).GetAwaiter().GetResult();

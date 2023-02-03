@@ -17,5 +17,5 @@ public class a_partitioned_streamprocessorstate
     protected static readonly Guid source_stream_id = Guid.Parse("c9294a5d-2e85-4ae2-8411-878d5d4fb4ac");
     protected static readonly DateTimeOffset last_failed = DateTimeOffset.Now - TimeSpan.FromSeconds(10);
     protected static readonly StreamProcessorState stream_processor_state =
-        new(new StreamPosition(10), 11, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.Now);
+        new(new ProcessingPosition(10, 11), ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.Now);
 }

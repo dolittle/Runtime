@@ -59,8 +59,7 @@ public class StreamProcessorState : AbstractStreamProcessorState
     /// <inheritdoc/>
     public override IStreamProcessorState ToRuntimeRepresentation() =>
         new runtime.StreamProcessorState(
-            Position,
-            EventLogPosition,
+            new ProcessingPosition(Position, EventLogPosition),
             FailureReason,
             RetryTime,
             ProcessingAttempts,

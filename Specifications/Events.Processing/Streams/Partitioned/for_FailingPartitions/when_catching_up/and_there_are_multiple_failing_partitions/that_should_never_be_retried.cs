@@ -17,13 +17,13 @@ public class that_should_never_be_retried : given.all_dependencies
     Establish context = () =>
     {
         stream_processor_state.FailingPartitions[first_failing_partition_id] = new FailingPartitionState(
-            first_failing_partition_state.ProcessingPosition,
+            first_failing_partition_state.Position,
             DateTimeOffset.MaxValue,
             first_failing_partition_state.Reason,
             first_failing_partition_state.ProcessingAttempts,
             DateTimeOffset.UtcNow);
         stream_processor_state.FailingPartitions[second_failing_partition_id] = new FailingPartitionState(
-            second_failing_partition_state.ProcessingPosition,
+            second_failing_partition_state.Position,
             DateTimeOffset.MaxValue,
             second_failing_partition_state.Reason,
             second_failing_partition_state.ProcessingAttempts,
@@ -36,8 +36,8 @@ public class that_should_never_be_retried : given.all_dependencies
     It should_have_two_failing_partitions = () => result.FailingPartitions.Count.ShouldEqual(2);
     It should_have_failing_partition_with_first_failing_partition_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).ShouldBeTrue();
     It should_have_failing_partition_with_second_failing_partition_id = () => result.FailingPartitions.ContainsKey(second_failing_partition_id).ShouldBeTrue();
-    It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).ProcessingPosition.ShouldEqual(first_initial_failing_partition_position);
-    It should_not_change_second_failing_partition_position = () => failing_partition(second_failing_partition_id).ProcessingPosition.ShouldEqual(second_initial_failing_partition_position);
+    It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).Position.ShouldEqual(first_initial_failing_partition_position);
+    It should_not_change_second_failing_partition_position = () => failing_partition(second_failing_partition_id).Position.ShouldEqual(second_initial_failing_partition_position);
     It should_not_change_first_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.ShouldEqual(first_initial_failing_partition_reason);
     It should_not_change_second_failing_partition_reason = () => failing_partition(second_failing_partition_id).Reason.ShouldEqual(second_initial_failing_partition_reason);
     It should_not_change_first_failing_partition_retry_time = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);

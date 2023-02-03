@@ -26,7 +26,7 @@ public class when_creating_state
     Because of = () =>
         state = new FailingPartitionState(position.StreamPosition, position.EventLogPosition, retry_time, reason, processing_attempts, DateTimeOffset.UtcNow);
 
-    It should_have_the_correct_position = () => state.ProcessingPosition.ShouldEqual(position);
+    It should_have_the_correct_position = () => state.Position.ShouldEqual(position);
     It should_have_the_correct_reason = () => state.Reason.ShouldEqual(reason);
     It should_have_the_correct_retry_time = () => state.RetryTime.ShouldEqual(retry_time);
     It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.ShouldEqual(processing_attempts);

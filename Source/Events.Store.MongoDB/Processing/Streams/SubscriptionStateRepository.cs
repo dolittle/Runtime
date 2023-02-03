@@ -57,7 +57,7 @@ public class SubscriptionStateRepository : StreamProcessorStateRepositoryBase<Su
             id.ProducerTenantId,
             id.StreamId,
             id.PartitionId,
-            state.Position,
+            state.Position.EventLogPosition,
             state.RetryTime.UtcDateTime,
             state.FailureReason,
             state.ProcessingAttempts,

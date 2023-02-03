@@ -27,8 +27,8 @@ public class and_fails_processing : given.all_dependencies
     It should_have_two_failing_partitions = () => result.FailingPartitions.Count.ShouldEqual(2);
     It should_have_failing_partition_with_first_failing_partition_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).ShouldBeTrue();
     It should_have_failing_partition_with_second_failing_partition_id = () => result.FailingPartitions.ContainsKey(second_failing_partition_id).ShouldBeTrue();
-    It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).ProcessingPosition.ShouldEqual(first_initial_failing_partition_position);
-    It should_change_second_failing_partition_position_two_first_unprocessed_event_in_partition = () => failing_partition(second_failing_partition_id).ProcessingPosition.ShouldEqual(second_initial_failing_partition_position.IncrementProcessed());
+    It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).Position.ShouldEqual(first_initial_failing_partition_position);
+    It should_change_second_failing_partition_position_two_first_unprocessed_event_in_partition = () => failing_partition(second_failing_partition_id).Position.ShouldEqual(second_initial_failing_partition_position.IncrementWithStream());
     It should_have_new_first_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.ShouldEqual(new_failing_reason);
     It should_have_new_second_failing_partition_reason = () => failing_partition(second_failing_partition_id).Reason.ShouldEqual(new_failing_reason);
     It should_not_change_first_failing_partition_retry_time = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);

@@ -11,11 +11,9 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 public interface IStreamProcessorState
 {
     /// <summary>
-    /// Gets the <see cref="StreamPosition" />.
+    /// Gets the <see cref="ProcessingPosition" />.
     /// </summary>
-    StreamPosition Position { get; }
-
-    EventLogSequenceNumber EventLogPosition { get; }
+    ProcessingPosition Position { get; }
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="AbstractScopedStreamProcessor" /> is partitioned or not.

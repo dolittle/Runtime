@@ -18,7 +18,7 @@ public class EventWaiter
 {
     readonly object _lock = new();
     readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
-    StreamPosition _lastNotified;
+    StreamPosition? _lastNotified;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventWaiter"/> class.
@@ -62,7 +62,7 @@ public class EventWaiter
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
-    public async Task Wait(StreamPosition position, CancellationToken token)
+    public async Task Wait(ProcessingPosition position, CancellationToken token)
     {
         if (IsAlreadyNotifiedOfPosition(position))
         {
@@ -75,7 +75,7 @@ public class EventWaiter
             {
                 return;
             }
-            tcs = GetOrAddTaskCompletionSourceLocking(position);
+            tcs = GetOrAddTaskCompletionSourceLocking(position.StreamPosition);
         }
         await tcs.Task.WaitAsync(token).ConfigureAwait(false);
     }
@@ -84,7 +84,7 @@ public class EventWaiter
     /// Notifies that an event has been written in a <see cref="StreamPosition" /> in a stream.
     /// </summary>
     /// <param name="position">The <see cref="StreamPosition" />.</param>
-    public void Notify(StreamPosition position)
+    public void Notify(ProcessingPosition position)
     {
         if (NeverNotifiedOrNotNotifiedOfPosition(position))
         {
@@ -93,7 +93,7 @@ public class EventWaiter
             {
                 if (NeverNotifiedOrNotNotifiedOfPosition(position))
                 {
-                    _lastNotified = position;
+                    _lastNotified = position.StreamPosition;
                     shouldUpdate = true;
                 }
             }
@@ -104,14 +104,14 @@ public class EventWaiter
         }
     }
 
-    void RemoveAllAtAndBelowLocking(StreamPosition position)
+    void RemoveAllAtAndBelowLocking(ProcessingPosition position)
     {
         lock (_lock)
         {
             var keys = _taskCompletionSources.Keys.ToArray();
             foreach (var storedPosition in keys)
             {
-                if (storedPosition.Value <= position.Value)
+                if (storedPosition.Value <= position.StreamPosition.Value)
                 {
                     _taskCompletionSources[storedPosition].TrySetResult(true);
                     _taskCompletionSources.Remove(storedPosition);
@@ -141,9 +141,9 @@ public class EventWaiter
         return tcs;
     }
 
-    bool NeverNotifiedOrNotNotifiedOfPosition(StreamPosition position)
-        => _lastNotified == null || _lastNotified.Value < position.Value;
+    bool NeverNotifiedOrNotNotifiedOfPosition(ProcessingPosition position)
+        => _lastNotified == null || _lastNotified.Value < position.StreamPosition.Value;
 
-    bool IsAlreadyNotifiedOfPosition(StreamPosition position)
-        => _lastNotified != null && _lastNotified.Value >= position.Value;
+    bool IsAlreadyNotifiedOfPosition(ProcessingPosition position)
+        => _lastNotified != null && _lastNotified.Value >= position.StreamPosition.Value;
 }

@@ -25,7 +25,7 @@ class nonpartitioned : given.a_clean_event_store
 
 
     static readonly StreamProcessorState stream_processor_state =
-        new(new StreamPosition(10), 19, "Testing", retry_time, 1, last_successfully_processed, true);
+        new(new ProcessingPosition(10, 19), "Testing", retry_time, 1, last_successfully_processed, true);
 
 
     Establish context = () =>

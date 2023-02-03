@@ -23,5 +23,5 @@ public interface ICanValidateFilterFor<TDefinition>
     /// <param name="lastUnprocessedEvent">The <see cref="StreamPosition" /> of the last unprocessed event.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns><see cref="FilterValidationResult" />.</returns>
-    Task<FilterValidationResult> Validate(TDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken);
+    Task<FilterValidationResult> Validate(TDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, ProcessingPosition lastUnprocessedEvent, CancellationToken cancellationToken);
 }

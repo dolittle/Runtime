@@ -16,10 +16,10 @@ public interface ICanFetchEventsFromStream
     /// <summary>
     /// Fetch the events from a given <see cref="StreamPosition" />.
     /// </summary>
-    /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
+    /// <param name="position"><see cref="StreamPosition">the position in the stream</see>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>The <see cref="StreamEvent" />.</returns>
-    Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken);
+    Task<Try<IEnumerable<StreamEvent>>> Fetch(ProcessingPosition position, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets the <see cref="StreamPosition"/> that will be used for the next event written to the stream. 

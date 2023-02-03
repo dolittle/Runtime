@@ -32,7 +32,7 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(ProcessingPosition position, CancellationToken cancellationToken)
     {
         try
         {
@@ -52,20 +52,20 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
         => new NotImplementedException("GetNextStreamPosition should never be used on this specific fetcher");
 
     /// <inheritdoc/>
-    public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
+    public void NotifyForEvent(ScopeId scope, StreamId stream, ProcessingPosition position)
     {
     }
 
     /// <inheritdoc/>
-    public void NotifyForEvent(StreamId stream, StreamPosition position)
+    public void NotifyForEvent(StreamId stream, ProcessingPosition position)
     {
     }
 
     /// <inheritdoc/>
-    public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
+    public Task WaitForEvent(ScopeId scope, StreamId stream, ProcessingPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
 
     /// <inheritdoc/>
-    public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
+    public Task WaitForEvent(ScopeId scope, StreamId stream, ProcessingPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
 
     /// <inheritdoc/>
     public Task WaitForEvent(ScopeId scope, StreamId stream, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
@@ -74,8 +74,8 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
     public Task WaitForEvent(ScopeId scope, StreamId stream, CancellationToken token) => Task.Delay(60 * 1000, token);
 
     /// <inheritdoc/>
-    public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
+    public Task WaitForEvent(StreamId stream, ProcessingPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
 
     /// <inheritdoc/>
-    public Task WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
+    public Task WaitForEvent(StreamId stream, ProcessingPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
 }

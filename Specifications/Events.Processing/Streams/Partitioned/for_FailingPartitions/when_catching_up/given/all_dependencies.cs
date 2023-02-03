@@ -37,7 +37,7 @@ public class all_dependencies : for_FailingPartitions.given.an_instance_of_faili
             });
 
         events_fetcher
-            .Setup(_ => _.FetchInPartition(Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.FetchInPartition(Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ProcessingPosition>(), Moq.It.IsAny<CancellationToken>()))
             .Returns<PartitionId, StreamPosition, CancellationToken>((partition, position, _) =>
             {
                 var events = eventStream.Skip((int)position.Value).Where(_ => _.Partition == partition);

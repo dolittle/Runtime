@@ -17,7 +17,7 @@ public class that_should_never_be_retried : given.all_dependencies
     Establish context = () =>
     {
         stream_processor_state.FailingPartitions[failing_partition_id] = new FailingPartitionState(
-            failing_partition_state.ProcessingPosition,
+            failing_partition_state.Position,
             DateTimeOffset.MaxValue,
             failing_partition_state.Reason,
             failing_partition_state.ProcessingAttempts,
@@ -32,7 +32,7 @@ public class that_should_never_be_retried : given.all_dependencies
     It should_return_a_state_with_the_correct_partitioned_value = () => result.Partitioned.ShouldEqual(stream_processor_state.Partitioned);
     It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
     It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(failing_partition_id).ShouldBeTrue();
-    It should_not_change_failing_partition_position = () => failing_partition(failing_partition_id).ProcessingPosition.ShouldEqual(initial_failing_partition_position);
+    It should_not_change_failing_partition_position = () => failing_partition(failing_partition_id).Position.ShouldEqual(initial_failing_partition_position);
     It should_not_change_failing_partition_reason = () => failing_partition(failing_partition_id).Reason.ShouldEqual(initial_failing_partition_reason);
     It should_not_change_failing_partition_retry_time = () => failing_partition(failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
 

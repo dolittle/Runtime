@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -99,7 +100,7 @@ public class FilterValidators : IFilterValidators
         return await validator.Validate((TDefinition)persistedDefinition, filter, lastUnprocessedEvent, cancellationToken).ConfigureAwait(false);
     }
 
-    bool TryGetValidatorFor<TDefinition>(out ICanValidateFilterFor<TDefinition> validator)
+    bool TryGetValidatorFor<TDefinition>([NotNullWhen(true)] out ICanValidateFilterFor<TDefinition>? validator)
         where TDefinition : IFilterDefinition
     {
         validator = default;
@@ -119,7 +120,7 @@ public class FilterValidators : IFilterValidators
         }
     }
 
-    static bool StreamProcessorHasProcessedEvents(Try<IStreamProcessorState> tryGetState, out FilterValidationResult validationResult, out StreamPosition lastUnprocessedEvent)
+    static bool StreamProcessorHasProcessedEvents(Try<IStreamProcessorState> tryGetState, [NotNullWhen(false)] out FilterValidationResult? validationResult, [NotNullWhen(true)] out ProcessingPosition? lastUnprocessedEvent)
     {
         if (!tryGetState.Success)
         {
@@ -132,7 +133,7 @@ public class FilterValidators : IFilterValidators
 
         lastUnprocessedEvent = tryGetState.Result.Position;
 
-        if (lastUnprocessedEvent == StreamPosition.Start)
+        if (lastUnprocessedEvent == ProcessingPosition.Initial)
         {
             validationResult = FilterValidationResult.Succeeded();
             return false;

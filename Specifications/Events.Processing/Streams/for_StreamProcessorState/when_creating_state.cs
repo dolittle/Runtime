@@ -9,15 +9,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState;
 
 public class when_creating_state
 {
-    static ProcessingPosition stream_position;
+    static ProcessingPosition processing_position;
     static StreamProcessorState state;
 
     Establish context = () =>
     {
-        stream_position = ProcessingPosition.Initial;
+        processing_position = ProcessingPosition.Initial;
     };
 
-    Because of = () => state = new StreamProcessorState(stream_position, DateTimeOffset.UtcNow);
+    Because of = () => state = new StreamProcessorState(processing_position, DateTimeOffset.UtcNow);
 
-    It should_have_the_correct_stream_position = () => state.ProcessingPosition.ShouldEqual(stream_position);
+    It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(processing_position);
 }

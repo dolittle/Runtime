@@ -109,7 +109,7 @@ public class all_dependencies
     protected static void setup_event_stream(params StreamEvent[] streamEvents)
     {
         events_fetcher
-            .Setup(_ => _.Fetch(It.IsAny<StreamPosition>(), It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Fetch(It.IsAny<ProcessingPosition>(), It.IsAny<CancellationToken>()))
             .Returns<StreamPosition, CancellationToken>((position, ct) =>
             {
                 var events = streamEvents.Skip((int) position.Value);
@@ -118,7 +118,7 @@ public class all_dependencies
                     : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
         events_fetcher
-            .Setup(_ => _.FetchInPartition(It.IsAny<PartitionId>(), It.IsAny<StreamPosition>(), It.IsAny<CancellationToken>()))
+            .Setup(_ => _.FetchInPartition(It.IsAny<PartitionId>(), It.IsAny<ProcessingPosition>(), It.IsAny<CancellationToken>()))
             .Returns<PartitionId, StreamPosition, CancellationToken>((partition, position, ct) =>
             {
                 var events = streamEvents.Skip((int) position.Value).Where(_ => _.Partition == partition);
@@ -126,6 +126,6 @@ public class all_dependencies
                     ? Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(events))
                     : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
-        event_waiter.NotifyForEvent(source_stream_id, (ulong)(streamEvents.Length - 1));
+        event_waiter.NotifyForEvent(source_stream_id, streamEvents.Last().CurrentProcessingPosition);
     }
 }

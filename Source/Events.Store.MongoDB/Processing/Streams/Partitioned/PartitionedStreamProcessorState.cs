@@ -43,8 +43,7 @@ public class PartitionedStreamProcessorState : AbstractStreamProcessorState
     /// <inheritdoc/>
     public override IStreamProcessorState ToRuntimeRepresentation() =>
         new runtime.Partitioned.StreamProcessorState(
-            Position,
-            EventLogPosition,
+            new ProcessingPosition(Position, EventLogPosition),
             FailingPartitions.ToDictionary(_ => new PartitionId(_.Key), _ => _.Value.ToRuntimeRepresentation()),
             LastSuccessfullyProcessed);
 }

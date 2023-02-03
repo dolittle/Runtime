@@ -27,7 +27,6 @@ public abstract class AbstractScopedStreamProcessor
     readonly ICanFetchEventsFromStream _eventsFetcher;
     readonly ExecutionContext _executionContext;
     readonly IEventFetcherPolicies _eventFetcherPolicies;
-    readonly IStreamEventWatcher _eventWaiter;
     readonly object _setPositionLock = new();
     CancellationTokenSource? _resetStreamProcessor;
     TaskCompletionSource<Try<ProcessingPosition>>? _resetStreamProcessorCompletionSource;
@@ -58,7 +57,6 @@ public abstract class AbstractScopedStreamProcessor
         ICanFetchEventsFromStream eventsFetcher,
         ExecutionContext executionContext,
         IEventFetcherPolicies eventFetcherPolicies,
-        IStreamEventWatcher streamWatcher,
         ILogger logger)
     {
         Identifier = streamProcessorId;
@@ -70,7 +68,6 @@ public abstract class AbstractScopedStreamProcessor
         _eventsFetcher = eventsFetcher;
         _executionContext = executionContext;
         _eventFetcherPolicies = eventFetcherPolicies;
-        _eventWaiter = streamWatcher;
     }
 
     /// <summary>
@@ -338,7 +335,7 @@ public abstract class AbstractScopedStreamProcessor
                     _resetStreamProcessor = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                     if (_resetStreamProcessorCompletionSource != default)
                     {
-                        if (_newPosition.EventLogPosition > _currentState.EventLogPosition)
+                        if (_newPosition.EventLogPosition > _currentState.Position.EventLogPosition)
                         {
                             _resetStreamProcessorCompletionSource.SetResult(Try<ProcessingPosition>.Failed(new CannotSetStreamProcessorPositionHigherThanCurrentPosition(Identifier, _currentState, _newPosition)));
                         }
@@ -350,7 +347,7 @@ public abstract class AbstractScopedStreamProcessor
                             {
                                 Log.ScopedStreamProcessorSetToPosition(Logger, Identifier, _newPosition);
                                 _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
-                                _resetStreamProcessorCompletionSource.SetResult(new ProcessingPosition(_currentState.Position, _currentState.EventLogPosition));
+                                _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
                             }
                             else
                             {
@@ -370,12 +367,7 @@ public abstract class AbstractScopedStreamProcessor
                         tryGetEvents = await FetchNextEventsToProcess(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
                         if (!tryGetEvents.Success)
                         {
-                            await _eventWaiter.WaitForEvent(
-                                Identifier.ScopeId,
-                                _sourceStreamDefinition.StreamId,
-                                _currentState.Position,
-                                GetTimeToRetryProcessing(_currentState),
-                                _resetStreamProcessor.Token).ConfigureAwait(false);
+                            throw new NotImplementedException("Watchers are being replaced with subscriptions");
                         }
                     }
                     catch (TaskCanceledException ex)

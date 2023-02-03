@@ -30,7 +30,7 @@ public class ConvertStreamProcessorStatuses : IConvertStreamProcessorStatuses
         {
             var status = new Contracts.TenantScopedStreamProcessorStatus
             {
-                StreamPosition = state.Position,
+                StreamPosition = state.Position.StreamPosition,
                 TenantId = tenant.ToProtobuf(),
             };
 
@@ -50,7 +50,7 @@ public class ConvertStreamProcessorStatuses : IConvertStreamProcessorStatuses
                                 LastFailed = failure.LastFailed.ToTimestamp(),
                                 RetryCount = failure.ProcessingAttempts,
                                 RetryTime = failure.RetryTime.ToTimestamp(),
-                                StreamPosition = failure.Position
+                                StreamPosition = failure.Position.StreamPosition
                             });
                     }
 

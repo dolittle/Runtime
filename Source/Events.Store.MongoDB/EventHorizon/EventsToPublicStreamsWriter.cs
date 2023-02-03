@@ -59,6 +59,6 @@ public class EventsToPublicStreamsWriter : IWriteEventsToPublicStreams
                     .ToList();
             },
             cancellationToken).ConfigureAwait(false);
-        _streamWatcher.NotifyForEvent(streamId, lastWrittenStreamPosition);
+        // _streamWatcher.NotifyForEvent(streamId, lastWrittenStreamPosition);
     }
 }

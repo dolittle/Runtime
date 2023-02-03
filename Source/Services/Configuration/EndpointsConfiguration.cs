@@ -14,22 +14,22 @@ public record EndpointsConfiguration
     /// <summary>
     /// Gets the configuration for the public endpoint.
     /// </summary>
-    public EndpointConfiguration Public { get; set; } = new() {Port = 50052};
+    public EndpointConfiguration Public { get; set; } = new() {Port = 5052};
     
     /// <summary>
     /// Gets the configuration for the private endpoint.
     /// </summary>
-    public EndpointConfiguration Private { get; set; } = new() {Port = 50053};
+    public EndpointConfiguration Private { get; set; } = new() {Port = 5053};
     
     /// <summary>
     /// Gets the configuration for the management endpoint.
     /// </summary>
-    public EndpointConfiguration Management { get; set; } = new() {Port = 51052};
+    public EndpointConfiguration Management { get; set; } = new() {Port = 5152};
     
     /// <summary>
     /// Gets the configuration for the management web endpoint.
     /// </summary>
-    public EndpointConfiguration ManagementWeb {get; set; } = new() {Port = 51152};
+    public EndpointConfiguration ManagementWeb {get; set; } = new() {Port = 5153};
 
     /// <summary>
     /// Gets the configuration for an endpoint by its <see cref="EndpointVisibility"/>.

@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
@@ -16,6 +18,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Legacy;
 
 public interface IMapStreamPositionToEventLogPosition
 {
+    Task<Try<EventLogSequenceNumber>> TryGetPublicEventLogPosition(StreamPosition streamPosition, CancellationToken cancellationToken);
     Task<Try<EventLogSequenceNumber>> TryGetEventLogPosition(StreamProcessorId id, StreamPosition streamPosition,
         CancellationToken cancellationToken);
 
@@ -23,6 +26,7 @@ public interface IMapStreamPositionToEventLogPosition
         CancellationToken cancellationToken);
 }
 
+[Singleton, PerTenant]
 public class StreamPositionToEventLogPositionService : IMapStreamPositionToEventLogPosition
 {
     readonly IEventFetchers _fetchers;
@@ -35,6 +39,11 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
     }
 
 
+    public Task<Try<EventLogSequenceNumber>> TryGetPublicEventLogPosition(StreamPosition streamPosition, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
     public async Task<Try<EventLogSequenceNumber>> TryGetEventLogPosition(StreamProcessorId id, StreamPosition streamPosition,
         CancellationToken cancellationToken)
     {
@@ -46,7 +55,7 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
     public Task<Try<IStreamProcessorState>> WithEventLogSequence(StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState> request,
         CancellationToken cancellationToken)
     {
-        if (request.State.EventLogPosition.Value > EventLogSequenceNumber.Initial.Value)
+        if (request.State.Position.EventLogPosition.Value > EventLogSequenceNumber.Initial.Value)
         {
             _logger.LogInformation("EventLogSequenceNumber is already set - skipping");
             return Task.FromResult(Try<IStreamProcessorState>.Succeeded(request.State));
@@ -71,7 +80,10 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
             {
                 return state with
                 {
-                    EventLogPosition = await fetcher.FetchEventLogSequenceNumberAsync(id, state.Position, cancellationToken),
+                    Position = state.Position with
+                    {
+                        EventLogPosition = await fetcher.FetchEventLogSequenceNumberAsync(id, state.Position.StreamPosition, cancellationToken)
+                    },
                     FailingPartitions = await Enrich(id, state.FailingPartitions, fetcher, cancellationToken)
                 };
             }
@@ -89,7 +101,10 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
         {
             enriched.Add(failingPartition.Key, failingPartition.Value with
             {
-                EventLogPosition = await fetcher.FetchEventLogSequenceNumberAsync(id, failingPartition.Value.Position, cancellationToken)
+                Position = failingPartition.Value.Position with
+                {
+                    EventLogPosition = await fetcher.FetchEventLogSequenceNumberAsync(id, failingPartition.Value.Position.StreamPosition, cancellationToken)
+                },
             });
         }
 
@@ -105,7 +120,10 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
 
             return state with
             {
-                EventLogPosition = await fetcher.FetchEventLogSequenceNumberAsync(id, state.Position, cancellationToken),
+                Position = state.Position with
+                {
+                    EventLogPosition = await fetcher.FetchEventLogSequenceNumberAsync(id, state.Position.StreamPosition, cancellationToken)
+                }
             };
         });
 

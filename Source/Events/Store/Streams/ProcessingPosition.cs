@@ -22,14 +22,31 @@ public record ProcessingPosition(StreamPosition StreamPosition, EventLogSequence
         return eventLogPositionComparison != 0 ? eventLogPositionComparison : EventLogPosition.CompareTo(other.EventLogPosition);
     }
 
-    
-    public ProcessingPosition IncrementProcessed()
+    /// <summary>
+    ///  The current event was included in the stream, increment the stream position as well as the event log position
+    /// </summary>
+    /// <returns></returns>
+    public ProcessingPosition IncrementWithStream()
     {
         return new(StreamPosition.Increment(), EventLogPosition.Increment());
     }
 
-    public ProcessingPosition IncrementNonProcessed()
+    /// <summary>
+    /// The current event was not included in the stream, only increment the event log position
+    /// </summary>
+    /// <returns></returns>
+    public ProcessingPosition IncrementEventLogOnly()
     {
         return this with { EventLogPosition = EventLogPosition.Increment() };
+    }
+
+    /// <summary>
+    /// If the event log position has not been initialized,
+    /// the processing position is not valid before the event log position has been retrieved based on the stream position
+    /// </summary>
+    /// <returns></returns>
+    public bool HasStreamPositionOnly()
+    {
+        return StreamPosition.Value > 0 && EventLogPosition.Value == 0;
     }
 }

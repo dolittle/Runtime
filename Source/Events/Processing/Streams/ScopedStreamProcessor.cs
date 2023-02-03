@@ -45,11 +45,9 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         ICanFetchEventsFromStream eventsFromStreamsFetcher,
         ExecutionContext executionContext,
         IEventFetcherPolicies eventFetcherPolicies,
-        IStreamEventWatcher eventWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies,
-            eventWatcher, logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _timeToRetryGetter = timeToRetryGetter;
@@ -110,7 +108,6 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         var oldState = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
             oldState.Position,
-            oldState.EventLogPosition,
             failedProcessing.FailureReason,
             DateTimeOffset.MaxValue,
             oldState.ProcessingAttempts + 1,
@@ -127,7 +124,6 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         var oldState = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
             oldState.Position,
-            oldState.EventLogPosition,
             failedProcessing.FailureReason,
             DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
             oldState.ProcessingAttempts + 1,

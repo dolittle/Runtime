@@ -29,8 +29,7 @@ public class and_the_state_is_persisted : given.all_dependencies
 
         stored_state = a_partitioned_state() with
         {
-            Position = 2,
-            EventLogPosition = 5,
+            Position = new ProcessingPosition(2, 5),
             FailingPartitions = failing_partitions
         };
         another_stored_processor = (stream_processor_id with

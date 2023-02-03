@@ -23,5 +23,5 @@ public class and_state_is_persisted : given.all_dependencies
     static StreamPosition result;
     Because of = () => result = get_next_event.GetNextEventToReceiveFor(subscription_id, cancellation_token).GetAwaiter().GetResult();
 
-    It should_return_the_subscription_state_position = () => result.ShouldEqual(subscription_state.Position);
+    It should_return_the_subscription_state_position = () => result.ShouldEqual(subscription_state.Position.StreamPosition);
 }

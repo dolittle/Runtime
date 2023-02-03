@@ -18,25 +18,25 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 /// <param name="ProcessingAttempts">The number of times it has processed the Event at <see cref="Position" />.</param>
 /// <param name="LastSuccessfullyProcessed">Timestamp of last successful Stream process.</param>
 /// <param name="IsFailing">Whether the stream processor is failing.</param>
-public record StreamProcessorState(StreamPosition Position, EventLogSequenceNumber EventLogPosition, string FailureReason, DateTimeOffset RetryTime,
+public record StreamProcessorState(ProcessingPosition Position, string FailureReason, DateTimeOffset RetryTime,
     uint ProcessingAttempts,
     DateTimeOffset LastSuccessfullyProcessed, bool IsFailing) : IStreamProcessorState
 {
-    /// <summary>
-    /// Represents the state of an <see cref="ScopedStreamProcessor" />.
-    /// </summary>
-    /// <param name="position">The <see cref="ProcessingPosition"/>position of the stream.</param>
-    /// <param name="failureReason">The reason for failing.</param>
-    /// <param name="retryTime">The <see cref="DateTimeOffset" /> for when to retry processing.</param>
-    /// <param name="processingAttempts">The number of times it has processed the Event at <see cref="Position" />.</param>
-    /// <param name="lastSuccessfullyProcessed">Timestamp of last successful Stream process.</param>
-    /// <param name="isFailing">Whether the stream processor is failing.</param>
-    public StreamProcessorState(ProcessingPosition position, string failureReason, DateTimeOffset retryTime,
-        uint processingAttempts,
-        DateTimeOffset lastSuccessfullyProcessed, bool isFailing) : this(position.StreamPosition, position.EventLogPosition, failureReason, retryTime,
-        processingAttempts, lastSuccessfullyProcessed, isFailing)
-    {
-    }
+    // /// <summary>
+    // /// Represents the state of an <see cref="ScopedStreamProcessor" />.
+    // /// </summary>
+    // /// <param name="position">The <see cref="ProcessingPosition"/>position of the stream.</param>
+    // /// <param name="failureReason">The reason for failing.</param>
+    // /// <param name="retryTime">The <see cref="DateTimeOffset" /> for when to retry processing.</param>
+    // /// <param name="processingAttempts">The number of times it has processed the Event at <see cref="Position" />.</param>
+    // /// <param name="lastSuccessfullyProcessed">Timestamp of last successful Stream process.</param>
+    // /// <param name="isFailing">Whether the stream processor is failing.</param>
+    // public StreamProcessorState(ProcessingPosition position, string failureReason, DateTimeOffset retryTime,
+    //     uint processingAttempts,
+    //     DateTimeOffset lastSuccessfullyProcessed, bool isFailing) : this(position, failureReason, retryTime,
+    //     processingAttempts, lastSuccessfullyProcessed, isFailing)
+    // {
+    // }
 
 
     /// <summary>
@@ -46,7 +46,7 @@ public record StreamProcessorState(StreamPosition Position, EventLogSequenceNumb
     /// <param name="eventLogPosition"></param>
     /// <param name="lastSuccessfullyProcessed">Timestamp of last successful Stream process.</param>
     public StreamProcessorState(StreamPosition streamPosition, EventLogSequenceNumber eventLogPosition, DateTimeOffset lastSuccessfullyProcessed) : this(
-        streamPosition, eventLogPosition, string.Empty,
+        new ProcessingPosition(streamPosition, eventLogPosition), string.Empty,
         lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false)
     {
     }
@@ -57,7 +57,7 @@ public record StreamProcessorState(StreamPosition Position, EventLogSequenceNumb
     /// <param name="position">The <see cref="ProcessingPosition"/>position of the stream.</param>
     /// <param name="lastSuccessfullyProcessed">Timestamp of last successful Stream process.</param>
     public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(
-        position.StreamPosition, position.EventLogPosition, string.Empty,
+        new ProcessingPosition(position.StreamPosition, position.EventLogPosition), string.Empty,
         lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false)
     {
     }
@@ -67,12 +67,12 @@ public record StreamProcessorState(StreamPosition Position, EventLogSequenceNumb
     /// </summary>
     /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
     /// <param name="eventLogPosition"></param>
-    StreamProcessorState(StreamPosition streamPosition, EventLogSequenceNumber eventLogPosition) : this(streamPosition, eventLogPosition, string.Empty,
+    StreamProcessorState(StreamPosition streamPosition, EventLogSequenceNumber eventLogPosition) : this(new ProcessingPosition(streamPosition, eventLogPosition), string.Empty,
         DateTimeOffset.UtcNow, 0, DateTimeOffset.MinValue, false)
     {
     }
 
-    public ProcessingPosition ProcessingPosition => new(Position, EventLogPosition);
+    // public ProcessingPosition ProcessingPosition => new(Position, EventLogPosition);
 
     /// <inheritdoc/>
     public bool Partitioned => false;
@@ -82,8 +82,8 @@ public record StreamProcessorState(StreamPosition Position, EventLogSequenceNumb
         var protobuf = new Bucket()
         {
             BucketId = 0,
-            CurrentOffset = Position.Value,
-            CurrentEventLogOffset = EventLogPosition.Value,
+            CurrentOffset = Position.StreamPosition.Value,
+            CurrentEventLogOffset = Position.EventLogPosition.Value,
             LastSuccessfullyProcessed = Timestamp.FromDateTimeOffset(LastSuccessfullyProcessed),
             Partitioned = false
         };

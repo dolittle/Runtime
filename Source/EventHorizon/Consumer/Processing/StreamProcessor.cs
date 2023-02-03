@@ -86,7 +86,7 @@ public class StreamProcessor : IStreamProcessor
         }
         else
         {
-            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position);
+            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position.StreamPosition);
         }
 
         _metrics.IncrementTotalStreamProcessorStarted();

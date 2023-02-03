@@ -118,7 +118,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                     event_handler.Info.EventTypes,
                     event_handler.Info.Partitioned)), CancellationToken.None).Result;
 
-            return fetcher.FetchInPartition(partition_id, StreamPosition.Start, CancellationToken.None).Result.Result;
+            return fetcher.FetchInPartition(partition_id, ProcessingPosition.Initial, CancellationToken.None).Result.Result;
         }
 
         var rangeFetcher = event_fetchers.GetRangeFetcherFor(event_handler.Info.Id.Scope,
@@ -420,7 +420,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         var expectedPosition = id.ScopeId == ScopeId.Default
             ? new StreamPosition((ulong)committed_events.Count)
             : new StreamPosition((ulong)scoped_committed_events[id.ScopeId].Count);
-        state.Position.ShouldEqual(expectedPosition);
+        state.Position.StreamPosition.ShouldEqual(expectedPosition);
         state.ShouldBeOfExactType<StreamProcessorState>();
         var unpartitionedState = state as StreamProcessorState;
         unpartitionedState!.IsFailing.ShouldBeFalse();
@@ -444,7 +444,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
         if (partitioned)
         {
-            state.Position.Value.ShouldEqual((ulong)num_events_to_handle);
+            state.Position.StreamPosition.Value.ShouldEqual((ulong)num_events_to_handle);
             expect_partitioned_event_processor_stream_processor_state(state, failing_partitioned_state);
         }
         else
@@ -471,7 +471,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             foreach (var (partition, failingState) in partitionedState!.FailingPartitions)
             {
                 var failingPosition = failing_partitioned_state.failing_partitions[partition];
-                failingState.Position.ShouldEqual(failingPosition);
+                failingState.Position.StreamPosition.ShouldEqual(failingPosition);
                 failingState.LastFailed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
                 failingState.ProcessingAttempts.ShouldBeGreaterThanOrEqualTo(1);
             }
@@ -492,12 +492,12 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             unpartitionedState.ProcessingAttempts.ShouldEqual((uint)0);
             unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
             unpartitionedState.RetryTime.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
-            unpartitionedState.Position.Value.ShouldEqual((ulong)num_events_to_handle);
+            unpartitionedState.Position.StreamPosition.Value.ShouldEqual((ulong)num_events_to_handle);
         }
         else
         {
             unpartitionedState!.IsFailing.ShouldBeTrue();
-            unpartitionedState.Position.ShouldEqual(failing_unpartitioned_state.failing_position);
+            unpartitionedState.Position.StreamPosition.ShouldEqual(failing_unpartitioned_state.failing_position);
             unpartitionedState.ProcessingAttempts.ShouldBeGreaterThanOrEqualTo(1);
             unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
         }

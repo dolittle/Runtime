@@ -14,5 +14,5 @@ public interface INotifyOfStreamEvents
     /// <param name="scope">The <see cref="ScopeId" /> of the event log.</param>
     /// <param name="stream">The <see cref="StreamId" /> of the stream.</param>
     /// <param name="position">The <see cref="StreamPosition" /> of the event.</param>
-    void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position);
+    void NotifyForEvent(ScopeId scope, StreamId stream, ProcessingPosition position);
 }

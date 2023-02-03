@@ -31,7 +31,7 @@ public class and_event_processing_failed_at_first_event : given.all_dependencies
 
     It should_process_one_event = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
     It should_process_first_event = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(),Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
-    It should_have_current_position_equal_zero = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(0));
+    It should_have_current_position_equal_zero = () => current_stream_processor_state.Position.StreamPosition.ShouldEqual(new StreamPosition(0));
     It should_be_failing = () => current_stream_processor_state.IsFailing.ShouldBeTrue();
     It should_have_the_correct_retry_time = () => current_stream_processor_state.RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
     It should_have_the_correct_reason = () => current_stream_processor_state.FailureReason.ShouldEqual(reason);

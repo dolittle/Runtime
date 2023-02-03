@@ -61,7 +61,7 @@ public class FailingPartitions : IFailingPartitions
         {
             [partition] = failingPartition
         };
-        var newState = new StreamProcessorState(failedPosition.StreamPosition + 1, failedPosition.EventLogPosition + 1, failingPartitions,
+        var newState = new StreamProcessorState(failedPosition.IncrementWithStream(), failingPartitions,
             oldState.LastSuccessfullyProcessed);
         await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
         return newState;
@@ -109,7 +109,7 @@ public class FailingPartitions : IFailingPartitions
                         throw new StreamEventInWrongPartition(streamEvent, partition);
                     }
 
-                    if (!ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position))
+                    if (!ShouldProcessNextEventInPartition(streamEvent.CurrentProcessingPosition, streamProcessorState.Position))
                     {
                         break;
                     }
@@ -229,7 +229,7 @@ public class FailingPartitions : IFailingPartitions
         var newFailingPartitions = oldState.FailingPartitions;
         newFailingPartitions[partitionId] = newFailingPartitionState;
 
-        var newState = position.StreamPosition > oldState.FailingPartitions[partitionId].Position
+        var newState = position.StreamPosition > oldState.FailingPartitions[partitionId].Position.StreamPosition
             ? oldState with { FailingPartitions = newFailingPartitions, LastSuccessfullyProcessed = DateTimeOffset.UtcNow }
             : oldState with { FailingPartitions = newFailingPartitions };
 
@@ -246,8 +246,8 @@ public class FailingPartitions : IFailingPartitions
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
 
-    static bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
-        failingPartitionPosition.Value < streamProcessorPosition.Value;
+    static bool ShouldProcessNextEventInPartition(ProcessingPosition failingPartitionPosition, ProcessingPosition streamProcessorPosition) =>
+        failingPartitionPosition.StreamPosition.Value < streamProcessorPosition.StreamPosition.Value;
 
     static bool ShouldRetryProcessing(FailingPartitionState state) =>
         DateTimeOffset.UtcNow.CompareTo(state.RetryTime) >= 0;

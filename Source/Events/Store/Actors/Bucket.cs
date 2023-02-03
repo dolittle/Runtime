@@ -20,22 +20,21 @@ public partial class Bucket
         var lastSuccessfullyProcessed = LastSuccessfullyProcessed.ToDateTimeOffset();
         switch (Failures.Count)
         {
-            case 0: return new StreamProcessorState(Position(), EventLogOffset(), "", lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false);
+            case 0: return new StreamProcessorState(Position(), "", lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false);
             case 1:
                 var failure = Failures[0];
-                return new StreamProcessorState(Position(), EventLogOffset(), failure.FailureReason, failure.RetryTime.ToDateTimeOffset(),
+                return new StreamProcessorState(Position(), failure.FailureReason, failure.RetryTime.ToDateTimeOffset(),
                     failure.ProcessingAttempts,
                     lastSuccessfullyProcessed, true);
             default:
                 // This is probably invalid, as this should not be able to represent more than a single failure
                 var fail = Failures[0];
-                return new StreamProcessorState(Position(), EventLogOffset(), fail.FailureReason, fail.RetryTime.ToDateTimeOffset(), fail.ProcessingAttempts,
+                return new StreamProcessorState(Position(), fail.FailureReason, fail.RetryTime.ToDateTimeOffset(), fail.ProcessingAttempts,
                     lastSuccessfullyProcessed, true);
         }
     }
 
-    StreamPosition Position() => new(CurrentOffset);
-    EventLogSequenceNumber EventLogOffset() => new(CurrentEventLogOffset);
+    ProcessingPosition Position() => new(CurrentOffset, CurrentEventLogOffset);
 
     IStreamProcessorState FromProtobufPartitioned()
     {
@@ -45,7 +44,7 @@ public partial class Bucket
                     _.FailureReason, _.ProcessingAttempts,
                     _.LastFailed.ToDateTimeOffset()));
 
-        return new Processing.Streams.Partitioned.StreamProcessorState(Position(), EventLogOffset(), failingPartitions,
+        return new Processing.Streams.Partitioned.StreamProcessorState(Position(), failingPartitions,
             LastSuccessfullyProcessed.ToDateTimeOffset());
     }
 }

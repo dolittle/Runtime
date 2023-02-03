@@ -49,11 +49,9 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         ExecutionContext executionContext,
         Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,
         IEventFetcherPolicies eventFetcherPolicies,
-        IStreamEventWatcher streamWatcher,
         ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
-        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies,
-            streamWatcher, logger)
+        : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _failingPartitions = failingPartitionsFactory(processor, eventsFromStreamsFetcher, GetExecutionContextForEvent);
@@ -72,7 +70,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
             {
                 var newState = streamProcessorState with
                 {
-                    Position = @event.Position + 1
+                    Position = @event.NextProcessingPosition,
                 };
                 await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
                 streamProcessorState = newState;
@@ -120,7 +118,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         IStreamProcessorState currentState)
     {
         var oldState = currentState as StreamProcessorState;
-        var newState = new StreamProcessorState(processedEvent.Position + 1, processedEvent.Event.EventLogSequenceNumber + 1, oldState.FailingPartitions,
+        var newState = new StreamProcessorState(processedEvent.NextProcessingPosition, oldState.FailingPartitions,
             DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
@@ -135,8 +133,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     {
         var state = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
-            position.StreamPosition,
-            position.EventLogPosition,
+            position,
             FailingPartitionsIgnoringPartitionsToReprocess(state, position),
             state.LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
@@ -145,6 +142,6 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 
     static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, ProcessingPosition position)
         => state.FailingPartitions
-            .Where(_ => _.Value.Position < position.StreamPosition)
+            .Where(_ => _.Value.Position.StreamPosition < position.StreamPosition)
             .ToDictionary(_ => _.Key, _ => _.Value);
 }

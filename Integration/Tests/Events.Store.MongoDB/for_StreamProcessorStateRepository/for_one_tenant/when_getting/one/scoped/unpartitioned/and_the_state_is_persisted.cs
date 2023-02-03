@@ -22,7 +22,7 @@ public class and_the_state_is_persisted : given.all_dependencies
         };
         stored_state = an_unpartitioned_state() with
         {
-            Position = 2
+            Position = new ProcessingPosition(2, 2)
         };
         another_stored_processor = (stream_processor_id with
         {
