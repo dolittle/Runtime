@@ -10,7 +10,6 @@
 // using Dolittle.Runtime.Events.Store.EventHorizon;
 // using Dolittle.Runtime.Events.Store.Streams;
 // using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
-// using Dolittle.Runtime.Events.Store.Streams.Legacy;
 // using Dolittle.Runtime.Execution;
 // using Dolittle.Runtime.Protobuf;
 // using Dolittle.Runtime.Rudimentary;
@@ -24,13 +23,10 @@
 // /// </summary>
 // public class EventHorizon : IDisposable
 // {
-//     readonly IReverseCallDispatcher<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest,
-//         SubscriptionResponse, ConsumerRequest, ConsumerResponse> _dispatcher;
-//
+//     readonly IReverseCallDispatcher<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, SubscriptionResponse, ConsumerRequest, ConsumerResponse> _dispatcher;
 //     readonly ICreateExecutionContexts _executionContexts;
 //     readonly Func<TenantId, IEventFetchers> _getEventFetchers;
-//     readonly Func<TenantId, IEventLogStream> _getEventLogStream;
-//     readonly Func<TenantId, IMapStreamPositionToEventLogPosition> _getEventLogPosition;
+//     readonly Func<TenantId, IStreamEventWatcher> _getStreamWaiter;
 //     readonly IMetricsCollector _metrics;
 //     readonly ILogger _logger;
 //     readonly CancellationTokenSource _cancellationTokenSource;
@@ -45,7 +41,6 @@
 //     /// <param name="executionContexts">The <see cref="ICreateExecutionContexts"/>.</param>
 //     /// <param name="getEventFetchers">The <see cref="Func{TResult}"/> callback for getting <see cref="IEventFetchers"/> in a tenant container.</param>
 //     /// <param name="getStreamWaiter">The <see cref="Func{TResult}"/> callback for getting <see cref="IStreamEventWatcher"/> in a tenant container</param>
-//     /// <param name="getEventLogPosition"></param>
 //     /// <param name="metrics">The <see cref="IMetricsCollector"/>.</param>
 //     /// <param name="logger">The <see cref="ILogger"/>.</param>
 //     /// <param name="cancellationToken">The cancellation token.</param>
@@ -53,12 +48,10 @@
 //         EventHorizonId id,
 //         ConsentId consent,
 //         StreamPosition currentPosition,
-//         IReverseCallDispatcher<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, SubscriptionResponse,
-//             ConsumerRequest, ConsumerResponse> dispatcher,
+//         IReverseCallDispatcher<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, SubscriptionResponse, ConsumerRequest, ConsumerResponse> dispatcher,
 //         ICreateExecutionContexts executionContexts,
 //         Func<TenantId, IEventFetchers> getEventFetchers,
-//         Func<TenantId, IEventLogStream> getEventLogStream,
-//         Func<TenantId, IMapStreamPositionToEventLogPosition> getEventLogPosition,
+//         Func<TenantId, IStreamEventWatcher> getStreamWaiter,
 //         IMetricsCollector metrics,
 //         ILogger logger,
 //         CancellationToken cancellationToken)
@@ -67,20 +60,19 @@
 //         _dispatcher = dispatcher;
 //         _executionContexts = executionContexts;
 //         _getEventFetchers = getEventFetchers;
-//         _getEventLogStream = getEventLogStream;
-//         _getEventLogPosition = getEventLogPosition;
+//         _getStreamWaiter = getStreamWaiter;
 //         _metrics = metrics;
 //         _logger = logger;
 //         Id = id;
 //         CurrentPosition = currentPosition;
 //         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 //     }
-//
+//     
 //     /// <summary>
 //     /// Gets the <see cref="ConsentId"/>.
 //     /// </summary>
 //     public ConsentId Consent { get; }
-//
+//     
 //     /// <summary>
 //     /// Gets the <see cref="EventHorizonId"/>.
 //     /// </summary>
@@ -100,7 +92,7 @@
 //         try
 //         {
 //             var tasks = new TaskGroup(
-//                 _dispatcher.Accept(new SubscriptionResponse { ConsentId = Consent.ToProtobuf() }, _cancellationTokenSource.Token),
+//                 _dispatcher.Accept(new SubscriptionResponse{ ConsentId = Consent.ToProtobuf() }, _cancellationTokenSource.Token),
 //                 ProcessEventsThroughEventHorizon());
 //             tasks.OnFirstTaskFailure += (_, ex) => Log.ErrorOccurredInEventHorizon(
 //                 _logger,
@@ -109,8 +101,7 @@
 //                 Id.ConsumerTenant,
 //                 Id.ProducerTenant,
 //                 Id.Partition,
-//                 Id.PublicStream);
-//             ;
+//                 Id.PublicStream);;
 //             tasks.OnAllTasksCompleted += () => Log.EventHorizonStopped(
 //                 _logger,
 //                 Id.ConsumerMicroservice,
@@ -131,7 +122,7 @@
 //                 Id.PublicStream);
 //         }
 //     }
-//
+//     
 //     /// <inheritdoc />
 //     public void Dispose()
 //     {
@@ -143,52 +134,18 @@
 //     {
 //         try
 //         {
-//             // var publicEvents = await _getEventFetchers(Id.ProducerTenant).GetPartitionedFetcherFor(
-//             //     ScopeId.Default,
-//             //     new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, Id.PublicStream)),
-//             //     _cancellationTokenSource.Token).ConfigureAwait(false);
-//             // var eventWaiter = _getStreamWaiter(Id.ProducerTenant);
-//             var publicEventLogPosition =
-//                 await _getEventLogPosition(Id.ProducerTenant).TryGetPublicEventLogPosition(CurrentPosition, _cancellationTokenSource.Token);
-//             if (!publicEventLogPosition.Success)
-//             {
-//                 throw publicEventLogPosition.Exception;
-//             }
-//
-//             var eventLogStream = _getEventLogStream(Id.ProducerTenant);
-//             var processingPosition = new ProcessingPosition(CurrentPosition, publicEventLogPosition.Result);
-//             var subscription = eventLogStream.SubscribePublic(ScopeId.Default, processingPosition.EventLogPosition, _cancellationTokenSource.Token);
-//
+//             var publicEvents = await _getEventFetchers(Id.ProducerTenant).GetPartitionedFetcherFor(
+//                 ScopeId.Default,
+//                 new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, Id.PublicStream)),
+//                 _cancellationTokenSource.Token).ConfigureAwait(false);
+//             var eventWaiter = _getStreamWaiter(Id.ProducerTenant);
 //             while (!_cancellationTokenSource.Token.IsCancellationRequested)
 //             {
-//                 var batch = await subscription.ReadAsync(_cancellationTokenSource.Token);
-//                 if (batch.MatchedEvents.Count == 0)
-//                 {
-//                     continue;
-//                 }
-//                 
-//                 foreach (var streamEvent in batch.MatchedEvents)
-//                 {
-//                     _metrics.IncrementTotalEventsWrittenToEventHorizon();
-//                     var response = await _dispatcher.Call(
-//                         new ConsumerRequest { Event = streamEvent.ToEventHorizonEvent() },
-//                         _executionContexts.TryCreateUsing(streamEvent.Event.ExecutionContext),
-//                         _cancellationTokenSource.Token).ConfigureAwait(false);
-//                     if (response.Failure != null)
-//                     {
-//                         Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
-//                         return;
-//                     }
-//
-//                     CurrentPosition = streamEvent.Position + 1;
-//                 }
-//                 
 //                 try
 //                 {
-//                     
 //                     var tryGetStreamEvent = await publicEvents.FetchInPartition(
 //                         Id.Partition,
-//                         new ProcessingPosition(CurrentPosition, CurrentPosition.Value),
+//                         CurrentPosition,
 //                         _cancellationTokenSource.Token).ConfigureAwait(false);
 //                     if (!tryGetStreamEvent.Success)
 //                     {
@@ -197,10 +154,9 @@
 //                         {
 //                             throw nextEventPositionInAnyPartition.Exception;
 //                         }
-//
 //                         await eventWaiter.WaitForEvent(
 //                             Id.PublicStream,
-//                             new ProcessingPosition(nextEventPositionInAnyPartition.Result, nextEventPositionInAnyPartition.Result.Value),
+//                             nextEventPositionInAnyPartition,
 //                             TimeSpan.FromMinutes(1),
 //                             _cancellationTokenSource.Token).ConfigureAwait(false);
 //                         continue;

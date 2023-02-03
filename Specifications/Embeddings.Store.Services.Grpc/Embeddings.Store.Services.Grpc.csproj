@@ -1,13 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../../specs.props"/>
+  <Import Project="../../specs.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Embeddings.Store.Services.Grpc.Specs</AssemblyName>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../../Source/Embeddings.Store.Services.Grpc/Embeddings.Store.Services.Grpc.csproj" />
-  </ItemGroup>
 
 </Project>

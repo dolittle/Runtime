@@ -7,8 +7,4 @@
 
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../../Source/Embeddings.Store.MongoDB/Embeddings.Store.MongoDB.csproj" />
-  </ItemGroup>
-
 </Project>
