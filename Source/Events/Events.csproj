@@ -37,5 +37,10 @@
         <Protobuf Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." GrpcServices="None" />
         <ProtoGrain Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." />
     </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Processing\EventHandlers\Actors" />
+    </ItemGroup>
     
 </Project>

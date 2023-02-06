@@ -59,4 +59,6 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
         },
         Partitioned = true
     };
+
+    public ProcessingPosition EarliestPosition => FailingPartitions.Any() ? FailingPartitions.Values.Min(_ => _.Position)! : Position;
 }

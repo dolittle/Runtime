@@ -2,11 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Dolittle.Protobuf.Contracts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.Events.Store.Streams;
 
@@ -38,9 +41,11 @@ public class StreamEventSubscriber : IStreamEventSubscriber
         }
     }
 
-    public async IAsyncEnumerable<StreamEvent> Subscribe(ScopeId scopeId, ProcessingPosition position, IReadOnlySet<Uuid> eventTypes, bool partitioned,
+    public async IAsyncEnumerable<StreamEvent> Subscribe(ScopeId scopeId, IEnumerable<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var eventTypes = artifactIds.Select(_ => _.Value.ToProtobuf()).ToHashSet();
+
         var current = position;
         var channel = _eventLogStream.SubscribeAll(scopeId, position.EventLogPosition, cancellationToken);
         var eventLogBatch = await channel.ReadAsync(cancellationToken);
