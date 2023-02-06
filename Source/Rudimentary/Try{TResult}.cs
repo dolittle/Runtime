@@ -40,6 +40,45 @@ public class Try<TResult> : Try
         => Success
             ? Try<TSelectResult>.Succeeded(selector(Result))
             : Try<TSelectResult>.Failed(Exception);
+    
+    /// <summary>
+    /// Projects the successful result if the operation succeeded, or returns the original failure if the operation failed.
+    /// </summary>
+    /// <param name="selector">A transform function to apply to the result.</param>
+    /// <typeparam name="TSelectResult">The type of the projected result.</typeparam>
+    /// <returns>A new <see cref="Try{TSelectResult}"/> result that contains the projected result if the operation succeeded.</returns>
+    public async ValueTask<Try<TSelectResult>> SelectAsync<TSelectResult>(Func<TResult, Task<TSelectResult>> selector)
+    {
+        return Success
+            ? await Try<TSelectResult>.DoAsync(() => selector(Result))
+            : Try<TSelectResult>.Failed(Exception);
+    }
+    
+    /// <summary>
+    /// Projects the successful result if the operation succeeded, or returns the original or new failure if the operation failed.
+    /// </summary>
+    /// <param name="selector">A transform function to apply to the result.</param>
+    /// <typeparam name="TSelectResult">The type of the projected result.</typeparam>
+    /// <returns>A new <see cref="Try{TSelectResult}"/> result that contains the projected result if the operation succeeded.</returns>
+    public Try<TSelectResult> Reduce<TSelectResult>(Func<TResult, Try<TSelectResult>> selector)
+    {
+        return Success
+            ? selector(Result)
+            : Try<TSelectResult>.Failed(Exception);
+    }
+    
+    /// <summary>
+    /// Projects the successful result if the operation succeeded, or returns the original or new failure if the operation failed.
+    /// </summary>
+    /// <param name="selector">A transform function to apply to the result.</param>
+    /// <typeparam name="TSelectResult">The type of the projected result.</typeparam>
+    /// <returns>A new <see cref="Try{TSelectResult}"/> result that contains the projected result if the operation succeeded.</returns>
+    public async ValueTask<Try<TSelectResult>> ReduceAsync<TSelectResult>(Func<TResult, Task<Try<TSelectResult>>> selector)
+    {
+        return Success
+            ? await selector(Result)
+            : Try<TSelectResult>.Failed(Exception);
+    }
 
     /// <summary>
     /// Try to do something that returns a result.
