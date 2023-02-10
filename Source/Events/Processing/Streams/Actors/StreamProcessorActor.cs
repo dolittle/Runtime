@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -29,6 +28,8 @@ record GetCurrentState
 /// </summary>
 public class StreamProcessorActor : IActor
 {
+    static readonly TimeSpan _eventWaiterTimeout = TimeSpan.FromMinutes(1);
+    
     readonly IStreamDefinition _sourceStreamDefinition;
     readonly TenantId _tenantId;
     readonly TypeFilterWithEventSourcePartitionDefinition _filterDefinition;
@@ -37,12 +38,12 @@ public class StreamProcessorActor : IActor
     readonly ExecutionContext _executionContext;
     readonly IStreamProcessorStates _streamProcessorStates;
     readonly IMapStreamPositionToEventLogPosition _eventLogPositionEnricher;
+    readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
+
 
     IStreamProcessorState _currentState;
     bool _started;
     ProcessingPosition _current;
-
-    IAsyncEnumerable<StreamEvent> _events;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamProcessorActor"/> class.
@@ -64,10 +65,11 @@ public class StreamProcessorActor : IActor
         IStreamProcessorStates streamProcessorStates,
         ExecutionContext executionContext,
         IMapStreamPositionToEventLogPosition eventLogPositionEnricher,
-        ILogger logger)
+        ILogger logger, ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter)
     {
         Identifier = streamProcessorId;
         Logger = logger;
+        _timeToRetryGetter = timeToRetryGetter;
         _eventLogPositionEnricher = eventLogPositionEnricher;
         _eventSubscriber = eventSubscriber;
         _streamProcessorStates = streamProcessorStates;
@@ -84,6 +86,8 @@ public class StreamProcessorActor : IActor
         {
             case Started:
                 return Init(context);
+            case StreamEvent evt:
+                return OnStreamEvent(evt, context);
             case GetCurrentState:
                 return OnGetCurrentState(context);
             case Stopping:
@@ -94,6 +98,10 @@ public class StreamProcessorActor : IActor
         return Task.CompletedTask;
     }
 
+    Task OnStopping(IContext context)
+    {
+        throw new NotImplementedException();
+    }
 
 
     Task OnGetCurrentState(IContext context)
@@ -114,9 +122,35 @@ public class StreamProcessorActor : IActor
         _currentState = processingPosition.Result;
 
         var from = _currentState.EarliestPosition;
+        var cts = new CancellationTokenSource();
+        StartSubscription(context, from, cts.Token);
+
+    }
+
+    void StartSubscription(IContext context, ProcessingPosition from, CancellationToken token)
+    {
 
 
-        _events = _eventSubscriber.Subscribe(_processor.Scope, _filterDefinition.Types, from, _filterDefinition.Partitioned, context.CancellationToken);
+        _ = Task.Run(async () =>
+        {
+            var events = _eventSubscriber.Subscribe(Identifier.ScopeId, _filterDefinition.Types, from, _filterDefinition.Partitioned,
+                token);
+            
+            await foreach (var evt in events.WithCancellation(token))
+            {
+                await context.RequestAsync<Ack>(context.Self, evt);
+            }
+        }, token);
+
+    }
+
+    async Task OnStreamEvent(StreamEvent evt, IContext ctx)
+    {
+        ctx.Respond(Ack.Instance);
+        var result = await _processor.Process(evt.Event, evt.Partition, GetExecutionContextForEvent(evt), ctx.CancellationToken);
+        
+        
+        
     }
 
     /// <summary>
@@ -220,16 +254,6 @@ public class StreamProcessorActor : IActor
     }
 
     /// <summary>
-    /// Fetches the Event that is should be processed next.
-    /// </summary>
-    /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="StreamEvent" />.</returns>
-    protected Task<Try<IEnumerable<StreamEvent>>> FetchNextEventsToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken)
-        => _eventFetcherPolicies.Fetching.ExecuteAsync(_ => _eventsFetcher.Fetch(currentState.Position.StreamPosition, _), cancellationToken);
-    // TODO: Shouldn't this policy rather be used in the actual fetcher?
-
-    /// <summary>
     /// Gets the <see cref="TimeSpan" /> for when to retry processing again.
     /// </summary>
     /// <param name="state">The current <see cref="IStreamProcessorState" />.</param>
@@ -249,6 +273,9 @@ public class StreamProcessorActor : IActor
         return result;
     }
 
+    protected bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
+        => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
+    
     /// <summary>
     /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
     /// </summary>
@@ -296,6 +323,41 @@ public class StreamProcessorActor : IActor
         return OnSuccessfulProcessingResult(processingResult as SuccessfulProcessing, processedEvent, currentState);
     }
 
+    /// <inheritdoc/>
+     Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState) =>
+        _failingPartitions.AddFailingPartitionFor(
+            Identifier,
+            currentState as StreamProcessorState,
+            processedEvent.Position,
+            processedEvent.Partition,
+            DateTimeOffset.MaxValue,
+            failedProcessing.FailureReason,
+            CancellationToken.None);
+
+    /// <inheritdoc/>
+     Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState) =>
+        _failingPartitions.AddFailingPartitionFor(
+            Identifier,
+            currentState as StreamProcessorState,
+            processedEvent.Position,
+            processedEvent.Partition,
+            DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
+            failedProcessing.FailureReason,
+            CancellationToken.None);
+    
+    /// <inheritdoc/>
+     async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
+    {
+        var oldState = currentState as Partitioned.StreamProcessorState;
+        var newState = new Partitioned.StreamProcessorState(processedEvent.NextProcessingPosition, oldState.FailingPartitions,
+            DateTimeOffset.UtcNow);
+        await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
+        return newState;
+    }
+    
     /// <summary>
     /// Gets the <see cref="ExecutionContext"/> to use while processing the specified <see cref="StreamEvent"/>.
     /// </summary>
@@ -322,7 +384,7 @@ public class StreamProcessorActor : IActor
                     if (_resetStreamProcessorCompletionSource != default)
                     {
                         if (_newPosition > _currentState.Position.StreamPosition)
-                        {
+                        
                             _resetStreamProcessorCompletionSource.SetResult(
                                 Try<StreamPosition>.Failed(
                                     new CannotSetStreamProcessorPositionHigherThanCurrentPosition(Identifier, _currentState, _newPosition)));
@@ -396,4 +458,10 @@ public class StreamProcessorActor : IActor
             _resetStreamProcessor = null;
         }
     }
+
+class Ack
+{
+    Ack()
+    { }
+    public static readonly Ack Instance = new();
 }
