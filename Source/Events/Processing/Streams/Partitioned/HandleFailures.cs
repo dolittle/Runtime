@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +20,6 @@ public class FailingPartitions : IFailingPartitions
     readonly IEventProcessor _eventProcessor;
     readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
     readonly Func<StreamEvent, ExecutionContext> _createExecutionContextForEvent;
-    readonly IEventFetcherPolicies _eventFetcherPolicies;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
@@ -30,60 +28,25 @@ public class FailingPartitions : IFailingPartitions
     /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
     /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromPartitionedStream" />.</param>
     /// <param name="createExecutionContextForEvent">The factory to use to create execution contexts for event processing.</param>
-    /// <param name="eventFetcherPolicies">The policies to use for fetching events.</param>
     public FailingPartitions(
         IStreamProcessorStates streamProcessorStates,
         IEventProcessor eventProcessor,
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
-        Func<StreamEvent, ExecutionContext> createExecutionContextForEvent, //TODO: Oh man, here we go again.
-        IEventFetcherPolicies eventFetcherPolicies)
+        Func<StreamEvent, ExecutionContext> createExecutionContextForEvent)
     {
         _streamProcessorStates = streamProcessorStates;
         _eventProcessor = eventProcessor;
         _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
         _createExecutionContextForEvent = createExecutionContextForEvent;
-        _eventFetcherPolicies = eventFetcherPolicies;
     }
 
-    /// <inheritdoc/>
-    public async Task<IStreamProcessorState> AddFailingPartitionFor(
-        IStreamProcessorId streamProcessorId,
-        StreamProcessorState oldState,
-        ProcessingPosition failedPosition,
-        PartitionId partition,
-        DateTimeOffset retryTime,
-        string reason,
-        CancellationToken cancellationToken)
-    {
-        var failingPartition =
-            new FailingPartitionState(failedPosition.StreamPosition, failedPosition.EventLogPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
-        var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
-        {
-            [partition] = failingPartition
-        };
-        var newState = new StreamProcessorState(failedPosition.IncrementWithStream(), failingPartitions,
-            oldState.LastSuccessfullyProcessed);
-        await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
-        return newState;
-    }
-
-    public Task<IStreamProcessorState> AddFailingPartitionFor(IStreamProcessorId streamProcessorId, StreamProcessorState oldState,
-        StreamPosition failedPosition, PartitionId partition,
-        DateTimeOffset retryTime, string reason, CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
 
     /// <inheritdoc/>
-    public async Task<IStreamProcessorState> CatchupFor(
+    public async Task<StreamProcessorState> CatchupFor(
         IStreamProcessorId streamProcessorId,
         StreamProcessorState streamProcessorState,
         CancellationToken cancellationToken)
     {
-        if (streamProcessorState.FailingPartitions.Count > 0)
-        {
-            streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken)
-                .ConfigureAwait(false)).Result as StreamProcessorState;
-        }
-
         var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
 
         // TODO: Failing partitions should be actorified
@@ -94,9 +57,7 @@ public class FailingPartitions : IFailingPartitions
             while (ShouldProcessNextEventInPartition(failingPartitionState.Position, streamProcessorState.Position) &&
                    ShouldRetryProcessing(failingPartitionState))
             {
-                var tryGetEvents = await _eventFetcherPolicies.Fetching.ExecuteAsync(
-                    _ => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, _),
-                    cancellationToken).ConfigureAwait(false);
+                var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
                 if (!tryGetEvents.Success)
                 {
                     break;

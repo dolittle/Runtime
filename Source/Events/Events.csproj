@@ -40,7 +40,7 @@
 
 
     <ItemGroup>
-      <Folder Include="Processing\EventHandlers\Actors" />
+      <Folder Include="Processing\Streams\Actors" />
     </ItemGroup>
     
 </Project>

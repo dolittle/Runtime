@@ -10,7 +10,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_TimeToRetry
 
 public class and_earliest_retry_time_is_in_the_past
 {
-    static TimeToRetryForPartitionedStreamProcessor time_to_retry_getter;
     static IDictionary<PartitionId, FailingPartitionState> failing_partitions;
     static StreamProcessorState state;
     static bool success;
@@ -18,7 +17,6 @@ public class and_earliest_retry_time_is_in_the_past
 
     Establish context = () =>
     {
-        time_to_retry_getter = new TimeToRetryForPartitionedStreamProcessor();
         failing_partitions = new Dictionary<PartitionId, FailingPartitionState>()
         {
             {
@@ -52,7 +50,7 @@ public class and_earliest_retry_time_is_in_the_past
         state = new StreamProcessorState(ProcessingPosition.Initial, failing_partitions, DateTimeOffset.UtcNow);
     };
 
-    Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
+    Because of = () => success = state.TryGetTimespanToRetry(out time_to_retry);
 
     It should_get_it = () => success.ShouldBeTrue();
     It should_retry_now = () => time_to_retry.ShouldEqual(TimeSpan.Zero);

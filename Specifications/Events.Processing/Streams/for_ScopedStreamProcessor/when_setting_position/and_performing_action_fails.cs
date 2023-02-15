@@ -33,7 +33,7 @@ public class and_performing_action_fails : all_dependencies
             .ReturnsAsync(Try.Failed(new Exception()));
     };
 
-    Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100),StreamPosition.Start, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
+    Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100),ProcessingPosition.Initial, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
         
     It should_not_process_event_again = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_not_fetch_event_again = () => events_fetcher.Verify(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);

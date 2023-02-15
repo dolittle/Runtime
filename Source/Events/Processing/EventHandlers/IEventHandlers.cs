@@ -26,7 +26,7 @@ public interface IEventHandlers
     /// </summary>
     /// <param name="eventHandlerId">The <see cref="EventHandlerId"/>.</param>
     /// <returns>The current states of the Event Handler.</returns>
-    Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId);
+    Task<Try<IDictionary<TenantId, IStreamProcessorState>>> CurrentStateFor(EventHandlerId eventHandlerId);
 
     /// <summary>
     /// Registers and starts an Event Handler for all tenants.

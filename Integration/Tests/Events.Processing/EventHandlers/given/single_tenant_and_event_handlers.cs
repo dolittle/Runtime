@@ -444,6 +444,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
         if (partitioned)
         {
+
             state.Position.StreamPosition.Value.ShouldEqual((ulong)num_events_to_handle);
             expect_partitioned_event_processor_stream_processor_state(state, failing_partitioned_state);
         }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -18,8 +19,10 @@ namespace Dolittle.Runtime.Events.Store.Streams.Legacy;
 
 public interface IMapStreamPositionToEventLogPosition
 {
-    Task<Try<EventLogSequenceNumber>> TryGetPublicEventLogPosition(StreamPosition streamPosition, CancellationToken cancellationToken);
-    Task<Try<EventLogSequenceNumber>> TryGetEventLogPosition(StreamProcessorId id, StreamPosition streamPosition,
+    Task<Try<ProcessingPosition>> TryGetProcessingPosition(EventLogSequenceNumber eventLogPosition, IReadOnlyCollection<ArtifactId> eventTypes,
+        CancellationToken cancellationToken);
+
+    Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, StreamPosition streamPosition,
         CancellationToken cancellationToken);
 
     Task<Try<IStreamProcessorState>> WithEventLogSequence(StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState> request,
@@ -30,21 +33,30 @@ public interface IMapStreamPositionToEventLogPosition
 public class StreamPositionToEventLogPositionService : IMapStreamPositionToEventLogPosition
 {
     readonly IEventFetchers _fetchers;
+    readonly IFetchCommittedEvents _committedEventsFetcher;
     readonly ILogger<StreamPositionToEventLogPositionService> _logger;
 
-    public StreamPositionToEventLogPositionService(IEventFetchers fetchers, ILogger<StreamPositionToEventLogPositionService> logger)
+    public StreamPositionToEventLogPositionService(IEventFetchers fetchers, ILogger<StreamPositionToEventLogPositionService> logger,
+        IFetchCommittedEvents committedEventsFetcher)
     {
         _fetchers = fetchers;
         _logger = logger;
+        _committedEventsFetcher = committedEventsFetcher;
     }
 
-
-    public Task<Try<EventLogSequenceNumber>> TryGetPublicEventLogPosition(StreamPosition streamPosition, CancellationToken cancellationToken)
+    public Task<Try<ProcessingPosition>> TryGetProcessingPosition(EventLogSequenceNumber eventLogPosition, IReadOnlyCollection<ArtifactId> eventTypes,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException("TODO");
+        return Try<ProcessingPosition>.DoAsync(async () =>
+        {
+            var streamPosition =
+                await _committedEventsFetcher.GetStreamPositionFromArtifactSet(ScopeId.Default, eventLogPosition, eventTypes, cancellationToken);
+
+            return new ProcessingPosition(streamPosition, eventLogPosition);
+        });
     }
 
-    public async Task<Try<EventLogSequenceNumber>> TryGetEventLogPosition(StreamProcessorId id, StreamPosition streamPosition,
+    public async Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, StreamPosition streamPosition,
         CancellationToken cancellationToken)
     {
         var fetcher = await _fetchers.GetRangeFetcherFor(id.ScopeId, GetStreamDefinition(id), cancellationToken);

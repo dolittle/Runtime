@@ -181,14 +181,14 @@ public class StreamProcessor : IDisposable
     /// <param name="tenant">The <see cref="TenantId"/>.</param>
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-    public Task<Try<StreamPosition>> SetToPosition(TenantId tenant, StreamPosition position)
+    public Task<Try<ProcessingPosition>> SetToPosition(TenantId tenant, ProcessingPosition position)
         => PerformActionAndSetToPosition(tenant, position, (_, _) => Task.FromResult(Try.Succeeded));
 
     /// <summary>
     /// Sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
     /// </summary>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
-    public Task<IDictionary<TenantId, Try<StreamPosition>>> SetToInitialPositionForAllTenants()
+    public Task<IDictionary<TenantId, Try<ProcessingPosition>>> SetToInitialPositionForAllTenants()
         => PerformActionAndSetToInitialPositionForAllTenants((_, _) => Task.FromResult(Try.Succeeded));
 
     /// <summary>
@@ -198,11 +198,11 @@ public class StreamProcessor : IDisposable
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <param name="action">The action to perform before setting the position.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-    public Task<Try<StreamPosition>> PerformActionAndSetToPosition(TenantId tenant, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> action)
+    public Task<Try<ProcessingPosition>> PerformActionAndSetToPosition(TenantId tenant, ProcessingPosition position, Func<TenantId, CancellationToken, Task<Try>> action)
     {
         if (!_streamProcessors.TryGetValue(tenant, out var streamProcessor))
         {
-            return Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
+            return Task.FromResult<Try<ProcessingPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
         }
 
         _metrics.IncrementPositionSet(_eventProcessorKind);
@@ -214,14 +214,14 @@ public class StreamProcessor : IDisposable
     /// </summary>
     /// <param name="action">The action to perform before setting the position.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
-    public async Task<IDictionary<TenantId, Try<StreamPosition>>> PerformActionAndSetToInitialPositionForAllTenants(Func<TenantId, CancellationToken, Task<Try>> action)
+    public async Task<IDictionary<TenantId, Try<ProcessingPosition>>> PerformActionAndSetToInitialPositionForAllTenants(Func<TenantId, CancellationToken, Task<Try>> action)
     {
         _metrics.IncrementInitialPositionSetForAllTenants(_eventProcessorKind);
 
         var tasks = _streamProcessors
-            .ToDictionary(_ => _.Key, _ => _.Value.PerformActionAndReprocessEventsFrom(StreamPosition.Start, action));
+            .ToDictionary(_ => _.Key, _ => _.Value.PerformActionAndReprocessEventsFrom(ProcessingPosition.Initial, action));
 
-        var result = new Dictionary<TenantId, Try<StreamPosition>>();
+        var result = new Dictionary<TenantId, Try<ProcessingPosition>>();
 
         foreach (var (tenant, task) in tasks)
         {

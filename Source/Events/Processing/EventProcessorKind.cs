@@ -15,4 +15,6 @@ public record EventProcessorKind(string Value) : ConceptAs<string>(Value)
     /// </summary>
     /// <param name="identifier"><see cref="string"/> representation.</param>
     public static implicit operator EventProcessorKind(string identifier) => new(identifier);
+    
+    public static readonly EventProcessorKind Actor = "Actor";
 }

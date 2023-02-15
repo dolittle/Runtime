@@ -57,8 +57,7 @@ public class all_dependencies
             stream_processor_state_repository,
             event_processor.Object,
             events_fetcher.Object,
-            stream_event => stream_event.Event.ExecutionContext,
-            new EventFetcherPolicies(Mock.Of<ILogger>()));
+            stream_event => stream_event.Event.ExecutionContext);
         
         
             
@@ -75,7 +74,6 @@ public class all_dependencies
             (processor, stream, arg3) => failing_partitiones,
             new EventFetcherPolicies(Mock.Of<ILogger>()),
             event_waiter,
-            new TimeToRetryForPartitionedStreamProcessor(),
             Mock.Of<ILogger<ScopedStreamProcessor>>());
         
         action_to_perform_before_reprocessing = new Mock<Func<TenantId, CancellationToken, Task<Try>>>();
@@ -90,7 +88,7 @@ public class all_dependencies
         cancellation_token_source.CancelAfter(cancelAfter);
         return stream_processor.Start(cancellation_token_source.Token);
     }
-    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
+    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, ProcessingPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
     {
         var result = stream_processor.Start(cancellation_token_source.Token);
         Task.Delay(setPositionAfter).GetAwaiter().GetResult();

@@ -9,18 +9,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartiti
 
 public class and_retry_time_is_in_the_past
 {
-    static TimeToRetryForUnpartitionedStreamProcessor time_to_retry_getter;
     static StreamProcessorState state;
     static bool success;
     static TimeSpan time_to_retry;
 
     Establish context = () =>
     {
-        time_to_retry_getter = new TimeToRetryForUnpartitionedStreamProcessor();
         state = new StreamProcessorState(ProcessingPosition.Initial, "reason", DateTimeOffset.UtcNow.AddSeconds(-10), 0, DateTimeOffset.UtcNow, true);
     };
 
-    Because of = () => success = time_to_retry_getter.TryGetTimespanToRetry(state, out time_to_retry);
+    Because of = () => success = state.TryGetTimespanToRetry(out time_to_retry);
 
     It should_get_it = () => success.ShouldBeTrue();
     It should_retry_now = () => time_to_retry.ShouldEqual(TimeSpan.Zero);

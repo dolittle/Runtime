@@ -42,9 +42,9 @@ public class EventHandlers : IEventHandlers
     public IEnumerable<EventHandlerInfo> All => _eventHandlers.Select(_ => _.Value.Info);
 
     /// <inheritdoc />
-    public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId)
+    public async Task<Try<IDictionary<TenantId, IStreamProcessorState>>> CurrentStateFor(EventHandlerId eventHandlerId)
         => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-            ? eventHandler.GetEventHandlerCurrentState()
+            ? await eventHandler.GetEventHandlerCurrentState()
             : new EventHandlerNotRegistered(eventHandlerId);
         
     /// <inheritdoc />

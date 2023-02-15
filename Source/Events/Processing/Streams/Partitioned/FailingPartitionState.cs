@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 /// <param name="Position">The <see cref="ProcessingPosition" />.</param>
 /// <param name="RetryTime">The <see cref="DateTimeOffset" /> to retry processing.</param>
 /// <param name="Reason">The reason for failing.</param>
-/// <param name="ProcessingAttempt">The number of times the Event has been processed.</param>
+/// <param name="ProcessingAttempts">The number of times the Event has been processed.</param>
 /// <param name="LastFailed">The <see cref="DateTimeOffset" /> for when this partition last failed.</param>
 public record FailingPartitionState(ProcessingPosition Position, DateTimeOffset RetryTime, string Reason,
     uint ProcessingAttempts, DateTimeOffset LastFailed)

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.Streams;
 using Google.Protobuf.WellKnownTypes;
@@ -23,7 +22,7 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
 {
     // public StreamProcessorState(ProcessingPosition position, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
     //     : this(position.StreamPosition, position.EventLogPosition, failingPartitions, lastSuccessfullyProcessed){}
-    
+
     /// <summary>
     /// Gets a new, initial, <see cref="StreamProcessorState" />.
     /// </summary>
@@ -33,7 +32,7 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
     public bool Partitioned => true;
 
     // public ProcessingPosition ProcessingPosition => new(Position, EventLogPosition);
-    
+
     public Bucket ToProtobuf() => new()
     {
         BucketId = 0,
@@ -61,4 +60,63 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
     };
 
     public ProcessingPosition EarliestPosition => FailingPartitions.Any() ? FailingPartitions.Values.Min(_ => _.Position)! : Position;
+
+    public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
+    {
+        timeToRetry = TimeSpan.MaxValue;
+        var failingStates = FailingPartitions;
+        if (failingStates.Count > 0)
+        {
+            var earliestRetryTime = failingStates.Min(_ => _.Value.RetryTime);
+            timeToRetry = RetryTimeIsInThePast(earliestRetryTime) ? TimeSpan.Zero : earliestRetryTime.Subtract(DateTimeOffset.UtcNow);
+            return true;
+        }
+
+        return false;
+    }
+
+    public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt = default)
+    {
+        if (failedProcessing.Succeeded)
+        {
+            throw new ArgumentException("Processing result cannot be successful when adding a failing partition", nameof(failedProcessing));
+        }
+
+        return AddFailingPartitionFor(
+            this,
+            processedEvent.CurrentProcessingPosition,
+            processedEvent.Partition,
+            retriedAt == default ? DateTimeOffset.MaxValue : retriedAt,
+            failedProcessing.FailureReason);
+    }
+
+    public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp)
+    {
+        return this with
+        {
+            Position = processedEvent.NextProcessingPosition,
+            LastSuccessfullyProcessed = timestamp
+        };
+    }
+
+    static IStreamProcessorState AddFailingPartitionFor(
+        StreamProcessorState oldState,
+        ProcessingPosition failedPosition,
+        PartitionId partition,
+        DateTimeOffset retryTime,
+        string reason)
+    {
+        var failingPartition =
+            new FailingPartitionState(failedPosition.StreamPosition, failedPosition.EventLogPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
+        var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
+        {
+            [partition] = failingPartition
+        };
+        var newState = new StreamProcessorState(failedPosition.IncrementWithStream(), failingPartitions,
+            oldState.LastSuccessfullyProcessed);
+        return newState;
+    }
+
+    bool RetryTimeIsInThePast(DateTimeOffset retryTime)
+        => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
 }

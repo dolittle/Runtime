@@ -3,13 +3,14 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store.Streams;
 
 public interface IStreamEventSubscriber
 {
-    public IAsyncEnumerable<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken);
+    public ChannelReader<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken);
 
     /// <summary>
     /// Subscribe to a stream of events for a specific scope and a set of event types.
@@ -20,6 +21,6 @@ public interface IStreamEventSubscriber
     /// <param name="partitioned">Whether the events should be tagged with "partitioned"</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    IAsyncEnumerable<StreamEvent> Subscribe(ScopeId scopeId, IEnumerable<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
+    ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IEnumerable<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
         CancellationToken cancellationToken);
 }

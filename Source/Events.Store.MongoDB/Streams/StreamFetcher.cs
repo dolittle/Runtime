@@ -93,17 +93,17 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(ProcessingPosition position, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition position, CancellationToken cancellationToken)
     {
         try
         {
             var events = await _collection.Find(
-                    _filter.Gte(_sequenceNumberExpression, position.StreamPosition.Value))
+                    _filter.Gte(_sequenceNumberExpression, position.Value))
                 .Limit(FetchEventsBatchSize)
                 .Project(_eventToStreamEvent)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             return events == default || events.Count == 0
-                ? new NoEventInStreamAtPosition(_stream, _scope, position.StreamPosition)
+                ? new NoEventInStreamAtPosition(_stream, _scope, position)
                 : events;
         }
         catch (MongoWaitQueueFullException ex)

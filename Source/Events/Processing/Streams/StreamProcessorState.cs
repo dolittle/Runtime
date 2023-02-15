@@ -67,7 +67,8 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
     /// </summary>
     /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
     /// <param name="eventLogPosition"></param>
-    StreamProcessorState(StreamPosition streamPosition, EventLogSequenceNumber eventLogPosition) : this(new ProcessingPosition(streamPosition, eventLogPosition), string.Empty,
+    StreamProcessorState(StreamPosition streamPosition, EventLogSequenceNumber eventLogPosition) : this(
+        new ProcessingPosition(streamPosition, eventLogPosition), string.Empty,
         DateTimeOffset.UtcNow, 0, DateTimeOffset.MinValue, false)
     {
     }
@@ -102,5 +103,42 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         return protobuf;
     }
 
+    public ProcessingPosition EarliestPosition => Position;
+
+    public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
+    {
+        timeToRetry = TimeSpan.MaxValue;
+        if (IsFailing)
+        {
+            var retryTime = RetryTime;
+            timeToRetry = RetryTimeIsInThePast(retryTime) ? TimeSpan.Zero : retryTime.Subtract(DateTimeOffset.UtcNow);
+            return true;
+        }
+
+        return false;
+    }
+
+    public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt)
+    {
+        if (failedProcessing.Succeeded)
+        {
+            throw new ArgumentException("Processing result cannot be successful when adding a failing partition", nameof(failedProcessing));
+        }
+        
+        return this with
+        {
+            ProcessingAttempts = ProcessingAttempts + 1,
+            FailureReason = failedProcessing.FailureReason,
+            RetryTime = retryAt,
+            IsFailing = true
+        };
+    }
+
+    public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>
+        new StreamProcessorState(processedEvent.NextProcessingPosition, DateTimeOffset.UtcNow);
+
+    bool RetryTimeIsInThePast(DateTimeOffset retryTime)
+        => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
+    
     public static StreamProcessorState New => new(StreamPosition.Start, EventLogSequenceNumber.Initial);
 }

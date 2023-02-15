@@ -58,16 +58,21 @@ public class EventHandlersService : EventHandlersBase
     }
 
     /// <inheritdoc />
-    public override Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
+    public override async Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
     {
         Log.GetAll(_logger);
         var response = new GetAllResponse();
-        response.EventHandlers.AddRange(_eventHandlers.All.Select(_ => CreateStatusFromInfo(_, request.TenantId?.ToGuid())));
-        return Task.FromResult(response);
+        foreach (var eventHandlerInfo in _eventHandlers.All)
+        {
+            var result = await CreateStatusFromInfo(eventHandlerInfo, request.TenantId?.ToGuid());
+            response.EventHandlers.Add(result);
+        }
+        
+        return response;
     }
 
     /// <inheritdoc />
-    public override Task<GetOneResponse> GetOne(GetOneRequest request, ServerCallContext context)
+    public override async Task<GetOneResponse> GetOne(GetOneRequest request, ServerCallContext context)
     {
         var response = new GetOneResponse();
 
@@ -75,7 +80,7 @@ public class EventHandlersService : EventHandlersBase
         if (!getIds.Success)
         {
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
-            return Task.FromResult(response);
+            return response;
         }
 
         var eventHandler = getIds.Result;
@@ -87,11 +92,11 @@ public class EventHandlersService : EventHandlersBase
         {
             Log.EventHandlerNotRegistered(_logger, eventHandler.EventHandler, eventHandler.Scope);
             response.Failure = _exceptionToFailureConverter.ToFailure(new EventHandlerNotRegistered(eventHandler));
-            return Task.FromResult(response);
+            return response;
         }
 
-        response.EventHandlers = CreateStatusFromInfo(info, request.TenantId?.ToGuid());
-        return Task.FromResult(response);
+        response.EventHandlers = await CreateStatusFromInfo(info, request.TenantId?.ToGuid());
+        return response;
     }
     
     
@@ -112,7 +117,7 @@ public class EventHandlersService : EventHandlersBase
         TenantId tenant = request.TenantId.ToGuid(); 
         Log.ReprocessEventsFrom(_logger, eventHandler.EventHandler, eventHandler.Scope, tenant, request.StreamPosition);
 
-        var eventLogPosition = await _streamPositionToEventLogSequenceService.TryGetEventLogPosition(new StreamProcessorId(eventHandler.Scope, eventHandler.EventHandler, StreamId.EventLog), request.StreamPosition, CancellationToken.None);
+        var eventLogPosition = await _streamPositionToEventLogSequenceService.TryGetEventLogPositionForStreamProcessor(new StreamProcessorId(eventHandler.Scope, eventHandler.EventHandler, StreamId.EventLog), request.StreamPosition, CancellationToken.None);
         if (!eventLogPosition.Success)
         {
             Log.FailedDuringReprocessing(_logger, eventLogPosition.Exception);
@@ -155,7 +160,7 @@ public class EventHandlersService : EventHandlersBase
         return response;
     }
 
-    EventHandlerStatus CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant)
+    async Task<EventHandlerStatus> CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant)
     {
         var status = new EventHandlerStatus
         {   
@@ -165,13 +170,13 @@ public class EventHandlersService : EventHandlersBase
             EventHandlerId = info.Id.EventHandler.ToProtobuf()
         };
         status.EventTypes.AddRange(info.EventTypes.Select(CreateEventType));
-        status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info, tenant));
+        status.Tenants.AddRange(await CreateScopedStreamProcessorStatus(info, tenant));
         return status;
     }
-        
-    IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(EventHandlerInfo info, TenantId tenant = null)
+
+    async Task<IEnumerable<TenantScopedStreamProcessorStatus>> CreateScopedStreamProcessorStatus(EventHandlerInfo info, TenantId tenant = null)
     {
-        var state = _eventHandlers.CurrentStateFor(info.Id);
+        var state = await _eventHandlers.CurrentStateFor(info.Id);
         if (!state.Success)
         {
             throw state.Exception;

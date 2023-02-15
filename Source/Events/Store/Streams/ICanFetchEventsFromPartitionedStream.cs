@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 /// <summary>
 /// Defines a system that can fetch <see cref="StreamEvent">events</see> from <see cref="StreamId">streams</see>.
 /// </summary>
-public interface ICanFetchEventsFromPartitionedStream : ICanFetchEventsFromStream
+public interface ICanFetchEventsFromPartitionedStream: ICanFetchEventsFromStream
 {
     /// <summary>
     /// Fetch the first event in the given partition from a given <see cref="StreamPosition" />.

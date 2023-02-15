@@ -101,7 +101,6 @@ public class StreamProcessor : IStreamProcessor
             _executionContext,
             _eventsFetcherPolicy,
             _eventsFetcher,
-            new TimeToRetryForUnpartitionedStreamProcessor(),
             _loggerFactory.CreateLogger<ScopedStreamProcessor>()).Start(cancellationToken).ConfigureAwait(false);
     }
 }

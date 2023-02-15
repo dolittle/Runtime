@@ -21,7 +21,7 @@ public interface IEventHandler : IDisposable
     /// Gets the current state of the Event Handler. 
     /// </summary>
     /// <returns>The  <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
-    Try<IDictionary<TenantId, IStreamProcessorState>> GetEventHandlerCurrentState();
+    Task<Try<IDictionary<TenantId, IStreamProcessorState>>> GetEventHandlerCurrentState();
 
     /// <summary>
     /// Reprocesses all events from a <see cref="StreamPosition" /> for a tenant.

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions;
 
@@ -29,8 +31,7 @@ public class when_adding_failing_partition : given.an_instance_of_failing_partit
         reason = "";
     };
 
-    Because of = () => result = failing_partitions.AddFailingPartitionFor(stream_processor_id, old_state, processing_position, partition, retry_time, reason, CancellationToken.None).GetAwaiter().GetResult();
-    It should_persist_a_new_state = () => stream_processor_state_repository.Verify(_ => _.Persist(stream_processor_id, Moq.It.IsAny<IStreamProcessorState>(), Moq.It.IsAny<CancellationToken>()));
+    private Because of = () => result = old_state.WithFailure(new FailedProcessing(reason, true, TimeSpan.Zero), Mock.Of<StreamEvent>(), retry_time);
     It should_return_a_new_state = () => result.ShouldNotBeNull();
     It should_return_a_state_of_the_expected_type = () => result.ShouldBeOfExactType<StreamProcessorState>();
     It should_return_a_state_with_the_position_incremented_by_one = () => result.Position.StreamPosition.Value.ShouldEqual(processing_position.StreamPosition + 1);

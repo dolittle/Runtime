@@ -20,7 +20,6 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 {
     readonly IStreamProcessorStates _streamProcessorStates;
     readonly IFailingPartitions _failingPartitions;
-    readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -50,13 +49,11 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,
         IEventFetcherPolicies eventFetcherPolicies,
         IStreamEventWatcher streamWatcher,
-        ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
         : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, streamWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _failingPartitions = failingPartitionsFactory(processor, eventsFromStreamsFetcher, GetExecutionContextForEvent);
-        _timeToRetryGetter = timeToRetryGetter;
     }
 
     /// <inheritdoc/>
@@ -87,62 +84,50 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc/>
-    protected override Task<IStreamProcessorState> Catchup(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
-        _failingPartitions.CatchupFor(Identifier, currentState as StreamProcessorState, cancellationToken);
+    protected override async Task<IStreamProcessorState> Catchup(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
+        await _failingPartitions.CatchupFor(Identifier, currentState as StreamProcessorState, cancellationToken);
 
     /// <inheritdoc/>
-    protected override Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
-        IStreamProcessorState currentState) =>
-        _failingPartitions.AddFailingPartitionFor(
-            Identifier,
-            currentState as StreamProcessorState,
-            processedEvent.Position,
-            processedEvent.Partition,
-            DateTimeOffset.MaxValue,
-            failedProcessing.FailureReason,
-            CancellationToken.None);
+    protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
+    {
+        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.MaxValue);
+        await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None);
+        return newState;
+    }
 
     /// <inheritdoc/>
-    protected override Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
-        IStreamProcessorState currentState) =>
-        _failingPartitions.AddFailingPartitionFor(
-            Identifier,
-            currentState as StreamProcessorState,
-            processedEvent.Position,
-            processedEvent.Partition,
-            DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
-            failedProcessing.FailureReason,
-            CancellationToken.None);
+    protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
+    {
+        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout));
+        await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None);
+        return newState;
+    }
 
     /// <inheritdoc/>
     protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent,
         IStreamProcessorState currentState)
     {
-        var oldState = currentState as StreamProcessorState;
-        var newState = new StreamProcessorState(processedEvent.NextProcessingPosition, oldState.FailingPartitions,
-            DateTimeOffset.UtcNow);
+        var newState = currentState.WithSuccessfullyProcessed(processedEvent, DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
 
-    /// <inheritdoc/>
-    protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
-        => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
-
     /// <inheritdoc />
-    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
+    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, ProcessingPosition position)
     {
         var state = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
-            new ProcessingPosition(position, 0),
+            position,
             FailingPartitionsIgnoringPartitionsToReprocess(state, position),
             state.LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
 
-    static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, StreamPosition position)
+    static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, ProcessingPosition position)
         => state.FailingPartitions
-            .Where(_ => _.Value.Position.StreamPosition < position)
+            .Where(_ => _.Value.Position.StreamPosition < position.StreamPosition)
             .ToDictionary(_ => _.Key, _ => _.Value);
 }

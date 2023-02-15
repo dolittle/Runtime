@@ -36,8 +36,8 @@ public class all_dependencies : when_catching_up.given.all_dependencies
         eventStream = new[]
         {
             new StreamEvent(committed_events.single(), 0, stream_id, first_failing_partition_id, true),
-            new StreamEvent(committed_events.single(), 1, stream_id, second_failing_partition_id, true),
-            new StreamEvent(committed_events.single(), 2, stream_id, first_failing_partition_id, true),
+            new StreamEvent(committed_events.single(1), 1, stream_id, second_failing_partition_id, true),
+            new StreamEvent(committed_events.single(2), 2, stream_id, first_failing_partition_id, true),
         };
     };
 }

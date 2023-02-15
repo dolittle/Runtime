@@ -24,7 +24,7 @@ public class and_processing_must_retry_in_both_partitions : given.all_dependenci
         first_partition_id = "first partition";
         second_partition_id = "second partition";
         first_event = new StreamEvent(committed_events.single(), StreamPosition.Start, Guid.NewGuid(), first_partition_id, true);
-        second_event = new StreamEvent(committed_events.single(), 1u, Guid.NewGuid(), second_partition_id, true);
+        second_event = new StreamEvent(committed_events.single(2), 1u, Guid.NewGuid(), second_partition_id, true);
         event_processor
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason, true, TimeSpan.Zero)));
