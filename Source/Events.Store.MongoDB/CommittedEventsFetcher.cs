@@ -15,6 +15,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.MongoDB;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using IAggregateRoots = Dolittle.Runtime.Events.Store.MongoDB.Aggregates.IAggregateRoots;
 
@@ -30,6 +31,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     readonly IStreams _streams;
     readonly IEventConverter _eventConverter;
     readonly IAggregateRoots _aggregateRoots;
+    readonly ILogger<CommittedEventsFetcher> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommittedEventsFetcher"/> class.
@@ -40,11 +42,12 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     public CommittedEventsFetcher(
         IStreams streams,
         IEventConverter eventConverter,
-        IAggregateRoots aggregateRoots)
+        IAggregateRoots aggregateRoots, ILogger<CommittedEventsFetcher> logger)
     {
         _streams = streams;
         _eventConverter = eventConverter;
         _aggregateRoots = aggregateRoots;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -88,6 +91,10 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             var filter = ToMongoFilterDefinition(eventTypes);
             var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
             var value = Convert.ToInt32(to.Value);
+            
+            _logger.LogInformation("Getting event log sequence number from artifact set: {Filter}, {Value}, {EventLog}", filter, value, eventLog);
+            
+            
             var evt = await eventLog.Find(filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(value)

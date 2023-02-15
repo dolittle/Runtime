@@ -43,9 +43,8 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly IMapStreamPositionToEventLogPosition _eventLogPositionEnricher;
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
-    readonly IHandleFailures _failureHandler;
 
-    CancellationTokenSource _stoppingToken;
+    CancellationTokenSource? _stoppingToken;
     bool retrying;
 
     IStreamProcessorState _currentState;
@@ -185,6 +184,13 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         if (_partitioned && _currentState is Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState state &&
             state.FailingPartitions.ContainsKey(evt.Partition))
         {
+            _failingPartitions.WriteToFailedPartition(evt);
+            ctx.Respond(Ack.Instance);
+            return;
+        }
+        if(evt.Position <= _currentState.Position.StreamPosition)
+        {
+            // Already processed, ignore
             ctx.Respond(Ack.Instance);
             return;
         }
@@ -504,7 +510,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     public void Dispose()
     {
-        _stoppingToken.Cancel();
-        _stoppingToken.Dispose();
+        _stoppingToken?.Cancel();
+        _stoppingToken?.Dispose();
     }
 }
