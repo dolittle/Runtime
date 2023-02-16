@@ -31,6 +31,7 @@ public class WrappedAsyncStreamWriterFactory : IWrappedAsyncStreamWriterFactory
     }
 
     public WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> Create<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+        bool shouldWritePings,
         RequestId requestId,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
@@ -42,6 +43,7 @@ public class WrappedAsyncStreamWriterFactory : IWrappedAsyncStreamWriterFactory
         where TRequest : class
         where TResponse : class
         => new(
+            shouldWritePings,
             _actorSystem,
             _reverseCallsConfig.UseActors,
             requestId,

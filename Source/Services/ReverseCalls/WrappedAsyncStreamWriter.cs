@@ -3,12 +3,15 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Proto;
 
 namespace Dolittle.Runtime.Services.ReverseCalls;
 
@@ -29,6 +32,8 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
     where TRequest : class
     where TResponse : class
 {
+    readonly bool _shouldWritePings;
+    readonly ActorSystem _actorSystem;
     readonly RequestId _requestId;
     readonly IAsyncStreamWriter<TServerMessage> _originalStream;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
@@ -37,10 +42,12 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
     readonly CancellationToken _cancellationToken;
     readonly SemaphoreSlim _writeLock = new(1);
     bool _disposed;
-
+    readonly PID? _streamWriterActor; 
     /// <summary>
     /// Initializes a new instance of the <see cref="WrappedAsyncStreamWriter{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
     /// </summary>
+    /// <param name="actorSystem"></param>
+    /// <param name="useActor"></param>
     /// <param name="requestId">The request id for the gRPC method call.</param>
     /// <param name="originalStream">The original gRPC stream writer to wrap.</param>
     /// <param name="messageConverter">The message converter to use to create ping messages.</param>
@@ -48,6 +55,9 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
     /// <param name="logger">The logger to use.</param>
     /// <param name="cancellationToken">A cancellation token to use for cancelling pending and future writes.</param>
     public WrappedAsyncStreamWriter(
+        bool shouldWritePings,
+        ActorSystem actorSystem,
+        bool useActor,
         RequestId requestId,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
@@ -55,12 +65,38 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
         ILogger logger,
         CancellationToken cancellationToken)
     {
+        _shouldWritePings = shouldWritePings;
+        _actorSystem = actorSystem;
         _requestId = requestId;
         _originalStream = originalStream;
         _messageConverter = messageConverter;
         _metrics = metrics;
         _logger = logger;
         _cancellationToken = cancellationToken;
+
+        if (!useActor)
+        {
+            return;
+        }
+        var actorName = $"reverse-call-stream-writer-{requestId.Value}";
+        _streamWriterActor = shouldWritePings
+            ? actorSystem.Root.SpawnNamed(
+                PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.GetProps(
+                    requestId,
+                    originalStream,
+                    metrics,
+                    logger,
+                    cancellationToken),
+                actorName)
+            : actorSystem.Root.SpawnNamed(
+                ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.GetProps(
+                    requestId,
+                    originalStream,
+                    metrics,
+                    logger,
+                    cancellationToken),
+                actorName);
+
     }
 
     /// <inheritdoc/>
@@ -70,6 +106,19 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
         set => _originalStream.WriteOptions = value;
     }
 
+    static PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.Write CreateWriteMessage(TServerMessage message, bool isPing)
+        => new(message, isPing);
+    
+    async Task WriteAsyncActor(TServerMessage message)
+    {
+        var result = await _actorSystem.Root.RequestAsync<Try>(_streamWriterActor!, _shouldWritePings ? CreateWriteMessage(message, false) : message, CancellationToken.None).ConfigureAwait(false);
+        if (result.Success)
+        {
+            return;
+        }
+        ExceptionDispatchInfo.Capture(result.Exception).Throw();
+    }
+
     /// <summary>
     /// Writes a message asynchronously, blocking until previous writes have been completed.
     /// </summary>
@@ -77,10 +126,16 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
     /// <returns>A task that will complete when the message is sent.</returns>
     public async Task WriteAsync(TServerMessage message)
     {
+        if (_streamWriterActor is not null)
+        {
+            await WriteAsyncActor(message).ConfigureAwait(false);
+            return;
+        }
+
         _logger.WritingMessage(_requestId, typeof(TServerMessage));
         _cancellationToken.ThrowIfCancellationRequested();
 
-        if (!_writeLock.Wait(0))
+        if (IsWriting())
         {
             var stopwatch = Stopwatch.StartNew();
 
@@ -121,15 +176,38 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
         }
     }
 
+    bool IsWriting() => !_writeLock.Wait(0);
+    
+    async Task MaybeWritePingActor()
+    {
+        var ping = new Ping();
+        var message = new TServerMessage();
+        _messageConverter.SetPing(message, ping);
+        var result = await _actorSystem.Root.RequestAsync<Try>(_streamWriterActor!, CreateWriteMessage(message, true), CancellationToken.None).ConfigureAwait(false);
+        if (result.Success)
+        {
+            return;
+        }
+        ExceptionDispatchInfo.Capture(result.Exception).Throw();
+    }
+
     /// <summary>
     /// Writes a ping message synchronously if another write operation is not in progress.
     /// </summary>
     public void MaybeWritePing()
     {
+        if (_streamWriterActor is not null)
+        {
+            if (_shouldWritePings)
+            {
+                MaybeWritePingActor().GetAwaiter().GetResult();
+            }
+            return;
+        }
         _logger.WritingPing(_requestId);
         _cancellationToken.ThrowIfCancellationRequested();
 
-        if (!_writeLock.Wait(0))
+        if (IsWriting())
         {
             _logger.WritingPingSkipped(_requestId);
             return;
@@ -175,6 +253,7 @@ public class WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectAr
 
         if (disposing)
         {
+            _streamWriterActor?.Stop(_actorSystem);
             _logger.DisposingWrappedAsyncStreamWriter(_requestId);
             _writeLock.Wait();
             _writeLock.Dispose();
