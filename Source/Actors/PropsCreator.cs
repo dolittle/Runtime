@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
+using Dolittle.Runtime.Domain.Tenancy;
 using Microsoft.Extensions.DependencyInjection;
 using Proto;
 
