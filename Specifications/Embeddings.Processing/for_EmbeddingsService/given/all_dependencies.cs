@@ -19,13 +19,13 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
 using Grpc.Core;
-using Grpc.Core.Testing;
 using Machine.Specifications;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using Status = Grpc.Core.Status;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 
@@ -57,7 +57,7 @@ public class all_dependencies
     protected static EmbeddingDefinition embedding_definition;
     protected static CallRequestContext call_request_context;
 
-    Establish context = () =>
+    private Establish context = () =>
     {
         embedding_id = "814b9978-2a4c-44cb-a765-3a7caadc1ee4";
         execution_context = new ExecutionContext(
@@ -116,18 +116,46 @@ public class all_dependencies
         dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>();
         runtime_stream = new Mock<IAsyncStreamReader<EmbeddingClientToRuntimeMessage>>();
         client_stream = new Mock<IServerStreamWriter<EmbeddingRuntimeToClientMessage>>();
-        call_context = TestServerCallContext.Create(
-            "method",
-            null,
-            DateTime.Now,
-            Metadata.Empty,
-            CancellationToken.None,
-            "peer",
-            null,
-            null,
-            _ => Task.CompletedTask,
-            () => WriteOptions.Default,
-            _ => { });
+        
+        call_context = new CallContext();
     };
 
+}
+
+public class CallContext : ServerCallContext
+{
+    public CallContext()
+    {
+        RequestHeadersCore = new Metadata();
+    }
+
+    protected override string MethodCore => "SpecMethod";
+
+    protected override string HostCore => throw new NotImplementedException();
+
+    protected override string PeerCore => throw new NotImplementedException();
+
+    protected override DateTime DeadlineCore => throw new NotImplementedException();
+
+    protected override Metadata RequestHeadersCore { get; }
+
+    protected override CancellationToken CancellationTokenCore => throw new NotImplementedException();
+
+    protected override Metadata ResponseTrailersCore => throw new NotImplementedException();
+
+    protected override Status StatusCore { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    protected override WriteOptions WriteOptionsCore { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    protected override AuthContext AuthContextCore => throw new NotImplementedException();
+
+    protected override ContextPropagationToken CreatePropagationTokenCore(ContextPropagationOptions options)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override Task WriteResponseHeadersAsyncCore(Metadata responseHeaders)
+    {
+        throw new NotImplementedException();
+    }
 }

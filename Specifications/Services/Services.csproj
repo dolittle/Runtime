@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Services.Specs</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Services</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

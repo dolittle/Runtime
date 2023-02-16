@@ -3,11 +3,13 @@
 
 using System;
 using Dolittle.Runtime.Services.Callbacks;
+using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Dolittle.Services.Contracts;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Machine.Specifications;
+using Microsoft.Extensions.Options;
 using Moq;
 using It = Machine.Specifications.It;
 
@@ -42,9 +44,14 @@ public class when_disposing_after_pings_have_started : all_dependencies
         callback_scheduler
             .Setup(_ => _.ScheduleCallback(Moq.It.IsAny<Action>(), Moq.It.IsAny<TimeSpan>()))
             .Returns(scheduled_callback.Object);
-
+        var factory = new WrappedAsyncStreamWriterFactory(
+            null,
+            new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = false}),
+            metrics,
+            logger_factory);
         connection = new PingedConnection<a_message, a_message, object, object, object, object>(
             request_id,
+            factory,
             an_async_stream_reader<a_message>
                 .that()
                 .receives(message_with_call_arguments),

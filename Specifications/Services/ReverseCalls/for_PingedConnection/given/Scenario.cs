@@ -7,10 +7,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.Callbacks;
+using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Grpc.Core;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
 
@@ -137,6 +140,11 @@ public class Scenario
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
     {
+        var factory = new WrappedAsyncStreamWriterFactory(
+            null,
+            new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = false}),
+            metrics,
+            loggerFactory);
         _simulatedTime = 0;
         _writtenMessages = new List<Tuple<int, a_message>>();
         _receivedMessages = new List<Tuple<int, a_message>>();
@@ -148,8 +156,9 @@ public class Scenario
         var fakeKeepaliveDeadline = new SimulatedKeepaliveDeadline(this);
         var fakeCallbackScheduler = new SimulatedCallbackScheduler(this);
 
-        var connection = new PingedConnection<a_message, a_message, object, object, object, object>(
+        _connection = new PingedConnection<a_message, a_message, object, object, object, object>(
             requestId,
+            factory,
             new SimulatedStreamReader(this),
             new SimulatedStreamWriter(this),
             context,
@@ -158,11 +167,10 @@ public class Scenario
             fakeCallbackScheduler,
             metrics,
             loggerFactory);
+        
+        ConnectionCancellationToken = _connection.CancellationToken;
 
-        _connectionWriter = connection.ClientStream;
-        ConnectionCancellationToken = connection.CancellationToken;
-
-        var reader = ReadAllConnectionOutputs(connection);
+        var reader = ReadAllConnectionOutputs(_connection);
 
         var time = 0;
         var currentStepIndex = 0;
@@ -186,7 +194,9 @@ public class Scenario
         Thread.Sleep(10);
     }
 
-    IAsyncStreamWriter<a_message> _connectionWriter;
+
+    private PingedConnection<a_message, a_message, object, object, object, object> _connection;
+    IAsyncStreamWriter<a_message> _connectionWriter => _connection.ClientStream;
 
     public CancellationToken ConnectionCancellationToken { get; private set; }
 

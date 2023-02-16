@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_writing;
+namespace Dolittle.Runtime.Services.ReverseCalls.for_PingingWrappedAsyncStreamWriterActor.when_writing;
 
 public class concurrently : given.a_wrapped_stream_writer
 {
