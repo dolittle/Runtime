@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -11,7 +12,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
 /// <summary>
 /// Defines an event horizon connection to a producer microservice Runtime.
 /// </summary>
-public interface IEventHorizonConnection
+public interface IEventHorizonConnection : IDisposable
 {
     /// <summary>
     /// Connects to the producer Runtime, and returns the response.
