@@ -10,9 +10,17 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Shared\Shared.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ReverseCalls\when_initiating" />
+        <Protobuf Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." />
     </ItemGroup>
 
 </Project>

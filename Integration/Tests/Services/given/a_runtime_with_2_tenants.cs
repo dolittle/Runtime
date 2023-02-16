@@ -8,7 +8,7 @@ using Integration.Shared;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Integration.Tests.Events.Processing.given;
+namespace Integration.Tests.Services.given;
 
 class a_runtime_with_2_tenants
 {

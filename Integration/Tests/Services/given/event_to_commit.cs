@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Newtonsoft.Json;
 
-namespace Integration.Tests.Events.Processing.given;
+namespace Integration.Tests.Services.given;
 
 static class event_to_commit
 {

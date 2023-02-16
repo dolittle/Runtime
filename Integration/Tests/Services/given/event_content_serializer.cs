@@ -3,7 +3,7 @@
 
 using MongoDB.Bson.IO;
 
-namespace Integration.Tests.Events.Processing.given;
+namespace Integration.Tests.Services.given;
 
 static class event_content_serializer
 {
