@@ -32,13 +32,16 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
 {
     readonly CancellationTokenSource _cancellationTokenSource;
     readonly RequestId _requestId;
+    readonly IWrappedAsyncStreamWriterFactory _reverseCallWriterFactory;
+    readonly IAsyncStreamWriter<TServerMessage> _clientStream;
+    readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
     readonly ICancelTokenIfDeadlineIsMissed _keepAlive;
     readonly ICallbackScheduler _pingScheduler;
     readonly IMetricsCollector _metrics;
     readonly WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedReader;
-    readonly WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedWriter;
     readonly ILogger _logger;
     readonly CancellationTokenRegistration _keepAliveExpiredRegistration;
+    WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>? _wrappedWriter;
     Stopwatch? _waitForCallContextStopwatch;
     TimeSpan? _keepAliveTimeout;
     IDisposable? _scheduledPings;
@@ -70,6 +73,9 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         ILoggerFactory loggerFactory)
     {
         _requestId = requestId;
+        _reverseCallWriterFactory = reverseCallWriterFactory;
+        _clientStream = clientStream;
+        _messageConverter = messageConverter;
         _keepAlive = keepAlive;
         _pingScheduler = pingScheduler;
         _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, keepAlive.Token);
@@ -82,11 +88,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
             metrics,
             loggerFactory.CreateLogger<WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
             _cancellationTokenSource.Token);
-        _wrappedWriter = reverseCallWriterFactory.Create(
-            requestId,
-            clientStream,
-            messageConverter,
-            _cancellationTokenSource.Token);
+        
         WaitForCallContextInFirstMessageThenStartPinging();
         _keepAliveExpiredRegistration = keepAlive.Token.Register(NotifyKeepAliveTimedOut);
     }
@@ -95,7 +97,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     public IAsyncStreamReader<TClientMessage> RuntimeStream => _wrappedReader;
 
     /// <inheritdoc/>
-    public IAsyncStreamWriter<TServerMessage> ClientStream => _wrappedWriter;
+    public IAsyncStreamWriter<TServerMessage> ClientStream => _wrappedWriter ?? throw new ConnectArgumentsNotReceived();
 
     /// <inheritdoc/>
     public CancellationToken CancellationToken => _cancellationTokenSource.Token;
@@ -129,7 +131,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
             }
 
             _cancellationTokenSource?.Dispose();
-            _wrappedWriter.Dispose();
+            _wrappedWriter?.Dispose();
             _logger.DisposedPingedConnection(_requestId);
         }
 
@@ -152,7 +154,22 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         var pingInterval = context.PingInterval.ToTimeSpan();
         if (ShouldStartPinging(pingInterval))
         {
+            _wrappedWriter = _reverseCallWriterFactory.Create(
+                true,
+                _requestId,
+                _clientStream,
+                _messageConverter,
+                _cancellationTokenSource.Token);
             StartPinging(pingInterval);
+        }
+        else
+        {
+            _wrappedWriter = _reverseCallWriterFactory.Create(
+                false,
+                _requestId,
+                _clientStream,
+                _messageConverter,
+                _cancellationTokenSource.Token);
         }
     }
 
@@ -166,7 +183,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     void StartPinging(TimeSpan pingInterval)
     {
         _logger.StartPings(_requestId, pingInterval);
-        _scheduledPings = _pingScheduler.ScheduleCallback(_wrappedWriter.MaybeWritePing, pingInterval);
+        _scheduledPings = _pingScheduler.ScheduleCallback(_wrappedWriter!.MaybeWritePing, pingInterval);
         StartKeepAliveTokenTimeout(pingInterval);
     }
 

@@ -10,6 +10,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls;
 public interface IWrappedAsyncStreamWriterFactory
 {
     WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> Create<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+        bool shouldWritePings,
         RequestId requestId,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
