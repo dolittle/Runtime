@@ -12,7 +12,7 @@ public class when_setting_write_options : given.a_wrapped_stream_writer
 
     Establish context = () => options = new WriteOptions();
 
-    Because of = () => wrapped_writer.WriteOptions = options;
+    Because of = () => writer.WriteOptions = options;
 
     It should_set_the_options_of_the_original_stream = () => original_writer.VerifySet(_ => _.WriteOptions = options);
 }

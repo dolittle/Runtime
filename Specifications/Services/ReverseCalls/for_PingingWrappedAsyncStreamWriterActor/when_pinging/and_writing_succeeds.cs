@@ -23,7 +23,7 @@ public class and_writing_succeeds : given.a_wrapped_stream_writer
             .Returns(Task.CompletedTask);
     };
 
-    Because of = () => wrapped_writer.MaybeWritePing();
+    Because of = () => writer.MaybeWritePing();
 
     It should_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message));
 }

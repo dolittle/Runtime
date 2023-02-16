@@ -60,9 +60,9 @@ public class concurrently : given.a_wrapped_stream_writer
     {
         var stopWatch = new Stopwatch();
         stopWatch.Start();
-        Task first_write_status = wrapped_writer.WriteAsync(first_message);
-        Task second_write_status = wrapped_writer.WriteAsync(second_message);
-        Task third_write_status = wrapped_writer.WriteAsync(third_message);
+        Task first_write_status = writer.WriteAsync(first_message);
+        Task second_write_status = writer.WriteAsync(second_message);
+        Task third_write_status = writer.WriteAsync(third_message);
 
         Thread.Sleep(20);
         first_write_first_check = first_write_status.IsCompleted;

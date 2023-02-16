@@ -17,9 +17,6 @@ public class a_wrapped_stream_writer : all_dependencies
     {
         original_writer = new Mock<IAsyncStreamWriter<a_message>>();
         wrapped_writer = new WrappedAsyncStreamWriter<a_message, a_message, object, object, object, object>(
-            true,
-            null,
-            false,
             request_id,
             original_writer.Object,
             message_converter.Object,

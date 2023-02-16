@@ -20,7 +20,7 @@ public class and_writing_succeeds : given.a_wrapped_stream_writer
             .Returns(Task.CompletedTask);
     };
 
-    Because of = () => wrapped_writer.WriteAsync(message).GetAwaiter().GetResult();
+    Because of = () => writer.WriteAsync(message).GetAwaiter().GetResult();
 
     It should_write_the_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(message));
 }

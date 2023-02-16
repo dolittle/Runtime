@@ -28,7 +28,7 @@ public class and_writing_fails : given.a_wrapped_stream_writer
     };
 
     static Exception result;
-    Because of = () => result = Catch.Exception(() => wrapped_writer.MaybeWritePing());
+    Because of = () => result = Catch.Exception(() => writer.MaybeWritePing());
 
     It should_not_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message), Moq.Times.Never);
     It should_not_fail_with_the_original_exception = () => result.ShouldBeNull();

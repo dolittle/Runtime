@@ -19,7 +19,7 @@ public class when_getting_write_options : given.a_wrapped_stream_writer
     };
 
     static WriteOptions result;
-    Because of = () => result = wrapped_writer.WriteOptions;
+    Because of = () => result = writer.WriteOptions;
 
     It should_get_the_options_of_the_original_stream = () => original_writer.VerifyGet(_ => _.WriteOptions);
     It should_return_the_options_from_the_original_stream = () => result.ShouldEqual(options);

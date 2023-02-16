@@ -31,8 +31,8 @@ public class and_writing_fails_once_then_succeeds : given.a_wrapped_stream_write
     static Exception result;
     Because of = () =>
     {
-        result = Catch.Exception(() => wrapped_writer.WriteAsync(first_message).GetAwaiter().GetResult());
-        wrapped_writer.WriteAsync(second_message).GetAwaiter().GetResult();
+        result = Catch.Exception(() => writer.WriteAsync(first_message).GetAwaiter().GetResult());
+        writer.WriteAsync(second_message).GetAwaiter().GetResult();
     };
 
     It should_write_the_first_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(first_message));

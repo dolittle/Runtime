@@ -140,7 +140,7 @@ public class Scenario
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
     {
-        var factory = new WrappedAsyncStreamWriterFactory(
+        var factory = new ReverseCallStreamWriterFactory(
             null,
             new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = false}),
             metrics,

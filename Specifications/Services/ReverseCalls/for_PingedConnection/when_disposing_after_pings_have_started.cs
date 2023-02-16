@@ -44,7 +44,7 @@ public class when_disposing_after_pings_have_started : all_dependencies
         callback_scheduler
             .Setup(_ => _.ScheduleCallback(Moq.It.IsAny<Action>(), Moq.It.IsAny<TimeSpan>()))
             .Returns(scheduled_callback.Object);
-        var factory = new WrappedAsyncStreamWriterFactory(
+        var factory = new ReverseCallStreamWriterFactory(
             null,
             new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = false}),
             metrics,

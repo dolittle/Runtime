@@ -25,8 +25,8 @@ public class and_another_write_is_currently_blocking : given.a_wrapped_stream_wr
 
     Because of = () =>
     {
-        _ = wrapped_writer.WriteAsync(another_message);
-        wrapped_writer.MaybeWritePing();
+        _ = writer.WriteAsync(another_message);
+        writer.MaybeWritePing();
         Thread.Sleep(20);
     };
 
