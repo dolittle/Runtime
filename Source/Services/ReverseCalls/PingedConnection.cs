@@ -32,7 +32,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
 {
     readonly CancellationTokenSource _cancellationTokenSource;
     readonly RequestId _requestId;
-    readonly IWrappedAsyncStreamWriterFactory _reverseCallWriterFactory;
+    readonly IReverseCallStreamWriterFactory _reverseCallWriterFactory;
     readonly IAsyncStreamWriter<TServerMessage> _clientStream;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
     readonly ICancelTokenIfDeadlineIsMissed _keepAlive;
@@ -41,7 +41,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     readonly WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedReader;
     readonly ILogger _logger;
     readonly CancellationTokenRegistration _keepAliveExpiredRegistration;
-    WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>? _wrappedWriter;
+    IReverseCallStreamWriter<TServerMessage>? _reverseCallStreamWriter;
     Stopwatch? _waitForCallContextStopwatch;
     TimeSpan? _keepAliveTimeout;
     IDisposable? _scheduledPings;
@@ -62,7 +62,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     /// <param name="loggerFactory">The logger factory to use to create loggers.</param>
     public PingedConnection(
         RequestId requestId,
-        IWrappedAsyncStreamWriterFactory reverseCallWriterFactory,
+        IReverseCallStreamWriterFactory reverseCallWriterFactory,
         IAsyncStreamReader<TClientMessage> runtimeStream,
         IAsyncStreamWriter<TServerMessage> clientStream,
         ServerCallContext context,
@@ -97,7 +97,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     public IAsyncStreamReader<TClientMessage> RuntimeStream => _wrappedReader;
 
     /// <inheritdoc/>
-    public IAsyncStreamWriter<TServerMessage> ClientStream => _wrappedWriter ?? throw new ConnectArgumentsNotReceived();
+    public IAsyncStreamWriter<TServerMessage> ClientStream => _reverseCallStreamWriter ?? throw new ConnectArgumentsNotReceived();
 
     /// <inheritdoc/>
     public CancellationToken CancellationToken => _cancellationTokenSource.Token;
@@ -131,7 +131,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
             }
 
             _cancellationTokenSource?.Dispose();
-            _wrappedWriter?.Dispose();
+            _reverseCallStreamWriter?.Dispose();
             _logger.DisposedPingedConnection(_requestId);
         }
 
@@ -154,8 +154,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         var pingInterval = context.PingInterval.ToTimeSpan();
         if (ShouldStartPinging(pingInterval))
         {
-            _wrappedWriter = _reverseCallWriterFactory.Create(
-                true,
+            _reverseCallStreamWriter = _reverseCallWriterFactory.CreatePingedWriter(
                 _requestId,
                 _clientStream,
                 _messageConverter,
@@ -164,8 +163,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         }
         else
         {
-            _wrappedWriter = _reverseCallWriterFactory.Create(
-                false,
+            _reverseCallStreamWriter = _reverseCallWriterFactory.CreateWriter(
                 _requestId,
                 _clientStream,
                 _messageConverter,
@@ -183,7 +181,7 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     void StartPinging(TimeSpan pingInterval)
     {
         _logger.StartPings(_requestId, pingInterval);
-        _scheduledPings = _pingScheduler.ScheduleCallback(_wrappedWriter!.MaybeWritePing, pingInterval);
+        _scheduledPings = _pingScheduler.ScheduleCallback(_reverseCallStreamWriter!.MaybeWritePing, pingInterval);
         StartKeepAliveTokenTimeout(pingInterval);
     }
 

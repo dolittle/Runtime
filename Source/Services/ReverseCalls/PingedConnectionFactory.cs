@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Services.Callbacks;
 using Google.Protobuf;
 using Grpc.Core;
@@ -11,9 +12,10 @@ namespace Dolittle.Runtime.Services.ReverseCalls;
 /// <summary>
 /// Represents an implementation of <see cref="IKeepConnectionsAlive"/>.
 /// </summary>
+[Singleton]
 public class PingedConnectionFactory : IKeepConnectionsAlive
 {
-    readonly IWrappedAsyncStreamWriterFactory _reverseCallWriterFactory;
+    readonly IReverseCallStreamWriterFactory _reverseCallWriterFactory;
     readonly ICallbackScheduler _callbackScheduler;
     readonly IMetricsCollector _metricsCollector;
     readonly ILoggerFactory _loggerFactory;
@@ -25,7 +27,7 @@ public class PingedConnectionFactory : IKeepConnectionsAlive
     /// <param name="callbackScheduler">The callback scheduler to use for scheduling pings.</param>
     /// <param name="metricsCollector">The metrics collector to use for metrics about pinged reverse call connections.</param>
     /// <param name="loggerFactory">The logger factory to use to create loggers.</param>
-    public PingedConnectionFactory(IWrappedAsyncStreamWriterFactory reverseCallWriterFactory, ICallbackScheduler callbackScheduler, IMetricsCollector metricsCollector, ILoggerFactory loggerFactory)
+    public PingedConnectionFactory(IReverseCallStreamWriterFactory reverseCallWriterFactory, ICallbackScheduler callbackScheduler, IMetricsCollector metricsCollector, ILoggerFactory loggerFactory)
     {
         _reverseCallWriterFactory = reverseCallWriterFactory;
         _callbackScheduler = callbackScheduler;
