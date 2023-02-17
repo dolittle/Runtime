@@ -30,6 +30,8 @@ using Version = Dolittle.Runtime.Domain.Platform.Version;
 using static Moq.It;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Events.Store.Streams.Legacy;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -64,6 +66,7 @@ public class all_dependencies
     protected static ActorSystem actor_system;
     protected static CreateStreamProcessorActorProps create_processor_props;
     protected static CreateTenantScopedStreamProcessorProps create_scoped_processor_props;
+    protected static in_memory_stream_processor_states stream_processor_states;
 
     protected static ITenants tenants =
         new Tenants(Options.Create(new TenantsConfiguration(new Dictionary<TenantId, TenantConfiguration>
@@ -107,15 +110,53 @@ public class all_dependencies
         factory_for_stream_writer = (tenant_id) => stream_writer.Object;
 
         actor_system = new ActorSystem();
+
+        stream_processor_states = new in_memory_stream_processor_states();
+
+        var eventSubscriber = new Mock<IStreamEventSubscriber>();
+        var eventLogPositionEnricher = new Mock<IMapStreamPositionToEventLogPosition>().Object;
         
-        
-        
-        
+        create_scoped_processor_props = (StreamProcessorId streamProcessorId,
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition,
+            IEventProcessor processor,
+            ExecutionContext executionContext,
+            ScopedStreamProcessorProcessedEvent onProcessed,
+            ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
+            TenantId tenantId) => Props.FromProducer(() => new TenantScopedStreamProcessorActor(
+            streamProcessorId,
+        filterDefinition,
+            processor,
+            eventSubscriber.Object,
+            stream_processor_states,
+        executionContext,
+            eventLogPositionEnricher,
+        NullLogger<TenantScopedStreamProcessorActor>.Instance, 
+            onProcessed,
+        onFailedToProcess,
+            tenantId
+            ));
+
+
+        create_processor_props = (
+            StreamProcessorId streamProcessorId,
+            IStreamDefinition streamDefinition,
+            Func<TenantId, IEventProcessor> createEventProcessorFor,
+            StreamProcessorProcessedEvent processedEvent,
+            StreamProcessorFailedToProcessEvent failedToProcessEvent,
+            ExecutionContext executionContext,
+            CancellationTokenSource cancellationTokenSource) => Props.FromProducer(() => new StreamProcessorActor(streamProcessorId,
+            streamDefinition,
+            createEventProcessorFor,
+            executionContext,
+            new Mock<Streams.IMetricsCollector>().Object,
+            processedEvent,
+            failedToProcessEvent,
+            NullLogger<StreamProcessorActor>.Instance,
+            tenant => create_scoped_processor_props,
+            tenants,
+            tenant => stream_processor_states,
+            cancellationTokenSource));
     };
 
-    private Cleanup cleanup = () =>
-    {
-        _ = actor_system.ShutdownAsync();
-    };
-
+    private Cleanup cleanup = () => { _ = actor_system.ShutdownAsync(); };
 }

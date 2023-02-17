@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -39,7 +38,6 @@ public class ActorEventHandler : IEventHandler
     readonly ActorSystem _actorSystem;
     readonly ITenants _tenants;
     readonly CreateStreamProcessorActorProps _createStreamProcessorActorProps;
-    readonly IStreamProcessors _streamProcessors;
     readonly IStreamDefinitions _streamDefinitions;
     readonly EventHandlerRegistrationArguments _arguments;
     readonly Func<TenantId, IEventProcessor> _eventProcessorForTenant;
@@ -57,7 +55,6 @@ public class ActorEventHandler : IEventHandler
     /// <summary>
     /// Initializes a new instance of <see cref="EventHandler"/>.
     /// </summary>
-    /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
     /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
     /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
     /// <param name="arguments">Connecting arguments.</param>
@@ -72,7 +69,6 @@ public class ActorEventHandler : IEventHandler
     /// <param name="tenants"></param>
     /// <param name="createStreamProcessorActorProps"></param>
     public ActorEventHandler(
-        IStreamProcessors streamProcessors,
         IStreamDefinitions streamDefinitions,
         EventHandlerRegistrationArguments arguments,
         Func<TenantId, IEventProcessor> eventProcessorForTenant,
@@ -85,10 +81,9 @@ public class ActorEventHandler : IEventHandler
         ITenants tenants,
         CreateStreamProcessorActorProps createStreamProcessorActorProps,
         CancellationToken cancellationToken
-        )
+    )
     {
         _logger = logger;
-        _streamProcessors = streamProcessors;
         _streamDefinitions = streamDefinitions;
         _arguments = arguments;
         _executionContext = executionContext;
@@ -116,7 +111,7 @@ public class ActorEventHandler : IEventHandler
 
     public EventProcessorId EventProcessor => _arguments.EventHandler.Value;
 
-    StreamProcessorId StreamProcessorId => new(Scope, EventProcessor, StreamId.EventLog);
+    StreamProcessorId StreamProcessorId => new(Scope, EventProcessor, EventProcessor.Value);
 
     IEnumerable<ArtifactId> EventTypes => _arguments.EventTypes;
 
@@ -205,80 +200,28 @@ public class ActorEventHandler : IEventHandler
     public async Task RegisterAndStart()
     {
         _logger.ConnectingEventHandlerWithId(EventProcessor);
-        // if (await RejectIfNonWriteableStream().ConfigureAwait(false)
-        //     || !await RegisterEventProcessorStreamProcessor().ConfigureAwait(false))
-        // {
-        //     return;
-        // }
-
         await Start().ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
-    public event EventHandlerRegistrationFailed? OnRegistrationFailed;
+    // /// <inheritdoc />
+    // public event EventHandlerRegistrationFailed? OnRegistrationFailed;
 
-    async Task<bool> RejectIfNonWriteableStream()
-    {
-        if (!TargetStream.IsNonWriteable)
-        {
-            return false;
-        }
-
-        _logger.EventHandlerIsInvalid(EventProcessor);
-        await Fail(
-            EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
-            $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id").ConfigureAwait(false);
-
-        return true;
-    }
-
-
-    // async Task<bool> RegisterEventProcessorStreamProcessor()
-    // {
-    //     _logger.RegisteringStreamProcessorForEventProcessor(EventProcessor, TargetStream);
-    //     return await RegisterStreamProcessor(
-    //         FilteredStreamDefinition,
-    //         _eventProcessorForTenant,
-    //         HandleFailedToRegisterEventProcessor,
-    //         (streamProcessor) =>
-    //         {
-    //             StreamProcessorProcessedEvent processed = (tenant, @event, time) => { _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time); };
-    //             StreamProcessorFailedToProcessEvent failed = (tenant, @event, time) =>
-    //             {
-    //                 _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
-    //                 _metrics.IncrementEventProcessingFailuresTotal(Info, tenant, @event);
-    //             };
-    //         }).ConfigureAwait(false);
-    // }
-
-    Failure HandleFailedToRegisterEventProcessor(Exception exception)
-    {
-        _logger.ErrorWhileRegisteringStreamProcessorForEventProcessor(exception, EventProcessor);
-
-        if (exception is not StreamProcessorAlreadyRegistered)
-        {
-            return new Failure(
-                EventHandlersFailures.FailedToRegisterEventHandler,
-                $"Failed to register Event Handler: {EventProcessor.Value}. An error occurred. {exception.Message}");
-        }
-
-        _logger.EventHandlerAlreadyRegisteredOnSourceStream(EventProcessor);
-        return new Failure(
-            EventHandlersFailures.FailedToRegisterEventHandler,
-            $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'");
-    }
 
     async Task Start()
     {
-        StreamProcessorProcessedEvent processedEvent = (tenant, @event, time) => { _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time); };
-        StreamProcessorFailedToProcessEvent failedToProcessEvent = (tenant, @event, time) =>
+        void ProcessedEvent(TenantId tenant, StreamEvent @event, TimeSpan time)
+        {
+            _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
+        }
+
+        void FailedToProcessEvent(TenantId tenant, StreamEvent @event, TimeSpan time)
         {
             _metrics.IncrementEventsProcessedTotal(Info, tenant, @event, time);
             _metrics.IncrementEventProcessingFailuresTotal(Info, tenant, @event);
-        };
+        }
 
         var props = _createStreamProcessorActorProps.Invoke(StreamProcessorId, FilteredStreamDefinition, _eventProcessorForTenant,
-            processedEvent, failedToProcessEvent, _executionContext, _cancellationTokenSource);
+            ProcessedEvent, FailedToProcessEvent, _executionContext, _cancellationTokenSource);
         _eventHandlerKindPid = _actorSystem.Root.SpawnNamed(props, EventProcessor.Value.ToString());
 
 
@@ -296,7 +239,17 @@ public class ActorEventHandler : IEventHandler
             var taskGroup = new TaskGroup(tasks);
 
 
-            taskGroup.OnFirstTaskFailure += (_, ex) => _logger.ErrorWhileRunningEventHandler(ex, EventProcessor, Scope);
+            taskGroup.OnFirstTaskFailure += (_, ex) =>
+            {
+                if (ex is OperationCanceledException)
+                {
+                    _logger.CancelledRunningEventHandler(ex, EventProcessor, Scope);
+                }
+                else
+                {
+                    _logger.ErrorWhileRunningEventHandler(ex, EventProcessor, Scope);
+                }
+            };
             taskGroup.OnAllTasksCompleted += () => _logger.EventHandlerDisconnected(EventProcessor, Scope);
 
             await taskGroup.WaitForAllCancellingOnFirst(_cancellationTokenSource).ConfigureAwait(false);
@@ -324,7 +277,6 @@ public class ActorEventHandler : IEventHandler
 
     Task Fail(Failure failure)
     {
-        OnRegistrationFailed?.Invoke();
         return _rejectRegistration(failure, _cancellationTokenSource.Token);
     }
 }

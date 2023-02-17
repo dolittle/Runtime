@@ -111,7 +111,8 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         if (IsFailing)
         {
             var retryTime = RetryTime;
-            timeToRetry = RetryTimeIsInThePast(retryTime) ? TimeSpan.Zero : retryTime.Subtract(DateTimeOffset.UtcNow);
+            var timeSpan = retryTime.Subtract(DateTimeOffset.UtcNow);
+            timeToRetry = timeSpan < TimeSpan.Zero ? TimeSpan.Zero : timeSpan;
             return true;
         }
 

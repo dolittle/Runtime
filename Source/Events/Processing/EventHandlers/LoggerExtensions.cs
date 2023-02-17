@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// <summary>
 /// Represents a extensions for <see cref="ILogger" />.
 /// </summary>
-static class LoggerExtensions
+static partial class LoggerExtensions
 {
     static readonly Action<ILogger, Guid, Guid, Guid, string, bool, Exception> _receivedEventHandler = LoggerMessage
         .Define<Guid, Guid, Guid, string, bool>(
@@ -63,12 +63,6 @@ static class LoggerExtensions
             LogLevel.Warning,
             new EventId(860866540, nameof(CouldNotStartEventHandler)),
             "Could not start event handler: {EventHandler} in scope: {Scope}");
-
-    static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileRunningEventHandler = LoggerMessage
-        .Define<Guid, Guid>(
-            LogLevel.Warning,
-            new EventId(331030466, nameof(ErrorWhileRunningEventHandler)),
-            "An error occurred while running event handler: {EventHandler} in scope: {Scope}");
 
     static readonly Action<ILogger, Guid, Guid, Exception> _eventHandlerDisconnected = LoggerMessage
         .Define<Guid, Guid>(
@@ -145,9 +139,13 @@ static class LoggerExtensions
     internal static void CouldNotStartEventHandler(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
         => _couldNotStartEventHandler(logger, handlerId, scopeId, null);
 
-    internal static void ErrorWhileRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId handlerId, ScopeId scopeId)
-        => _errorWhileRunningEventHandler(logger, handlerId, scopeId, ex);
-
+    
+    [LoggerMessage(0,LogLevel.Warning, "An error occurred while running event handler: {EventHandler} in scope: {Scope}")]
+    internal static partial void ErrorWhileRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope);
+    
+    [LoggerMessage(0,LogLevel.Information, "EventHandler was cancelled: {EventHandler} in scope: {Scope}")]
+    internal static partial void CancelledRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope);
+    
     internal static void EventHandlerDisconnected(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
         => _eventHandlerDisconnected(logger, handlerId, scopeId, null);
 

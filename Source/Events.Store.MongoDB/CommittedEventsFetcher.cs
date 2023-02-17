@@ -83,25 +83,25 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             .ConfigureAwait(false);
     }
 
-    public Task<Try<EventLogSequenceNumber>> GetEventLogSequenceFromArtifactSet(ScopeId scope, StreamPosition to, IEnumerable<ArtifactId> eventTypes,
+    public Task<Try<EventLogSequenceNumber>> GetEventLogSequenceFromArtifactSet(ScopeId scope, StreamPosition nextStreamPosition, IEnumerable<ArtifactId> eventTypes,
         CancellationToken cancellationToken)
     {
         return Try<EventLogSequenceNumber>.DoAsync(async () =>
         {
             var filter = ToMongoFilterDefinition(eventTypes);
             var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
-            var value = Convert.ToInt32(to.Value);
-            
-            _logger.LogInformation("Getting event log sequence number from artifact set: {Filter}, {Value}, {EventLog}", filter, value, eventLog);
-            
+            var value = Convert.ToInt32(nextStreamPosition.Value);
             
             var evt = await eventLog.Find(filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(value)
-                .Skip(value - 1)
+                .Skip(value-1)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return evt?.EventLogSequenceNumber ?? throw new ArgumentException("Could not find event log sequence number");
+            _logger.LogInformation("StreamPosition {Position} mapped to event log sequence {Sequence} for {Scope} with event types {@EventTypes}", value, evt?.EventLogSequenceNumber, scope, eventTypes);
+            if (evt == null) throw new ArgumentException("Could not find event log sequence number");
+
+            return new EventLogSequenceNumber(evt.EventLogSequenceNumber + 1);
         });
     }
 

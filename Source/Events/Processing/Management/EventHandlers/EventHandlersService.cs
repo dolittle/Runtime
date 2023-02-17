@@ -34,7 +34,7 @@ public class EventHandlersService : EventHandlersBase
     readonly IEventHandlers _eventHandlers;
     readonly IExceptionToFailureConverter _exceptionToFailureConverter;
     readonly IConvertStreamProcessorStatuses _streamProcessorStatusConverter;
-    readonly IMapStreamPositionToEventLogPosition _streamPositionToEventLogSequenceService;
+    readonly IGetEventLogSequenceFromStreamPosition _streamPositionToEventLogSequenceService;
     readonly ILogger _logger;
 
     /// <summary>
@@ -48,7 +48,7 @@ public class EventHandlersService : EventHandlersBase
         IEventHandlers eventHandlers,
         IExceptionToFailureConverter exceptionToFailureConverter,
         IConvertStreamProcessorStatuses streamProcessorStatusConverter,
-        ILogger logger, IMapStreamPositionToEventLogPosition streamPositionToEventLogSequenceService)
+        ILogger logger, IGetEventLogSequenceFromStreamPosition streamPositionToEventLogSequenceService)
     {
         _eventHandlers = eventHandlers;
         _exceptionToFailureConverter = exceptionToFailureConverter;

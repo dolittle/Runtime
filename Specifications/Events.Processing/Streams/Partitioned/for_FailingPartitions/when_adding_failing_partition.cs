@@ -21,17 +21,22 @@ public class when_adding_failing_partition : given.an_instance_of_failing_partit
     static string reason;
     static IStreamProcessorState result;
 
+    static StreamEvent stream_event;
+
+    
     Establish context = () =>
     {
+
         stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         partition = "a partition";
+        stream_event = new StreamEvent(committed_events.single(), 0, Guid.Empty, partition, false);
         processing_position = ProcessingPosition.Initial;
         retry_time = DateTimeOffset.Now;
         old_state = new StreamProcessorState(processing_position, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
         reason = "";
     };
 
-    private Because of = () => result = old_state.WithFailure(new FailedProcessing(reason, true, TimeSpan.Zero), Mock.Of<StreamEvent>(), retry_time);
+    private Because of = () => result = old_state.WithFailure(new FailedProcessing(reason, true, TimeSpan.Zero), stream_event, retry_time);
     It should_return_a_new_state = () => result.ShouldNotBeNull();
     It should_return_a_state_of_the_expected_type = () => result.ShouldBeOfExactType<StreamProcessorState>();
     It should_return_a_state_with_the_position_incremented_by_one = () => result.Position.StreamPosition.Value.ShouldEqual(processing_position.StreamPosition + 1);

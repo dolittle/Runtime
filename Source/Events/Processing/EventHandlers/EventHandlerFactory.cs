@@ -66,9 +66,7 @@ public class EventHandlerFactory : IEventHandlerFactory
     public IEventHandler Create(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
     {
         EventProcessor Converter(TenantId _) => new EventProcessor(arguments.Scope, arguments.EventHandler, dispatcher, _loggerFactory.CreateLogger<EventProcessor>());
-        return new ActorEventHandler(
-            _streamProcessors,
-            _streamDefinitions,
+        return new ActorEventHandler(_streamDefinitions,
             arguments,
             Converter,
             cancellation => dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellation),

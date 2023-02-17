@@ -23,9 +23,7 @@ public class an_event_handler : all_dependencies
     {
         filter_processor = new Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
         event_processor = new Mock<IEventProcessor>();
-        event_handler = new ActorEventHandler(
-            stream_processors.Object,
-            stream_definitions.Object,
+        event_handler = new ActorEventHandler(stream_definitions.Object,
             arguments,
             tenant => event_processor.Object,
             cancellation => reverse_call_dispatcher.Object.Accept(new EventHandlerRegistrationResponse(), cancellation),

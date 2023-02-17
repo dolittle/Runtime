@@ -64,13 +64,13 @@ public class EventHandlers : IEventHandlers
         }
         try
         {
-            eventHandler.OnRegistrationFailed += IncrementFailure;
+            // eventHandler.OnRegistrationFailed += IncrementFailure;
             await eventHandler.RegisterAndStart().ConfigureAwait(false);
         }
         finally
         {
             _eventHandlers.Remove(eventHandlerId, out _);
-            eventHandler.OnRegistrationFailed -= IncrementFailure;
+            // eventHandler.OnRegistrationFailed -= IncrementFailure;
         }
     }
 

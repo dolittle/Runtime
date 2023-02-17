@@ -46,5 +46,5 @@ public interface IEventHandler : IDisposable
     /// <summary>
     /// Event that occurs if the EventHandler registration fails.
     /// </summary>
-    event EventHandlerRegistrationFailed OnRegistrationFailed;
+    // event EventHandlerRegistrationFailed OnRegistrationFailed;
 }

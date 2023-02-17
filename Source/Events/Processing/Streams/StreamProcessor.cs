@@ -15,10 +15,33 @@ using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.Streams;
 
+public interface IStreamProcessor
+{
+    /// <summary>
+    /// Gets all current <see cref="IStreamProcessorState"/> states. 
+    /// </summary>
+    /// <returns>The <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
+    Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates();
+
+    /// <summary>
+    /// Sets the position of the stream processor for a tenant.
+    /// </summary>
+    /// <param name="tenant">The <see cref="TenantId"/>.</param>
+    /// <param name="position">The <see cref="StreamPosition" />.</param>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+    Task<Try<ProcessingPosition>> SetToPosition(TenantId tenant, ProcessingPosition position);
+
+    /// <summary>
+    /// Sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
+    /// </summary>
+    /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+    Task<IDictionary<TenantId, Try<ProcessingPosition>>> SetToInitialPositionForAllTenants();
+}
+
 /// <summary>
 /// Represents a system for working with all the <see cref="AbstractScopedStreamProcessor" /> registered for <see cref="ITenants.All" />.
 /// </summary>
-public class StreamProcessor : IDisposable
+public class StreamProcessor : IDisposable, IStreamProcessor
 {
     readonly StreamProcessorId _identifier;
     readonly EventProcessorKind _eventProcessorKind;

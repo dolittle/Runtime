@@ -3,18 +3,23 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;
 using Proto;
+using Proto.Cluster;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
+using StreamProcessorState = Dolittle.Runtime.Events.Processing.Streams.StreamProcessorState;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 
@@ -33,8 +38,8 @@ public delegate Props CreateStreamProcessorActorProps(
 public class StreamProcessorActor : IDisposable, IActor
 {
     readonly StreamProcessorId _identifier;
-    readonly IStreamDefinition _streamDefinition;
     readonly ITenants _tenants;
+    readonly Func<TenantId, IStreamProcessorStates> _getStreamProcessorStates;
     readonly Func<TenantId, IEventProcessor> _createEventProcessorFor;
     readonly Streams.IMetricsCollector _metrics;
     readonly ILogger<StreamProcessorActor> _logger;
@@ -56,9 +61,14 @@ public class StreamProcessorActor : IDisposable, IActor
     /// <param name="streamProcessorId">The identifier of the stream processor.</param>
     /// <param name="streamDefinition">The definition of the stream the processor should process events from.</param>
     /// <param name="createEventProcessorFor">The factory to use to create an event processor per tenant.</param>
-    /// <param name="getCreateScopedStreamProcessorProps">The factory to us to get the scoped stream processor creator per tenant.</param>
-    /// <param name="logger">The logger to use for logging.</param>
     /// <param name="executionContext">The execution context to run the processor in.</param>
+    /// <param name="metrics"></param>
+    /// <param name="onProcessedEvent"></param>
+    /// <param name="onFailedToProcessEvent"></param>
+    /// <param name="logger">The logger to use for logging.</param>
+    /// <param name="getCreateScopedStreamProcessorProps">The factory to us to get the scoped stream processor creator per tenant.</param>
+    /// <param name="tenants"></param>
+    /// <param name="getStreamProcessorStates"></param>
     /// <param name="stoppingToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
     public StreamProcessorActor(
         StreamProcessorId streamProcessorId,
@@ -66,11 +76,12 @@ public class StreamProcessorActor : IDisposable, IActor
         Func<TenantId, IEventProcessor> createEventProcessorFor,
         ExecutionContext executionContext,
         Streams.IMetricsCollector metrics,
-        ITenants tenants,
         StreamProcessorProcessedEvent onProcessedEvent,
         StreamProcessorFailedToProcessEvent onFailedToProcessEvent,
         ILogger<StreamProcessorActor> logger,
         Func<TenantId, CreateTenantScopedStreamProcessorProps> getCreateScopedStreamProcessorProps,
+        ITenants tenants,
+        Func<TenantId, IStreamProcessorStates> getStreamProcessorStates,
         CancellationTokenSource stoppingToken)
     {
         if (streamDefinition.FilterDefinition is not TypeFilterWithEventSourcePartitionDefinition filter)
@@ -81,8 +92,8 @@ public class StreamProcessorActor : IDisposable, IActor
 
         _filter = filter;
         _identifier = streamProcessorId;
-        _streamDefinition = streamDefinition;
         _tenants = tenants;
+        _getStreamProcessorStates = getStreamProcessorStates;
         _createEventProcessorFor = createEventProcessorFor;
         _metrics = metrics;
         _logger = logger;
@@ -147,6 +158,8 @@ public class StreamProcessorActor : IDisposable, IActor
             if (_streamProcessors.Remove(reprocess.TenantId, out var pid))
             {
                 await context.StopAsync(pid);
+                await _getStreamProcessorStates(reprocess.TenantId).Persist(_identifier,
+                    CreateProcessorState(reprocess.ProcessingPosition, _filter.Partitioned), context.CancellationToken);
                 InitTenant(reprocess.TenantId, context);
             }
             else
@@ -160,6 +173,16 @@ public class StreamProcessorActor : IDisposable, IActor
         }
     }
 
+    IStreamProcessorState CreateProcessorState(ProcessingPosition fromPosition, bool partitioned)
+    {
+        return partitioned switch
+        {
+            true => new Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState(fromPosition,
+                ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, default),
+            false => new StreamProcessorState(fromPosition, default)
+        };
+    }
+
     async Task OnGetCurrentProcessorState(IContext context)
     {
         var states = new Dictionary<TenantId, IStreamProcessorState>();
@@ -167,8 +190,12 @@ public class StreamProcessorActor : IDisposable, IActor
         {
             foreach (var (tenantId, pid) in _streamProcessors)
             {
-                var state = await context.RequestAsync<IStreamProcessorState>(pid, GetCurrentProcessorState.Instance);
-                states.Add(tenantId, state);
+                var forTenant = await _getStreamProcessorStates(tenantId).TryGetFor(_identifier, context.CancellationToken);
+                // var state = await context.RequestAsync<IStreamProcessorState>(pid, GetCurrentProcessorState.Instance);
+                if (forTenant.Success)
+                {
+                    states.Add(tenantId, forTenant.Result);
+                }
             }
 
             context.Respond(states);
@@ -210,6 +237,11 @@ public class StreamProcessorActor : IDisposable, IActor
 
     async Task OnStarted(IContext context)
     {
+        if (!context.System.Cluster().MemberList.Started.IsCompletedSuccessfully)
+        {
+            await context.System.Cluster().MemberList.Started;
+        }
+
         Streams.Log.InitializingStreamProcessor(_logger, _identifier);
 
         if (_stopAllProcessors.Token.IsCancellationRequested)

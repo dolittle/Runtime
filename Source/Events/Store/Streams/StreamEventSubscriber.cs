@@ -54,7 +54,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
         CancellationToken cancellationToken) =>
         _ = Task.Run(async () =>
         {
-            var current = startingPosition;
+            var current = startingPosition.StreamPosition;
 
             try
             {
@@ -66,13 +66,9 @@ public class StreamEventSubscriber : IStreamEventSubscriber
                     {
                         if (include(evt))
                         {
-                            var streamEvent = new StreamEvent(evt.FromProtobuf(), current.StreamPosition, StreamId.EventLog, evt.EventSourceId, true);
+                            var streamEvent = new StreamEvent(evt.FromProtobuf(), current, StreamId.EventLog, evt.EventSourceId, true);
                             await writer.WriteAsync(streamEvent, cancellationToken);
-                            current = streamEvent.CurrentProcessingPosition;
-                        }
-                        else
-                        {
-                            current = current.IncrementEventLogOnly();
+                            current = current.Increment();
                         }
                     }
                 }

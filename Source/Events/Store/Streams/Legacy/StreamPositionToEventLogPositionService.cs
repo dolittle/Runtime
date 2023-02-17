@@ -10,7 +10,6 @@ using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using StreamProcessorState = Dolittle.Runtime.Events.Processing.Streams.StreamProcessorState;
@@ -19,12 +18,6 @@ namespace Dolittle.Runtime.Events.Store.Streams.Legacy;
 
 public interface IMapStreamPositionToEventLogPosition
 {
-    Task<Try<ProcessingPosition>> TryGetProcessingPosition(EventLogSequenceNumber eventLogPosition, IReadOnlyCollection<ArtifactId> eventTypes,
-        CancellationToken cancellationToken);
-
-    Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, StreamPosition streamPosition,
-        CancellationToken cancellationToken);
-
     Task<Try<IStreamProcessorState>> WithEventLogSequence(StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState> request,
         CancellationToken cancellationToken);
 }
@@ -32,51 +25,17 @@ public interface IMapStreamPositionToEventLogPosition
 [Singleton, PerTenant]
 public class StreamPositionToEventLogPositionService : IMapStreamPositionToEventLogPosition
 {
-    readonly IFetchCommittedEvents _committedEventsFetcher;
-    readonly IFilterDefinitions _filterDefinitions;
     readonly ILogger<StreamPositionToEventLogPositionService> _logger;
+    readonly IGetEventLogSequenceFromStreamPosition _getEventLogSequenceFromStreamPosition;
 
-    public StreamPositionToEventLogPositionService(ILogger<StreamPositionToEventLogPositionService> logger,
-        IFetchCommittedEvents committedEventsFetcher, IFilterDefinitions filterDefinitions)
+    public StreamPositionToEventLogPositionService(
+        ILogger<StreamPositionToEventLogPositionService> logger, IGetEventLogSequenceFromStreamPosition getEventLogSequenceFromStreamPosition)
     {
         _logger = logger;
-        _committedEventsFetcher = committedEventsFetcher;
-        _filterDefinitions = filterDefinitions;
+        _getEventLogSequenceFromStreamPosition = getEventLogSequenceFromStreamPosition;
     }
 
-    public Task<Try<ProcessingPosition>> TryGetProcessingPosition(EventLogSequenceNumber eventLogPosition, IReadOnlyCollection<ArtifactId> eventTypes,
-        CancellationToken cancellationToken)
-    {
-        return Try<ProcessingPosition>.DoAsync(async () =>
-        {
-            var streamPosition =
-                await _committedEventsFetcher.GetStreamPositionFromArtifactSet(ScopeId.Default, eventLogPosition, eventTypes, cancellationToken);
 
-            return new ProcessingPosition(streamPosition, eventLogPosition);
-        });
-    }
-
-    public async Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, StreamPosition streamPosition,
-        CancellationToken cancellationToken)
-    {
-        var tryGetFilter = await _filterDefinitions.TryGetFromStream(id.ScopeId, id.EventProcessorId.Value, cancellationToken);
-        if (!tryGetFilter.Success)
-        {
-            return tryGetFilter.Exception;
-        }
-
-        var filter = tryGetFilter.Result;
-        if (filter is not TypeFilterWithEventSourcePartitionDefinition typeFilter)
-        {
-            return Try<EventLogSequenceNumber>.Failed(new ArgumentException("Invalid filter type: " + filter.GetType().Name));
-        }
-
-        var artifacts = typeFilter.Types;
-
-        var hopefullyEventLogSequence =
-            await _committedEventsFetcher.GetEventLogSequenceFromArtifactSet(id.ScopeId, streamPosition, artifacts, cancellationToken);
-        return hopefullyEventLogSequence;
-    }
 
 
     public Task<Try<IStreamProcessorState>> WithEventLogSequence(StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState> request,
@@ -111,7 +70,7 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
 
     async Task<EventLogSequenceNumber> GetEventLogPosition(StreamProcessorId id, StreamPosition streamPosition, CancellationToken cancellationToken)
     {
-        var eventLogPosition = await TryGetEventLogPositionForStreamProcessor(id, streamPosition, cancellationToken);
+        var eventLogPosition = await _getEventLogSequenceFromStreamPosition.TryGetEventLogPositionForStreamProcessor(id, streamPosition, cancellationToken);
 
         if (!eventLogPosition.Success)
         {
