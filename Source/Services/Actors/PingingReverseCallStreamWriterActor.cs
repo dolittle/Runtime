@@ -3,10 +3,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -22,6 +25,61 @@ public class PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage,
     where TRequest : class
     where TResponse : class
 {
+    
+    public class Wrapper : IReverseCallStreamWriter<TServerMessage>
+    {
+        readonly ActorSystem _actorSystem;
+        readonly IAsyncStreamWriter<TServerMessage> _originalStream;
+        readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
+        readonly PID _actor;
+
+        public Wrapper(
+            ActorSystem actorSystem,
+            ICreateProps props,
+            RequestId requestId,
+            IAsyncStreamWriter<TServerMessage> originalStream,
+            IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
+            CancellationToken cancellationToken)
+        {
+            _actorSystem = actorSystem;
+            _originalStream = originalStream;
+            _messageConverter = messageConverter;
+            _actor = actorSystem.Root.SpawnNamed(
+                props.PropsFor<PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(
+                    requestId,
+                    originalStream,
+                    cancellationToken),
+                $"pinging-reverse-call-stream-writer-{requestId.Value}");
+        }
+
+        public Task WriteAsync(TServerMessage message) => SendWrite(message, false);
+
+        public WriteOptions? WriteOptions
+        {
+            get => _originalStream.WriteOptions;
+            set => _originalStream.WriteOptions = value;
+        }
+
+
+        public void MaybeWritePing()
+        {
+            var message = new TServerMessage();
+            _messageConverter.SetPing(message, new Ping());
+            SendWrite(message, true).GetAwaiter().GetResult();
+        }
+
+        async Task SendWrite(TServerMessage message, bool isPing)
+        {
+            var result = await _actorSystem.Root.RequestAsync<Try>(_actor, new Write(message, isPing), CancellationToken.None);
+            if (!result.Success)
+            {
+                ExceptionDispatchInfo.Capture(result.Exception).Throw();
+            }
+        }
+
+        public void Dispose() => _actorSystem.Root.Stop(_actor);
+    }
+    
     readonly RequestId _requestId;
     readonly IAsyncStreamWriter<TServerMessage> _originalStream;
     readonly IMetricsCollector _metrics;
@@ -42,7 +100,7 @@ public class PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage,
         RequestId requestId,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IMetricsCollector metrics,
-        ILogger logger,
+        ILogger<PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> logger,
         CancellationToken cancellationToken)
     {
         _requestId = requestId;
@@ -53,18 +111,6 @@ public class PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage,
     }
 
     public record Write(TServerMessage Message, bool IsPing);
-    public static Props GetProps(
-        RequestId requestId,
-        IAsyncStreamWriter<TServerMessage> originalStream,
-        IMetricsCollector metricsCollector,
-        ILogger logger,
-        CancellationToken cancellationToken) =>
-            Props.FromProducer(() => new PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                requestId,
-                originalStream,
-                metricsCollector,
-                logger,
-                cancellationToken));
 
     public Task ReceiveAsync(IContext context)
         => context.Message switch
@@ -120,7 +166,9 @@ public class PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage,
                 _metrics.IncrementTotalStreamWriteBytes(messageSize);
                 LogDoneWriting(isPing, stopwatch.Elapsed, messageSize);
             }
-            context.Send(sender, completedTask.IsCompletedSuccessfully ? Try.Succeeded() : Try.Failed(completedTask.Exception?.InnerException ?? completedTask.Exception!));
+            context.Send(sender, completedTask.IsCompletedSuccessfully
+                ? Try.Succeeded()
+                : Try.Failed(completedTask.Exception?.InnerException ?? completedTask.Exception!));
             return _bufferedMessages.Reader.TryRead(out var item)
                 ? WriteMessage(item.Item1, false, item.Item2.Context, item.Item2.MessageEnvelope.Sender!)
                 : Task.CompletedTask;

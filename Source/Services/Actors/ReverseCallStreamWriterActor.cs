@@ -3,8 +3,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Rudimentary;
 using Google.Protobuf;
 using Grpc.Core;
@@ -21,6 +23,46 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
     where TRequest : class
     where TResponse : class
 {
+    public class Wrapper : IReverseCallStreamWriter<TServerMessage>
+    {
+        readonly ActorSystem _actorSystem;
+        readonly IAsyncStreamWriter<TServerMessage> _originalStream;
+        readonly PID _actor;
+
+        public Wrapper(ActorSystem actorSystem, ICreateProps props, RequestId requestId, IAsyncStreamWriter<TServerMessage> originalStream, CancellationToken cancellationToken)
+        {
+            _actorSystem = actorSystem;
+            _originalStream = originalStream;
+            _actor = actorSystem.Root.SpawnNamed(
+                props.PropsFor<ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(
+                    requestId,
+                    originalStream,
+                    cancellationToken),
+                $"reverse-call-stream-writer-{requestId.Value}");
+        }
+
+        public async Task WriteAsync(TServerMessage message)
+        {
+            var result = await _actorSystem.Root.RequestAsync<Try>(_actor, message, CancellationToken.None);
+            if (!result.Success)
+            {
+                ExceptionDispatchInfo.Capture(result.Exception).Throw();
+            }
+        }
+
+        public WriteOptions? WriteOptions
+        {
+            get => _originalStream.WriteOptions;
+            set => _originalStream.WriteOptions = value;
+        }
+
+        public void MaybeWritePing()
+        {
+        }
+
+        public void Dispose() => _actorSystem.Root.Stop(_actor);
+    }
+
     readonly RequestId _requestId;
     readonly IAsyncStreamWriter<TServerMessage> _originalStream;
     readonly IMetricsCollector _metrics;
@@ -34,7 +76,7 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
         RequestId requestId,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IMetricsCollector metrics,
-        ILogger logger,
+        ILogger<ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> logger,
         CancellationToken cancellationToken)
     {
         _requestId = requestId;
@@ -44,32 +86,19 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
         _cancellationToken = cancellationToken;
     }
 
-    public static Props GetProps(
-        RequestId requestId,
-        IAsyncStreamWriter<TServerMessage> originalStream,
-        IMetricsCollector metricsCollector,
-        ILogger logger,
-        CancellationToken cancellationToken) =>
-        Props.FromProducer(() => new ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-            requestId,
-            originalStream,
-            metricsCollector,
-            logger,
-            cancellationToken));
-
     public Task ReceiveAsync(IContext context)
         => context.Message switch
         {
-            TServerMessage msg => OnWrite(msg, context),
+            TServerMessage msg => OnWrite(msg, context.Respond),
             Stopping => DisposeAsync().AsTask(),
             _ => Task.CompletedTask
         };
 
-    async Task OnWrite(TServerMessage msg, IContext context)
+    async Task OnWrite(TServerMessage msg, Action<Try> respond)
     {
         if (_cancellationToken.IsCancellationRequested || _disposed)
         {
-            context.Respond(Try.Failed(new OperationCanceledException($"{GetType().Name} for request id {_requestId} is cancelled")));
+            RespondError(new OperationCanceledException($"{GetType().Name} for request id {_requestId} is cancelled"));
             return;
         }
         
@@ -85,11 +114,20 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
             _metrics.IncrementTotalStreamWrites();
             _metrics.IncrementTotalStreamWriteBytes(messageSize);
             _logger.WroteMessage(_requestId, stopwatch.Elapsed, messageSize);
-            context.Respond(Try.Succeeded());
+            RespondSuccess();
         }
         catch (Exception e)
         {
-            context.Respond(Try.Failed(e));
+            RespondError(e);
+        }
+
+        void RespondError(Exception e)
+        {
+            respond(Try.Failed(e));
+        }
+        void RespondSuccess()
+        {
+            respond(Try.Succeeded());
         }
     }
 
