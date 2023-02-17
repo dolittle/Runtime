@@ -144,6 +144,7 @@ public class PartitionedProcessor : ProcessorBase
             Logger.LogInformation("Already processed event {Position}, currently at {CurrentPosition}", evt.CurrentProcessingPosition, existingState.Position);
             return existingState;
         }
+        
 
         var (state, processingResult) = await ProcessEvent(evt, existingState, GetExecutionContextForEvent(evt), ctx.CancellationToken);
         if (!processingResult.Succeeded)
@@ -154,40 +155,6 @@ public class PartitionedProcessor : ProcessorBase
         return AsPartitioned(state);
     }
 
-    // void PerformPartitionedRetriesAfterDelay(Streams.Partitioned.StreamProcessorState processorState, IContext ctx)
-    // {
-    //     if (!retrying && HasFailedEvents && processorState.TryGetTimespanToRetry(out var retryTimeout))
-    //     {
-    //         ctx.ReenterAfter(Task.Delay(retryTimeout, _stoppingToken!.Token), async task =>
-    //         {
-    //             var getCurrentState = await _streamProcessorStates.TryGetFor(Identifier, ctx.CancellationToken);
-    //             if (!getCurrentState.Success)
-    //             {
-    //                 throw getCurrentState.Exception;
-    //             }
-    //
-    //             var currentState = getCurrentState.Result;
-    //             if (currentState is not Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState streamProcessorState)
-    //             {
-    //                 Logger.LogError("Current state is not a partitioned state");
-    //                 return;
-    //             }
-    //
-    //             ProcessNext(ctx);
-    //             streamProcessorState = await CatchupFor(Identifier, streamProcessorState, _stoppingToken.Token);
-    //             retrying = false;
-    //             PerformPartitionedRetriesAfterDelay(streamProcessorState, ctx);
-    //         });
-    //     }
-    // }
-
-
-    void HandleFailure(StreamEvent evt, StreamProcessorState streamProcessorState,
-        IContext ctx)
-    {
-        WriteToFailedPartition(evt);
-    }
-
     static StreamProcessorState AsPartitioned(IStreamProcessorState state)
     {
         if (state is not StreamProcessorState partitionedState)
@@ -196,7 +163,7 @@ public class PartitionedProcessor : ProcessorBase
         return partitionedState;
     }
 
-    public void WriteToFailedPartition(StreamEvent evt)
+    void WriteToFailedPartition(StreamEvent evt)
     {
         if (!_failedEvents.TryGetValue(evt.Partition, out var list))
         {
@@ -207,17 +174,16 @@ public class PartitionedProcessor : ProcessorBase
         list.Add(evt);
     }
 
-    public bool HasFailedEvents => _failedEvents.Any();
+    bool HasFailedEvents => _failedEvents.Any();
 
 
-    /// <inheritdoc/>
-    public async Task<StreamProcessorState> CatchupFor(
+    async Task<StreamProcessorState> CatchupFor(
         StreamProcessorState streamProcessorState,
         CancellationToken cancellationToken)
     {
         foreach (var (partition, events) in _failedEvents)
         {
-            streamProcessorState = await CatchupPartition(streamProcessorState, cancellationToken, partition, events);
+            streamProcessorState = await CatchupPartition(streamProcessorState, partition, events, cancellationToken);
         }
 
         return streamProcessorState;
@@ -225,8 +191,9 @@ public class PartitionedProcessor : ProcessorBase
 
     async Task<StreamProcessorState> CatchupPartition(
         StreamProcessorState existingStreamProcessorState,
-        CancellationToken cancellationToken,
-        PartitionId partition, IReadOnlyList<StreamEvent> events)
+        PartitionId partition,
+        IReadOnlyList<StreamEvent> events,
+        CancellationToken cancellationToken)
     {
         var failingPartitionState = existingStreamProcessorState.FailingPartitions[partition];
         if (!ShouldRetryProcessing(failingPartitionState)) return existingStreamProcessorState;
@@ -309,7 +276,6 @@ public class PartitionedProcessor : ProcessorBase
             }
         }
 
-
         return streamProcessorState;
     }
 
@@ -372,9 +338,6 @@ public class PartitionedProcessor : ProcessorBase
 
         return (newState, newFailingPartitionState);
     }
-
-    static bool ShouldProcessNextEventInPartition(ProcessingPosition failingPartitionPosition, ProcessingPosition streamProcessorPosition) =>
-        failingPartitionPosition.StreamPosition.Value < streamProcessorPosition.StreamPosition.Value;
 
     static bool ShouldRetryProcessing(FailingPartitionState state) =>
         DateTimeOffset.UtcNow.CompareTo(state.RetryTime) >= 0;
