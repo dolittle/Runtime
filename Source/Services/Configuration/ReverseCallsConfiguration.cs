@@ -14,6 +14,6 @@ public record ReverseCallsConfiguration
     /// <summary>
     /// Gets the configuration for whether to use actors for reverse calls.
     /// </summary>
-    public bool UseActors { get; init; }
-    
+    public bool UseActors { get; init; } = true;
+
 }

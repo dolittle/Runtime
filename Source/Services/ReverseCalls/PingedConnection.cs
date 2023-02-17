@@ -7,9 +7,9 @@ using System.Threading;
 using Dolittle.Runtime.Services.Callbacks;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using Proto;
 
 namespace Dolittle.Runtime.Services.ReverseCalls;
 
@@ -151,8 +151,10 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         _waitForCallContextStopwatch?.Stop();
         _metrics.AddToTotalWaitForFirstMessageTime(_waitForCallContextStopwatch?.Elapsed ?? TimeSpan.Zero);
         _logger.ReceivedReverseCallContext(_requestId, _waitForCallContextStopwatch?.Elapsed ?? TimeSpan.Zero);
-        var pingInterval = context.PingInterval.ToTimeSpan();
-        if (ShouldStartPinging(pingInterval))
+        var pingIntervalDuration = context.PingInterval;
+        var pingInterval = pingIntervalDuration.ToTimeSpan();
+        
+        if (pingIntervalDuration.Seconds != Duration.MaxSeconds && ShouldStartPinging(pingInterval))
         {
             _reverseCallStreamWriter = _reverseCallWriterFactory.CreatePingedWriter(
                 _requestId,
@@ -220,5 +222,5 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
     }
 
     static bool ShouldStartPinging(TimeSpan pingInterval)
-        => pingInterval >= TimeSpan.FromSeconds(1);
+        => pingInterval >= TimeSpan.FromSeconds(1) && pingInterval != TimeSpan.MaxValue;
 }
