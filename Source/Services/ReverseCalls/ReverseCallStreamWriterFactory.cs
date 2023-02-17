@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Services.Configuration;
 using Google.Protobuf;
@@ -16,17 +17,20 @@ namespace Dolittle.Runtime.Services.ReverseCalls;
 public class ReverseCallStreamWriterFactory : IReverseCallStreamWriterFactory
 {
     readonly ActorSystem _actorSystem;
+    readonly ICreateProps _props;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
     readonly ReverseCallsConfiguration _reverseCallsConfig;
 
     public ReverseCallStreamWriterFactory(
         ActorSystem actorSystem,
+        ICreateProps props,
         IOptions<ReverseCallsConfiguration> reverseCallsConfig,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
     {
         _actorSystem = actorSystem;
+        _props = props;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
         _reverseCallsConfig = reverseCallsConfig.Value;
@@ -47,29 +51,20 @@ public class ReverseCallStreamWriterFactory : IReverseCallStreamWriterFactory
         if (!_reverseCallsConfig.UseActors)
         {
             return new ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                new WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
                     requestId,
                     originalStream,
                     messageConverter,
                     _metrics,
-                    _loggerFactory.CreateLogger<WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
-                    cancellationToken));
+                    _loggerFactory.CreateLogger<ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
+                    cancellationToken);
         }
-
-        var actor = _actorSystem.Root.SpawnNamed(
-            PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.GetProps(
-                requestId,
-                originalStream,
-                _metrics,
-                _loggerFactory.CreateLogger<PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
-                cancellationToken),
-            GetActorName(requestId));
-        return new ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+        return new PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.Wrapper(
             _actorSystem,
+            _props,
+            requestId,
             originalStream,
             messageConverter,
-            actor,
-            true);
+            cancellationToken);
     }
 
     public IReverseCallStreamWriter<TServerMessage> CreateWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
@@ -87,30 +82,18 @@ public class ReverseCallStreamWriterFactory : IReverseCallStreamWriterFactory
         if (!_reverseCallsConfig.UseActors)
         {
             return new ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                new WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
                     requestId,
                     originalStream,
                     messageConverter,
                     _metrics,
-                    _loggerFactory.CreateLogger<WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
-                    cancellationToken));
+                    _loggerFactory.CreateLogger<ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
+                    cancellationToken);
         }
-
-        var actor = _actorSystem.Root.SpawnNamed(
-            ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.GetProps(
-                requestId,
-                originalStream,
-                _metrics,
-                _loggerFactory.CreateLogger<ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
-                cancellationToken),
-            GetActorName(requestId));
-        return new ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+        return new ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.Wrapper(
             _actorSystem,
+            _props,
+            requestId,
             originalStream,
-            messageConverter,
-            actor,
-            false);
+            cancellationToken);
     }
-    
-    static string GetActorName(RequestId requestId) => $"reverse-call-stream-writer-{requestId.Value}";
 }
