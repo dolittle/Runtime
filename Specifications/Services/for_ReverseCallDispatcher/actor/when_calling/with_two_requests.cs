@@ -7,7 +7,7 @@ using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling;
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.actor.when_calling;
 
 [Ignore("This hangs most of the times")]
 public class with_two_requests : given.a_dispatcher
@@ -52,8 +52,8 @@ public class with_two_requests : given.a_dispatcher
 
             })
             .Returns(Task.FromResult(true));
-        
-        _ = dispatcher.Accept(new MyConnectResponse(), CancellationToken.None);
+
+            _ = dispatcher.Accept(new MyConnectResponse(), CancellationToken.None);
     };
 
     static MyResponse first_response;

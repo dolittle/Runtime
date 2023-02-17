@@ -42,7 +42,7 @@ public class and_it_receives_a_response_with_another_callid : given.a_dispatcher
             })
             .Returns(Task.FromResult(true));
 
-        Task.Run(() => dispatcher.Accept(new MyConnectResponse(), CancellationToken.None));
+        _ = dispatcher.Accept(new MyConnectResponse(), CancellationToken.None);
     };
 
     static Task<MyResponse> response;

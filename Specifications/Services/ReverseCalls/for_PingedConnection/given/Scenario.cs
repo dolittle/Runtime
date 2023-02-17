@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Services.Callbacks;
 using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.ReverseCalls.given;
@@ -14,6 +15,7 @@ using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Proto;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
 
@@ -141,7 +143,8 @@ public class Scenario
         ILoggerFactory loggerFactory)
     {
         var factory = new ReverseCallStreamWriterFactory(
-            null,
+            new ActorSystem(),
+            Mock.Of<ICreateProps>(),
             new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = false}),
             metrics,
             loggerFactory);

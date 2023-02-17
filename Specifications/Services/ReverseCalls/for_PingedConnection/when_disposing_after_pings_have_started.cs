@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Services.Callbacks;
 using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.ReverseCalls.given;
@@ -11,6 +12,7 @@ using Grpc.Core;
 using Machine.Specifications;
 using Microsoft.Extensions.Options;
 using Moq;
+using Proto;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection;
@@ -45,7 +47,8 @@ public class when_disposing_after_pings_have_started : all_dependencies
             .Setup(_ => _.ScheduleCallback(Moq.It.IsAny<Action>(), Moq.It.IsAny<TimeSpan>()))
             .Returns(scheduled_callback.Object);
         var factory = new ReverseCallStreamWriterFactory(
-            null,
+            new ActorSystem(),
+            Mock.Of<ICreateProps>(),
             new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = false}),
             metrics,
             logger_factory);

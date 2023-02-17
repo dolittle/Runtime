@@ -13,4 +13,8 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="for_ReverseCallDispatcherActor" />
+    <Folder Include="for_ReverseCallDispatcher\actor" />
+  </ItemGroup>
 </Project>

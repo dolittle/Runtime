@@ -9,7 +9,7 @@ using Dolittle.Services.Contracts;
 using Machine.Specifications;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling;
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.actor.when_calling;
 
 public class and_it_receives_a_response_with_the_correct_callid : given.a_dispatcher
 {
