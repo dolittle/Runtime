@@ -23,4 +23,24 @@ public record FailingPartitionState(ProcessingPosition Position, DateTimeOffset 
         : this(new ProcessingPosition(position, retryTime), toDateTimeOffset, failureReason, processingAttempts, dateTimeOffset)
     {
     }
+
+    public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
+    {
+        if (RetryTime == DateTimeOffset.MaxValue)
+        {
+            timeToRetry = default;
+            return false;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+
+        if (RetryTime > now)
+        {
+            timeToRetry = RetryTime.Subtract(now);
+            return true;
+        }
+
+        timeToRetry = TimeSpan.Zero;
+        return true;
+    }
 }

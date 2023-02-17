@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -45,11 +44,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
 
-    bool waitingForEvent;
-
     CancellationTokenSource? _stoppingToken;
-    bool retrying;
-
     readonly bool _partitioned;
 
     /// <summary>
@@ -120,9 +115,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                 case Started:
                     await Init(context);
                     break;
-                // case StreamEvent evt:
-                //     await OnStreamEvent(evt, context);
-                //     break;
             }
         }
         catch (OperationCanceledException)
@@ -158,35 +150,42 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context)
     {
-        if (_partitioned)
+        try
         {
-            var processor = new PartitionedProcessor(
-                Identifier,
-                _filterDefinition,
-                _processor,
-                _streamProcessorStates,
-                _executionContext,
-                _onProcessed,
-                _onFailedToProcess,
-                _tenantId,
-                Logger);
-            
-            await processor.Process(events, streamProcessorState, context);
+            if (_partitioned)
+            {
+                var processor = new PartitionedProcessor(
+                    Identifier,
+                    _filterDefinition,
+                    _processor,
+                    _streamProcessorStates,
+                    _executionContext,
+                    _onProcessed,
+                    _onFailedToProcess,
+                    _tenantId,
+                    Logger);
+
+                await processor.Process(events, streamProcessorState, context.CancellationToken);
+            }
+            else
+            {
+                var processor = new NonPartitionedProcessor(
+                    Identifier,
+                    _filterDefinition,
+                    _processor,
+                    _streamProcessorStates,
+                    _executionContext,
+                    _onProcessed,
+                    _onFailedToProcess,
+                    _tenantId,
+                    Logger);
+
+                await processor.Process(events, streamProcessorState, context.CancellationToken);
+            }
         }
-        else
+        finally
         {
-            var processor = new NonPartitionedProcessor(
-                Identifier,
-                _filterDefinition,
-                _processor,
-                _streamProcessorStates,
-                _executionContext,
-                _onProcessed,
-                _onFailedToProcess,
-                _tenantId,
-                Logger);
-            
-            await processor.Process(events, streamProcessorState, context);
+            context.Stop(context.Self);
         }
     }
 
@@ -222,7 +221,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         }
     }
 
-
     /// <summary>
     /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="TenantScopedStreamProcessorActor"/>.
     /// </summary>
@@ -232,104 +230,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     /// Gets the <see cref="ILogger" />.
     /// </summary>
     protected ILogger Logger { get; }
-
-    /// <summary>
-    /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
-    /// </summary>
-    /// <param name="evt">The <see cref="StreamEvent" />.</param>
-    /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
-    /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    async Task<(IStreamProcessorState, IProcessingResult)> ProcessEvent(StreamEvent evt, IStreamProcessorState currentState,
-        ExecutionContext executionContext, CancellationToken cancellationToken)
-    {
-        Logger.LogInformation("Processing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
-
-        var before = Stopwatch.GetTimestamp();
-        var processingResult = await _processor.Process(evt.Event, evt.Partition, executionContext, cancellationToken).ConfigureAwait(false);
-        var elapsed = Stopwatch.GetElapsedTime(before);
-        return (await HandleProcessingResult(processingResult, evt, elapsed, currentState).ConfigureAwait(false), processingResult);
-    }
-
-    /// <summary>
-    /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
-    /// </summary>
-    /// <param name="evt">The <see cref="StreamEvent" />.</param>
-    /// <param name="failureReason">The reason for why processing failed the last time.</param>
-    /// <param name="processingAttempts">The number of times that this event has been processed before.</param>
-    /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
-    /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    async Task<(IStreamProcessorState, IProcessingResult)> RetryProcessingEvent(StreamEvent evt, IStreamProcessorState currentState, string failureReason,
-        uint processingAttempts, ExecutionContext executionContext,
-        CancellationToken cancellationToken)
-    {
-        Logger.LogInformation("ReProcessing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
-
-
-        var start = Stopwatch.GetTimestamp();
-        var processingResult = await _processor
-            .Process(evt.Event, evt.Partition, failureReason, processingAttempts - 1, executionContext, cancellationToken).ConfigureAwait(false);
-        var elapsed = Stopwatch.GetElapsedTime(start);
-        var updatedState = await HandleProcessingResult(processingResult, evt, elapsed, currentState).ConfigureAwait(false);
-        return (updatedState, processingResult);
-    }
-
-    /// <summary>
-    /// Handle the <see cref="IProcessingResult" /> from the processing of a <see cref="StreamEvent" />..
-    /// </summary>
-    /// <param name="processingResult">The <see cref="IProcessingResult" />.</param>
-    /// <param name="processedEvent">The processed <see cref="StreamEvent" />.</param>
-    /// <param name="processingTime">The time it took to process the event.</param>
-    /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
-    /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="IStreamProcessorState" />.</returns>
-    async Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, TimeSpan processingTime,
-        IStreamProcessorState currentState)
-    {
-        Logger.LogInformation("Processing result for event at position {ProcessingPosition} is {ProcessingResult}", processedEvent.CurrentProcessingPosition,
-            processingResult.GetType().Name);
-        var newState = currentState.WithResult(processingResult, processedEvent, DateTimeOffset.UtcNow);
-        OnProcessingResult(processingResult, processedEvent, processingTime);
-        await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
-        return newState;
-    }
-
-    void OnProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, TimeSpan processingTime)
-    {
-        if (processingResult.Succeeded)
-        {
-            _onProcessed.Invoke(processedEvent, processingTime);
-        }
-        else
-        {
-            _onFailedToProcess.Invoke(processedEvent, processingTime);
-        }
-    }
-
-    /// <summary>
-    /// Gets the <see cref="ExecutionContext"/> to use while processing the specified <see cref="StreamEvent"/>.
-    /// </summary>
-    /// <param name="eventToProcess">The event to create the processing execution context for.</param>
-    /// <returns>The <see cref="ExecutionContext"/> to use while processing the event.</returns>
-    ExecutionContext GetExecutionContextForEvent(StreamEvent eventToProcess)
-        => _executionContext with
-        {
-            Tenant = _tenantId,
-            CorrelationId = eventToProcess.Event.ExecutionContext.CorrelationId,
-            // TODO: Does this make sense? Do we want more, or less?
-        };
-
-
-    // class Ack
-    // {
-    //     Ack()
-    //     {
-    //     }
-    //
-    //     public static Ack Instance { get; } = new();
-    // }
 
     public void Dispose()
     {

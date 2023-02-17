@@ -34,7 +34,10 @@ public class and_processing_must_retry_in_both_partitions : given.all_dependenci
         setup_event_stream(first_event, second_event);
     };
 
-    Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(100)).GetAwaiter().GetResult();
+    private Because of = () =>
+    {
+        start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(100)).GetAwaiter().GetResult();
+    };
 
     It should_process_one_event_in_first_partition = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), first_partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_process_one_event_in_second_partition = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), second_partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);

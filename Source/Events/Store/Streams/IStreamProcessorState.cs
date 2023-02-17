@@ -34,7 +34,6 @@ public interface IStreamProcessorState
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry);
 
-
     public IStreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
     {
         if (result.Retry)
