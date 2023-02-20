@@ -21,6 +21,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 public record StreamProcessorState(ProcessingPosition Position, ImmutableDictionary<PartitionId, FailingPartitionState> FailingPartitions,
     DateTimeOffset LastSuccessfullyProcessed) : IStreamProcessorState
 {
+    public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, lastSuccessfullyProcessed)
+    {
+    }
+
     // public StreamProcessorState(ProcessingPosition position, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
     //     : this(position.StreamPosition, position.EventLogPosition, failingPartitions, lastSuccessfullyProcessed){}
 
@@ -65,7 +69,8 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
     /// Returns earliest processable position.
     /// Will Skip over failing partitions without a retry time.
     /// </summary>
-    public ProcessingPosition EarliestProcessingPosition => FailingPartitions.Any() ? FailingPartitions.Where(_ => _.Value.CanBeRetried).Min(_ => _.Value.Position)! : Position;
+    public ProcessingPosition EarliestProcessingPosition =>
+        FailingPartitions.Any() ? FailingPartitions.Where(_ => _.Value.CanBeRetried).Min(_ => _.Value.Position)! : Position;
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
     {
@@ -87,8 +92,8 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         {
             throw new ArgumentException("Processing result cannot be successful when adding a failing partition", nameof(failedProcessing));
         }
-        
-        if(FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
+
+        if (FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
         {
             return UpdateFailingPartition(failedProcessing, processedEvent, retriedAt, failingPartitionState);
         }
@@ -175,7 +180,7 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         {
             FailingPartitions = FailingPartitions.RemoveRange(noLongerFailingPartitions)
         };
-    
+
     public StreamProcessorState WithFailingPartition(PartitionId partitionId, FailingPartitionState partitionState) =>
         this with
         {
