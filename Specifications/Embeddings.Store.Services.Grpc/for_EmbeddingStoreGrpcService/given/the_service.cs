@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
@@ -17,33 +18,36 @@ using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpcService.given;
 
-
 public class CallContext : ServerCallContext
-{
-    public CallContext()
+{ 
+    readonly Metadata _requestHeaders;
+    readonly CancellationToken _cancellationToken;
+    readonly Metadata _responseTrailers;
+    readonly AuthContext _authContext;
+    readonly Dictionary<object, object> _userState;
+    WriteOptions? _writeOptions;
+    
+    public Metadata? ResponseHeaders { get; private set; }
+
+    private CallContext(Metadata requestHeaders, CancellationToken cancellationToken)
     {
-        RequestHeadersCore = new Metadata();
+        _requestHeaders = requestHeaders;
+        _cancellationToken = cancellationToken;
+        _responseTrailers = new Metadata();
+        _authContext = new AuthContext(string.Empty, new Dictionary<string, List<AuthProperty>>());
+        _userState = new Dictionary<object, object>();
     }
 
-    protected override string MethodCore => "SpecMethod";
-
-    protected override string HostCore => throw new NotImplementedException();
-
-    protected override string PeerCore => throw new NotImplementedException();
-
-    protected override DateTime DeadlineCore => throw new NotImplementedException();
-
-    protected override Metadata RequestHeadersCore { get; }
-
-    protected override CancellationToken CancellationTokenCore => throw new NotImplementedException();
-
-    protected override Metadata ResponseTrailersCore => throw new NotImplementedException();
-
-    protected override Status StatusCore { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-    protected override WriteOptions WriteOptionsCore { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-    protected override AuthContext AuthContextCore => throw new NotImplementedException();
+    protected override string MethodCore => "MethodName";
+    protected override string HostCore => "HostName";
+    protected override string PeerCore => "PeerName";
+    protected override DateTime DeadlineCore { get; }
+    protected override Metadata RequestHeadersCore => _requestHeaders;
+    protected override CancellationToken CancellationTokenCore => _cancellationToken;
+    protected override Metadata ResponseTrailersCore => _responseTrailers;
+    protected override Status StatusCore { get; set; }
+    protected override WriteOptions? WriteOptionsCore { get => _writeOptions; set { _writeOptions = value; } }
+    protected override AuthContext AuthContextCore => _authContext;
 
     protected override ContextPropagationToken CreatePropagationTokenCore(ContextPropagationOptions options)
     {
@@ -52,7 +56,20 @@ public class CallContext : ServerCallContext
 
     protected override Task WriteResponseHeadersAsyncCore(Metadata responseHeaders)
     {
-        throw new NotImplementedException();
+        if (ResponseHeaders != null)
+        {
+            throw new InvalidOperationException("Response headers have already been written.");
+        }
+
+        ResponseHeaders = responseHeaders;
+        return Task.CompletedTask;
+    }
+
+    protected override IDictionary<object, object> UserStateCore => _userState;
+
+    public static CallContext Create(Metadata? requestHeaders = null, CancellationToken cancellationToken = default)
+    {
+        return new CallContext(requestHeaders ?? new Metadata(), cancellationToken);
     }
 }
 public class the_service
@@ -82,7 +99,7 @@ public class the_service
         cancellation_token = CancellationToken.None;
         a_current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "some state", "some key");
         embeddings_service = new Mock<IEmbeddingsService>();
-        call_context = new CallContext();
+        call_context = CallContext.Create();
         grpc_service = new EmbeddingStoreGrpcService(embeddings_service.Object);
     };
 }

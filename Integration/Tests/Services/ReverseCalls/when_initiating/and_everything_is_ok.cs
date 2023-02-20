@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using Integration.Tests.Services.given;
 using Machine.Specifications;
@@ -13,7 +14,9 @@ class and_everything_is_ok : given.all_dependencies_and_single_tenant
 {
     Establish context = () =>
     {
-        on_service_connect = async (reader, writer, context) => connect_result = await reverse_call_initiator.Connect(reader, writer, context, new basic_with_ping_pong_reverse_call_service_protocol(), context.CancellationToken);
+        setup(
+            async (reader, writer, context) => connect_result = await reverse_call_initiator.Connect(reader, writer, context, new basic_with_ping_pong_reverse_call_service_protocol(), context.CancellationToken),
+            TimeSpan.FromSeconds(5));
     };
 
     Because of = () =>
