@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Immutable;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -39,12 +40,11 @@ public partial class Bucket
     IStreamProcessorState FromProtobufPartitioned()
     {
         var failingPartitions = Failures
-            .ToDictionary(kv => new PartitionId(kv.EventSourceId),
+            .ToImmutableDictionary(kv => new PartitionId(kv.EventSourceId),
                 _ => new FailingPartitionState(new StreamPosition(_.Offset), new EventLogSequenceNumber(_.EventLogOffset), _.RetryTime.ToDateTimeOffset(),
                     _.FailureReason, _.ProcessingAttempts,
                     _.LastFailed.ToDateTimeOffset()));
 
-        return new Processing.Streams.Partitioned.StreamProcessorState(Position(), failingPartitions,
-            LastSuccessfullyProcessed.ToDateTimeOffset());
+        return new Processing.Streams.Partitioned.StreamProcessorState(Position(), failingPartitions, LastSuccessfullyProcessed.ToDateTimeOffset());
     }
 }

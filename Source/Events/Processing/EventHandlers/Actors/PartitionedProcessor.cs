@@ -11,7 +11,6 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using StreamProcessorState = Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState;
@@ -21,11 +20,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 public class PartitionedProcessor : ProcessorBase
 {
     readonly Dictionary<PartitionId, List<StreamEvent>> _failedEvents = new();
-
+    bool catchingUp = true;
 
     public PartitionedProcessor(
         StreamProcessorId streamProcessorId,
-        TypeFilterWithEventSourcePartitionDefinition filterDefinition,
         IEventProcessor processor,
         IStreamProcessorStates streamProcessorStates,
         ExecutionContext executionContext,
@@ -34,10 +32,9 @@ public class PartitionedProcessor : ProcessorBase
         TenantId tenantId,
         ILogger logger)
         : base(
-            streamProcessorId, filterDefinition, processor, streamProcessorStates, executionContext, onProcessed, onFailedToProcess, tenantId, logger)
+            streamProcessorId, processor, streamProcessorStates, executionContext, onProcessed, onFailedToProcess, tenantId, logger)
     {
     }
-
 
     public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState currentState, CancellationToken cancellationToken)
     {
@@ -51,6 +48,10 @@ public class PartitionedProcessor : ProcessorBase
 
                 switch (nextAction)
                 {
+                    case NextAction.ProcessCatchupEvent:
+                        var catchupEvent = await messages.ReadAsync(cancellationToken);
+                        partitionedState = await HandleCatchupEvent(catchupEvent, partitionedState, cancellationToken);
+                        break;
                     case NextAction.ProcessNextEvent:
                         var evt = await messages.ReadAsync(cancellationToken);
                         partitionedState = await HandleNewEvent(evt, partitionedState, cancellationToken);
@@ -73,7 +74,18 @@ public class PartitionedProcessor : ProcessorBase
 
     enum NextAction
     {
+        /// <summary>
+        /// Process the next event in the event stream.
+        /// </summary>
         ProcessNextEvent,
+        /// <summary>
+        /// Process an event from before the current position in the event stream.
+        /// Skips events in non failing partitions
+        /// </summary>
+        ProcessCatchupEvent,
+        /// <summary>
+        /// Retry processing of failed events.
+        /// </summary>
         ProcessFailedEvents,
     }
 
@@ -83,6 +95,7 @@ public class PartitionedProcessor : ProcessorBase
     /// </summary>
     /// <param name="messages"></param>
     /// <param name="state"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="OperationCanceledException"></exception>
     async ValueTask<NextAction> WaitForNextAction(ChannelReader<StreamEvent> messages, StreamProcessorState state, CancellationToken cancellationToken)
@@ -91,7 +104,6 @@ public class PartitionedProcessor : ProcessorBase
         {
             return await WaitForNextEvent();
         }
-
 
         if (timeToRetry <= TimeSpan.Zero)
         {
@@ -113,6 +125,14 @@ public class PartitionedProcessor : ProcessorBase
             var notClosed = await messages.WaitToReadAsync(cancellationToken);
             if (notClosed)
             {
+                if (catchingUp && messages.TryPeek(out var evt))
+                {
+                    if (evt.Event.EventLogSequenceNumber < state.Position.EventLogPosition)
+                    {
+                        return NextAction.ProcessCatchupEvent;
+                    }
+                    return NextAction.ProcessNextEvent;
+                }
                 return NextAction.ProcessNextEvent;
             }
 
@@ -125,35 +145,48 @@ public class PartitionedProcessor : ProcessorBase
         timeToRetry = TimeSpan.MaxValue;
         foreach (var (partitionId, failingPartitionState) in streamProcessorState.FailingPartitions)
         {
-            if(!_failedEvents.ContainsKey(partitionId)) continue;
+            if (!_failedEvents.ContainsKey(partitionId)) continue;
             if (failingPartitionState.TryGetTimespanToRetry(out var partitionTimeToRetry) && partitionTimeToRetry < timeToRetry)
             {
                 timeToRetry = partitionTimeToRetry;
             }
         }
+
         return timeToRetry < TimeSpan.MaxValue;
     }
 
+    async Task<StreamProcessorState> HandleCatchupEvent(StreamEvent evt, StreamProcessorState existingState, CancellationToken cancellationToken)
+    {
+        if (existingState.FailingPartitions.TryGetValue(evt.Partition, out var failingPartition))
+        {
+            return await HandleCatchupEventForPartition(evt, failingPartition, existingState, cancellationToken);
+        }
+
+        // Already processed, ignore
+        Logger.LogInformation("Already processed event {Position}, currently at {CurrentPosition}", evt.CurrentProcessingPosition, existingState.Position);
+        return existingState;
+    }
 
     async Task<StreamProcessorState> HandleNewEvent(StreamEvent evt, StreamProcessorState existingState, CancellationToken cancellationToken)
     {
+        if (catchingUp) // Finished catching up, clear all partitions with failed events that do not have any more events to process
+        {
+            catchingUp = false;
+
+            var noLongerFailingPartitions = existingState.FailingPartitions.Where(_ => !_failedEvents.ContainsKey(_.Key)).Select(_ => _.Key).ToArray();
+            existingState = existingState.WithoutFailingPartitions(noLongerFailingPartitions);
+            await PersistNewState(Identifier, newState: existingState, cancellationToken);
+        }
+
         if (existingState.FailingPartitions.TryGetValue(evt.Partition, out var failingPartitionState))
         {
-            if (evt.Event.EventLogSequenceNumber >= failingPartitionState.Position.EventLogPosition)
+            if (failingPartitionState.CanBeRetried) //Ignore events from partitions that are not retryable
             {
                 WriteToFailedPartition(evt);
             }
 
             return existingState;
         }
-
-        if (evt.Event.EventLogSequenceNumber < existingState.Position.EventLogPosition)
-        {
-            // Already processed, ignore
-            Logger.LogInformation("Already processed event {Position}, currently at {CurrentPosition}", evt.CurrentProcessingPosition, existingState.Position);
-            return existingState;
-        }
-        
 
         var (state, processingResult) = await ProcessEvent(evt, existingState, GetExecutionContextForEvent(evt), cancellationToken);
         if (processingResult is { Succeeded: false, Retry: true })
@@ -162,6 +195,47 @@ public class PartitionedProcessor : ProcessorBase
         }
 
         return AsPartitioned(state);
+    }
+
+
+    async Task<StreamProcessorState> HandleCatchupEventForPartition(StreamEvent evt, FailingPartitionState failingPartitionState, StreamProcessorState existingState,
+        CancellationToken cancellationToken)
+    {
+        if (!failingPartitionState.CanBeRetried)
+        {
+            // Ignore
+            return existingState;
+        }
+        
+        if (_failedEvents.ContainsKey(evt.Partition))
+        {
+            // Currently waiting for retry, events are already written to the failed partition
+            WriteToFailedPartition(evt);
+            return existingState;
+        }
+
+        if (failingPartitionState.TryGetTimespanToRetry(out var timeToRetry) && timeToRetry > TimeSpan.Zero)
+        {
+            // Currently waiting for retry
+            WriteToFailedPartition(evt);
+            return existingState;
+        }
+
+        // Retry immediately
+        var (newState, processingResult) = await RetryProcessingEvent(
+            evt,
+            existingState,
+            failingPartitionState.Reason,
+            failingPartitionState.ProcessingAttempts,
+            GetExecutionContextForEvent(evt),
+            cancellationToken).ConfigureAwait(false);
+
+        if (processingResult is { Succeeded: false, Retry: true })
+        {
+            WriteToFailedPartition(evt);
+        }
+
+        return AsPartitioned(newState);
     }
 
     static StreamProcessorState AsPartitioned(IStreamProcessorState state)
@@ -199,22 +273,17 @@ public class PartitionedProcessor : ProcessorBase
     }
 
     async Task<StreamProcessorState> CatchupPartition(
-        StreamProcessorState existingStreamProcessorState,
+        StreamProcessorState streamProcessorState,
         PartitionId partition,
         IReadOnlyList<StreamEvent> events,
         CancellationToken cancellationToken)
     {
-        var failingPartitionState = existingStreamProcessorState.FailingPartitions[partition];
-        if (!ShouldRetryProcessing(failingPartitionState)) return existingStreamProcessorState;
-        var streamProcessorState = existingStreamProcessorState;
+        var failingPartitionState = streamProcessorState.FailingPartitions[partition];
+        if (!ShouldRetryProcessing(failingPartitionState)) return streamProcessorState;
+
         for (var index = 0; index < events.Count; index++)
         {
-            var nextIndex = index + 1;
             var streamEvent = events[index];
-            if (!ShouldRetryProcessing(failingPartitionState))
-            {
-                return streamProcessorState;
-            }
 
             var (newState, processingResult) = await RetryProcessingEvent(
                 streamEvent,
@@ -227,125 +296,24 @@ public class PartitionedProcessor : ProcessorBase
 
             if (processingResult.Succeeded)
             {
-                if (nextIndex < events.Count)
-                {
-                    var nextEvent = events[nextIndex];
-                    (streamProcessorState, failingPartitionState) = await ChangePositionInFailingPartition(
-                        Identifier,
-                        streamProcessorState,
-                        partition,
-                        nextEvent.CurrentProcessingPosition,
-                        failingPartitionState.LastFailed,
-                        cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    // We are at the end of the list, so we can remove the partition from the failed partitions
-                    _failedEvents.Remove(partition);
-                    streamProcessorState = await RemoveFailingPartition(Identifier, streamProcessorState, partition, cancellationToken)
-                        .ConfigureAwait(false);
-                    return streamProcessorState;
-                }
+                continue;
             }
-            else // Failed
-            {
-                if (processingResult.Retry)
-                {
-                    (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(
-                        Identifier,
-                        streamProcessorState,
-                        partition,
-                        failingPartitionState.ProcessingAttempts + 1,
-                        processingResult.RetryTimeout,
-                        processingResult.FailureReason,
-                        streamEvent.CurrentProcessingPosition,
-                        DateTimeOffset.UtcNow,
-                        cancellationToken).ConfigureAwait(false);
-                    // Important to not process the next events if this failed
-                    _failedEvents[partition] = events.Skip(nextIndex).ToList();
-                    break;
-                }
-                else
-                {
-                    (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(
-                        Identifier,
-                        streamProcessorState,
-                        partition,
-                        failingPartitionState.ProcessingAttempts + 1,
-                        DateTimeOffset.MaxValue,
-                        processingResult.FailureReason,
-                        streamEvent.CurrentProcessingPosition,
-                        DateTimeOffset.UtcNow,
-                        cancellationToken).ConfigureAwait(false);
-                    // Important to not process the next events if this failed
-                    _failedEvents[partition] = events.Skip(nextIndex).ToList();
 
-                    break;
-                }
-            }
+            // Failed, retry later
+            _failedEvents[partition] = events.Skip(index).ToList();
+            return AsPartitioned(newState);
+
+            // Failed
+        }
+
+        // All current events processed.
+        _failedEvents.Remove(partition);
+        if (!catchingUp)
+        {
+            streamProcessorState = streamProcessorState.WithoutFailingPartitions(partition);
         }
 
         return streamProcessorState;
-    }
-
-    async Task<StreamProcessorState> RemoveFailingPartition(IStreamProcessorId streamProcessorId,
-        StreamProcessorState oldState, PartitionId partition,
-        CancellationToken cancellationToken)
-    {
-        var newFailingPartitions = oldState.FailingPartitions;
-        newFailingPartitions.Remove(partition);
-        var newState = oldState with { FailingPartitions = newFailingPartitions };
-        oldState.FailingPartitions.Remove(partition);
-
-        await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
-        return newState;
-    }
-
-    Task<(StreamProcessorState, FailingPartitionState)> ChangePositionInFailingPartition(
-        IStreamProcessorId streamProcessorId,
-        StreamProcessorState oldState,
-        PartitionId partitionId,
-        ProcessingPosition newPosition,
-        DateTimeOffset lastFailed,
-        CancellationToken cancellationToken) =>
-        SetFailingPartitionState(streamProcessorId, oldState, partitionId, 0, DateTimeOffset.UtcNow, string.Empty, newPosition, lastFailed, cancellationToken);
-
-    Task<(StreamProcessorState, FailingPartitionState)> SetFailingPartitionState(
-        IStreamProcessorId streamProcessorId,
-        StreamProcessorState oldState,
-        PartitionId partitionId,
-        uint processingAttempts,
-        TimeSpan retryTimeout,
-        string reason,
-        ProcessingPosition position,
-        DateTimeOffset lastFailed,
-        CancellationToken cancellationToken) =>
-        SetFailingPartitionState(streamProcessorId, oldState, partitionId, processingAttempts, DateTimeOffset.UtcNow.Add(retryTimeout), reason, position,
-            lastFailed, cancellationToken);
-
-    async Task<(StreamProcessorState, FailingPartitionState)> SetFailingPartitionState(
-        IStreamProcessorId streamProcessorId,
-        StreamProcessorState oldState,
-        PartitionId partitionId,
-        uint processingAttempts,
-        DateTimeOffset retryTime,
-        string reason,
-        ProcessingPosition position,
-        DateTimeOffset lastFailed,
-        CancellationToken cancellationToken)
-    {
-        var newFailingPartitionState =
-            new FailingPartitionState(position.StreamPosition, position.EventLogPosition, retryTime, reason, processingAttempts, lastFailed);
-        var newFailingPartitions = oldState.FailingPartitions;
-        newFailingPartitions[partitionId] = newFailingPartitionState;
-
-        var newState = position.StreamPosition > oldState.FailingPartitions[partitionId].Position.StreamPosition
-            ? oldState with { FailingPartitions = newFailingPartitions, LastSuccessfullyProcessed = DateTimeOffset.UtcNow }
-            : oldState with { FailingPartitions = newFailingPartitions };
-
-        await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
-
-        return (newState, newFailingPartitionState);
     }
 
     static bool ShouldRetryProcessing(FailingPartitionState state) =>

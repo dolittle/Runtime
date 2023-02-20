@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -10,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_TimeToRetry
 
 public class and_earliest_retry_time_is_in_the_past
 {
-    static IDictionary<PartitionId, FailingPartitionState> failing_partitions;
+    static ImmutableDictionary<PartitionId, FailingPartitionState> failing_partitions;
     static StreamProcessorState state;
     static bool success;
     static TimeSpan time_to_retry;
@@ -46,7 +47,7 @@ public class and_earliest_retry_time_is_in_the_past
                     0,
                     DateTimeOffset.UtcNow)
             }
-        };
+        }.ToImmutableDictionary();
         state = new StreamProcessorState(ProcessingPosition.Initial, failing_partitions, DateTimeOffset.UtcNow);
     };
 

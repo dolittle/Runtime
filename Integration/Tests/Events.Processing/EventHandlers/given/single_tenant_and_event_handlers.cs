@@ -105,8 +105,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         committed_events = new CommittedEvents(all_committed_events);
     }
 
-    protected static IEnumerable<Dolittle.Runtime.Events.Store.Streams.StreamEvent> get_partitioned_events_in_stream(IEventHandler event_handler,
-        PartitionId partition_id)
+    protected static IEnumerable<Dolittle.Runtime.Events.Store.Streams.StreamEvent> get_partitioned_events_in_stream(IEventHandler event_handler, PartitionId partition_id)
     {
         if (event_handler.Info.Partitioned)
         {
@@ -118,7 +117,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                     event_handler.Info.EventTypes,
                     event_handler.Info.Partitioned)), CancellationToken.None).Result;
 
-            return fetcher.FetchInPartition(partition_id, ProcessingPosition.Initial, CancellationToken.None).Result.Result;
+            return fetcher.FetchInPartition(partition_id, ProcessingPosition.Initial, CancellationToken.None).Result!.Result!;
         }
 
         var rangeFetcher = event_fetchers.GetRangeFetcherFor(event_handler.Info.Id.Scope,

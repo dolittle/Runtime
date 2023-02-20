@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,8 +127,8 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         return newState;
     }
 
-    static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, ProcessingPosition position)
+    static ImmutableDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, ProcessingPosition position)
         => state.FailingPartitions
             .Where(_ => _.Value.Position.StreamPosition < position.StreamPosition)
-            .ToDictionary(_ => _.Key, _ => _.Value);
+            .ToImmutableDictionary(_ => _.Key, _ => _.Value);
 }

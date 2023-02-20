@@ -29,7 +29,7 @@ public interface IStreamProcessorState
     ///  Get the earliest position that the stream processor needs to process. This is normally the same as the <see cref="Position"/>
     /// but can be earlier in the stream if the stream processor is partitioned and there exists failing partitions.
     /// </summary>
-    ProcessingPosition EarliestPosition { get; }
+    ProcessingPosition EarliestProcessingPosition { get; }
 
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry);

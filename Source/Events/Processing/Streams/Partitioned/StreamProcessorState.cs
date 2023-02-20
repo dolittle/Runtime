@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -17,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 /// <param name="EventLogPosition">The <see cref="StreamPosition"/>position of the stream.</param>
 /// <param name="FailingPartitions">The <see cref="IDictionary{PartitionId, FailingPartitionState}">states of the failing partitions</see>.</param>
 /// <param name="LastSuccessfullyProcessed">The <see cref="DateTimeOffset" /> for the last time when an Event in the Stream that the <see cref="ScopedStreamProcessor" /> processes was processed successfully.</param>
-public record StreamProcessorState(ProcessingPosition Position, IDictionary<PartitionId, FailingPartitionState> FailingPartitions,
+public record StreamProcessorState(ProcessingPosition Position, ImmutableDictionary<PartitionId, FailingPartitionState> FailingPartitions,
     DateTimeOffset LastSuccessfullyProcessed) : IStreamProcessorState
 {
     // public StreamProcessorState(ProcessingPosition position, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
@@ -26,7 +27,8 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
     /// <summary>
     /// Gets a new, initial, <see cref="StreamProcessorState" />.
     /// </summary>
-    public static StreamProcessorState New => new(ProcessingPosition.Initial, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.MinValue);
+    public static StreamProcessorState New =>
+        new(ProcessingPosition.Initial, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.MinValue);
 
     /// <inheritdoc/>
     public bool Partitioned => true;
@@ -59,7 +61,11 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
         Partitioned = true
     };
 
-    public ProcessingPosition EarliestPosition => FailingPartitions.Any() ? FailingPartitions.Values.Min(_ => _.Position)! : Position;
+    /// <summary>
+    /// Returns earliest processable position.
+    /// Will Skip over failing partitions without a retry time.
+    /// </summary>
+    public ProcessingPosition EarliestProcessingPosition => FailingPartitions.Any() ? FailingPartitions.Where(_ => _.Value.CanBeRetried).Min(_ => _.Value.Position)! : Position;
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
     {
@@ -81,6 +87,11 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
         {
             throw new ArgumentException("Processing result cannot be successful when adding a failing partition", nameof(failedProcessing));
         }
+        
+        if(FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
+        {
+            return UpdateFailingPartition(failedProcessing, processedEvent, retriedAt, failingPartitionState);
+        }
 
         return AddFailingPartitionFor(
             this,
@@ -90,8 +101,46 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
             failedProcessing.FailureReason);
     }
 
+    IStreamProcessorState UpdateFailingPartition(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt,
+        FailingPartitionState failingPartitionState)
+    {
+        var failingPartition = new FailingPartitionState(
+            Position: processedEvent.CurrentProcessingPosition,
+            RetryTime: failedProcessing.Retry ? DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout) : DateTimeOffset.MaxValue,
+            ProcessingAttempts: processedEvent.CurrentProcessingPosition.EventLogPosition == failingPartitionState.Position.EventLogPosition
+                ? failingPartitionState.ProcessingAttempts + 1
+                : 1,
+            Reason: failedProcessing.FailureReason,
+            LastFailed: retriedAt);
+        return this with
+        {
+            FailingPartitions = FailingPartitions.SetItem(processedEvent.Partition, failingPartition)
+        };
+    }
+
     public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp)
     {
+        if (FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
+        {
+            if (Position.EventLogPosition <= processedEvent.CurrentProcessingPosition.EventLogPosition)
+            {
+                // Since the event log position is the same or higher than the failing partition state, we can remove the failing partition state
+                return new StreamProcessorState(Position: processedEvent.NextProcessingPosition,
+                    FailingPartitions: FailingPartitions.Remove(processedEvent.Partition), LastSuccessfullyProcessed: timestamp);
+            }
+
+            // There might be more events between this event and the current high watermark of processed events.
+            var failingPartition = failingPartitionState with
+            {
+                Position = processedEvent.NextProcessingPosition,
+                RetryTime = DateTimeOffset.UtcNow,
+                ProcessingAttempts = 0,
+                Reason = "behind"
+            };
+            return new StreamProcessorState(Position: processedEvent.NextProcessingPosition,
+                FailingPartitions: FailingPartitions.SetItem(processedEvent.Partition, failingPartition), LastSuccessfullyProcessed: timestamp);
+        }
+
         return this with
         {
             Position = processedEvent.NextProcessingPosition,
@@ -106,17 +155,30 @@ public record StreamProcessorState(ProcessingPosition Position, IDictionary<Part
         DateTimeOffset retryTime,
         string reason)
     {
-        var failingPartition =
-            new FailingPartitionState(failedPosition.StreamPosition, failedPosition.EventLogPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
-        var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
-        {
-            [partition] = failingPartition
-        };
-        var newState = new StreamProcessorState(failedPosition.IncrementWithStream(), failingPartitions,
+        var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
+        var newState = new StreamProcessorState(failedPosition.IncrementWithStream(), oldState.FailingPartitions.SetItem(partition, failingPartition),
             oldState.LastSuccessfullyProcessed);
         return newState;
     }
 
     bool RetryTimeIsInThePast(DateTimeOffset retryTime)
         => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
+
+    /// <summary>
+    /// Remove the previously failing partitions that are no longer failing.
+    /// </summary>
+    /// <param name="noLongerFailingPartitions"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public StreamProcessorState WithoutFailingPartitions(params PartitionId[] noLongerFailingPartitions) =>
+        this with
+        {
+            FailingPartitions = FailingPartitions.RemoveRange(noLongerFailingPartitions)
+        };
+    
+    public StreamProcessorState WithFailingPartition(PartitionId partitionId, FailingPartitionState partitionState) =>
+        this with
+        {
+            FailingPartitions = FailingPartitions.SetItem(partitionId, partitionState)
+        };
 }

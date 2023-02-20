@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -11,14 +12,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_StreamProce
 public class when_creating_state
 {
     static ProcessingPosition stream_position;
-    static IDictionary<PartitionId, FailingPartitionState> failing_partitions;
+    static ImmutableDictionary<PartitionId, FailingPartitionState> failing_partitions;
     static StreamProcessorState state;
     static DateTimeOffset last_successfully_processed;
 
     Establish context = () =>
     {
         stream_position = ProcessingPosition.Initial;
-        failing_partitions = new Dictionary<PartitionId, FailingPartitionState>();
+        failing_partitions = ImmutableDictionary<PartitionId, FailingPartitionState>.Empty;
         last_successfully_processed = DateTimeOffset.UtcNow;
     };
 

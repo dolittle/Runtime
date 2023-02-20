@@ -28,10 +28,10 @@ class partitioned : given.a_clean_event_store
         source_stream_id);
 
     static readonly StreamProcessorState stream_processor_state =
-        new(new ProcessingPosition(10, 12), new Dictionary<PartitionId, FailingPartitionState>()
+        new(new ProcessingPosition(10, 12), new Dictionary<PartitionId, FailingPartitionState>
         {
             {failing_partition_id, new FailingPartitionState(new StreamPosition(5), 5, retry_time, "testing",2, last_failed)}
-        }, DateTimeOffset.Now);
+        }.ToImmutableDictionary(), DateTimeOffset.Now);
 
     Establish context = () =>
     {

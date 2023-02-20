@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ public class all_dependencies : for_FailingPartitions.given.an_instance_of_faili
     Establish context = () =>
     {
         stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-        stream_processor_state = new StreamProcessorState(initial_stream_processor_position, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
+        stream_processor_state = new StreamProcessorState(initial_stream_processor_position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.UtcNow);
 
         stream_processor_state_repository
             .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))

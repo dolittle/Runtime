@@ -140,7 +140,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
         var initialState = processingPosition.Result;
 
-        var from = initialState.EarliestPosition;
+        var from = initialState.EarliestProcessingPosition;
         var cts = new CancellationTokenSource();
         var events = StartSubscription(from, cts.Token);
         var firstEventReady = events.WaitToReadAsync(cts.Token).AsTask();
@@ -156,7 +156,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
             {
                 var processor = new PartitionedProcessor(
                     Identifier,
-                    _filterDefinition,
                     _processor,
                     _streamProcessorStates,
                     _executionContext,

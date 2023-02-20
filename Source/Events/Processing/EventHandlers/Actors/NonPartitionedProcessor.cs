@@ -28,7 +28,7 @@ public class NonPartitionedProcessor : ProcessorBase
         TenantId tenantId,
         ILogger logger)
         : base(
-        streamProcessorId, filterDefinition, processor, streamProcessorStates, executionContext, onProcessed, onFailedToProcess, tenantId, logger)
+        streamProcessorId, processor, streamProcessorStates, executionContext, onProcessed, onFailedToProcess, tenantId, logger)
     {
     }
 

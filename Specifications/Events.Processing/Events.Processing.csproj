@@ -8,6 +8,10 @@
     <ProjectReference Include="../../Source/Events/Events.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Processors\partitioned" />
+  </ItemGroup>
+
   <Import Project="../../specs.props" />
   
 </Project>

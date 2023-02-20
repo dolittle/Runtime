@@ -24,9 +24,11 @@ public record FailingPartitionState(ProcessingPosition Position, DateTimeOffset 
     {
     }
 
+    public bool CanBeRetried => RetryTime < DateTimeOffset.MaxValue;
+
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
     {
-        if (RetryTime == DateTimeOffset.MaxValue)
+        if (!CanBeRetried)
         {
             timeToRetry = default;
             return false;

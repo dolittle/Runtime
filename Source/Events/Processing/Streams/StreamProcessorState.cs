@@ -103,7 +103,7 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         return protobuf;
     }
 
-    public ProcessingPosition EarliestPosition => Position;
+    public ProcessingPosition EarliestProcessingPosition => Position;
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
     {

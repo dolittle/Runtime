@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
@@ -30,7 +31,7 @@ public class and_the_state_is_persisted : given.all_dependencies
         stored_state = a_partitioned_state() with
         {
             Position = new ProcessingPosition(2, 5),
-            FailingPartitions = failing_partitions
+            FailingPartitions = failing_partitions.ToImmutableDictionary()
         };
         another_stored_processor = (stream_processor_id with
         {

@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -34,9 +34,6 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
         _logger = logger;
         _getEventLogSequenceFromStreamPosition = getEventLogSequenceFromStreamPosition;
     }
-
-
-
 
     public Task<Try<IStreamProcessorState>> WithEventLogSequence(StreamProcessorStateWithId<StreamProcessorId, IStreamProcessorState> request,
         CancellationToken cancellationToken)
@@ -80,8 +77,8 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
         return eventLogPosition.Result;
     }
 
-    async Task<IDictionary<PartitionId, FailingPartitionState>> Enrich(StreamProcessorId id,
-        IDictionary<PartitionId, FailingPartitionState> failingPartitions, CancellationToken cancellationToken)
+    async Task<ImmutableDictionary<PartitionId, FailingPartitionState>> Enrich(StreamProcessorId id,
+        ImmutableDictionary<PartitionId, FailingPartitionState> failingPartitions, CancellationToken cancellationToken)
     {
         if (failingPartitions.Count == 0) return failingPartitions;
 
@@ -98,9 +95,8 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
             });
         }
 
-        return enriched;
+        return enriched.ToImmutableDictionary();
     }
-
 
     Task<Try<IStreamProcessorState>> FetchForNonPartitioned(StreamProcessorId id, StreamProcessorState state,
         CancellationToken cancellationToken) =>
@@ -111,10 +107,4 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
                 EventLogPosition = await GetEventLogPosition(id, state.Position.StreamPosition, cancellationToken)
             }
         });
-
-    // static StreamDefinition GetStreamDefinition(StreamProcessorId streamProcessorId)
-    // {
-    //     var streamDefinition = new StreamDefinition(new FilterDefinition(streamProcessorId.SourceStreamId, streamProcessorId.SourceStreamId, false));
-    //     return streamDefinition;
-    // }
 }

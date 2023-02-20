@@ -13,14 +13,15 @@ public class when_both_tasks_fail : given.a_group_and_inputs
 {
     static Exception first_task_failure;
     static Exception second_task_failure;
-    
-    Establish context = () =>
+
+    private Establish context = () =>
     {
         first_task_failure = new Exception();
         second_task_failure = new Exception();
         
-        first_task = Task.Delay(20).ContinueWith(_ => throw first_task_failure);
-        second_task = Task.Delay(10).ContinueWith(_ => throw second_task_failure);
+        first_task = Task.Delay(5).ContinueWith(_ => throw first_task_failure);
+        second_task = Task.Delay(1).ContinueWith(_ => throw second_task_failure);
+
     };
 
     It should_throw_the_first_exception = () => exception.ShouldBeTheSameAs(second_task_failure);

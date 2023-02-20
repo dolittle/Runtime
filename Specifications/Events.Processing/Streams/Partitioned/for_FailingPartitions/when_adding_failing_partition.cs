@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -32,7 +33,7 @@ public class when_adding_failing_partition : given.an_instance_of_failing_partit
         stream_event = new StreamEvent(committed_events.single(), 0, Guid.Empty, partition, false);
         processing_position = ProcessingPosition.Initial;
         retry_time = DateTimeOffset.Now;
-        old_state = new StreamProcessorState(processing_position, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
+        old_state = new StreamProcessorState(processing_position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.UtcNow);
         reason = "";
     };
 

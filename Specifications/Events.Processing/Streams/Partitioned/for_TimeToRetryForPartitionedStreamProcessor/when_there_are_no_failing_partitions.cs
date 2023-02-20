@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -16,7 +17,7 @@ public class when_there_are_no_failing_partitions
 
     Establish context = () =>
     {
-        state = new StreamProcessorState(ProcessingPosition.Initial, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
+        state = new StreamProcessorState(ProcessingPosition.Initial, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.UtcNow);
     };
 
     Because of = () => success = state.TryGetTimespanToRetry(out time_to_retry);

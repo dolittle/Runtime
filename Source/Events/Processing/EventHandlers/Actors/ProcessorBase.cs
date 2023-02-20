@@ -38,7 +38,6 @@ public abstract class ProcessorBase
     /// </summary>
     /// <param name="tenantId">The <see cref="TenantId"/>.</param>
     /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
-    /// <param name="filterDefinition"></param>
     /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
     /// <param name="streamProcessorStates"></param>
     /// <param name="executionContext">The <see cref="ExecutionContext"/> of the stream processor.</param>
@@ -49,7 +48,6 @@ public abstract class ProcessorBase
     /// <param name="onFailedToProcess"></param>
     public ProcessorBase(
         StreamProcessorId streamProcessorId,
-        TypeFilterWithEventSourcePartitionDefinition filterDefinition,
         IEventProcessor processor,
         IStreamProcessorStates streamProcessorStates,
         ExecutionContext executionContext,

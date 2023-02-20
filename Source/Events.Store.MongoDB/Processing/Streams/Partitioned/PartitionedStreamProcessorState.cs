@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -44,6 +45,6 @@ public class PartitionedStreamProcessorState : AbstractStreamProcessorState
     public override IStreamProcessorState ToRuntimeRepresentation() =>
         new runtime.Partitioned.StreamProcessorState(
             new ProcessingPosition(Position, EventLogPosition),
-            FailingPartitions.ToDictionary(_ => new PartitionId(_.Key), _ => _.Value.ToRuntimeRepresentation()),
+            FailingPartitions.ToImmutableDictionary(_ => new PartitionId(_.Key), _ => _.Value.ToRuntimeRepresentation()),
             LastSuccessfullyProcessed);
 }

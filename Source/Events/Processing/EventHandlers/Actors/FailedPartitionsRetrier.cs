@@ -204,8 +204,7 @@ public class FailedPartitionsRetrier
     {
         var newFailingPartitionState =
             new FailingPartitionState(position.StreamPosition, position.EventLogPosition, retryTime, reason, processingAttempts, lastFailed);
-        var newFailingPartitions = oldState.FailingPartitions;
-        newFailingPartitions[partitionId] = newFailingPartitionState;
+        var newFailingPartitions = oldState.FailingPartitions.SetItem(partitionId, newFailingPartitionState);
 
         var newState = position.StreamPosition > oldState.FailingPartitions[partitionId].Position.StreamPosition
             ? oldState with { FailingPartitions = newFailingPartitions, LastSuccessfullyProcessed = DateTimeOffset.UtcNow }
