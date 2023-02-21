@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package dolittle.runtime;
+
+option csharp_namespace = "Integration.Tests.Services";
+
+import "Services/ReverseCallContext.proto";
+import "Services/Ping.proto";
+
+message RegistrationRequest {
+  services.ReverseCallArgumentsContext callContext = 1;
+  bool isValid = 2;
+}
+
+message Response {
+  services.ReverseCallResponseContext callContext = 1;
+}
+
+message ClientToRuntimeMessage {
+  oneof Message {
+    RegistrationRequest registrationRequest = 1;
+    Response response = 2;
+    services.Pong pong = 3;
+  }
+}
+
+message RegistrationResponse {
+  bool failed = 1;
+}
+
+message Request {
+  services.ReverseCallRequestContext callContext = 1;
+}
+
+message RuntimeToClientMessage {
+  oneof Message {
+    RegistrationResponse registrationResponse = 1;
+    Request handleRequest = 2;
+    services.Ping ping = 3;
+  }
+}
+
+service BasicReverseCallService {
+  rpc Connect (stream ClientToRuntimeMessage) returns (stream RuntimeToClientMessage);
+}

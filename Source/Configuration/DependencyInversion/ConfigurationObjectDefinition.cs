@@ -1,13 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Dolittle.Runtime.Configuration.DependencyInversion;
 
 /// <summary>
 /// Represents the definition of a Dolittle configuration.
 /// </summary>
 /// <typeparam name="TConfiguration">The <see cref="System.Type"/> of the Dolittle configuration object.</typeparam>
-public class ConfigurationObjectDefinition<TConfiguration>
+public class ConfigurationObjectDefinition<TConfiguration> : IAmAConfigurationObjectDefinition
     where TConfiguration : class
 {
     /// <summary>
@@ -34,15 +36,15 @@ public class ConfigurationObjectDefinition<TConfiguration>
     ConfigurationObjectDefinition(string section)
     {
         Section = section;
+        ConfigurationObjectType = typeof(TConfiguration);
     }
 
-    /// <summary>
-    /// Gets the section where this configuration resides in the <see cref="Microsoft.Extensions.Configuration.IConfiguration"/>.
-    /// </summary>
+    /// <inheritdoc />
     public string Section { get; }
-    
-    /// <summary>
-    /// Gets a value indicating whether this Dolittle configuration is per tenant or not.
-    /// </summary>
+
+    /// <inheritdoc />
     public bool IsPerTenant { get; }
+
+    /// <inheritdoc />
+    public Type ConfigurationObjectType { get; }
 }

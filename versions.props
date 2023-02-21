@@ -4,13 +4,12 @@
         <AutofacExtensionsVersion>7.2.0</AutofacExtensionsVersion>
         <BaselineTypeDiscoveryVersion>1.1.2</BaselineTypeDiscoveryVersion>
         <ConsoleTablesVersion>2.4.2</ConsoleTablesVersion>
-        <ContractsVersion>7.5.0</ContractsVersion>
+        <ContractsVersion>7.6.0</ContractsVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
-        <GrpcVersion>2.50.0</GrpcVersion>
-        <GrpcTestingVersion>2.46.3</GrpcTestingVersion>
-        <GrpcToolsVersion>2.50.0</GrpcToolsVersion>
+        <GrpcVersion>2.51.0</GrpcVersion>
+        <GrpcToolsVersion>2.51.0</GrpcToolsVersion>
         <MachineSpecificationsRunnerVersion>2.10.2</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
         <McMasterVersion>3.1.0</McMasterVersion>
@@ -27,7 +26,7 @@
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>6.0.0</PrometheusVersion>
         <PrometheusNetDotNetRuntimeVersion>4.2.4</PrometheusNetDotNetRuntimeVersion>
-        <ProtoActorVersion>1.0.0</ProtoActorVersion>
+        <ProtoActorVersion>1.1.1-alpha.0.13</ProtoActorVersion>
         <ProtobufVersion>3.21.12</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>

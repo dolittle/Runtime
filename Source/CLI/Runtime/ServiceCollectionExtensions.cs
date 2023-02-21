@@ -3,6 +3,7 @@
 
 using Docker.DotNet;
 using Dolittle.Runtime.CLI.Runtime.Aggregates;
+using Dolittle.Runtime.CLI.Runtime.Configuration;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
@@ -26,6 +27,7 @@ public static class ServiceCollectionExtensions
             new DockerClientConfiguration().CreateClient());
             
         services.AddAggregatesServices();
+        services.AddConfigurationServices();
         services.AddEventHandlerServices();
         services.AddEventTypesServices();
         services.AddEventsProcessingServices();

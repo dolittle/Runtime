@@ -44,8 +44,8 @@ public class and_it_receives_a_response_with_the_correct_callid : given.a_dispat
                 stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_from_client });
             })
             .Returns(Task.FromResult(true));
-
-        Task.Run(() => dispatcher.Accept(new MyConnectResponse(), CancellationToken.None));
+        
+        _ = dispatcher.Accept(new MyConnectResponse(), CancellationToken.None);
     };
 
     static MyResponse response;

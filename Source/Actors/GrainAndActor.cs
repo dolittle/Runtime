@@ -25,11 +25,9 @@ public record GrainAndActor(Type Grain, Type Actor, bool IsPerTenant)
         get
         {
             var kind = GetKind(Actor);
-            
             return kind ?? Grain.Name;
         }
     }
-
     static string? GetKind(Type type)
     {
         var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
