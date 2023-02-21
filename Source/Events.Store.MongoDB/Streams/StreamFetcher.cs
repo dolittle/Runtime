@@ -128,19 +128,19 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, ProcessingPosition position, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, StreamPosition position, CancellationToken cancellationToken)
     {
         ThrowIfNotConstructedWithPartitionIdExpression();
         try
         {
             var events = await _collection.Find(
                     _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
-                    & _filter.Gte(_sequenceNumberExpression, position.StreamPosition.Value))
+                    & _filter.Gte(_sequenceNumberExpression, position.Value))
                 .Limit(FetchEventsBatchSize)
                 .Project(_eventToStreamEvent)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             return events == default || events.Count == 0
-                ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, position.StreamPosition)
+                ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, position)
                 : events;
         }
         catch (MongoWaitQueueFullException ex)

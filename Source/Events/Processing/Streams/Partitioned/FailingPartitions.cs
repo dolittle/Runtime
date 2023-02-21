@@ -57,7 +57,7 @@ public class FailingPartitions : IFailingPartitions
             while (ShouldProcessNextEventInPartition(failingPartitionState.Position, streamProcessorState.Position) &&
                    ShouldRetryProcessing(failingPartitionState))
             {
-                var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
+                var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, cancellationToken).ConfigureAwait(false);
                 if (!tryGetEvents.Success)
                 {
                     break;

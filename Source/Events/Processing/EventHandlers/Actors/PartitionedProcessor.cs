@@ -78,11 +78,13 @@ public class PartitionedProcessor : ProcessorBase
         /// Process the next event in the event stream.
         /// </summary>
         ProcessNextEvent,
+
         /// <summary>
         /// Process an event from before the current position in the event stream.
         /// Skips events in non failing partitions
         /// </summary>
         ProcessCatchupEvent,
+
         /// <summary>
         /// Retry processing of failed events.
         /// </summary>
@@ -131,8 +133,10 @@ public class PartitionedProcessor : ProcessorBase
                     {
                         return NextAction.ProcessCatchupEvent;
                     }
+
                     return NextAction.ProcessNextEvent;
                 }
+
                 return NextAction.ProcessNextEvent;
             }
 
@@ -198,7 +202,8 @@ public class PartitionedProcessor : ProcessorBase
     }
 
 
-    async Task<StreamProcessorState> HandleCatchupEventForPartition(StreamEvent evt, FailingPartitionState failingPartitionState, StreamProcessorState existingState,
+    async Task<StreamProcessorState> HandleCatchupEventForPartition(StreamEvent evt, FailingPartitionState failingPartitionState,
+        StreamProcessorState existingState,
         CancellationToken cancellationToken)
     {
         if (!failingPartitionState.CanBeRetried)
@@ -206,7 +211,7 @@ public class PartitionedProcessor : ProcessorBase
             // Ignore
             return existingState;
         }
-        
+
         if (_failedEvents.ContainsKey(evt.Partition))
         {
             // Currently waiting for retry, events are already written to the failed partition
@@ -238,12 +243,25 @@ public class PartitionedProcessor : ProcessorBase
         return AsPartitioned(newState);
     }
 
-    static StreamProcessorState AsPartitioned(IStreamProcessorState state)
+    StreamProcessorState AsPartitioned(IStreamProcessorState state)
     {
-        if (state is not StreamProcessorState partitionedState)
-            throw new ArgumentException("State is not a partitioned state");
+        switch (state)
+        {
+            case StreamProcessorState partitionedState:
+                return partitionedState;
 
-        return partitionedState;
+            case Dolittle.Runtime.Events.Processing.Streams.StreamProcessorState nonPartitionedState:
+                if (!nonPartitionedState.IsFailing)
+                {
+                    Logger.LogInformation("Converting non-partitioned state to partitioned for {StreamProcessorId}", Identifier);
+                    return new StreamProcessorState(nonPartitionedState.Position, nonPartitionedState.LastSuccessfullyProcessed);
+                }
+
+                throw new ArgumentException("State is not convertible to partitioned");
+
+            default:
+                throw new ArgumentException("State is of invalid type");
+        }
     }
 
     void WriteToFailedPartition(StreamEvent evt)

@@ -117,7 +117,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
                     event_handler.Info.EventTypes,
                     event_handler.Info.Partitioned)), CancellationToken.None).Result;
 
-            return fetcher.FetchInPartition(partition_id, ProcessingPosition.Initial, CancellationToken.None).Result!.Result!;
+            return fetcher.FetchInPartition(partition_id, StreamPosition.Start, CancellationToken.None).Result!.Result!;
         }
 
         var rangeFetcher = event_fetchers.GetRangeFetcherFor(event_handler.Info.Id.Scope,

@@ -116,7 +116,7 @@ public class all_dependencies
                     : Task.FromResult(Try<IEnumerable<StreamEvent>>.Failed(new Exception()));
             });
         events_fetcher
-            .Setup(_ => _.FetchInPartition(It.IsAny<PartitionId>(), It.IsAny<ProcessingPosition>(), It.IsAny<CancellationToken>()))
+            .Setup(_ => _.FetchInPartition(It.IsAny<PartitionId>(), It.IsAny<StreamPosition>(), It.IsAny<CancellationToken>()))
             .Returns<PartitionId, StreamPosition, CancellationToken>((partition, position, ct) =>
             {
                 var events = streamEvents.Skip((int) position.Value).Where(_ => _.Partition == partition);

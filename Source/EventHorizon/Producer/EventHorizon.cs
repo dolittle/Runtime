@@ -132,64 +132,63 @@ public class EventHorizon : IDisposable
 
     async Task ProcessEventsThroughEventHorizon()
     {
-        throw new NotImplementedException("Currently disabled");
-        // try
-        // {
-        //     var publicEvents = await _getEventFetchers(Id.ProducerTenant).GetPartitionedFetcherFor(
-        //         ScopeId.Default,
-        //         new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, Id.PublicStream)),
-        //         _cancellationTokenSource.Token).ConfigureAwait(false);
-        //     var eventWaiter = _getStreamWaiter(Id.ProducerTenant);
-        //     while (!_cancellationTokenSource.Token.IsCancellationRequested)
-        //     {
-        //         try
-        //         {
-        //             var tryGetStreamEvent = await publicEvents.FetchInPartition(
-        //                 Id.Partition,
-        //                 CurrentPosition,
-        //                 _cancellationTokenSource.Token).ConfigureAwait(false);
-        //             if (!tryGetStreamEvent.Success)
-        //             {
-        //                 var nextEventPositionInAnyPartition = await publicEvents.GetNextStreamPosition(_cancellationTokenSource.Token).ConfigureAwait(false);
-        //                 if (!nextEventPositionInAnyPartition.Success)
-        //                 {
-        //                     throw nextEventPositionInAnyPartition.Exception;
-        //                 }
-        //                 await eventWaiter.WaitForEvent(
-        //                     Id.PublicStream,
-        //                     nextEventPositionInAnyPartition,
-        //                     TimeSpan.FromMinutes(1),
-        //                     _cancellationTokenSource.Token).ConfigureAwait(false);
-        //                 continue;
-        //             }
-        //
-        //             var streamEvents = tryGetStreamEvent.Result;
-        //             foreach (var streamEvent in streamEvents)
-        //             {
-        //                 _metrics.IncrementTotalEventsWrittenToEventHorizon();
-        //                 var response = await _dispatcher.Call(
-        //                     new ConsumerRequest { Event = streamEvent.ToEventHorizonEvent() },
-        //                     _executionContexts.TryCreateUsing(streamEvent.Event.ExecutionContext),
-        //                     _cancellationTokenSource.Token).ConfigureAwait(false);
-        //                 if (response.Failure != null)
-        //                 {
-        //                     Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
-        //                     return;
-        //                 }
-        //
-        //                 CurrentPosition = streamEvent.Position + 1;
-        //             }
-        //         }
-        //         catch (EventStoreUnavailable e)
-        //         {
-        //             _logger.LogWarning(e, "Event Store unavailable. Waiting 1 second");
-        //             await Task.Delay(1000).ConfigureAwait(false);
-        //         }
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     Log.ErrorWritingEventToEventHorizon(_logger, ex);
-        // }
+        try
+        {
+            var publicEvents = await _getEventFetchers(Id.ProducerTenant).GetPartitionedFetcherFor(
+                ScopeId.Default,
+                new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, Id.PublicStream)),
+                _cancellationTokenSource.Token).ConfigureAwait(false);
+            var eventWaiter = _getStreamWaiter(Id.ProducerTenant);
+            while (!_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    var tryGetStreamEvent = await publicEvents.FetchInPartition(
+                        Id.Partition,
+                        CurrentPosition,
+                        _cancellationTokenSource.Token).ConfigureAwait(false);
+                    if (!tryGetStreamEvent.Success)
+                    {
+                        var nextEventPositionInAnyPartition = await publicEvents.GetNextStreamPosition(_cancellationTokenSource.Token).ConfigureAwait(false);
+                        if (!nextEventPositionInAnyPartition.Success)
+                        {
+                            throw nextEventPositionInAnyPartition.Exception;
+                        }
+                        await eventWaiter.WaitForEvent(
+                            Id.PublicStream,
+                            nextEventPositionInAnyPartition,
+                            TimeSpan.FromMinutes(1),
+                            _cancellationTokenSource.Token).ConfigureAwait(false);
+                        continue;
+                    }
+        
+                    var streamEvents = tryGetStreamEvent.Result;
+                    foreach (var streamEvent in streamEvents)
+                    {
+                        _metrics.IncrementTotalEventsWrittenToEventHorizon();
+                        var response = await _dispatcher.Call(
+                            new ConsumerRequest { Event = streamEvent.ToEventHorizonEvent() },
+                            _executionContexts.TryCreateUsing(streamEvent.Event.ExecutionContext),
+                            _cancellationTokenSource.Token).ConfigureAwait(false);
+                        if (response.Failure != null)
+                        {
+                            Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
+                            return;
+                        }
+        
+                        CurrentPosition = streamEvent.Position + 1;
+                    }
+                }
+                catch (EventStoreUnavailable e)
+                {
+                    _logger.LogWarning(e, "Event Store unavailable. Waiting 1 second");
+                    await Task.Delay(1000).ConfigureAwait(false);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.ErrorWritingEventToEventHorizon(_logger, ex);
+        }
     }
 }

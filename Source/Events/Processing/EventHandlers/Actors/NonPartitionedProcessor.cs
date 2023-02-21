@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ public class NonPartitionedProcessor : ProcessorBase
         TenantId tenantId,
         ILogger logger)
         : base(
-        streamProcessorId, processor, streamProcessorStates, executionContext, onProcessed, onFailedToProcess, tenantId, logger)
+            streamProcessorId, processor, streamProcessorStates, executionContext, onProcessed, onFailedToProcess, tenantId, logger)
     {
     }
 
@@ -55,8 +56,8 @@ public class NonPartitionedProcessor : ProcessorBase
                     }
 
                     (state, processingResult) = await RetryProcessingEvent(evt, state, processingResult.FailureReason,
-                            AsNonPartitioned(streamProcessorState).ProcessingAttempts + 1,
-                            GetExecutionContextForEvent(evt), cancellationToken);
+                        AsNonPartitioned(streamProcessorState).ProcessingAttempts + 1,
+                        GetExecutionContextForEvent(evt), cancellationToken);
                 }
             }
         }
@@ -70,10 +71,24 @@ public class NonPartitionedProcessor : ProcessorBase
         }
     }
 
-    static StreamProcessorState AsNonPartitioned(IStreamProcessorState state)
+    StreamProcessorState AsNonPartitioned(IStreamProcessorState state)
     {
-        if (state is not StreamProcessorState nonPartitionedState) throw new ArgumentException("State is not a non-partitioned state");
+        switch (state)
+        {
+            case StreamProcessorState nonPartitionedState:
+                return nonPartitionedState;
 
-        return nonPartitionedState;
+            case Dolittle.Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedState:
+                if (!partitionedState.FailingPartitions.Any())
+                {
+                    Logger.LogInformation("Converting partitioned state to non-partitioned for {StreamProcessorId}", Identifier);
+                    return new StreamProcessorState(partitionedState.Position, partitionedState.LastSuccessfullyProcessed);
+                }
+
+                throw new ArgumentException("State is not convertible to non-partitioned");
+
+            default:
+                throw new ArgumentException("Invalid state type");
+        }
     }
 }

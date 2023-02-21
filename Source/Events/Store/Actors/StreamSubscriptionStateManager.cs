@@ -240,7 +240,7 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 
     void Persist(IReadOnlyDictionary<SubscriptionId, StreamProcessorState> changes, ScopeId scopeId)
     {
-        _logger.LogInformation("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
+        _logger.LogTrace("Persisting {Count} changes for scope {ScopeId}", changes.Count, scopeId);
         var persistTask = _repository.PersistForScope(scopeId, changes, Context.CancellationToken);
         Context.ReenterAfter(persistTask, _ =>
         {
