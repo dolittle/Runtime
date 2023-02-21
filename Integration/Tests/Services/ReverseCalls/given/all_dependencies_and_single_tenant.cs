@@ -37,7 +37,7 @@ class all_dependencies_and_single_tenant : Services.given.all_dependencies_and_s
         reverse_call_client = reverse_call_clients.GetFor(
             new basic_with_ping_pong_reverse_call_client_protocol(),
             "localhost",
-            new EndpointsConfiguration().Private.Port,
+            endpoints.Private.Port,
             ping_interval);
         
     }
