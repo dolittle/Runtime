@@ -257,7 +257,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         }
         void RespondSuccess()
         {
-            respond(Try.Succeeded());
+            respond(Try.Succeeded);
         }
     }
     
@@ -275,7 +275,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             var message = new TServerMessage();
             _messageConverter.SetConnectResponse(msg.Response, message);
             await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
-            respond(Try.Succeeded());
+            respond(Try.Succeeded);
         }
         catch (Exception e)
         {
@@ -445,6 +445,6 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         {
             return new ReverseCallDispatcherAlreadyRejected();
         }
-        return Try.Succeeded();
+        return Try.Succeeded;
     }
 }

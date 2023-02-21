@@ -127,7 +127,7 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
         }
         void RespondSuccess()
         {
-            respond(Try.Succeeded());
+            respond(Try.Succeeded);
         }
     }
 

@@ -132,7 +132,7 @@ public class PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage,
         {
             if (msg.IsPing)
             {
-                context.Respond(Try.Succeeded());
+                context.Respond(Try.Succeeded);
                 return Task.CompletedTask;
             }
             _bufferedMessages.Writer.TryWrite((msg.Message, context.Capture()));
@@ -167,7 +167,7 @@ public class PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage,
                 LogDoneWriting(isPing, stopwatch.Elapsed, messageSize);
             }
             context.Send(sender, completedTask.IsCompletedSuccessfully
-                ? Try.Succeeded()
+                ? Try.Succeeded
                 : Try.Failed(completedTask.Exception?.InnerException ?? completedTask.Exception!));
             return _bufferedMessages.Reader.TryRead(out var item)
                 ? WriteMessage(item.Item1, false, item.Item2.Context, item.Item2.MessageEnvelope.Sender!)
