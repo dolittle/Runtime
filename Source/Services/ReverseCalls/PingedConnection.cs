@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Dolittle.Runtime.Services.Callbacks;
 using Dolittle.Services.Contracts;
@@ -151,17 +152,17 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         _waitForCallContextStopwatch?.Stop();
         _metrics.AddToTotalWaitForFirstMessageTime(_waitForCallContextStopwatch?.Elapsed ?? TimeSpan.Zero);
         _logger.ReceivedReverseCallContext(_requestId, _waitForCallContextStopwatch?.Elapsed ?? TimeSpan.Zero);
-        var pingIntervalDuration = context.PingInterval;
-        var pingInterval = pingIntervalDuration.ToTimeSpan();
-        
-        if (pingIntervalDuration.Seconds != Duration.MaxSeconds && ShouldStartPinging(pingInterval))
+        var pingDuration = context.PingInterval;
+
+        if (ShouldStartPinging(pingDuration, out var pingInterval))
         {
-            _reverseCallStreamWriter = _reverseCallWriterFactory.CreatePingedWriter(
+            _reverseCallStreamWriter = _reverseCallWriterFactory.CreateWriter(
                 _requestId,
                 _clientStream,
                 _messageConverter,
-                _cancellationTokenSource.Token);
-            StartPinging(pingInterval);
+                _cancellationTokenSource.Token,
+                pingInterval);
+            StartPinging(pingInterval.Value);
         }
         else
         {
@@ -169,7 +170,8 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
                 _requestId,
                 _clientStream,
                 _messageConverter,
-                _cancellationTokenSource.Token);
+                _cancellationTokenSource.Token,
+                pingInterval);
         }
     }
 
@@ -221,6 +223,21 @@ public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments,
         _logger.KeepaliveTimedOut(_requestId);
     }
 
-    static bool ShouldStartPinging(TimeSpan pingInterval)
-        => pingInterval >= TimeSpan.FromSeconds(1) && pingInterval != TimeSpan.MaxValue;
+    static bool ShouldStartPinging(Duration pingDuration, [NotNullWhen(true)]out TimeSpan? pingInterval)
+    {
+        pingInterval = null;
+        if (pingDuration.Seconds == Duration.MaxSeconds)
+        {
+            return false;
+        }
+
+        var timeSpan = pingDuration.ToTimeSpan();
+        if (timeSpan < TimeSpan.FromSeconds(1))
+        {
+            return false;
+        }
+
+        pingInterval = timeSpan;
+        return true;
+    }
 }

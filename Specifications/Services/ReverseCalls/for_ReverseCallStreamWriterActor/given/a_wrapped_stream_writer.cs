@@ -39,7 +39,7 @@ public class a_wrapped_stream_writer : all_dependencies
             new OptionsWrapper<ReverseCallsConfiguration>(new ReverseCallsConfiguration{UseActors = true}),
             metrics,
             NullLoggerFactory.Instance);
-        writer = factory.CreateWriter(request_id, original_writer.Object, message_converter.Object, cancellation_token);
+        writer = factory.CreateWriter(request_id, original_writer.Object, message_converter.Object, cancellation_token, null);
     };
 
     Cleanup cleanup = () =>

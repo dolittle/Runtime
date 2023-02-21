@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -35,43 +36,13 @@ public class ReverseCallStreamWriterFactory : IReverseCallStreamWriterFactory
         _loggerFactory = loggerFactory;
         _reverseCallsConfig = reverseCallsConfig.Value;
     }
-    
-    public IReverseCallStreamWriter<TServerMessage> CreatePingedWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-        RequestId requestId,
-        IAsyncStreamWriter<TServerMessage> originalStream,
-        IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
-        CancellationToken cancellationToken)
-        where TClientMessage : IMessage, new()
-        where TServerMessage : IMessage, new()
-        where TConnectArguments : class
-        where TConnectResponse : class
-        where TRequest : class
-        where TResponse : class
-    {
-        if (!_reverseCallsConfig.UseActors)
-        {
-            return new ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                    requestId,
-                    originalStream,
-                    messageConverter,
-                    _metrics,
-                    _loggerFactory.CreateLogger<ReverseCallStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
-                    cancellationToken);
-        }
-        return new PingingReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.Wrapper(
-            _actorSystem,
-            _props,
-            requestId,
-            originalStream,
-            messageConverter,
-            cancellationToken);
-    }
 
     public IReverseCallStreamWriter<TServerMessage> CreateWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
         RequestId requestId,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        TimeSpan? pingTimeout)
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
         where TConnectArguments : class
@@ -93,7 +64,9 @@ public class ReverseCallStreamWriterFactory : IReverseCallStreamWriterFactory
             _actorSystem,
             _props,
             requestId,
+            messageConverter,
             originalStream,
-            cancellationToken);
+            cancellationToken,
+            pingTimeout);
     }
 }

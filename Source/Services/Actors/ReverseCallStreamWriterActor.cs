@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,7 @@ using Proto;
 
 namespace Dolittle.Runtime.Services.ReverseCalls;
 
-public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IActor, IAsyncDisposable
+public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IActor
     where TClientMessage : IMessage, new()
     where TServerMessage : IMessage, new()
     where TConnectArguments : class
@@ -29,14 +30,23 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
         readonly IAsyncStreamWriter<TServerMessage> _originalStream;
         readonly PID _actor;
 
-        public Wrapper(ActorSystem actorSystem, ICreateProps props, RequestId requestId, IAsyncStreamWriter<TServerMessage> originalStream, CancellationToken cancellationToken)
+        public Wrapper(
+            ActorSystem actorSystem,
+            ICreateProps props,
+            RequestId requestId,
+            IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
+            IAsyncStreamWriter<TServerMessage> originalStream,
+            CancellationToken cancellationToken,
+            TimeSpan? pingTimeout)
         {
             _actorSystem = actorSystem;
             _originalStream = originalStream;
             _actor = actorSystem.Root.SpawnNamed(
                 props.PropsFor<ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(
                     requestId,
+                    messageConverter,
                     originalStream,
+                    pingTimeout ?? TimeSpan.Zero,
                     cancellationToken),
                 $"reverse-call-stream-writer-{requestId.Value}");
         }
@@ -64,56 +74,83 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
     }
 
     readonly RequestId _requestId;
+    readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
     readonly IAsyncStreamWriter<TServerMessage> _originalStream;
     readonly IMetricsCollector _metrics;
     readonly ILogger _logger;
-
-    Task? _writeInProcess;
     readonly CancellationToken _cancellationToken;
-    bool _disposed;
+    readonly TimeSpan? _pingTimeout;
 
     public ReverseCallStreamWriterActor(
         RequestId requestId,
+        IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
         IAsyncStreamWriter<TServerMessage> originalStream,
         IMetricsCollector metrics,
         ILogger<ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> logger,
+        TimeSpan pingTimeout,
         CancellationToken cancellationToken)
     {
         _requestId = requestId;
+        _messageConverter = messageConverter;
         _originalStream = originalStream;
         _metrics = metrics;
         _logger = logger;
         _cancellationToken = cancellationToken;
+        _pingTimeout = pingTimeout == TimeSpan.Zero ? null : pingTimeout;
     }
 
     public Task ReceiveAsync(IContext context)
         => context.Message switch
         {
+            Started => OnStarted(context),
+            ReceiveTimeout => OnPingTimeout(),
             TServerMessage msg => OnWrite(msg, context.Respond),
-            Stopping => DisposeAsync().AsTask(),
+            Stopping => OnStopped(),
             _ => Task.CompletedTask
         };
 
-    async Task OnWrite(TServerMessage msg, Action<Try> respond)
+    Task OnStarted(IContext context)
     {
-        if (_cancellationToken.IsCancellationRequested || _disposed)
+        if (_pingTimeout.HasValue)
+        {
+            context.SetReceiveTimeout(_pingTimeout.Value);
+        }
+        return Task.CompletedTask;
+    }
+    
+    Task OnStopped()
+    {
+        _logger.DisposedWrappedAsyncStreamWriter(_requestId);
+        return Task.CompletedTask;
+    }
+    async Task OnPingTimeout()
+    {
+        var message = new TServerMessage();
+        _messageConverter.SetPing(message, new Ping());
+        await WriteMessage(message, false, _ => {}).ConfigureAwait(false);
+    }
+
+    async Task OnWrite(TServerMessage msg, Action<Try> respond) => await WriteMessage(msg, false, respond).ConfigureAwait(false); 
+
+    async Task WriteMessage(TServerMessage msg, bool isPing, Action<Try> respond)
+    {
+        LogWriting(isPing);
+        if (_cancellationToken.IsCancellationRequested)
         {
             RespondError(new OperationCanceledException($"{GetType().Name} for request id {_requestId} is cancelled"));
             return;
         }
         
-        _logger.WritingMessage(_requestId, typeof(TServerMessage));
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            _writeInProcess = _originalStream.WriteAsync(msg); 
-            await _writeInProcess!.ConfigureAwait(false);
+            await _originalStream.WriteAsync(msg)!.ConfigureAwait(false);
             stopwatch.Stop();
             var messageSize = msg.CalculateSize();
             _metrics.AddToTotalStreamWriteTime(stopwatch.Elapsed);
             _metrics.IncrementTotalStreamWrites();
             _metrics.IncrementTotalStreamWriteBytes(messageSize);
-            _logger.WroteMessage(_requestId, stopwatch.Elapsed, messageSize);
+            LogDoneWriting(isPing, stopwatch.Elapsed, messageSize);
             RespondSuccess();
         }
         catch (Exception e)
@@ -125,29 +162,35 @@ public class ReverseCallStreamWriterActor<TClientMessage, TServerMessage, TConne
         {
             respond(Try.Failed(e));
         }
+
         void RespondSuccess()
         {
             respond(Try.Succeeded);
         }
     }
 
-    /// <inheritdoc />
-    public async ValueTask DisposeAsync()
+    void LogWriting(bool isPing)
     {
-        if (_disposed)
+        if (isPing)
         {
-            return;
+            _logger.WritingPing(_requestId);
         }
-        try
+        else
         {
-            _disposed = true;
-            _logger.DisposingWrappedAsyncStreamWriter(_requestId);
-            var writeInProcess = _writeInProcess ?? Task.CompletedTask;
-            await writeInProcess.ConfigureAwait(false);
+            _logger.WritingMessage(_requestId, typeof(TServerMessage));
         }
-        finally
+    }
+
+    void LogDoneWriting(bool isPing, TimeSpan writeTime, int messageSize)
+    {
+        if (isPing)
         {
-            _logger.DisposedWrappedAsyncStreamWriter(_requestId);
+            _metrics.IncrementTotalPingsSent();
+            _logger.WrotePing(_requestId, writeTime);
+        }
+        else
+        {
+            _logger.WroteMessage(_requestId, writeTime, messageSize);
         }
     }
 }
