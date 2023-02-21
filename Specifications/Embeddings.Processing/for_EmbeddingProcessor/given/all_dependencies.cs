@@ -2,16 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
@@ -59,7 +56,7 @@ public class all_dependencies
             Mock.Of<ILogger>());
         cancellation_token = CancellationToken.None;
 
-        state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+        state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<ExecutionContext>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded));
         event_waiter.Setup(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, It.IsAny<CancellationToken>())).Returns<ScopeId, StreamId, CancellationToken>((_scope, _stream, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken));
     };
     

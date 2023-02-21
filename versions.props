@@ -9,7 +9,6 @@
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
         <GrpcVersion>2.51.0</GrpcVersion>
-        <GrpcTestingVersion>2.46.6</GrpcTestingVersion>
         <GrpcToolsVersion>2.51.0</GrpcToolsVersion>
         <MachineSpecificationsRunnerVersion>2.10.2</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>

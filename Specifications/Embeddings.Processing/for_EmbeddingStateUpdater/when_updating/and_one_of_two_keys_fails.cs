@@ -72,7 +72,7 @@ public class and_one_of_two_keys_fails : given.all_dependencies
             .Returns(Task.FromResult<Partial<EmbeddingCurrentState>>(projection_result_b));
         embedding_store
             .Setup(_ => _.TryReplace(embedding, projection_key_b, projection_result_b.Version, projection_result_b.State, cancellation_token))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
     };
 
     static Try result;

@@ -12,6 +12,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.MongoDB;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using StreamProcessorState = Dolittle.Runtime.Events.Processing.Streams.StreamProcessorState;
@@ -23,7 +24,7 @@ namespace Integration.Benchmarks.Events.Store.Streams;
 /// </summary>
 public class StreamProcessorStateTest : JobBase
 {
-    Dictionary<TenantId, (IResilientStreamProcessorStateRepository, IStreamProcessorStates)> _statesCollections;
+    Dictionary<TenantId, (IStreamProcessorStates, IStreamProcessorStateCollections)> _statesCollections;
 
     (StreamProcessorId, StreamProcessorState)[] _states;
 
@@ -31,7 +32,7 @@ public class StreamProcessorStateTest : JobBase
     protected override void Setup(IServiceProvider services)
     {
         _statesCollections = ConfiguredTenants.ToDictionary(tenant => tenant, tenant =>
-            (services.GetRequiredService<Func<TenantId, IResilientStreamProcessorStateRepository>>()(tenant), services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant)));
+            (services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant), services.GetRequiredService<Func<TenantId, IStreamProcessorStateCollections>>()(tenant)));
     }
 
     [IterationSetup]

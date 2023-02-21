@@ -4,10 +4,6 @@
 #nullable enable
 
 using System.Linq;
-using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
-using Integration.Tests.Events.Processing.EventHandlers.given;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.unscoped.partitioned.event_handler.given;
 

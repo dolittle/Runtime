@@ -8,12 +8,11 @@
 
     <ItemGroup>
         <ProjectReference Include="../Artifacts/Artifacts.csproj" />
-        <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../MongoDB/MongoDB.csproj" />
-        <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../Events/Events.csproj" />
         <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
         <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="$(MongoDBOpenTelemetryVersion)" />
     </ItemGroup>

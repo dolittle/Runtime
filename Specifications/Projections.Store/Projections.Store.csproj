@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Source/Projections.Store/Projections.Store.csproj" />
+    <ProjectReference Include="../../Source/Events/Events.csproj" />
   </ItemGroup>
 
 </Project>

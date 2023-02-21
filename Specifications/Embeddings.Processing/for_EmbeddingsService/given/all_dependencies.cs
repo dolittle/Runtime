@@ -102,7 +102,7 @@ public class all_dependencies
         embedding_definition_persister = new Mock<IPersistEmbeddingDefinitionForAllTenants>();
         embedding_definition_persister
             .Setup(_ => _.TryPersist(Moq.It.IsAny<EmbeddingDefinition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
         embedding_service = new EmbeddingsService(
             application_lifetime.Object,
             execution_context_creator.Object,

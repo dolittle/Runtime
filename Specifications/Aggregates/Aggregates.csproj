@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Aggregates\Aggregates.csproj" />
+    <ProjectReference Include="../../Source/Events/Events.csproj" />
   </ItemGroup>
 
 </Project>

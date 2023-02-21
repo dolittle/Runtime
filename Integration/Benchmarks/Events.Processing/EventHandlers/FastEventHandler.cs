@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;

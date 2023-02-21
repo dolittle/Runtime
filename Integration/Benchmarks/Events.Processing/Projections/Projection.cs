@@ -16,11 +16,9 @@ using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
-using Integration.Benchmarks.Events.Store;
 using Integration.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using ProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.ProjectionClientToRuntimeMessage,

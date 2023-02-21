@@ -4,11 +4,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Services.Grpc;
-using Dolittle.Runtime.Execution;
 using Grpc.Core;
 using Machine.Specifications;
 using Microsoft.Extensions.DependencyInjection;

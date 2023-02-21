@@ -5,7 +5,6 @@ using System;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -23,7 +22,7 @@ class a_clean_event_store : a_runtime_with_a_single_tenant
     protected static IEventContentConverter event_content_converter;
     protected static IStreams streams;
     protected static IEventFetchers event_fetchers;
-    protected static IResilientStreamProcessorStateRepository stream_processor_states;
+    protected static IStreamProcessorStates stream_processor_states;
     protected static IStreamDefinitionRepository stream_definition_repository;
 
 
@@ -33,7 +32,7 @@ class a_clean_event_store : a_runtime_with_a_single_tenant
         event_content_converter = runtime.Host.Services.GetRequiredService<IEventContentConverter>();
         streams = runtime.Host.Services.GetRequiredService<Func<TenantId, IStreams>>()(execution_context.Tenant);
         event_fetchers = runtime.Host.Services.GetRequiredService<Func<TenantId, IEventFetchers>>()(tenant);
-        stream_processor_states = runtime.Host.Services.GetRequiredService<Func<TenantId, IResilientStreamProcessorStateRepository>>()(tenant);
+        stream_processor_states = runtime.Host.Services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant);
         stream_definition_repository = runtime.Host.Services.GetRequiredService<Func<TenantId, IStreamDefinitionRepository>>()(tenant);
     };
 }

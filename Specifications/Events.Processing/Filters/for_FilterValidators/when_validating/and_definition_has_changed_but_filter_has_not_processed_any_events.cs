@@ -8,7 +8,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Machine.Specifications;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating;
 

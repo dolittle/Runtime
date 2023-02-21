@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
-using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -15,15 +12,10 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Tenancy.Contracts;
 using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
-using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given;
 
@@ -42,7 +34,7 @@ public class all_dependencies
     protected static StreamProcessorState stream_processor_state;
     
     // protected static Mock<IContainer> container;
-    protected static Mock<IStreamProcessorStateRepository> stream_processor_state_repository;
+    protected static Mock<IStreamProcessorStates> stream_processor_state_repository;
     protected static Mock<IFilterDefinitions> filter_definitions;
     protected static Mock<ICompareFilterDefinitions> definition_comparer;
     protected static CancellationToken cancellation_token;
@@ -79,7 +71,7 @@ public class all_dependencies
 
         stream_processor_state = new StreamProcessorState(10, DateTimeOffset.Now);
 
-        stream_processor_state_repository = mocks.Create<IStreamProcessorStateRepository>();
+        stream_processor_state_repository = mocks.Create<IStreamProcessorStates>();
         stream_processor_state_repository
             .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
             .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(stream_processor_state)));

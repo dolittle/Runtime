@@ -4,7 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Persistence;
-using Dolittle.Runtime.Rudimentary;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Persistence;

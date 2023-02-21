@@ -28,7 +28,7 @@ public class and_one_processor_fails : given.two_tenants_and_processors
             {
                 await Task.Delay(10).ConfigureAwait(false);
             }
-            return Try.Succeeded();
+            return Try.Succeeded;
 
         });
 

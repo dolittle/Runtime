@@ -9,10 +9,8 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionDefinitionsForAllTenants.given;
 

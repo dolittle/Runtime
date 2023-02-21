@@ -26,11 +26,11 @@ public class and_one_processor_completes : given.two_tenants_and_processors
             {
                 await Task.Delay(10).ConfigureAwait(false);
             }
-            return Try.Succeeded();
+            return Try.Succeeded;
         });
 
         var processor_b = new Mock<IEmbeddingProcessor>();
-        processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+        processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded));
 
         factory.Setup(_ => _(tenant_a)).Returns(processor_a.Object);
         factory.Setup(_ => _(tenant_b)).Returns(processor_b.Object);

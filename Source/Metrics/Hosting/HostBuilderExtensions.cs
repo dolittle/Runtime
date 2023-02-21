@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-using Prometheus.DotNetRuntime;
 
 namespace Dolittle.Runtime.Metrics.Hosting;
 

@@ -59,7 +59,7 @@ public class CommitWriter : IPersistCommits
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
             //TODO: Notifying for events should be a concern handled by actors
             _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, eventsToStore.Max(_ => _.EventLogSequenceNumber));
-            return Try.Succeeded();
+            return Try.Succeeded;
         }
         catch (MongoWaitQueueFullException ex)
         {

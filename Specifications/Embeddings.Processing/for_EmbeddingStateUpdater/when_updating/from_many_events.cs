@@ -39,7 +39,7 @@ public class from_many_events : given.all_dependencies
             .Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state));
         embedding_store
             .Setup(_ => _.TryReplace(embedding, projection_key, projection_result.Version, projection_result.State, cancellation_token))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
         committed_events_fetcher
             .Setup(_ => _.FetchForAggregateAfter(projection_key.Value, embedding.Value, current_state.Version, cancellation_token))
             .Returns(Task.FromResult(unprocessed_events));

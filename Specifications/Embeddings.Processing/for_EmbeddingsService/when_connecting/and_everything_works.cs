@@ -78,6 +78,6 @@ public class and_everything_works : given.all_dependencies
     It should_not_reject_reverse_call = () => dispatcher.Verify(
         _ => _.Reject(IsAny<EmbeddingRegistrationResponse>(), IsAny<CancellationToken>()), Never);
 
-    Cleanup clean = () => processor_tcs.SetResult(Try.Succeeded());
+    Cleanup clean = () => processor_tcs.SetResult(Try.Succeeded);
 
 }

@@ -21,7 +21,7 @@ public class all_dependencies
     protected static Mock<IEventProcessor> event_processor;
     protected static EventsFromEventHorizonFetcher event_fetcher;
     protected static AsyncProducerConsumerQueue<StreamEvent> event_queue;
-    protected static Mock<IResilientStreamProcessorStateRepository> stream_processor_states;
+    protected static Mock<IStreamProcessorStates> stream_processor_states;
     protected static StreamProcessor stream_processor;
     protected static ExecutionContext execution_context;
 
@@ -40,7 +40,7 @@ public class all_dependencies
         event_processor = new Mock<IEventProcessor>();
         event_queue = new AsyncProducerConsumerQueue<StreamEvent>();
         event_fetcher = new EventsFromEventHorizonFetcher(event_queue, Mock.Of<IMetricsCollector>());
-        stream_processor_states = new Mock<IResilientStreamProcessorStateRepository>();
+        stream_processor_states = new Mock<IStreamProcessorStates>();
         stream_processor = new StreamProcessor(
             subscription_id,
             execution_context,

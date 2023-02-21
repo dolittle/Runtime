@@ -7,7 +7,6 @@ using Autofac;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating;
 
