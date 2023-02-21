@@ -76,7 +76,5 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
             dispatcher.Dispose();
             throw;
         }
-        
-
     }
 }

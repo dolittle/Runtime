@@ -23,7 +23,6 @@ ENV Logging__Console__FormatterName=""
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
 COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
-COPY Docker/Production/.dolittle ./.dolittle
 
 EXPOSE 9700 50052 50053 51052
 

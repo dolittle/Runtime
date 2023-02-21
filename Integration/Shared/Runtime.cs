@@ -71,7 +71,7 @@ public static class Runtime
                 _.AddOptions<EndpointsConfiguration>().Configure(builder =>
                 {
                     builder.Management = new EndpointConfiguration { Port = 0 };
-                    builder.Private = new EndpointConfiguration { Port = 0 };
+                    // builder.Private = new EndpointConfiguration { Port = 0 };
                     builder.Public = new EndpointConfiguration { Port = 0 };
                 });
             })

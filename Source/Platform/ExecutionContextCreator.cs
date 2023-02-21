@@ -40,7 +40,7 @@ public class ExecutionContextCreator : ICreateExecutionContexts
     /// <inheritdoc />
     public Try<ExecutionContext> TryCreateUsing(ExecutionContext requested)
     {
-        if (requested.Microservice != _configuration.MicroserviceID)
+        if (requested.Microservice.Value != _configuration.MicroserviceID)
         {
             return new InvalidExecutionContext(
                 nameof(ExecutionContext.Microservice),
@@ -48,7 +48,7 @@ public class ExecutionContextCreator : ICreateExecutionContexts
                 requested.Microservice.ToString());
         }
         
-        if (requested.Environment != _configuration.Environment)
+        if (requested.Environment.Value != _configuration.Environment)
         {
             return new InvalidExecutionContext(
                 nameof(ExecutionContext.Environment),

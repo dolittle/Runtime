@@ -17,7 +17,8 @@ public class TenantConfigurationObjects : ICanAddServicesForTypesWith<TenantConf
     public void AddServiceFor(Type type, TenantConfigurationAttribute attribute, IServiceCollection services)
     {
         var definitionType = typeof(ConfigurationObjectDefinition<>).MakeGenericType(type);
-        var definition = Activator.CreateInstance(definitionType, attribute);
+        var definition = Activator.CreateInstance(definitionType, attribute)!;
         services.AddSingleton(definitionType, definition);
+        services.AddSingleton(typeof(IAmAConfigurationObjectDefinition), _ => _.GetRequiredService(definitionType));
     }
 }

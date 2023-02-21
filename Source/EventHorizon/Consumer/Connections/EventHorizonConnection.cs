@@ -149,4 +149,9 @@ public class EventHorizonConnection : IEventHorizonConnection
     static ConsumerResponse CreateSuccessfulResponse() => new();
 
     static ConsumerResponse CreateFailureResponse(Failure failure) => new() { Failure = failure };
+
+    public void Dispose()
+    {
+        _reverseCallClient?.Dispose();
+    }
 }

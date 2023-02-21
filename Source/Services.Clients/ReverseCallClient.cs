@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Services.Clients;
 /// <typeparam name="TConnectResponse">Type of the response that is received after the initial Connect call.</typeparam>
 /// <typeparam name="TRequest">Type of the requests sent from the server to the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
 /// <typeparam name="TResponse">Type of the responses received from the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
-public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IReverseCallClient<TConnectArguments, TConnectResponse, TRequest, TResponse>, IDisposable
+public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IReverseCallClient<TConnectArguments, TConnectResponse, TRequest, TResponse>
     where TClient : ClientBase<TClient>
     where TClientMessage : IMessage, new()
     where TServerMessage : IMessage, new()
@@ -163,9 +163,8 @@ public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnect
         {
             if (disposing)
             {
-                _writeLock.Dispose();
+                _writeLock?.Dispose();
             }
-
             _disposed = true;
         }
     }
