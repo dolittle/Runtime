@@ -378,7 +378,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         var tryGetStreamDefinition = get_stream_definition_for(event_handler);
         tryGetStreamDefinition.Success.ShouldBeTrue();
         var streamDefinition = tryGetStreamDefinition.Result;
-        streamDefinition.Partitioned.ShouldEqual(partitioned);
+        streamDefinition!.Partitioned.ShouldEqual(partitioned);
         streamDefinition.Public.ShouldEqual(public_stream);
         streamDefinition.FilterDefinition.ShouldBeOfExactType<TypeFilterWithEventSourcePartitionDefinition>();
         var filterDefinition = streamDefinition.FilterDefinition as TypeFilterWithEventSourcePartitionDefinition;
@@ -413,9 +413,8 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         {
             return;
         }
-
         var state = tryGetStreamProcessorState.Result;
-        state.Partitioned.ShouldBeFalse();
+        state!.Partitioned.ShouldBeFalse();
         var expectedPosition = id.ScopeId == ScopeId.Default
             ? new StreamPosition((ulong)committed_events.Count)
             : new StreamPosition((ulong)scoped_committed_events[id.ScopeId].Count);
@@ -439,7 +438,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         var tryGetStreamProcessorState = get_stream_processor_state_for(id);
         tryGetStreamProcessorState.Success.ShouldBeTrue();
         var state = tryGetStreamProcessorState.Result;
-        state.Partitioned.ShouldEqual(partitioned);
+        state!.Partitioned.ShouldEqual(partitioned);
 
         if (partitioned)
         {
