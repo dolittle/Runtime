@@ -50,7 +50,7 @@ public abstract class StreamProcessorStateRepositoryBase<TId, TState, TDocument>
 
     public async IAsyncEnumerable<StreamProcessorStateWithId<TId, TState>> GetForScope(ScopeId scopeId, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var collection = await _getCollection(ScopeId.Default, cancellationToken).ConfigureAwait(false);
+        var collection = await _getCollection(scopeId, cancellationToken).ConfigureAwait(false);
         var states = collection
             .Find(FilterDefinition<TDocument>.Empty)
             .ToAsyncEnumerable(cancellationToken: cancellationToken)
