@@ -128,10 +128,11 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
     {
         var taskCompletionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _loadingScopes.Add(scopeId, taskCompletionSource.Task);
-        return LoadScopeInternal(scopeId, taskCompletionSource);
+        LoadScopeInternal(scopeId, taskCompletionSource);
+        return taskCompletionSource.Task;
     }
 
-    Task LoadScopeInternal(ScopeId scopeId, TaskCompletionSource taskCompletionSource)
+    void LoadScopeInternal(ScopeId scopeId, TaskCompletionSource taskCompletionSource)
     {
         var scopeTask = _repository.GetForScope(scopeId, Context.CancellationToken).ToListAsync().AsTask();
         Context.ReenterAfter(scopeTask, _ =>
@@ -145,6 +146,10 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
                     if (streamProcessorKey.IdCase == StreamProcessorKey.IdOneofCase.SubscriptionId)
                     {
                         buckets[streamProcessorKey.SubscriptionId] = streamProcessorStateWithId.State.ToProtobuf();
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Got unexpected stream processor key type {StreamProcessorKeyType} for scope {ScopeId}", streamProcessorKey.IdCase, scopeId);
                     }
                 }
 
@@ -161,7 +166,6 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
                 }
             }
         });
-        return taskCompletionSource.Task;
     }
 
     public override Task SetBySubscriptionId(SetStreamProcessorStateRequest request)

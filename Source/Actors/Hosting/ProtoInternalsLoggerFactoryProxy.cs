@@ -49,12 +49,12 @@ class ProtoInternalsLoggerFactoryProxy : ILoggerFactory
         public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(GetLogLevel(logLevel));
 
         public void Log(LogLevel logLevel, int eventId, object state,
-            Exception exception, Func<object, Exception, string> formatter)
+            Exception exception, Func<object, Exception?, string> formatter)
         {
             _logger.Log(GetLogLevel(logLevel), eventId, state, exception, formatter);
         }
 
-        public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
+        public IDisposable? BeginScope<TState>(TState state) where TState: notnull=> _logger.BeginScope(state);
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
             _logger.Log(GetLogLevel(logLevel), eventId, state, exception, formatter);

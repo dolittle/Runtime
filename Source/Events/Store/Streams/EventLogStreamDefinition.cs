@@ -21,4 +21,6 @@ public record EventLogStreamDefinition : IStreamDefinition
 
     /// <inheritdoc/>
     public IFilterDefinition FilterDefinition => default;
+    
+    public static readonly EventLogStreamDefinition Instance = new();
 }

@@ -237,6 +237,10 @@ public class StreamProcessorActor : IDisposable, IActor
 
     async Task OnStarted(IContext context)
     {
+        while (context.System.Cluster().MemberList is null)
+        {
+            await Task.Delay(100);
+        }
         if (!context.System.Cluster().MemberList.Started.IsCompletedSuccessfully)
         {
             await context.System.Cluster().MemberList.Started;

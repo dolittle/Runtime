@@ -137,6 +137,8 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         }
     }
 
+    
+    
     static Task<List<Events.StreamEvent>> GetStoredEventStreamHeadOfStreamToWrite(IMongoCollection<Events.StreamEvent> stream, IReadOnlyList<Events.StreamEvent> eventsToWrite, IClientSessionHandle transaction, CancellationToken cancellationToken)
         => stream
             .Find(

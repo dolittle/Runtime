@@ -78,6 +78,8 @@ public class StreamProcessor : IStreamProcessor
         _started = true;
 
         var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, cancellationToken).ConfigureAwait(false);
+        
+        
         if (!tryGetStreamProcessorState.Success)
         {
             Log.StreamProcessorPersistingNewState(_logger, _identifier);

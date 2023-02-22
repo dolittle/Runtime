@@ -63,12 +63,13 @@ public class StreamProcessor : IDisposable, IStreamProcessor
     /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
     /// </summary>
     /// <param name="streamProcessorId">The identifier of the stream processor.</param>
-    /// <param name="eventProcessorKind ">The kind of the event processor.</param>
+    /// <param name="eventProcessorKind">The kind of the event processor.</param>
     /// <param name="streamDefinition">The definition of the stream the processor should process events from.</param>
     /// <param name="forAllTenants">The performer to use to create scoped stream processors for all tenants.</param>
     /// <param name="createEventProcessorFor">The factory to use to create an event processor per tenant.</param>
     /// <param name="getCreateScopedStreamProcessors">The factory to us to get the scoped stream processor creator per tenant.</param>
     /// <param name="unregister">The callback to call to unregister the stream processor when it completes or fails.</param>
+    /// <param name="metrics"><see cref="IMetricsCollector"/></param>
     /// <param name="logger">The logger to use for logging.</param>
     /// <param name="executionContext">The execution context to run the processor in.</param>
     /// <param name="cancellationToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>

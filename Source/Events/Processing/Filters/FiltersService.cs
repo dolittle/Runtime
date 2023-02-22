@@ -414,7 +414,7 @@ public class FiltersService : FiltersBase
                 scopeId,
                 filterDefinition.TargetStream.Value,
                 _kind,
-                new EventLogStreamDefinition(),
+                EventLogStreamDefinition.Instance,
                 getFilterProcessor,
                 executionContext,
                 cancellationToken);
