@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 public class PartitionedProcessor : ProcessorBase
 {
     readonly Dictionary<PartitionId, List<StreamEvent>> _failedEvents = new();
-    bool catchingUp = true;
+    bool _catchingUp = true;
 
     public PartitionedProcessor(
         StreamProcessorId streamProcessorId,
@@ -127,7 +127,7 @@ public class PartitionedProcessor : ProcessorBase
             var notClosed = await messages.WaitToReadAsync(cancellationToken);
             if (notClosed)
             {
-                if (catchingUp && messages.TryPeek(out var evt))
+                if (_catchingUp && messages.TryPeek(out var evt))
                 {
                     if (evt.Event.EventLogSequenceNumber < state.Position.EventLogPosition)
                     {
@@ -173,9 +173,9 @@ public class PartitionedProcessor : ProcessorBase
 
     async Task<StreamProcessorState> HandleNewEvent(StreamEvent evt, StreamProcessorState existingState, CancellationToken cancellationToken)
     {
-        if (catchingUp) // Finished catching up, clear all partitions with failed events that do not have any more events to process
+        if (_catchingUp) // Finished catching up, clear all partitions with failed events that do not have any more events to process
         {
-            catchingUp = false;
+            _catchingUp = false;
 
             var noLongerFailingPartitions = existingState.FailingPartitions.Where(_ => !_failedEvents.ContainsKey(_.Key)).Select(_ => _.Key).ToArray();
             existingState = existingState.WithoutFailingPartitions(noLongerFailingPartitions);
@@ -326,7 +326,7 @@ public class PartitionedProcessor : ProcessorBase
 
         // All current events processed.
         _failedEvents.Remove(partition);
-        if (!catchingUp)
+        if (!_catchingUp)
         {
             streamProcessorState = streamProcessorState.WithoutFailingPartitions(partition);
         }
