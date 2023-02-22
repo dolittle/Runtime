@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Persistence;
 public class CommitWriter : IPersistCommits
 {
     readonly IStreams _streams;
-    // readonly IStreamEventWatcher _streamWatcher;
+    readonly IStreamEventWatcher _streamWatcher;
     readonly IConvertCommitToEvents _commitConverter;
     readonly IUpdateAggregateVersionsAfterCommit _aggregateVersions;
 
@@ -34,7 +34,7 @@ public class CommitWriter : IPersistCommits
     public CommitWriter(IStreams streams, IStreamEventWatcher streamWatcher, IConvertCommitToEvents commitConverter, IUpdateAggregateVersionsAfterCommit aggregateVersions)
     {
         _streams = streams;
-        // _streamWatcher = streamWatcher;
+        _streamWatcher = streamWatcher;
         _commitConverter = commitConverter;
         _aggregateVersions = aggregateVersions;
     }
@@ -58,7 +58,7 @@ public class CommitWriter : IPersistCommits
             await _aggregateVersions.UpdateAggregateVersions(session, commit, cancellationToken).ConfigureAwait(false);
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
             //TODO: Notifying for events should be a concern handled by actors
-            // _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, eventsToStore.Max(_ => _.EventLogSequenceNumber));
+            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, eventsToStore.Max(_ => _.EventLogSequenceNumber));
             return Try.Succeeded;
         }
         catch (MongoWaitQueueFullException ex)
