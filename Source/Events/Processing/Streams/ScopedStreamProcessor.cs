@@ -127,7 +127,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc />
-    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, ProcessingPosition position)
+    protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
     {
         // 
         var newState = new StreamProcessorState(position, 

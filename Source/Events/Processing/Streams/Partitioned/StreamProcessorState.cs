@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.Streams;
 using Google.Protobuf.WellKnownTypes;
@@ -23,6 +24,11 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
 {
     public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, lastSuccessfullyProcessed)
     {
+    }
+
+    [Obsolete("legacy stream processor state, without event log position")]
+    public StreamProcessorState(StreamPosition streamPosition, ImmutableDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed):
+        this(new ProcessingPosition(streamPosition, EventLogSequenceNumber.Initial), failingPartitions, lastSuccessfullyProcessed){
     }
 
     // public StreamProcessorState(ProcessingPosition position, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)

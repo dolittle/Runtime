@@ -30,8 +30,12 @@ public class all_dependencies : when_catching_up.given.all_dependencies
         first_failing_partition_state = new FailingPartitionState(first_initial_failing_partition_position, first_initial_failing_partition_retry_time, first_initial_failing_partition_reason, 1, DateTimeOffset.MinValue);
         second_failing_partition_state = new FailingPartitionState(second_initial_failing_partition_position, second_initial_failing_partition_retry_time, second_initial_failing_partition_reason, 1, DateTimeOffset.MinValue);
 
-        stream_processor_state.FailingPartitions.Add(first_failing_partition_id, first_failing_partition_state);
-        stream_processor_state.FailingPartitions.Add(second_failing_partition_id, second_failing_partition_state);
+        stream_processor_state = stream_processor_state with
+        {
+            FailingPartitions = stream_processor_state.FailingPartitions
+                .Add(first_failing_partition_id, first_failing_partition_state)
+                .Add(second_failing_partition_id, second_failing_partition_state)
+        };
 
         eventStream = new[]
         {

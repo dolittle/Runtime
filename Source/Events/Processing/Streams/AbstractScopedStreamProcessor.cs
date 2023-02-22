@@ -194,7 +194,7 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="currentState">The current <see cref="IStreamProcessorState"/>.</param>
     /// <param name="position">The new <see cref="StreamPosition"/>.</param>
     /// <returns>The new <see cref="IStreamProcessorState"/>.</returns>
-    protected abstract Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, ProcessingPosition processingPosition);
+    protected abstract Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position);
 
     /// <summary>
     /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
@@ -341,7 +341,7 @@ public abstract class AbstractScopedStreamProcessor
                             if (result.Success)
                             {
                                 Log.ScopedStreamProcessorSetToPosition(Logger, Identifier, _newPosition.StreamPosition);
-                                _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
+                                _currentState = await SetNewStateWithPosition(_currentState, _newPosition.StreamPosition).ConfigureAwait(false);
                                 _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
                             }
                             else

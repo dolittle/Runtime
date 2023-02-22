@@ -24,6 +24,13 @@ public record FailingPartitionState(ProcessingPosition Position, DateTimeOffset 
     {
     }
 
+    [Obsolete("legacy stream processor state, without event log position")]
+    public FailingPartitionState(StreamPosition streamPosition, DateTimeOffset retryTime, string reason,
+        uint processingAttempts, DateTimeOffset lastFailed) : this(new ProcessingPosition(streamPosition, EventLogSequenceNumber.Initial), retryTime, reason,
+        processingAttempts, lastFailed)
+    {
+    }
+
     public bool CanBeRetried => RetryTime < DateTimeOffset.MaxValue;
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)

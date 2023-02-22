@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -15,14 +16,18 @@ public class all_dependencies : when_catching_up.given.all_dependencies
     protected static DateTimeOffset initial_failing_partition_retry_time;
     protected static FailingPartitionState failing_partition_state;
 
-    Establish context = () =>
+    private Establish context = () =>
     {
         failing_partition_id = "failing partition";
         initial_failing_partition_position = ProcessingPosition.Initial;
         initial_failing_partition_reason = "some reason";
         initial_failing_partition_retry_time = DateTimeOffset.UtcNow;
         failing_partition_state = new FailingPartitionState(initial_failing_partition_position, initial_failing_partition_retry_time, initial_failing_partition_reason, 1, DateTimeOffset.UtcNow);
-        stream_processor_state.FailingPartitions.Add(failing_partition_id, failing_partition_state);
+        stream_processor_state = stream_processor_state with
+        {
+            FailingPartitions = stream_processor_state.FailingPartitions.Add(failing_partition_id, failing_partition_state)
+        };
+        stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None);
         eventStream = new[]
         {
             new StreamEvent(committed_events.single(), 0, stream_id, failing_partition_id, true),

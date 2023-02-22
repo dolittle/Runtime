@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +22,7 @@ public class FailingPartitions : IFailingPartitions
     readonly IEventProcessor _eventProcessor;
     readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
     readonly Func<StreamEvent, ExecutionContext> _createExecutionContextForEvent;
+    readonly IEventFetcherPolicies _eventFetcherPolicies;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
@@ -28,25 +31,55 @@ public class FailingPartitions : IFailingPartitions
     /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
     /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromPartitionedStream" />.</param>
     /// <param name="createExecutionContextForEvent">The factory to use to create execution contexts for event processing.</param>
+    /// <param name="eventFetcherPolicies">The policies to use for fetching events.</param>
     public FailingPartitions(
         IStreamProcessorStates streamProcessorStates,
         IEventProcessor eventProcessor,
         ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
-        Func<StreamEvent, ExecutionContext> createExecutionContextForEvent)
+        Func<StreamEvent, ExecutionContext> createExecutionContextForEvent,
+        IEventFetcherPolicies eventFetcherPolicies)
     {
         _streamProcessorStates = streamProcessorStates;
         _eventProcessor = eventProcessor;
         _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
         _createExecutionContextForEvent = createExecutionContextForEvent;
+        _eventFetcherPolicies = eventFetcherPolicies;
     }
 
 
     /// <inheritdoc/>
-    public async Task<StreamProcessorState> CatchupFor(
+    public async Task<IStreamProcessorState> AddFailingPartitionFor(
+        IStreamProcessorId streamProcessorId,
+        StreamProcessorState oldState,
+        StreamPosition failedPosition,
+        PartitionId partition,
+        DateTimeOffset retryTime,
+        string reason,
+        CancellationToken cancellationToken)
+    {
+        var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
+        var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
+        {
+            [partition] = failingPartition
+        }.ToImmutableDictionary();
+        StreamPosition streamPosition = failedPosition + 1;
+        var newState = new StreamProcessorState(streamPosition, failingPartitions, oldState.LastSuccessfullyProcessed);
+        await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
+        return newState;
+    }
+
+    /// <inheritdoc/>
+    public async Task<IStreamProcessorState> CatchupFor(
         IStreamProcessorId streamProcessorId,
         StreamProcessorState streamProcessorState,
         CancellationToken cancellationToken)
     {
+        if (streamProcessorState.FailingPartitions.Count > 0)
+        {
+            streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken)
+                .ConfigureAwait(false)).Result as StreamProcessorState;
+        }
+
         var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
 
         // TODO: Failing partitions should be actorified
@@ -54,10 +87,14 @@ public class FailingPartitions : IFailingPartitions
         {
             var partition = kvp.Key;
             var failingPartitionState = kvp.Value;
-            while (ShouldProcessNextEventInPartition(failingPartitionState.Position, streamProcessorState.Position) &&
+            while (ShouldProcessNextEventInPartition(failingPartitionState.Position.StreamPosition, streamProcessorState.Position.StreamPosition) &&
                    ShouldRetryProcessing(failingPartitionState))
             {
-                var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, cancellationToken).ConfigureAwait(false);
+                var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, cancellationToken);
+                
+                // var tryGetEvents = await _eventFetcherPolicies.Fetching.ExecuteAsync(
+                //     _ => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, _),
+                //     cancellationToken).ConfigureAwait(false);
                 if (!tryGetEvents.Success)
                 {
                     break;
@@ -69,8 +106,7 @@ public class FailingPartitions : IFailingPartitions
                     {
                         throw new StreamEventInWrongPartition(streamEvent, partition);
                     }
-
-                    if (!ShouldProcessNextEventInPartition(streamEvent.CurrentProcessingPosition, streamProcessorState.Position))
+                    if (!ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position.StreamPosition))
                     {
                         break;
                     }
@@ -93,7 +129,7 @@ public class FailingPartitions : IFailingPartitions
                             streamProcessorId,
                             streamProcessorState,
                             partition,
-                            new ProcessingPosition(streamEvent.Position + 1, streamEvent.Event.EventLogSequenceNumber + 1),
+                            streamEvent.Position + 1,
                             failingPartitionState.LastFailed,
                             cancellationToken).ConfigureAwait(false);
                     }
@@ -106,7 +142,7 @@ public class FailingPartitions : IFailingPartitions
                             failingPartitionState.ProcessingAttempts + 1,
                             processingResult.RetryTimeout,
                             processingResult.FailureReason,
-                            new ProcessingPosition(streamEvent.Position, streamEvent.Event.EventLogSequenceNumber),
+                            streamEvent.Position,
                             DateTimeOffset.UtcNow,
                             cancellationToken).ConfigureAwait(false);
                         // Important to not process the next events if this failed
@@ -121,7 +157,7 @@ public class FailingPartitions : IFailingPartitions
                             failingPartitionState.ProcessingAttempts + 1,
                             DateTimeOffset.MaxValue,
                             processingResult.FailureReason,
-                            new ProcessingPosition(streamEvent.Position, streamEvent.Event.EventLogSequenceNumber),
+                            streamEvent.Position,
                             DateTimeOffset.UtcNow,
                             cancellationToken).ConfigureAwait(false);
                         // Important to not process the next events if this failed
@@ -143,11 +179,7 @@ public class FailingPartitions : IFailingPartitions
     async Task<StreamProcessorState> RemoveFailingPartition(IStreamProcessorId streamProcessorId, StreamProcessorState oldState, PartitionId partition,
         CancellationToken cancellationToken)
     {
-        var newFailingPartitions = oldState.FailingPartitions;
-        newFailingPartitions.Remove(partition);
-        var newState = oldState with { FailingPartitions = newFailingPartitions };
-        oldState.FailingPartitions.Remove(partition);
-
+        var newState = oldState with { FailingPartitions = oldState.FailingPartitions.Remove(partition) };
         await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
         return newState;
     }
@@ -156,7 +188,7 @@ public class FailingPartitions : IFailingPartitions
         IStreamProcessorId streamProcessorId,
         StreamProcessorState oldState,
         PartitionId partitionId,
-        ProcessingPosition newPosition,
+        StreamPosition newPosition,
         DateTimeOffset lastFailed,
         CancellationToken cancellationToken) =>
         SetFailingPartitionState(streamProcessorId, oldState, partitionId, 0, DateTimeOffset.UtcNow, string.Empty, newPosition, lastFailed, cancellationToken);
@@ -168,7 +200,7 @@ public class FailingPartitions : IFailingPartitions
         uint processingAttempts,
         TimeSpan retryTimeout,
         string reason,
-        ProcessingPosition position,
+        StreamPosition position,
         DateTimeOffset lastFailed,
         CancellationToken cancellationToken) =>
         SetFailingPartitionState(streamProcessorId, oldState, partitionId, processingAttempts, DateTimeOffset.UtcNow.Add(retryTimeout), reason, position,
@@ -181,17 +213,16 @@ public class FailingPartitions : IFailingPartitions
         uint processingAttempts,
         DateTimeOffset retryTime,
         string reason,
-        ProcessingPosition position,
+        StreamPosition position,
         DateTimeOffset lastFailed,
         CancellationToken cancellationToken)
     {
-        var newFailingPartitionState =
-            new FailingPartitionState(position.StreamPosition, position.EventLogPosition, retryTime, reason, processingAttempts, lastFailed);
-        var newFailingPartitions = oldState.FailingPartitions.SetItem(partitionId, newFailingPartitionState);
+        var newFailingPartitionState = new FailingPartitionState(position, retryTime, reason, processingAttempts, lastFailed);
+        var newFailingPartitions = oldState.FailingPartitions.SetItem(partitionId,newFailingPartitionState);
 
-        var newState = position.StreamPosition > oldState.FailingPartitions[partitionId].Position.StreamPosition
-            ? oldState with { FailingPartitions = newFailingPartitions, LastSuccessfullyProcessed = DateTimeOffset.UtcNow }
-            : oldState with { FailingPartitions = newFailingPartitions };
+        var newState = position > oldState.FailingPartitions[partitionId].Position.StreamPosition
+            ? new StreamProcessorState(oldState.Position, newFailingPartitions, DateTimeOffset.UtcNow)
+            : new StreamProcessorState(oldState.Position, newFailingPartitions, oldState.LastSuccessfullyProcessed);
 
         await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
 
@@ -206,8 +237,8 @@ public class FailingPartitions : IFailingPartitions
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
 
-    static bool ShouldProcessNextEventInPartition(ProcessingPosition failingPartitionPosition, ProcessingPosition streamProcessorPosition) =>
-        failingPartitionPosition.StreamPosition.Value < streamProcessorPosition.StreamPosition.Value;
+    static bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
+        failingPartitionPosition.Value < streamProcessorPosition.Value;
 
     static bool ShouldRetryProcessing(FailingPartitionState state) =>
         DateTimeOffset.UtcNow.CompareTo(state.RetryTime) >= 0;

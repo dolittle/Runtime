@@ -57,7 +57,8 @@ public class all_dependencies
             stream_processor_state_repository,
             event_processor.Object,
             events_fetcher.Object,
-            stream_event => stream_event.Event.ExecutionContext);
+            stream_event => stream_event.Event.ExecutionContext,
+            new EventFetcherPolicies(Mock.Of<ILogger>()));
         
         
             

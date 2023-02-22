@@ -22,6 +22,7 @@ public class that_should_never_be_retried : given.all_dependencies
             failing_partition_state.Reason,
             failing_partition_state.ProcessingAttempts,
             DateTimeOffset.UtcNow));
+        stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
     };
 
     Because of = () =>

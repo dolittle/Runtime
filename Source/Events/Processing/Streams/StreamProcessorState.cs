@@ -62,6 +62,11 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
     {
     }
 
+    public StreamProcessorState(StreamPosition streamPosition, DateTimeOffset lastSuccessfullyProcessed) : this(
+        new ProcessingPosition(streamPosition, EventLogSequenceNumber.Initial), lastSuccessfullyProcessed)
+    {
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamProcessorState"/> class.
     /// </summary>
@@ -125,7 +130,7 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         {
             throw new ArgumentException("Processing result cannot be successful when adding a failing partition", nameof(failedProcessing));
         }
-        
+
         return this with
         {
             ProcessingAttempts = ProcessingAttempts + 1,
@@ -140,6 +145,6 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
 
     bool RetryTimeIsInThePast(DateTimeOffset retryTime)
         => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
-    
+
     public static StreamProcessorState New => new(StreamPosition.Start, EventLogSequenceNumber.Initial);
 }

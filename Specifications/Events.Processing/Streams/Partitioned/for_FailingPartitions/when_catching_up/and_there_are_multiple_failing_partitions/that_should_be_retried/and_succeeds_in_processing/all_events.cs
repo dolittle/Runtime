@@ -15,6 +15,7 @@ public class all_events : given.all_dependencies
     static StreamProcessorState result;
 
     Establish context = () =>
+    {
         event_processor
             .Setup(_ => _.Process(
                 Moq.It.IsAny<CommittedEvent>(),
@@ -24,6 +25,9 @@ public class all_events : given.all_dependencies
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
+        
+        stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
+    };
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 

@@ -24,24 +24,12 @@ public class all_dependencies : for_FailingPartitions.given.an_instance_of_faili
     {
         stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         stream_processor_state = new StreamProcessorState(initial_stream_processor_position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.UtcNow);
-
-        stream_processor_state_repository
-            .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(stream_processor_state)));
-
-        stream_processor_state_repository
-            .Setup(_ => _.Persist(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IStreamProcessorState>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns<IStreamProcessorId, IStreamProcessorState, CancellationToken>((stream_processor_id, new_state, _) =>
-            {
-                stream_processor_state = new_state as StreamProcessorState;
-                return Task.FromResult(stream_processor_state);
-            });
-
+        stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
         events_fetcher
             .Setup(_ => _.FetchInPartition(Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns<PartitionId, ProcessingPosition, CancellationToken>((partition, position, _) =>
+            .Returns<PartitionId, StreamPosition, CancellationToken>((partition, position, _) =>
             {
-                var events = eventStream.Skip((int)position.StreamPosition.Value).Where(_ => _.Partition == partition);
+                var events = eventStream.Skip((int)position.Value).Where(_ => _.Partition == partition);
                 if (events != default && events.Any())
                 {
                     return Task.FromResult(Try<IEnumerable<StreamEvent>>.Succeeded(events));
