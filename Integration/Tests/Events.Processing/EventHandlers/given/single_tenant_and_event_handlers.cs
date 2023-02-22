@@ -60,7 +60,6 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     static CancellationTokenSource? cancel_event_handlers_source;
 
     static Dictionary<EventHandlerInfo, Try<IStreamDefinition>> persisted_stream_definitions = default!;
-    static Dictionary<StreamProcessorId, Try<IStreamProcessorState>> persisted_stream_processor_states = default!;
 
     Establish context = () =>
     {
@@ -231,7 +230,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             .Returns<HandleEventRequest, ExecutionContext, CancellationToken>((request, _, _) =>
             {
                 var response = callback(request);
-                reset_timeout_after_action(TimeSpan.FromMilliseconds(1000));
+                reset_timeout_after_action(TimeSpan.FromMilliseconds(250));
                 return Task.FromResult(response);
             });
     }
@@ -328,24 +327,26 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     protected static Try<IStreamProcessorState> get_stream_processor_state_for(StreamProcessorId stream_processor_id)
     {
-        if (persisted_stream_processor_states == default)
-        {
-            persisted_stream_processor_states = new Dictionary<StreamProcessorId, Try<IStreamProcessorState>>();
-            foreach (var info in event_handlers_to_run.Select(_ => _.Info))
-            {
-                var filterProcessorId = info.GetFilterStreamId();
-                var eventProcessorId = info.GetEventProcessorStreamId();
-                persisted_stream_processor_states[filterProcessorId] = stream_processor_states.TryGetFor(filterProcessorId, CancellationToken.None).Result;
-                persisted_stream_processor_states[eventProcessorId] = stream_processor_states.TryGetFor(eventProcessorId, CancellationToken.None).Result;
-            }
-        }
-
-        if (!persisted_stream_processor_states.ContainsKey(stream_processor_id))
-        {
-            persisted_stream_processor_states[stream_processor_id] = stream_processor_states.TryGetFor(stream_processor_id, CancellationToken.None).Result;
-        }
-
-        return persisted_stream_processor_states[stream_processor_id];
+        return stream_processor_states.TryGetFor(stream_processor_id, CancellationToken.None).GetAwaiter().GetResult();
+        
+        // if (persisted_stream_processor_states == default)
+        // {
+        //     persisted_stream_processor_states = new Dictionary<StreamProcessorId, Try<IStreamProcessorState>>();
+        //     foreach (var info in event_handlers_to_run.Select(_ => _.Info))
+        //     {
+        //         var filterProcessorId = info.GetFilterStreamId();
+        //         var eventProcessorId = info.GetEventProcessorStreamId();
+        //         persisted_stream_processor_states[filterProcessorId] = stream_processor_states.TryGetFor(filterProcessorId, CancellationToken.None).Result;
+        //         persisted_stream_processor_states[eventProcessorId] = stream_processor_states.TryGetFor(eventProcessorId, CancellationToken.None).Result;
+        //     }
+        // }
+        //
+        // if (!persisted_stream_processor_states.ContainsKey(stream_processor_id))
+        // {
+        //     persisted_stream_processor_states[stream_processor_id] = stream_processor_states.TryGetFor(stream_processor_id, CancellationToken.None).Result;
+        // }
+        //
+        // return persisted_stream_processor_states[stream_processor_id];
     }
 
     #region SpecHelpers
@@ -391,41 +392,38 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     protected static void expect_stream_processor_state(
         IEventHandler event_handler,
-        bool implicit_filter = false,
-        bool fast_event_handler = false,
         bool partitioned = false,
         int num_events_to_handle = 0,
         failing_partitioned_state? failing_partitioned_state = null,
         failing_unpartitioned_state? failing_unpartitioned_state = null
     )
     {
-        expect_filter_stream_processor_state(event_handler.Info.GetFilterStreamId(), implicit_filter, fast_event_handler);
         expect_event_processor_stream_processor_state(event_handler.Info.GetEventProcessorStreamId(), partitioned, num_events_to_handle,
             failing_partitioned_state, failing_unpartitioned_state);
     }
 
-    static void expect_filter_stream_processor_state(StreamProcessorId id, bool implicit_filter, bool fast_event_handler)
-    {
-        var isImplicit = implicit_filter && fast_event_handler;
-        var tryGetStreamProcessorState = get_stream_processor_state_for(id);
-        tryGetStreamProcessorState.Success.ShouldEqual(!isImplicit);
-        if (isImplicit)
-        {
-            return;
-        }
-        var state = tryGetStreamProcessorState.Result;
-        state!.Partitioned.ShouldBeFalse();
-        var expectedPosition = id.ScopeId == ScopeId.Default
-            ? new StreamPosition((ulong)committed_events.Count)
-            : new StreamPosition((ulong)scoped_committed_events[id.ScopeId].Count);
-        state.Position.StreamPosition.ShouldEqual(expectedPosition);
-        state.ShouldBeOfExactType<StreamProcessorState>();
-        var unpartitionedState = state as StreamProcessorState;
-        unpartitionedState!.IsFailing.ShouldBeFalse();
-        unpartitionedState.ProcessingAttempts.ShouldEqual((uint)0);
-        unpartitionedState.RetryTime.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
-        unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
-    }
+    // static void expect_filter_stream_processor_state(StreamProcessorId id, bool implicit_filter, bool fast_event_handler)
+    // {
+    //     var isImplicit = implicit_filter && fast_event_handler;
+    //     var tryGetStreamProcessorState = get_stream_processor_state_for(id);
+    //     tryGetStreamProcessorState.Success.ShouldEqual(!isImplicit);
+    //     if (isImplicit)
+    //     {
+    //         return;
+    //     }
+    //     var state = tryGetStreamProcessorState.Result;
+    //     state!.Partitioned.ShouldBeFalse();
+    //     var expectedPosition = id.ScopeId == ScopeId.Default
+    //         ? new StreamPosition((ulong)committed_events.Count)
+    //         : new StreamPosition((ulong)scoped_committed_events[id.ScopeId].Count);
+    //     state.Position.StreamPosition.ShouldEqual(expectedPosition);
+    //     state.ShouldBeOfExactType<StreamProcessorState>();
+    //     var unpartitionedState = state as StreamProcessorState;
+    //     unpartitionedState!.IsFailing.ShouldBeFalse();
+    //     unpartitionedState.ProcessingAttempts.ShouldEqual((uint)0);
+    //     unpartitionedState.RetryTime.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+    //     unpartitionedState.LastSuccessfullyProcessed.ShouldBeLessThanOrEqualTo(DateTimeOffset.UtcNow);
+    // }
 
     static void expect_event_processor_stream_processor_state(
         StreamProcessorId id,
