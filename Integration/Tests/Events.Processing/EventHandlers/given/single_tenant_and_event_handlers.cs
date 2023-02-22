@@ -351,16 +351,6 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
 
     #region SpecHelpers
 
-    protected static void expect_number_of_filtered_events(IEventHandler event_handler, long expected_number)
-        => count_events_in_stream(event_handler, Builders<MongoStreamEvent>.Filter.Empty).ShouldEqual(expected_number);
-
-    protected static void expect_number_of_filtered_events_with_partition(IEventHandler event_handler, long expected_number, PartitionId partition_id)
-        => count_events_in_stream(event_handler, Builders<MongoStreamEvent>.Filter.Eq(_ => _.Partition, partition_id.Value)).ShouldEqual(expected_number);
-
-    protected static void expect_number_of_filtered_events_with_event_type(IEventHandler event_handler, long expected_number, ArtifactId event_type)
-        => count_events_in_stream(event_handler, Builders<MongoStreamEvent>.Filter.Eq(_ => _.Metadata.TypeId, event_type.Value)).ShouldEqual(expected_number);
-
-
     static long count_events_in_stream(IEventHandler event_handler, FilterDefinition<MongoStreamEvent> filter)
         => streams
             .Get(event_handler.Info.Id.Scope, event_handler.Info.Id.EventHandler.Value, CancellationToken.None)
