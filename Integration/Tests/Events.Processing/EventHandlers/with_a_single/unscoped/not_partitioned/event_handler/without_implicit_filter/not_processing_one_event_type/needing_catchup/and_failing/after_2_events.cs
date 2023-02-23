@@ -33,5 +33,5 @@ class after_2_events : given.single_tenant_and_event_handlers
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(
         event_handler,
-        new failing_unpartitioned_state(1));
+        new failing_unpartitioned_state(1, failure_reason));
 }

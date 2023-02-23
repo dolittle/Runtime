@@ -179,7 +179,7 @@ public class PartitionedProcessor : ProcessorBase
 
             var noLongerFailingPartitions = existingState.FailingPartitions.Where(_ => !_failedEvents.ContainsKey(_.Key)).Select(_ => _.Key).ToArray();
             existingState = existingState.WithoutFailingPartitions(noLongerFailingPartitions);
-            await PersistNewState(Identifier, newState: existingState, cancellationToken);
+            await PersistNewState(newState: existingState, cancellationToken);
         }
 
         if (existingState.FailingPartitions.TryGetValue(evt.Partition, out var failingPartitionState))
@@ -193,6 +193,7 @@ public class PartitionedProcessor : ProcessorBase
         }
 
         var (state, processingResult) = await ProcessEvent(evt, existingState, GetExecutionContextForEvent(evt), cancellationToken);
+        await PersistNewState(state, cancellationToken);
         if (processingResult is { Succeeded: false, Retry: true })
         {
             WriteToFailedPartition(evt);
@@ -234,7 +235,7 @@ public class PartitionedProcessor : ProcessorBase
             failingPartitionState.ProcessingAttempts,
             GetExecutionContextForEvent(evt),
             cancellationToken).ConfigureAwait(false);
-
+        await PersistNewState(newState, CancellationToken.None);
         if (processingResult is { Succeeded: false, Retry: true })
         {
             WriteToFailedPartition(evt);
@@ -310,6 +311,8 @@ public class PartitionedProcessor : ProcessorBase
                 failingPartitionState.ProcessingAttempts,
                 GetExecutionContextForEvent(streamEvent),
                 cancellationToken).ConfigureAwait(false);
+            await PersistNewState(newState, CancellationToken.None);
+
             streamProcessorState = AsPartitioned(newState);
 
             if (processingResult.Succeeded)
@@ -329,6 +332,7 @@ public class PartitionedProcessor : ProcessorBase
         if (!_catchingUp)
         {
             streamProcessorState = streamProcessorState.WithoutFailingPartitions(partition);
+            await PersistNewState(streamProcessorState, CancellationToken.None);
         }
 
         return streamProcessorState;

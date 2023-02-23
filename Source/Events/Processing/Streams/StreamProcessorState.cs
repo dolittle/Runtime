@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 /// <param name="IsFailing">Whether the stream processor is failing.</param>
 public record StreamProcessorState(ProcessingPosition Position, string FailureReason, DateTimeOffset RetryTime,
     uint ProcessingAttempts,
-    DateTimeOffset LastSuccessfullyProcessed, bool IsFailing) : IStreamProcessorState
+    DateTimeOffset LastSuccessfullyProcessed, bool IsFailing) : IStreamProcessorState<StreamProcessorState>
 {
     // /// <summary>
     // /// Represents the state of an <see cref="ScopedStreamProcessor" />.
@@ -112,6 +112,11 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
 
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry)
     {
+        if (RetryTime == DateTimeOffset.MaxValue)
+        {
+            timeToRetry = TimeSpan.Zero;
+            return false;
+        }
         timeToRetry = TimeSpan.MaxValue;
         if (IsFailing)
         {
@@ -124,7 +129,19 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         return false;
     }
 
-    public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt)
+    public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
+    {
+        if (result.Retry)
+        {
+            return WithFailure(result, processedEvent, timestamp.Add(result.RetryTimeout), timestamp);
+        }
+
+        return result.Succeeded
+            ? WithSuccessfullyProcessed(processedEvent, timestamp)
+            : WithFailure(result, processedEvent, DateTimeOffset.MaxValue, timestamp);
+    }
+    
+    public StreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset _)
     {
         if (failedProcessing.Succeeded)
         {
@@ -140,8 +157,8 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         };
     }
 
-    public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>
-        new StreamProcessorState(processedEvent.NextProcessingPosition, DateTimeOffset.UtcNow);
+    public StreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>
+        new StreamProcessorState(processedEvent.NextProcessingPosition, timestamp);
 
     bool RetryTimeIsInThePast(DateTimeOffset retryTime)
         => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;

@@ -3,12 +3,12 @@
 
 using System.Collections.Immutable;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using FluentAssertions;
 
-namespace Events.Processing.Tests;
+namespace Events.Processing.Tests.NonPartitioned;
 
 public class StreamProcessorStateTests
 {
@@ -28,7 +28,6 @@ public class StreamProcessorStateTests
         var before = StreamProcessorState.New;
         var afterState = before.WithSuccessfullyProcessed(Evt, Now);
 
-        afterState.Should().BeEquivalentTo(new StreamProcessorState(ProcessingPosition.Initial.IncrementWithStream(),
-            ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, Now));
+        afterState.Should().BeEquivalentTo(new StreamProcessorState(Evt.NextProcessingPosition, Now));
     }
 }

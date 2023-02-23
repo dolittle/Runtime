@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 /// <param name="FailingPartitions">The <see cref="IDictionary{PartitionId, FailingPartitionState}">states of the failing partitions</see>.</param>
 /// <param name="LastSuccessfullyProcessed">The <see cref="DateTimeOffset" /> for the last time when an Event in the Stream that the <see cref="ScopedStreamProcessor" /> processes was processed successfully.</param>
 public record StreamProcessorState(ProcessingPosition Position, ImmutableDictionary<PartitionId, FailingPartitionState> FailingPartitions,
-    DateTimeOffset LastSuccessfullyProcessed) : IStreamProcessorState
+    DateTimeOffset LastSuccessfullyProcessed) : IStreamProcessorState<StreamProcessorState>
 {
     public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, lastSuccessfullyProcessed)
     {
@@ -92,7 +92,7 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         return false;
     }
 
-    public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt = default)
+    public StreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset lastProcessingAttempt = default)
     {
         if (failedProcessing.Succeeded)
         {
@@ -101,23 +101,38 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
 
         if (FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
         {
-            return UpdateFailingPartition(failedProcessing, processedEvent, retriedAt, failingPartitionState);
+            return UpdateFailingPartition(failedProcessing, processedEvent, lastProcessingAttempt, failingPartitionState);
         }
 
         return AddFailingPartitionFor(
             this,
             processedEvent.CurrentProcessingPosition,
             processedEvent.Partition,
-            retriedAt == default ? DateTimeOffset.MaxValue : retriedAt,
-            failedProcessing.FailureReason);
+            retryAt == default ? DateTimeOffset.MaxValue : retryAt,
+            failedProcessing.FailureReason,
+            lastProcessingAttempt == default ? DateTimeOffset.UtcNow : lastProcessingAttempt);
     }
 
-    IStreamProcessorState UpdateFailingPartition(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt,
+    
+    
+    public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
+    {
+        if (result.Retry)
+        {
+            return WithFailure(result, processedEvent, timestamp.Add(result.RetryTimeout), timestamp);
+        }
+
+        return result.Succeeded
+            ? WithSuccessfullyProcessed(processedEvent, timestamp)
+            : WithFailure(result, processedEvent, DateTimeOffset.MaxValue, timestamp);
+    }
+    
+    StreamProcessorState UpdateFailingPartition(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt,
         FailingPartitionState failingPartitionState)
     {
         var failingPartition = new FailingPartitionState(
             Position: processedEvent.CurrentProcessingPosition,
-            RetryTime: failedProcessing.Retry ? DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout) : DateTimeOffset.MaxValue,
+            RetryTime: failedProcessing.Retry ? retriedAt.Add(failedProcessing.RetryTimeout) : DateTimeOffset.MaxValue,
             ProcessingAttempts: processedEvent.CurrentProcessingPosition.EventLogPosition == failingPartitionState.Position.EventLogPosition
                 ? failingPartitionState.ProcessingAttempts + 1
                 : 1,
@@ -129,7 +144,7 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         };
     }
 
-    public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp)
+    public StreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp)
     {
         if (FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
         {
@@ -144,12 +159,14 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
             var failingPartition = failingPartitionState with
             {
                 Position = processedEvent.NextProcessingPosition,
-                RetryTime = DateTimeOffset.UtcNow,
+                RetryTime = timestamp,
                 ProcessingAttempts = 0,
                 Reason = "behind"
             };
-            return new StreamProcessorState(Position: processedEvent.NextProcessingPosition,
-                FailingPartitions: FailingPartitions.SetItem(processedEvent.Partition, failingPartition), LastSuccessfullyProcessed: timestamp);
+            return this with
+            {
+                FailingPartitions = FailingPartitions.SetItem(processedEvent.Partition, failingPartition), LastSuccessfullyProcessed = timestamp
+            };
         }
 
         return this with
@@ -159,14 +176,15 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         };
     }
 
-    static IStreamProcessorState AddFailingPartitionFor(
+    static StreamProcessorState AddFailingPartitionFor(
         StreamProcessorState oldState,
         ProcessingPosition failedPosition,
         PartitionId partition,
         DateTimeOffset retryTime,
-        string reason)
+        string reason,
+        DateTimeOffset lastFailed)
     {
-        var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
+        var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1, lastFailed);
         var newState = new StreamProcessorState(failedPosition.IncrementWithStream(), oldState.FailingPartitions.SetItem(partition, failingPartition),
             oldState.LastSuccessfullyProcessed);
         return newState;

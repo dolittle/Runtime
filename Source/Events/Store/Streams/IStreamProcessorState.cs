@@ -8,9 +8,6 @@ using Dolittle.Runtime.Events.Store.Actors;
 
 namespace Dolittle.Runtime.Events.Store.Streams;
 
-/// <summary>
-/// Defines the basis for the state of a <see cref="AbstractScopedStreamProcessor" />.
-/// </summary>
 public interface IStreamProcessorState
 {
     /// <summary>
@@ -31,21 +28,29 @@ public interface IStreamProcessorState
     /// </summary>
     ProcessingPosition EarliestProcessingPosition { get; }
 
-
     public bool TryGetTimespanToRetry(out TimeSpan timeToRetry);
 
-    public IStreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
-    {
-        if (result.Retry)
-        {
-            return WithFailure(result, processedEvent, DateTimeOffset.UtcNow.Add(result.RetryTimeout));
-        }
-
-        return result.Succeeded
-            ? WithSuccessfullyProcessed(processedEvent, timestamp)
-            : WithFailure(result, processedEvent, DateTimeOffset.MaxValue);
-    }
-
-    public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt);
+    public IStreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp);
+    public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset timestamp);
     public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp);
+}
+
+/// <summary>
+/// Defines the basis for the state of a <see cref="AbstractScopedStreamProcessor" />.
+/// </summary>
+public interface IStreamProcessorState<T> : IStreamProcessorState where T : IStreamProcessorState<T>
+{
+    IStreamProcessorState IStreamProcessorState.WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp) =>
+        WithResult(result, processedEvent, timestamp);
+
+    IStreamProcessorState IStreamProcessorState.WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset timestamp) =>
+        WithFailure(failedProcessing, processedEvent, retryAt, timestamp);
+
+    IStreamProcessorState IStreamProcessorState.WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>
+        WithSuccessfullyProcessed(processedEvent, timestamp);
+
+    public new T WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp);
+
+    public new T WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset timestamp);
+    public new T WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp);
 }

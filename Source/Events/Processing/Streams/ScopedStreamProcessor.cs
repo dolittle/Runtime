@@ -103,7 +103,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
         IStreamProcessorState currentState)
     {
-        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.MaxValue);
+        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.MaxValue, DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
@@ -112,7 +112,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
         IStreamProcessorState currentState)
     {
-        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout));
+        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout), DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }

@@ -137,9 +137,9 @@ public abstract class ProcessorBase
         return (updatedState, processingResult);
     }
 
-    protected Task PersistNewState(IStreamProcessorId streamProcessorId, IStreamProcessorState newState, CancellationToken cancellationToken)
+    protected Task PersistNewState(IStreamProcessorState newState, CancellationToken cancellationToken)
     {
-        return _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
+        return _streamProcessorStates.Persist(Identifier, newState, cancellationToken);
     }
 
     /// <summary>
@@ -157,7 +157,6 @@ public abstract class ProcessorBase
             processingResult.GetType().Name);
         var newState = currentState.WithResult(processingResult, processedEvent, DateTimeOffset.UtcNow);
         OnProcessingResult(processingResult, processedEvent, processingTime);
-        await PersistNewState(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
 

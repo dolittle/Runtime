@@ -11,7 +11,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
-using Proto;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
@@ -43,6 +42,8 @@ public class NonPartitionedProcessor : ProcessorBase
                 var evt = await messages.ReadAsync(cancellationToken);
 
                 var (streamProcessorState, processingResult) = await ProcessEvent(evt, state, GetExecutionContextForEvent(evt), cancellationToken);
+                await PersistNewState(streamProcessorState, cancellationToken);
+
                 while (processingResult.Retry)
                 {
                     if (state.TryGetTimespanToRetry(out var retryTimeout))
@@ -58,6 +59,7 @@ public class NonPartitionedProcessor : ProcessorBase
                     (state, processingResult) = await RetryProcessingEvent(evt, state, processingResult.FailureReason,
                         AsNonPartitioned(streamProcessorState).ProcessingAttempts + 1,
                         GetExecutionContextForEvent(evt), cancellationToken);
+                    await PersistNewState(state, cancellationToken);
                 }
             }
         }

@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store.Streams;
 using Integration.Tests.Events.Processing.EventHandlers.given;
@@ -31,5 +30,5 @@ class after_2_events : given.single_tenant_and_event_handlers
 
     
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
-    It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(event_handler, new failing_unpartitioned_state(1));
+    It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(event_handler, new failing_unpartitioned_state(1, failure_reason));
 }

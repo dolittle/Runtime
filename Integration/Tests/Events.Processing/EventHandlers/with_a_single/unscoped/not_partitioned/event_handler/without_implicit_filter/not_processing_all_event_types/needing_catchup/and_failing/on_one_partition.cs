@@ -36,5 +36,5 @@ class on_one_partition : given.single_tenant_and_event_handlers
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_with_failure(
         event_handler,
-        new failing_unpartitioned_state(get_partitioned_events_in_stream(event_handler, failing_partition).First().Position));
+        new failing_unpartitioned_state(get_partitioned_events_in_stream(event_handler, failing_partition).First().Position, failure_reason));
 }
