@@ -5,7 +5,7 @@ using System;
 
 namespace Dolittle.Runtime.Services;
 
-public class RuntimeShuttingDown : Exception
+public class RuntimeShuttingDown : OperationCanceledException
 {
     public RuntimeShuttingDown() : base("Operation is unavailable: runtime is shutting down")
     {

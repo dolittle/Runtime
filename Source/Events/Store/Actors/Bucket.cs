@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Immutable;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -20,10 +21,11 @@ public partial class Bucket
         var lastSuccessfullyProcessed = LastSuccessfullyProcessed.ToDateTimeOffset();
         switch (Failures.Count)
         {
-            case 0: return new StreamProcessorState(Position(), "", lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false );
+            case 0: return new StreamProcessorState(Position(), "", lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false);
             case 1:
                 var failure = Failures[0];
-                return new StreamProcessorState(Position(), failure.FailureReason, failure.RetryTime.ToDateTimeOffset(), failure.ProcessingAttempts,
+                return new StreamProcessorState(Position(), failure.FailureReason, failure.RetryTime.ToDateTimeOffset(),
+                    failure.ProcessingAttempts,
                     lastSuccessfullyProcessed, true);
             default:
                 // This is probably invalid, as this should not be able to represent more than a single failure
@@ -33,13 +35,14 @@ public partial class Bucket
         }
     }
 
-    StreamPosition Position() => new(CurrentOffset);
+    ProcessingPosition Position() => new(CurrentOffset, CurrentEventLogOffset);
 
     IStreamProcessorState FromProtobufPartitioned()
     {
         var failingPartitions = Failures
-            .ToDictionary(kv => new PartitionId(kv.EventSourceId),
-                _ => new FailingPartitionState(new StreamPosition(_.Offset), _.RetryTime.ToDateTimeOffset(), _.FailureReason, _.ProcessingAttempts,
+            .ToImmutableDictionary(kv => new PartitionId(kv.EventSourceId),
+                _ => new FailingPartitionState(new StreamPosition(_.Offset), new EventLogSequenceNumber(_.EventLogOffset), _.RetryTime.ToDateTimeOffset(),
+                    _.FailureReason, _.ProcessingAttempts,
                     _.LastFailed.ToDateTimeOffset()));
 
         return new Processing.Streams.Partitioned.StreamProcessorState(Position(), failingPartitions, LastSuccessfullyProcessed.ToDateTimeOffset());

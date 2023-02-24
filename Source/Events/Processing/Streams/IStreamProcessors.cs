@@ -42,6 +42,7 @@ public interface IStreamProcessors
         ExecutionContext executionContext,
         CancellationToken cancellationToken);
 
+    
 
     /// <summary>
     /// Reprocesses all events for a <see cref="StreamProcessor"/> from a <see cref="StreamPosition" /> for a tenant.
@@ -50,7 +51,7 @@ public interface IStreamProcessors
     /// <param name="tenant">The <see cref="TenantId"/>.</param>
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-    Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position);
+    Task<Try<ProcessingPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, ProcessingPosition position);
         
         
     /// <summary>
@@ -58,5 +59,5 @@ public interface IStreamProcessors
     /// </summary>
     /// <param name="streamProcessorId">The <see cref="StreamProcessorId"/> of the <see cref="StreamProcessor"/>.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
-    Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId);
+    Task<Try<IDictionary<TenantId, Try<ProcessingPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId);
 }

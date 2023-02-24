@@ -14,5 +14,5 @@ public class a_failing_streamprocessorstate
     protected static readonly DateTimeOffset retry_time = last_successfully_processed + TimeSpan.FromSeconds(30);
 
     protected static readonly StreamProcessorState stream_processor_state =
-        new(new StreamPosition(10), "testing", retry_time, 2, last_successfully_processed, true);
+        new(new ProcessingPosition(10, 15), "testing", retry_time, 2, last_successfully_processed, true);
 }

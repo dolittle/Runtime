@@ -48,7 +48,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
     
     It should_have_retried_processing_first_event_three_times = () => event_processor.Verify(
         _ => _.Process(
-            eventStream[(int)failing_partition(failing_partition_id).Position.Value].Event,
+            eventStream[(int)failing_partition(failing_partition_id).Position.StreamPosition.Value].Event,
             failing_partition_id,
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),

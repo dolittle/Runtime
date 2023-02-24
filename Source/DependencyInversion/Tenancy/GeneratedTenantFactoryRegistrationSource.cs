@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -78,7 +79,11 @@ public class GeneratedTenantFactoryRegistrationSource : IRegistrationSource
         };
     }
 
-    static bool IsDelegateWithTenantIdAsFirstParameter(Service service, out Type delegateType, out ParameterInfo[] parameters, out Type returnType)
+    static bool IsDelegateWithTenantIdAsFirstParameter(
+        Service service,
+        [NotNullWhen(true)] out Type? delegateType,
+        [NotNullWhen(true)] out ParameterInfo[]? parameters,
+        [NotNullWhen(true)] out Type? returnType)
     {
         delegateType = default;
         parameters = default;

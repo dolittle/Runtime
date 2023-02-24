@@ -73,7 +73,8 @@ public class StreamProcessorStateTest : JobBase
                 await collection.ReplaceOneAsync(CreateFilter(id), new Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.StreamProcessorState(
                     id.EventProcessorId,
                     id.SourceStreamId,
-                    state.Position,
+                    state.Position.StreamPosition,
+                    state.Position.EventLogPosition,
                     state.RetryTime.UtcDateTime,
                     state.FailureReason,
                     state.ProcessingAttempts,

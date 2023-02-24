@@ -34,7 +34,7 @@ public class ValidateFilterByComparingEventTypes : ICanValidateFilterFor<TypeFil
     }
 
     /// <inheritdoc/>
-    public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+    public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, ProcessingPosition lastUnprocessedEvent, CancellationToken cancellationToken)
     {
         try
         {
@@ -51,7 +51,7 @@ public class ValidateFilterByComparingEventTypes : ICanValidateFilterFor<TypeFil
                 cancellationToken).ConfigureAwait(false);
 
             var typesInSourceStream = await streamTypesFetcher.FetchInRange(
-                new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
+                new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent.StreamPosition),
                 cancellationToken).ConfigureAwait(false);
 
             return SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes)

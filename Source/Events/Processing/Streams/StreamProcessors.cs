@@ -100,20 +100,20 @@ public class StreamProcessors : IStreamProcessors
 
     }
     /// <inheritdoc />
-    public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position)
+    public Task<Try<ProcessingPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, ProcessingPosition position)
         => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
             ? streamProcessor.SetToPosition(tenant, position)
-            : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegistered(streamProcessorId));
+            : Task.FromResult<Try<ProcessingPosition>>(new StreamProcessorNotRegistered(streamProcessorId));
 
     /// <inheritdoc />
-    public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId)
+    public async Task<Try<IDictionary<TenantId, Try<ProcessingPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId)
         => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
-            ? Try<IDictionary<TenantId, Try<StreamPosition>>>.Succeeded(await streamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false))
+            ? Try<IDictionary<TenantId, Try<ProcessingPosition>>>.Succeeded(await streamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false))
             : new StreamProcessorNotRegistered(streamProcessorId); 
 
     void Unregister(StreamProcessorId id)
     {
-        StreamProcessor existing;
+        StreamProcessor? existing;
         do
         {
             _streamProcessors.TryRemove(id, out existing);

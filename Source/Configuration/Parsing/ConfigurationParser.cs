@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,9 @@ namespace Dolittle.Runtime.Configuration.Parsing;
 public class ConfigurationParser : IParseConfigurationObjects
 {
     /// <inheritdoc />
-    public bool TryParseFrom<TOptions>(IConfigurationSection configuration, out TOptions parsed, out Exception error)
+    public bool TryParseFrom<TOptions>(IConfigurationSection configuration,
+        [NotNullWhen(true)] out TOptions? parsed,
+        [NotNullWhen(false)] out Exception? error)
         where TOptions : class
     {
         parsed = default;

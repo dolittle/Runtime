@@ -44,11 +44,13 @@ public class StreamProcessorStateRepository : StreamProcessorStateRepositoryBase
             Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState => new Partitioned.PartitionedStreamProcessorState(
                 id.EventProcessorId,
                 id.SourceStreamId,
-                partitionedStreamProcessorState.Position,
+                partitionedStreamProcessorState.Position.StreamPosition,
+                partitionedStreamProcessorState.Position.EventLogPosition,
                 partitionedStreamProcessorState.FailingPartitions.ToDictionary(
                     kvp => kvp.Key.Value.ToString(),
                     kvp => new FailingPartitionState(
-                        kvp.Value.Position,
+                        kvp.Value.Position.StreamPosition,
+                        kvp.Value.Position.EventLogPosition,
                         kvp.Value.RetryTime.UtcDateTime,
                         kvp.Value.Reason,
                         kvp.Value.ProcessingAttempts,
@@ -57,7 +59,8 @@ public class StreamProcessorStateRepository : StreamProcessorStateRepositoryBase
             Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState => new StreamProcessorState(
                 id.EventProcessorId,
                 id.SourceStreamId,
-                streamProcessorState.Position,
+                streamProcessorState.Position.StreamPosition,
+                streamProcessorState.Position.EventLogPosition,
                 streamProcessorState.RetryTime.UtcDateTime,
                 streamProcessorState.FailureReason,
                 streamProcessorState.ProcessingAttempts,

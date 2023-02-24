@@ -93,17 +93,17 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition position, CancellationToken cancellationToken)
     {
         try
         {
             var events = await _collection.Find(
-                    _filter.Gte(_sequenceNumberExpression, streamPosition.Value))
+                    _filter.Gte(_sequenceNumberExpression, position.Value))
                 .Limit(FetchEventsBatchSize)
                 .Project(_eventToStreamEvent)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             return events == default || events.Count == 0
-                ? new NoEventInStreamAtPosition(_stream, _scope, streamPosition)
+                ? new NoEventInStreamAtPosition(_stream, _scope, position)
                 : events;
         }
         catch (MongoWaitQueueFullException ex)
@@ -128,19 +128,19 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> FetchInPartition(PartitionId partitionId, StreamPosition position, CancellationToken cancellationToken)
     {
         ThrowIfNotConstructedWithPartitionIdExpression();
         try
         {
             var events = await _collection.Find(
                     _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
-                    & _filter.Gte(_sequenceNumberExpression, streamPosition.Value))
+                    & _filter.Gte(_sequenceNumberExpression, position.Value))
                 .Limit(FetchEventsBatchSize)
                 .Project(_eventToStreamEvent)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             return events == default || events.Count == 0
-                ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, streamPosition)
+                ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, position)
                 : events;
         }
         catch (MongoWaitQueueFullException ex)

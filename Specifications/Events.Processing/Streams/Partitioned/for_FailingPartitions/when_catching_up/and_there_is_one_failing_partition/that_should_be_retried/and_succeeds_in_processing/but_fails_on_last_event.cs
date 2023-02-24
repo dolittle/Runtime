@@ -20,10 +20,10 @@ public class but_fails_on_last_event : given.all_dependencies
     {
         event_processor
             .Setup(_ => _.Process(eventStream[0].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(eventStream[1].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         event_processor
             .Setup(_ => _.Process(eventStream[2].Event, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(new_failure_reason)));
@@ -34,7 +34,7 @@ public class but_fails_on_last_event : given.all_dependencies
     It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
     It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
     It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(failing_partition_id).ShouldBeTrue();
-    It should_have_the_correct_position_on_failing_partition = () => failing_partition(failing_partition_id).Position.ShouldEqual(new StreamPosition(initial_failing_partition_position + 2));
+    It should_have_the_correct_position_on_failing_partition = () => failing_partition(failing_partition_id).Position.StreamPosition.ShouldEqual(new StreamPosition(initial_failing_partition_position.StreamPosition + 2));
     It should_have_new_failing_partition_reason = () => failing_partition(failing_partition_id).Reason.ShouldEqual(new_failure_reason);
     It should_not_retry_failing_partition = () => failing_partition(failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
 

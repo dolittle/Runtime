@@ -13,5 +13,5 @@ public interface IStreamProcessorId
     /// </summary>
     ScopeId ScopeId { get; }
 
-    Actors.StreamProcessorKey ToProtobuf();
+    Dolittle.Runtime.Events.Store.Actors.StreamProcessorKey ToProtobuf();
 }

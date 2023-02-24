@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -20,7 +22,6 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 {
     readonly IStreamProcessorStates _streamProcessorStates;
     readonly IFailingPartitions _failingPartitions;
-    readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -50,27 +51,26 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         Func<IEventProcessor, ICanFetchEventsFromPartitionedStream, Func<StreamEvent, ExecutionContext>, IFailingPartitions> failingPartitionsFactory,
         IEventFetcherPolicies eventFetcherPolicies,
         IStreamEventWatcher streamWatcher,
-        ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
         : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, streamWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
         _failingPartitions = failingPartitionsFactory(processor, eventsFromStreamsFetcher, GetExecutionContextForEvent);
-        _timeToRetryGetter = timeToRetryGetter;
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> ProcessEvents(IEnumerable<(StreamEvent, ExecutionContext)> events, IStreamProcessorState currentState, CancellationToken cancellationToken)
+    protected override async Task<IStreamProcessorState> ProcessEvents(IEnumerable<(StreamEvent, ExecutionContext)> events, IStreamProcessorState currentState,
+        CancellationToken cancellationToken)
     {
         var streamProcessorState = currentState as StreamProcessorState;
-        
+
         foreach (var (@event, executionContext) in events)
         {
             if (streamProcessorState.FailingPartitions.ContainsKey(@event.Partition))
             {
                 var newState = streamProcessorState with
                 {
-                    Position = @event.Position + 1
+                    Position = new ProcessingPosition(@event.Position.Increment(), EventLogSequenceNumber.Initial)
                 };
                 await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
                 streamProcessorState = newState;
@@ -81,7 +81,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
                 streamProcessorState = newState as StreamProcessorState;
             }
         }
-        
+
         return streamProcessorState;
     }
 
@@ -112,7 +112,8 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
             CancellationToken.None);
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
         var oldState = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(processedEvent.Position + 1, oldState.FailingPartitions, DateTimeOffset.UtcNow);
@@ -120,24 +121,24 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         return newState;
     }
 
-    /// <inheritdoc/>
-    protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
-        => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
+    /// <inheritdoc />
+    protected bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
+        => state.TryGetTimespanToRetry(out timeToRetry);
         
     /// <inheritdoc />
     protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
     {
         var state = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
-            position, 
+            position,
             FailingPartitionsIgnoringPartitionsToReprocess(state, position),
             state.LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
-        
-    static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, StreamPosition position)
+
+    static ImmutableDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, StreamPosition position)
         => state.FailingPartitions
-            .Where(_ => _.Value.Position < position)
-            .ToDictionary(_ => _.Key, _ => _.Value);
+            .Where(_ => _.Value.Position.StreamPosition < position)
+            .ToImmutableDictionary(_ => _.Key, _ => _.Value);
 }

@@ -28,7 +28,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
 
     readonly HashSet<ScopeId> _activeRequests = new();
 
-    IShutdownHook _shutdownHook;
+    IShutdownHook? _shutdownHook;
     bool _shuttingDown;
 
 

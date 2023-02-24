@@ -11,6 +11,7 @@ public class when_creating_stream_event
     static CommittedEvent committed_event;
     static StreamId stream;
     static StreamPosition stream_position;
+    static EventLogSequenceNumber event_log_sequence;
     static PartitionId partition;
     static StreamEvent stream_event;
     static bool partitioned;
@@ -20,10 +21,11 @@ public class when_creating_stream_event
     {
         stream = Guid.NewGuid();
         stream_position = 0;
+        event_log_sequence = 0;
         partition = "]≈[partitionﬁß";
         execution_context = execution_contexts.create();
         committed_event = new CommittedEvent(
-            0,
+            event_log_sequence,
             DateTimeOffset.Now,
             "event source∞§",
             execution_context,

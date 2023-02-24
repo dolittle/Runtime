@@ -1,19 +1,28 @@
+endpoints:
+  private:
+    port: 5053
+  public:
+    port: 5052
+  management:
+    port: 5152
+  managementweb:
+    port: 5352
 tenants:
   445f8ea8-1a6f-40d7-b2fc-796dba92dc44:
     resources:
       eventStore:
         servers:
-          - localhost
+        - localhost
         database: event_store
         maxConnectionPoolSize: 1000
       projections:
         servers:
-          - localhost
+        - localhost
         database: projections
         maxConnectionPoolSize: 1000
       embeddings:
         servers:
-          - localhost
+        - localhost
         database: embeddings
         maxConnectionPoolSize: 1000
       readModels:

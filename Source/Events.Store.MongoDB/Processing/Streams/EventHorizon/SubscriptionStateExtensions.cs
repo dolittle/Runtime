@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store.Streams;
 using runtime = Dolittle.Runtime.Events.Processing.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
@@ -18,7 +19,7 @@ public static class SubscriptionStateExtensions
     /// <returns>The converted <see cref="runtime.Partitioned.StreamProcessorState" />.</returns>
     public static runtime.StreamProcessorState ToRuntimeRepresentation(this SubscriptionState state) =>
         new(
-            state.Position,
+            new ProcessingPosition(state.Position, state.Position),
             state.FailureReason,
             state.RetryTime,
             state.ProcessingAttempts,

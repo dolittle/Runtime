@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -23,11 +24,13 @@ public class PartitionedStreamProcessorState : AbstractStreamProcessorState
     /// </summary>
     /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
     /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
-    /// <param name="position">The position.</param>
+    /// <param name="position">The position in the stream (how many processed events).</param>
+    /// <param name="eventLogPosition">The position in the event log</param>
     /// <param name="failingPartitions">The states of the failing partitions.</param>
     /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
-    public PartitionedStreamProcessorState(Guid eventProcessorId, Guid sourceStreamId, ulong position, IDictionary<string, FailingPartitionState> failingPartitions, DateTime lastSuccessfullyProcessed)
-        : base(eventProcessorId, sourceStreamId, position, lastSuccessfullyProcessed)
+    public PartitionedStreamProcessorState(Guid eventProcessorId, Guid sourceStreamId, ulong position, ulong eventLogPosition,
+        IDictionary<string, FailingPartitionState> failingPartitions, DateTime lastSuccessfullyProcessed)
+        : base(eventProcessorId, sourceStreamId, position, eventLogPosition, lastSuccessfullyProcessed)
     {
         FailingPartitions = failingPartitions;
     }
@@ -41,7 +44,7 @@ public class PartitionedStreamProcessorState : AbstractStreamProcessorState
     /// <inheritdoc/>
     public override IStreamProcessorState ToRuntimeRepresentation() =>
         new runtime.Partitioned.StreamProcessorState(
-            Position,
-            FailingPartitions.ToDictionary(_ => new PartitionId(_.Key), _ => _.Value.ToRuntimeRepresentation()),
+            new ProcessingPosition(Position, EventLogPosition),
+            FailingPartitions.ToImmutableDictionary(_ => new PartitionId(_.Key), _ => _.Value.ToRuntimeRepresentation()),
             LastSuccessfullyProcessed);
 }

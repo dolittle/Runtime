@@ -42,9 +42,9 @@ public class EventHandlers : IEventHandlers
     public IEnumerable<EventHandlerInfo> All => _eventHandlers.Select(_ => _.Value.Info);
 
     /// <inheritdoc />
-    public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId)
+    public async Task<Try<IDictionary<TenantId, IStreamProcessorState>>> CurrentStateFor(EventHandlerId eventHandlerId)
         => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-            ? eventHandler.GetEventHandlerCurrentState()
+            ? await eventHandler.GetEventHandlerCurrentState()
             : new EventHandlerNotRegistered(eventHandlerId);
         
     /// <inheritdoc />
@@ -64,25 +64,25 @@ public class EventHandlers : IEventHandlers
         }
         try
         {
-            eventHandler.OnRegistrationFailed += IncrementFailure;
+            // eventHandler.OnRegistrationFailed += IncrementFailure;
             await eventHandler.RegisterAndStart().ConfigureAwait(false);
         }
         finally
         {
             _eventHandlers.Remove(eventHandlerId, out _);
-            eventHandler.OnRegistrationFailed -= IncrementFailure;
+            // eventHandler.OnRegistrationFailed -= IncrementFailure;
         }
     }
 
     /// <inheritdoc />
-    public Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position)
+    public Task<Try<ProcessingPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, ProcessingPosition position)
         => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
             ? eventHandler.ReprocessEventsFrom(tenant, position)
-            : Task.FromResult<Try<StreamPosition>>(new EventHandlerNotRegistered(eventHandlerId));
+            : Task.FromResult<Try<ProcessingPosition>>(new EventHandlerNotRegistered(eventHandlerId));
 
     /// <inheritdoc />
-    public Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId)
+    public Task<Try<IDictionary<TenantId, Try<ProcessingPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId)
         => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
             ? eventHandler.ReprocessAllEvents()
-            : Task.FromResult<Try<IDictionary<TenantId, Try<StreamPosition>>>>(new EventHandlerNotRegistered(eventHandlerId));
+            : Task.FromResult<Try<IDictionary<TenantId, Try<ProcessingPosition>>>>(new EventHandlerNotRegistered(eventHandlerId));
 }

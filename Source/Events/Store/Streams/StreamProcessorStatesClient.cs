@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Rudimentary;
@@ -14,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 /// <summary>
 /// Represents an implementation of <see cref="IStreamProcessorStates"/>.
 /// </summary>
-[PerTenant]
+[Singleton, PerTenant]
 public class StreamProcessorStatesClient : IStreamProcessorStates
 {
     readonly StreamProcessorStateClient _streamProcessorStateClient;

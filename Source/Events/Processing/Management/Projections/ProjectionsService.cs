@@ -69,12 +69,13 @@ public class ProjectionsService : ProjectionsBase
     {
         var response = new GetOneProjectionResponse();
         
-        var getIds = GetScopeAndProjectionIds(request.ScopeId, request.ProjectionId, out var scope, out var projection);
+        var getIds = GetScopeAndProjectionIds(request.ScopeId, request.ProjectionId);
         if (!getIds.Success)
         {
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
             return Task.FromResult(response);
         }
+        var (scope, projection) = getIds.Result;
         
         Log.GetOne(_logger, projection, scope);
 
@@ -95,12 +96,14 @@ public class ProjectionsService : ProjectionsBase
     {
         var response = new ReplayProjectionResponse();
         
-        var getIds = GetScopeAndProjectionIds(request.ScopeId, request.ProjectionId, out var scope, out var projection);
+        var getIds = GetScopeAndProjectionIds(request.ScopeId, request.ProjectionId);
         if (!getIds.Success)
         {
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
             return response;
         }
+        
+        var (scope, projection) = getIds.Result;
         
         Log.Replay(_logger, projection, scope);
         
@@ -132,7 +135,7 @@ public class ProjectionsService : ProjectionsBase
         return status;
     }
     
-    IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(ProjectionInfo info, TenantId tenant = null)
+    IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(ProjectionInfo info, TenantId? tenant = null)
     {
         var state = _projections.CurrentStateFor(info.Definition.Scope, info.Definition.Projection);
         if (!state.Success)
@@ -150,23 +153,19 @@ public class ProjectionsService : ProjectionsBase
         return _streamProcessorStatusConverter.ConvertForTenant(state.Result, tenant);
     }
 
-    static Try GetScopeAndProjectionIds(Uuid scope, Uuid projection, out ScopeId scopeId, out ProjectionId projectionId)
+    static Try<(ScopeId scopeId,ProjectionId projectionId)> GetScopeAndProjectionIds(Uuid? scope, Uuid? projection)
     {
-        scopeId = default;
-        projectionId = default;
-        
         if (scope == default)
         {
-            return Try.Failed(new ArgumentNullException(nameof(scope), "Scope id is missing in request"));
+            return Try<(ScopeId,ProjectionId)>.Failed(new ArgumentNullException(nameof(scope), "Scope id is missing in request"));
         }
         if (projection == default)
         {
-            return Try.Failed(new ArgumentNullException(nameof(projection), "Projection id is missing in request"));
+            return Try<(ScopeId,ProjectionId)>.Failed(new ArgumentNullException(nameof(projection), "Projection id is missing in request"));
         }
         
-        scopeId = scope.ToGuid();
-        projectionId = projection.ToGuid();
+        (ScopeId,ProjectionId) result = (scope.ToGuid(), projection.ToGuid());
 
-        return Try.Succeeded;
+        return Try<(ScopeId,ProjectionId)>.Succeeded(result);
     }
 }

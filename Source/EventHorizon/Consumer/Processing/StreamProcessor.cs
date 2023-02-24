@@ -78,6 +78,8 @@ public class StreamProcessor : IStreamProcessor
         _started = true;
 
         var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, cancellationToken).ConfigureAwait(false);
+        
+        
         if (!tryGetStreamProcessorState.Success)
         {
             Log.StreamProcessorPersistingNewState(_logger, _identifier);
@@ -86,7 +88,7 @@ public class StreamProcessor : IStreamProcessor
         }
         else
         {
-            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position);
+            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position.StreamPosition);
         }
 
         _metrics.IncrementTotalStreamProcessorStarted();
@@ -101,7 +103,6 @@ public class StreamProcessor : IStreamProcessor
             _executionContext,
             _eventsFetcherPolicy,
             _eventsFetcher,
-            new TimeToRetryForUnpartitionedStreamProcessor(),
             _loggerFactory.CreateLogger<ScopedStreamProcessor>()).Start(cancellationToken).ConfigureAwait(false);
     }
 }

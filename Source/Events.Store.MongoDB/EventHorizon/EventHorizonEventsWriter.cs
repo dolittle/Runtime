@@ -54,7 +54,7 @@ public class EventHorizonEventsWriter : IWriteEventHorizonEvents
                     DateTimeOffset.UtcNow,
                     consentId)),
             cancellationToken).ConfigureAwait(false);
-        _streamWatcher.NotifyForEvent(scope, StreamId.EventLog, writtenStreamPosition);
+        _streamWatcher.NotifyForEvent(scope, StreamId.EventLog, writtenStreamPosition.Value);
         return writtenStreamPosition.Value;
     }
 }

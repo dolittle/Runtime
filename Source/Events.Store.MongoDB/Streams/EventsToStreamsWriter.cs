@@ -23,7 +23,6 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
 {
     readonly IStreams _streams;
     readonly IEventConverter _eventConverter;
-    readonly IStreamEventWatcher _streamWatcher;
     readonly ILogger _logger;
 
     /// <summary>
@@ -31,13 +30,11 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     /// </summary>
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
-    /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
     /// <param name="logger">An <see cref="ILogger"/>.</param>
-    public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger logger)
+    public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, ILogger logger)
     {
         _streams = streams;
         _eventConverter = eventConverter;
-        _streamWatcher = streamWatcher;
         _logger = logger;
     }
 
@@ -60,7 +57,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
                     .ToList();
             },
             cancellationToken).ConfigureAwait(false);
-        _streamWatcher.NotifyForEvent(scope, stream, lastWrittenStreamPosition);
+        // _streamWatcher.NotifyForEvent(scope, stream, lastWrittenStreamPosition);
     }
 
     /// <inheritdoc/>
@@ -140,6 +137,8 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         }
     }
 
+    
+    
     static Task<List<Events.StreamEvent>> GetStoredEventStreamHeadOfStreamToWrite(IMongoCollection<Events.StreamEvent> stream, IReadOnlyList<Events.StreamEvent> eventsToWrite, IClientSessionHandle transaction, CancellationToken cancellationToken)
         => stream
             .Find(

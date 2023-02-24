@@ -76,9 +76,7 @@ public class EventHandlersService : EventHandlersBase
             
             using var dispatcher = connectResult.Result.dispatcher;
             var arguments = connectResult.Result.arguments;
-            using var eventHandler = _configuration.Value.Fast
-                ? _eventHandlerFactory.CreateFast(arguments, _configuration.Value.ImplicitFilter, dispatcher, context.CancellationToken)
-                : _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken); 
+            using var eventHandler = _eventHandlerFactory.Create(arguments, dispatcher, context.CancellationToken);
 
             await _eventHandlers.RegisterAndStart(
                 eventHandler,

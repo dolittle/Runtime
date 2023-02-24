@@ -21,7 +21,7 @@ public interface IEventHandler : IDisposable
     /// Gets the current state of the Event Handler. 
     /// </summary>
     /// <returns>The  <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
-    Try<IDictionary<TenantId, IStreamProcessorState>> GetEventHandlerCurrentState();
+    Task<Try<IDictionary<TenantId, IStreamProcessorState>>> GetEventHandlerCurrentState();
 
     /// <summary>
     /// Reprocesses all events from a <see cref="StreamPosition" /> for a tenant.
@@ -29,13 +29,13 @@ public interface IEventHandler : IDisposable
     /// <param name="tenant">The <see cref="TenantId"/>.</param>
     /// <param name="position">The <see cref="StreamPosition" />.</param>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-    Task<Try<StreamPosition>> ReprocessEventsFrom(TenantId tenant, StreamPosition position);
+    Task<Try<ProcessingPosition>> ReprocessEventsFrom(TenantId tenant, ProcessingPosition position);
 
     /// <summary>
     /// Reprocesses all the events for all tenants.
     /// </summary>
     /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
-    Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents();
+    Task<Try<IDictionary<TenantId, Try<ProcessingPosition>>>> ReprocessAllEvents();
 
     /// <summary>
     /// Register and start the event handler for filtering and processing.
@@ -46,5 +46,5 @@ public interface IEventHandler : IDisposable
     /// <summary>
     /// Event that occurs if the EventHandler registration fails.
     /// </summary>
-    event EventHandlerRegistrationFailed OnRegistrationFailed;
+    // event EventHandlerRegistrationFailed OnRegistrationFailed;
 }

@@ -1,0 +1,47 @@
+opentelemetry:
+  serviceName: "Producer-Runtime"
+endpoints:
+  private:
+    port: 5053
+  public:
+    port: 5052
+  management:
+    port: 5152
+  managementweb:
+    port: 5352
+platform:
+  applicationName: "EventHorizon Tutorial"
+  applicationID: "5bd8762f-6c39-4ba2-a141-d041c8668894"
+  microserviceName: "Producer"
+  microserviceID: "f39b1f61-d360-4675-b859-53c05c87c0e6"
+  customerName: "Dolittle Tacos"
+  customerID: "c2d49e3e-9bd4-4e54-9e13-3ea4e04d8230"
+  environment: "Tutorial"
+tenants:
+  445f8ea8-1a6f-40d7-b2fc-796dba92dc44:
+    resources:
+      eventStore:
+        servers:
+        - localhost
+        database: "producer_event_store"
+      projections:
+        servers:
+        - localhost
+        database: "producer_projections"
+        maxConnectionPoolSize: 1000
+      embeddings:
+        servers:
+        - localhost
+        database: "producer_embeddings"
+        maxConnectionPoolSize: 1000
+      readModels:
+        host: "mongodb://localhost:27017"
+        database: "producer_readmodels"
+        useSSL: false
+    eventHorizons:
+      a14bb24e-51f3-4d83-9eba-44c4cffe6bb9:
+        consents:
+        - consumerTenant: "445f8ea8-1a6f-40d7-b2fc-796dba92dc44"
+          stream: "2c087657-b318-40b1-ae92-a400de44e507"
+          partition: "Dolittle Tacos"
+          consent: "ad57aa2b-e641-4251-b800-dd171e175d1f"

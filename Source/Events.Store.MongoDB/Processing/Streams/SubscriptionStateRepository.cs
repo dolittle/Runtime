@@ -1,16 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -57,7 +49,7 @@ public class SubscriptionStateRepository : StreamProcessorStateRepositoryBase<Su
             id.ProducerTenantId,
             id.StreamId,
             id.PartitionId,
-            state.Position,
+            state.Position.EventLogPosition,
             state.RetryTime.UtcDateTime,
             state.FailureReason,
             state.ProcessingAttempts,

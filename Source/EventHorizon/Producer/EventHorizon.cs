@@ -161,7 +161,7 @@ public class EventHorizon : IDisposable
                             _cancellationTokenSource.Token).ConfigureAwait(false);
                         continue;
                     }
-
+        
                     var streamEvents = tryGetStreamEvent.Result;
                     foreach (var streamEvent in streamEvents)
                     {
@@ -175,7 +175,7 @@ public class EventHorizon : IDisposable
                             Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
                             return;
                         }
-
+        
                         CurrentPosition = streamEvent.Position + 1;
                     }
                 }

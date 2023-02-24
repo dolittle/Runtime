@@ -37,4 +37,13 @@ public interface IEventLogStream
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     ChannelReader<EventLogBatch> SubscribeAll(ScopeId scopeId, EventLogSequenceNumber from, CancellationToken cancellationToken);
+    
+    /// <summary>
+    /// Subscribe to the complete event log stream at the given offset, including public events only
+    /// </summary>
+    /// <param name="scopeId">The <see cref="ScopeId"/>.</param>
+    /// <param name="from">From offset, inclusive</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    ChannelReader<EventLogBatch> SubscribePublic(EventLogSequenceNumber from, CancellationToken cancellationToken);
 }

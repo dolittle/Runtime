@@ -38,22 +38,22 @@ public class TaskGroup
     /// <summary>
     /// Event that occurs when the first task in the group completes.
     /// </summary>
-    public event Action<Task> OnFirstTaskCompleted;
+    public event Action<Task>? OnFirstTaskCompleted;
     
     /// <summary>
     /// Event that occurs when the first task in the group fails with an <see cref="Exception"/>.
     /// </summary>
-    public event Action<Task, Exception> OnFirstTaskFailure;
+    public event Action<Task, Exception>? OnFirstTaskFailure;
     
     /// <summary>
     /// Event that occurs when all of the tasks in the group have completed.
     /// </summary>
-    public event Action OnAllTasksCompleted;
+    public event Action? OnAllTasksCompleted;
     
     /// <summary>
     /// Event that occurs when any other task in the group other than the first fails with an <see cref="Exception"/>.
     /// </summary>
-    public event Action<Task, Exception> OnOtherTaskFailures; 
+    public event Action<Task, Exception>? OnOtherTaskFailures; 
 
     /// <summary>
     /// Waits for the first task to complete, then cancels the provided token source, and waits for all to complete.
@@ -91,7 +91,7 @@ public class TaskGroup
         }
     }
 
-    Exception GetFirstFailureAndInvokeFirstCompleted()
+    Exception? GetFirstFailureAndInvokeFirstCompleted()
     {
         foreach (var task in _tasks)
         {
@@ -113,7 +113,7 @@ public class TaskGroup
         return default;
     }
 
-    void InvokeOtherTaskFailures(Exception firstFailure)
+    void InvokeOtherTaskFailures(Exception? firstFailure)
     {
         foreach (var task in _tasks)
         {

@@ -32,7 +32,7 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
+    public async Task<Try<IEnumerable<StreamEvent>>> Fetch(StreamPosition position, CancellationToken cancellationToken)
     {
         try
         {

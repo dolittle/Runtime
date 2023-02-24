@@ -10,6 +10,8 @@ namespace Dolittle.Runtime.Events.Processing;
 /// </summary>
 public class SuccessfulProcessing : IProcessingResult
 {
+    public static readonly SuccessfulProcessing Instance = new();
+    
     /// <inheritdoc/>
     public bool Succeeded => true;
 

@@ -14,6 +14,7 @@ public class when_first_task_completes_first : given.a_group_and_inputs
     {
         first_task = Task.Delay(10);
         second_task = Task.Delay(20);
+        second_task.GetAwaiter().GetResult();
     };
 
     It should_not_throw_an_exception = () => exception.ShouldBeNull();

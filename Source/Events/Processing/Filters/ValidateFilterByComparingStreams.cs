@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
@@ -31,14 +32,14 @@ public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefi
     }
 
     /// <inheritdoc />
-    public Task<FilterValidationResult> Validate(FilterDefinition persistedDefinition, IFilterProcessor<FilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+    public Task<FilterValidationResult> Validate(FilterDefinition persistedDefinition, IFilterProcessor<FilterDefinition> filter, ProcessingPosition lastUnprocessedEvent, CancellationToken cancellationToken)
         => PerformValidation(filter, lastUnprocessedEvent, cancellationToken);
 
     /// <inheritdoc />
-    public Task<FilterValidationResult> Validate(PublicFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+    public Task<FilterValidationResult> Validate(PublicFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, ProcessingPosition lastUnprocessedEvent, CancellationToken cancellationToken)
         => PerformValidation(filter, lastUnprocessedEvent, cancellationToken);
 
-    async Task<FilterValidationResult> PerformValidation(IFilterProcessor<IFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+    async Task<FilterValidationResult> PerformValidation(IFilterProcessor<IFilterDefinition> filter, ProcessingPosition lastUnprocessedEvent, CancellationToken cancellationToken)
     {
         try
         {
@@ -55,7 +56,7 @@ public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefi
             var oldStream = oldStreamEventsFetcher.FetchRange(
                     new StreamPositionRange(StreamPosition.Start, ulong.MaxValue),
                     cancellationToken);
-            var eventLogStream = eventLogFetcher.FetchRange(new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent), cancellationToken);
+            var eventLogStream = eventLogFetcher.FetchRange(new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent.StreamPosition), cancellationToken);
             await using var oldStreamEnumerator = oldStream.GetAsyncEnumerator(cancellationToken);
             var newStreamPosition = 0;
             await foreach (var eventFromEventLog in eventLogStream.WithCancellation(cancellationToken))
@@ -101,7 +102,7 @@ public class ValidateFilterByComparingStreams : ICanValidateFilterFor<FilterDefi
         }
     }
 
-    static bool EventsAreNotEqual(IFilterDefinition filterDefinition, StreamEvent newEvent, StreamEvent oldEvent, out FilterValidationResult failedResult)
+    static bool EventsAreNotEqual(IFilterDefinition filterDefinition, StreamEvent newEvent, StreamEvent oldEvent, [NotNullWhen(true)] out FilterValidationResult? failedResult)
     {
         failedResult = default;
         if (newEvent.Event.EventLogSequenceNumber != oldEvent.Event.EventLogSequenceNumber)

@@ -23,7 +23,7 @@ class partitioned : given.a_clean_event_store
         source_stream_id);
 
     static readonly StreamProcessorState stream_processor_state =
-        new(new StreamPosition(10), ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.Now);
+        new(new ProcessingPosition(10,10), ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.Now);
 
     Establish context = () =>
     {

@@ -69,7 +69,7 @@ public class all_dependencies
 
         filter_validator = mocks.Create<ICanValidateFilterFor<FilterDefinition>>();
 
-        stream_processor_state = new StreamProcessorState(10, DateTimeOffset.Now);
+        stream_processor_state = new StreamProcessorState(10, 13, DateTimeOffset.Now);
 
         stream_processor_state_repository = mocks.Create<IStreamProcessorStates>();
         stream_processor_state_repository

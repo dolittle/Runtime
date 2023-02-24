@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -20,7 +19,6 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
 {
     readonly IEventFetchers _eventFetchers;
     readonly IStreamProcessorStates _streamProcessorStates;
-    readonly IStreamEventWatcher _streamWatcher;
     readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, ExecutionContext, Partitioned.ScopedStreamProcessor> _createPartitionedStreamProcessor;
     readonly Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ExecutionContext, ScopedStreamProcessor> _createUnpartitionedStreamProcessor;
 
@@ -35,13 +33,11 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
     public CreateScopedStreamProcessors(
         IEventFetchers eventFetchers,
         IStreamProcessorStates streamProcessorStates,
-        IStreamEventWatcher streamWatcher,
         Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromPartitionedStream, IEventProcessor, Partitioned.StreamProcessorState, ExecutionContext, Partitioned.ScopedStreamProcessor> createPartitionedStreamProcessor,
         Func<IStreamDefinition, IStreamProcessorId, ICanFetchEventsFromStream, IEventProcessor, StreamProcessorState, ExecutionContext, ScopedStreamProcessor> createUnpartitionedStreamProcessor)
     {
         _eventFetchers = eventFetchers;
         _streamProcessorStates = streamProcessorStates;
-        _streamWatcher = streamWatcher;
         _createPartitionedStreamProcessor = createPartitionedStreamProcessor;
         _createUnpartitionedStreamProcessor = createUnpartitionedStreamProcessor;
     }
@@ -85,7 +81,7 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
             streamProcessor = _createUnpartitionedStreamProcessor(streamDefinition, streamProcessorId, eventFetcher, eventProcessor, unpartitionedProcessorState, executionContext);
         }
         
-        NotifyStream(streamProcessorId.ScopeId, streamDefinition, processorState.Position);
+        // NotifyStream(streamProcessorId.ScopeId, streamDefinition, processorState.Position);
 
         return streamProcessor;
     }
@@ -103,19 +99,19 @@ public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
         return initialState;
     }
 
-    void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
-    {
-        if (position == StreamPosition.Start)
-        {
-            return;
-        }
-        if (streamDefinition.Public)
-        {
-            _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
-        }
-        else
-        {
-            _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
-        }
-    }
+    // void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
+    // {
+    //     if (position == StreamPosition.Start)
+    //     {
+    //         return;
+    //     }
+    //     if (streamDefinition.Public)
+    //     {
+    //         _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
+    //     }
+    //     else
+    //     {
+    //         _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
+    //     }
+    // }
 }

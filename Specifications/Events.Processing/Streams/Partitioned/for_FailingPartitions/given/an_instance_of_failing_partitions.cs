@@ -12,7 +12,7 @@ public class an_instance_of_failing_partitions : all_dependencies
     protected static FailingPartitions failing_partitions;
 
     Establish context = () => failing_partitions = new FailingPartitions(
-        stream_processor_state_repository.Object,
+        stream_processor_state_repository,
         event_processor.Object,
         events_fetcher.Object,
         create_execution_context,

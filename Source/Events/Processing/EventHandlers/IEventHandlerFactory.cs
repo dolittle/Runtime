@@ -25,14 +25,4 @@ public interface IEventHandlerFactory
     /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="IEventHandler"/>.</returns>
     IEventHandler Create(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Creates an <see cref="FastEventHandler"/>.
-    /// </summary>
-    /// <param name="arguments">The <see cref="EventHandlerRegistrationArguments"/>.</param>
-    /// <param name="implicitFilter">Whether filtering is implicit.</param>
-    /// <param name="dispatcher">The <see cref="ReverseCallDispatcher"/>.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
-    /// <returns>The <see cref="IEventHandler"/>.</returns>
-    FastEventHandler CreateFast(EventHandlerRegistrationArguments arguments, bool implicitFilter, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken);
 }

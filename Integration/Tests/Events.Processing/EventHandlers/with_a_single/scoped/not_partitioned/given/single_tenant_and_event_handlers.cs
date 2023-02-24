@@ -14,11 +14,9 @@ class single_tenant_and_event_handlers : scoped.given.single_tenant_and_event_ha
     protected static void expect_stream_definition(IEventHandler event_handler, int max_handled_event_types)
         => expect_correct_stream_definition(event_handler, partitioned: false, public_stream: false, max_handled_event_types: max_handled_event_types);
     
-    protected static void expect_stream_processor_state(IEventHandler event_handler, bool implicit_filter, bool fast_event_handler, int num_events_to_handle, failing_unpartitioned_state failing_unpartitioned_state)
+    protected static void expect_stream_processor_state(IEventHandler event_handler, int num_events_to_handle, failing_unpartitioned_state failing_unpartitioned_state)
         => expect_stream_processor_state(
             event_handler,
-            implicit_filter: implicit_filter,
-            fast_event_handler: fast_event_handler,
             partitioned: false,
             num_events_to_handle: num_events_to_handle,
             failing_partitioned_state: null,

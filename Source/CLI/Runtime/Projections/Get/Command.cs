@@ -42,7 +42,7 @@ public class Command : CommandBase
     /// The "--tenant" argument used to provide a Tenant Id.
     /// </summary>
     [Option("--tenant", CommandOptionType.SingleValue, Description = "Only show Projection information for the specified Tenant")]
-    TenantId Tenant { get; init; }
+    TenantId? Tenant { get; init; }
     
     /// <summary>
     /// The Projection identifier argument used to provide the identifier of the Projection to get.

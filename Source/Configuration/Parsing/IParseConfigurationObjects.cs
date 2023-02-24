@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 
 namespace Dolittle.Runtime.Configuration.Parsing;
@@ -19,6 +20,8 @@ public interface IParseConfigurationObjects
     /// <param name="error">The outputted <see cref="Exception"/>.</param>
     /// <typeparam name="TOptions">The type of the configuration.</typeparam>
     /// <returns>True if successfully parsed, false if not.</returns>
-    bool TryParseFrom<TOptions>(IConfigurationSection configuration, out TOptions parsed, out Exception error)
+    bool TryParseFrom<TOptions>(IConfigurationSection configuration,
+        [NotNullWhen(true)] out TOptions? parsed,
+        [NotNullWhen(false)] out Exception? error)
         where TOptions : class;
 }

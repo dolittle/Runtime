@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams;
 public class ScopedStreamProcessor : AbstractScopedStreamProcessor
 {
     readonly IStreamProcessorStates _streamProcessorStates;
-    readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -46,12 +45,10 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
         ExecutionContext executionContext,
         IEventFetcherPolicies eventFetcherPolicies,
         IStreamEventWatcher eventWatcher,
-        ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
         ILogger logger)
         : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, executionContext, eventFetcherPolicies, eventWatcher, logger)
     {
         _streamProcessorStates = streamProcessorStates;
-        _timeToRetryGetter = timeToRetryGetter;
     }
 
     /// <inheritdoc/>
@@ -78,7 +75,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
                 }
 
                 var eventToRetry = getNextEvents.Result.First();
-                
+
                 var executionContext = GetExecutionContextForEvent(eventToRetry);
                 streamProcessorState = await RetryProcessingEvent(
                     eventToRetry,
@@ -92,7 +89,9 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
                 {
                     continue;
                 }
-                var newStreamProcessorState = await ProcessEvents(getNextEvents.Result.Skip(1).Select(_ => (_, GetExecutionContextForEvent(_))), streamProcessorState, cancellationToken).ConfigureAwait(false);
+
+                var newStreamProcessorState = await ProcessEvents(getNextEvents.Result.Skip(1).Select(_ => (_, GetExecutionContextForEvent(_))),
+                    streamProcessorState, cancellationToken).ConfigureAwait(false);
                 streamProcessorState = newStreamProcessorState as StreamProcessorState;
             }
         }
@@ -101,52 +100,38 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
-        var oldState = currentState as StreamProcessorState;
-        var newState = new StreamProcessorState(
-            oldState.Position,
-            failedProcessing.FailureReason,
-            DateTimeOffset.MaxValue,
-            oldState.ProcessingAttempts + 1,
-            oldState.LastSuccessfullyProcessed,
-            true);
+        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.MaxValue, DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
-        var oldState = currentState as StreamProcessorState;
-        var newState = new StreamProcessorState(
-            oldState.Position,
-            failedProcessing.FailureReason,
-            DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
-            oldState.ProcessingAttempts + 1,
-            oldState.LastSuccessfullyProcessed,
-            true);
+        var newState = currentState.WithFailure(failedProcessing, processedEvent, DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout), DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
 
     /// <inheritdoc/>
-    protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
+    protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent,
+        IStreamProcessorState currentState)
     {
-        var newState = new StreamProcessorState(processedEvent.Position + 1, DateTimeOffset.UtcNow);
+        var newState = currentState.WithSuccessfullyProcessed(processedEvent, DateTimeOffset.UtcNow);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }
-
-    /// <inheritdoc/>
-    protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
-        => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
-
 
     /// <inheritdoc />
     protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
     {
-        var newState = new StreamProcessorState(position, ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
+        // 
+        var newState = new StreamProcessorState(position, 
+            ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
         await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
         return newState;
     }

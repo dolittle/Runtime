@@ -18,7 +18,7 @@ public class EventWaiter
 {
     readonly object _lock = new();
     readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
-    StreamPosition _lastNotified;
+    StreamPosition? _lastNotified;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventWaiter"/> class.

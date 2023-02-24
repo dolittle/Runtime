@@ -83,7 +83,7 @@ public class StreamProcessorStateRepository : JobBase
                 var (id, state) = _nonPartitionedStates[y];
                 _nonPartitionedStates[y] = (id, state with
                 {
-                    Position = state.Position + 1,
+                    Position = state.Position.IncrementWithStream(),
                     LastSuccessfullyProcessed = DateTimeOffset.UtcNow
                 });
             }
@@ -109,7 +109,7 @@ public class StreamProcessorStateRepository : JobBase
                 var (id, state) = _partitionedStates[y];
                 _partitionedStates[y] = (id, state with
                 {
-                    Position = state.Position + 1,
+                    Position = state.Position.IncrementWithStream(),
                     LastSuccessfullyProcessed = DateTimeOffset.UtcNow
                 });
             }

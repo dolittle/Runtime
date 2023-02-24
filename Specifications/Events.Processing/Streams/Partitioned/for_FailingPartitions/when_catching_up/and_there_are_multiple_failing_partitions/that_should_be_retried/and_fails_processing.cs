@@ -17,9 +17,14 @@ public class and_fails_processing : given.all_dependencies
     static StreamProcessorState result;
 
     Establish context = () =>
+    {
+        stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
+        
         event_processor
-            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(),
+                Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(new_failing_reason)));
+    };
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
@@ -28,7 +33,7 @@ public class and_fails_processing : given.all_dependencies
     It should_have_failing_partition_with_first_failing_partition_id = () => result.FailingPartitions.ContainsKey(first_failing_partition_id).ShouldBeTrue();
     It should_have_failing_partition_with_second_failing_partition_id = () => result.FailingPartitions.ContainsKey(second_failing_partition_id).ShouldBeTrue();
     It should_not_change_first_failing_partition_position = () => failing_partition(first_failing_partition_id).Position.ShouldEqual(first_initial_failing_partition_position);
-    It should_change_second_failing_partition_position_two_first_unprocessed_event_in_partition = () => failing_partition(second_failing_partition_id).Position.ShouldEqual(second_initial_failing_partition_position.Increment());
+    It should_change_second_failing_partition_position_two_first_unprocessed_event_in_partition = () => failing_partition(second_failing_partition_id).Position.ShouldEqual(new ProcessingPosition(1,0));
     It should_have_new_first_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.ShouldEqual(new_failing_reason);
     It should_have_new_second_failing_partition_reason = () => failing_partition(second_failing_partition_id).Reason.ShouldEqual(new_failing_reason);
     It should_not_change_first_failing_partition_retry_time = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);

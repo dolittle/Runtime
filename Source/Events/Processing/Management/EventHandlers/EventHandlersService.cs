@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Protobuf.Contracts;
 using Dolittle.Runtime.Artifacts;
@@ -11,6 +12,9 @@ using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Legacy;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services.Hosting;
@@ -30,6 +34,7 @@ public class EventHandlersService : EventHandlersBase
     readonly IEventHandlers _eventHandlers;
     readonly IExceptionToFailureConverter _exceptionToFailureConverter;
     readonly IConvertStreamProcessorStatuses _streamProcessorStatusConverter;
+    readonly IGetEventLogSequenceFromStreamPosition _streamPositionToEventLogSequenceService;
     readonly ILogger _logger;
 
     /// <summary>
@@ -43,34 +48,42 @@ public class EventHandlersService : EventHandlersBase
         IEventHandlers eventHandlers,
         IExceptionToFailureConverter exceptionToFailureConverter,
         IConvertStreamProcessorStatuses streamProcessorStatusConverter,
-        ILogger logger)
+        ILogger logger, IGetEventLogSequenceFromStreamPosition streamPositionToEventLogSequenceService)
     {
         _eventHandlers = eventHandlers;
         _exceptionToFailureConverter = exceptionToFailureConverter;
         _streamProcessorStatusConverter = streamProcessorStatusConverter;
         _logger = logger;
+        _streamPositionToEventLogSequenceService = streamPositionToEventLogSequenceService;
     }
 
     /// <inheritdoc />
-    public override Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
+    public override async Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
     {
         Log.GetAll(_logger);
         var response = new GetAllResponse();
-        response.EventHandlers.AddRange(_eventHandlers.All.Select(_ => CreateStatusFromInfo(_, request.TenantId?.ToGuid())));
-        return Task.FromResult(response);
+        foreach (var eventHandlerInfo in _eventHandlers.All)
+        {
+            var result = await CreateStatusFromInfo(eventHandlerInfo, request.TenantId?.ToGuid());
+            response.EventHandlers.Add(result);
+        }
+        
+        return response;
     }
 
     /// <inheritdoc />
-    public override Task<GetOneResponse> GetOne(GetOneRequest request, ServerCallContext context)
+    public override async Task<GetOneResponse> GetOne(GetOneRequest request, ServerCallContext context)
     {
         var response = new GetOneResponse();
 
-        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId, out var eventHandler);
+        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId);
         if (!getIds.Success)
         {
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
-            return Task.FromResult(response);
+            return response;
         }
+
+        var eventHandler = getIds.Result;
         
         Log.GetOne(_logger, eventHandler.EventHandler, eventHandler.Scope);
 
@@ -79,11 +92,11 @@ public class EventHandlersService : EventHandlersBase
         {
             Log.EventHandlerNotRegistered(_logger, eventHandler.EventHandler, eventHandler.Scope);
             response.Failure = _exceptionToFailureConverter.ToFailure(new EventHandlerNotRegistered(eventHandler));
-            return Task.FromResult(response);
+            return response;
         }
 
-        response.EventHandlers = CreateStatusFromInfo(info, request.TenantId?.ToGuid());
-        return Task.FromResult(response);
+        response.EventHandlers = await CreateStatusFromInfo(info, request.TenantId?.ToGuid());
+        return response;
     }
     
     
@@ -92,17 +105,27 @@ public class EventHandlersService : EventHandlersBase
     {
         var response = new ReprocessEventsFromResponse();
 
-        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId, out var eventHandler);
+        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId);
         if (!getIds.Success)
         {
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
             return response;
         }
+
+        var eventHandler = getIds.Result;
         
         TenantId tenant = request.TenantId.ToGuid(); 
         Log.ReprocessEventsFrom(_logger, eventHandler.EventHandler, eventHandler.Scope, tenant, request.StreamPosition);
-        
-        var reprocessing = await _eventHandlers.ReprocessEventsFrom(eventHandler, tenant, request.StreamPosition).ConfigureAwait(false);
+
+        var eventLogPosition = await _streamPositionToEventLogSequenceService.TryGetEventLogPositionForStreamProcessor(new StreamProcessorId(eventHandler.Scope, eventHandler.EventHandler, StreamId.EventLog), request.StreamPosition, CancellationToken.None);
+        if (!eventLogPosition.Success)
+        {
+            Log.FailedDuringReprocessing(_logger, eventLogPosition.Exception);
+            response.Failure = _exceptionToFailureConverter.ToFailure(eventLogPosition.Exception);
+            return response;
+        }
+
+        var reprocessing = await _eventHandlers.ReprocessEventsFrom(eventHandler, tenant, new ProcessingPosition(request.StreamPosition, eventLogPosition.Result)).ConfigureAwait(false);
         if (!reprocessing.Success)
         {
             Log.FailedDuringReprocessing(_logger, reprocessing.Exception);
@@ -117,12 +140,14 @@ public class EventHandlersService : EventHandlersBase
     {
         var response = new ReprocessAllEventsResponse();
         
-        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId, out var eventHandler);
+        var getIds = GetEventHandlerId(request.ScopeId, request.EventHandlerId);
         if (!getIds.Success)
         {
             response.Failure = _exceptionToFailureConverter.ToFailure(getIds.Exception);
             return response;
         }
+
+        var eventHandler = getIds.Result;
         
         Log.ReprocessAllEvents(_logger, eventHandler.EventHandler, eventHandler.Scope);
         var reprocessing = await _eventHandlers.ReprocessAllEvents(eventHandler).ConfigureAwait(false);
@@ -135,7 +160,7 @@ public class EventHandlersService : EventHandlersBase
         return response;
     }
 
-    EventHandlerStatus CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant = null)
+    async Task<EventHandlerStatus> CreateStatusFromInfo(EventHandlerInfo info, TenantId tenant)
     {
         var status = new EventHandlerStatus
         {   
@@ -145,13 +170,13 @@ public class EventHandlersService : EventHandlersBase
             EventHandlerId = info.Id.EventHandler.ToProtobuf()
         };
         status.EventTypes.AddRange(info.EventTypes.Select(CreateEventType));
-        status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info, tenant));
+        status.Tenants.AddRange(await CreateScopedStreamProcessorStatus(info, tenant));
         return status;
     }
-        
-    IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(EventHandlerInfo info, TenantId tenant = null)
+
+    async Task<IEnumerable<TenantScopedStreamProcessorStatus>> CreateScopedStreamProcessorStatus(EventHandlerInfo info, TenantId tenant = null)
     {
-        var state = _eventHandlers.CurrentStateFor(info.Id);
+        var state = await _eventHandlers.CurrentStateFor(info.Id);
         if (!state.Success)
         {
             throw state.Exception;
@@ -169,20 +194,17 @@ public class EventHandlersService : EventHandlersBase
             Generation = ArtifactGeneration.First,
         };
 
-    static Try GetEventHandlerId(Uuid scope, Uuid eventHandler, out EventHandlerId eventHandlerId)
+    static Try<EventHandlerId> GetEventHandlerId(Uuid? scope, Uuid? eventHandler)
     {
-        eventHandlerId = default;
-        
         if (scope == default)
         {
-            return Try.Failed(new ArgumentNullException(nameof(scope), "Scope id is missing in request"));
+            return Try<EventHandlerId>.Failed(new ArgumentNullException(nameof(scope), "Scope id is missing in request"));
         }
         if (eventHandler == default)
         {
-            return Try.Failed(new ArgumentNullException(nameof(eventHandler), "EventHandler id is missing in request"));
+            return Try<EventHandlerId>.Failed(new ArgumentNullException(nameof(eventHandler), "EventHandler id is missing in request"));
         }
 
-        eventHandlerId = new EventHandlerId(scope.ToGuid(), eventHandler.ToGuid());
-        return Try.Succeeded;
+        return Try<EventHandlerId>.Succeeded(new EventHandlerId(scope.ToGuid(), eventHandler.ToGuid()));
     }
 }

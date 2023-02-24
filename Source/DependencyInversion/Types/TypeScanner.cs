@@ -25,7 +25,7 @@ public static class TypeScanner
             _ => { },
             assembly => (assembly.FullName != default 
                         && assembly.FullName.StartsWith("Dolittle.Runtime", StringComparison.InvariantCulture)
-                        && !assembly.FullName.Contains("Contracts", StringComparison.InvariantCulture)) || assembly.FullName.StartsWith("Integration.Tests", StringComparison.InvariantCulture),
+                        && !assembly.FullName.Contains("Contracts", StringComparison.InvariantCulture)) || assembly.FullName?.StartsWith("Integration.Tests", StringComparison.InvariantCulture) == true,
             true);
         return assemblies.SelectMany(_ => _.ExportedTypes).Where(_ => _.IsClass);
     }

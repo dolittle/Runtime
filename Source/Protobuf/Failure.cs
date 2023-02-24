@@ -24,7 +24,7 @@ public record Failure(FailureId Id, FailureReason Reason)
     /// Implicitly convert <see cref="Failure" /> to <see cref="FailureContract" />.
     /// </summary>
     /// <param name="failure"><see cref="Failure" /> to convert.</param>
-    public static implicit operator FailureContract(Failure failure) =>
+    public static implicit operator FailureContract?(Failure? failure) =>
         failure != null ?
             new FailureContract { Id = failure.Id.Value.ToProtobuf(), Reason = failure.Reason }
             : null;
@@ -33,5 +33,5 @@ public record Failure(FailureId Id, FailureReason Reason)
     /// Implicitly convert <see cref="FailureContract" /> to <see cref="Failure" />.
     /// </summary>
     /// <param name="failure"><see cref="FailureContract" /> to convert.</param>
-    public static implicit operator Failure(FailureContract failure) => failure?.ToFailure();
+    public static implicit operator Failure?(FailureContract? failure) => failure?.ToFailure();
 }

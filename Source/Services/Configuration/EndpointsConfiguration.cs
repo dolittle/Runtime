@@ -29,7 +29,7 @@ public record EndpointsConfiguration
     /// <summary>
     /// Gets the configuration for the management web endpoint.
     /// </summary>
-    public EndpointConfiguration ManagementWeb {get; set; } = new() {Port = 51152};
+    public EndpointConfiguration ManagementWeb {get; init; } = new() {Port = 51152};
 
     /// <summary>
     /// Gets the configuration for an endpoint by its <see cref="EndpointVisibility"/>.
