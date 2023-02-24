@@ -72,6 +72,8 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     public async Task<StreamPosition> GetStreamPositionFromArtifactSet(ScopeId scope, EventLogSequenceNumber to, IEnumerable<ArtifactId> eventTypes,
         CancellationToken cancellationToken)
     {
+        if (to == EventLogSequenceNumber.Initial) return StreamPosition.Start;
+
         var filter = _eventFilter.And(
             _eventFilter.Lte(_ => _.EventLogSequenceNumber, to.Value),
             ToMongoFilterDefinition(eventTypes)
@@ -86,6 +88,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     public Task<Try<EventLogSequenceNumber>> GetEventLogSequenceFromArtifactSet(ScopeId scope, StreamPosition nextStreamPosition, IEnumerable<ArtifactId> eventTypes,
         CancellationToken cancellationToken)
     {
+        if (nextStreamPosition == StreamPosition.Start) return Task.FromResult(Try<EventLogSequenceNumber>.Succeeded(EventLogSequenceNumber.Initial));
         return Try<EventLogSequenceNumber>.DoAsync(async () =>
         {
             var filter = ToMongoFilterDefinition(eventTypes);

@@ -146,6 +146,9 @@ static partial class LoggerExtensions
     [LoggerMessage(0,LogLevel.Information, "EventHandler was cancelled: {EventHandler} in scope: {Scope}")]
     internal static partial void CancelledRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope);
     
+    [LoggerMessage(0,LogLevel.Information, "Failing eventHandler was cancelled, no retries scheduled: {EventHandler} in scope: {Scope}. Error: {Reason}")]
+    internal static partial void StoppedFailingEventHandler(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, string reason);
+    
     internal static void EventHandlerDisconnected(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
         => _eventHandlerDisconnected(logger, handlerId, scopeId, null);
 

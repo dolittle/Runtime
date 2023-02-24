@@ -22,13 +22,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned;
 public record StreamProcessorState(ProcessingPosition Position, ImmutableDictionary<PartitionId, FailingPartitionState> FailingPartitions,
     DateTimeOffset LastSuccessfullyProcessed) : IStreamProcessorState<StreamProcessorState>
 {
-    public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(position, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, lastSuccessfullyProcessed)
+    public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(position,
+        ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, lastSuccessfullyProcessed)
     {
     }
 
     [Obsolete("legacy stream processor state, without event log position")]
-    public StreamProcessorState(StreamPosition streamPosition, ImmutableDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed):
-        this(new ProcessingPosition(streamPosition, EventLogSequenceNumber.Initial), failingPartitions, lastSuccessfullyProcessed){
+    public StreamProcessorState(StreamPosition streamPosition, ImmutableDictionary<PartitionId, FailingPartitionState> failingPartitions,
+        DateTimeOffset lastSuccessfullyProcessed) :
+        this(new ProcessingPosition(streamPosition, EventLogSequenceNumber.Initial), failingPartitions, lastSuccessfullyProcessed)
+    {
     }
 
     // public StreamProcessorState(ProcessingPosition position, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
@@ -42,8 +45,6 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
 
     /// <inheritdoc/>
     public bool Partitioned => true;
-
-    // public ProcessingPosition ProcessingPosition => new(Position, EventLogPosition);
 
     public Bucket ToProtobuf() => new()
     {
@@ -92,7 +93,37 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         return false;
     }
 
-    public StreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset lastProcessingAttempt = default)
+    static List<(StreamProcessorState, IProcessingResult, StreamEvent)> _globalHistory = new();
+
+    public List<(StreamProcessorState, IProcessingResult, StreamEvent)> History { get; private set; } = new();
+
+    public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
+    {
+        _globalHistory.Add((this, result, processedEvent));
+        History.Add((this, result, processedEvent));
+        VerifyEventHasValidProcessingPosition(processedEvent);
+        
+        var r =  InnerWithResult(result, processedEvent, timestamp);
+
+        r.History = History;
+        
+        return r;
+    }
+
+    StreamProcessorState InnerWithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
+    {
+        if (result.Retry)
+        {
+            return WithFailure(result, processedEvent, timestamp.Add(result.RetryTimeout), timestamp);
+        }
+
+        return result.Succeeded
+            ? WithSuccessfullyProcessed(processedEvent, timestamp)
+            : WithFailure(result, processedEvent, DateTimeOffset.MaxValue, timestamp);
+    }
+
+    public StreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt,
+        DateTimeOffset lastProcessingAttempt = default)
     {
         if (failedProcessing.Succeeded)
         {
@@ -113,20 +144,27 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
             lastProcessingAttempt == default ? DateTimeOffset.UtcNow : lastProcessingAttempt);
     }
 
-    
-    
-    public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
+    void VerifyEventHasValidProcessingPosition(StreamEvent processedEvent)
     {
-        if (result.Retry)
+        if (processedEvent.CurrentProcessingPosition.StreamPosition == Position.StreamPosition)
         {
-            return WithFailure(result, processedEvent, timestamp.Add(result.RetryTimeout), timestamp);
+            return;
         }
 
-        return result.Succeeded
-            ? WithSuccessfullyProcessed(processedEvent, timestamp)
-            : WithFailure(result, processedEvent, DateTimeOffset.MaxValue, timestamp);
+        if (!FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
+        {
+            throw new ArgumentException($"The processed event does not match the current position of the stream processor. Expected {Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));
+        }
+
+        if (failingPartitionState.Position.StreamPosition <= processedEvent.CurrentProcessingPosition.StreamPosition)
+        {
+            return;
+        }
+
+        Console.WriteLine(History.Count);
+        throw new ArgumentException($"The processed event does not match the current position of the partition. Expected {failingPartitionState.Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));
     }
-    
+
     StreamProcessorState UpdateFailingPartition(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt,
         FailingPartitionState failingPartitionState)
     {
@@ -199,10 +237,16 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
     /// <param name="noLongerFailingPartitions"></param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    public StreamProcessorState WithoutFailingPartitions(params PartitionId[] noLongerFailingPartitions) =>
+    public StreamProcessorState WithoutFailingPartitions(IEnumerable<PartitionId> noLongerFailingPartitions) =>
         this with
         {
             FailingPartitions = FailingPartitions.RemoveRange(noLongerFailingPartitions)
+        };
+    
+    public StreamProcessorState WithoutFailingPartition(PartitionId noLongerFailingPartition) =>
+        this with
+        {
+            FailingPartitions = FailingPartitions.Remove(noLongerFailingPartition)
         };
 
     public StreamProcessorState WithFailingPartition(PartitionId partitionId, FailingPartitionState partitionState) =>

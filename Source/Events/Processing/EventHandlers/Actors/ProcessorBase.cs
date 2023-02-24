@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 /// <summary>
 /// Represents the basis of system that can process a stream of events.
 /// </summary>
-public abstract class ProcessorBase
+public abstract class ProcessorBase<T> where T: IStreamProcessorState<T>
 {
     readonly TenantId _tenantId;
     readonly IEventProcessor _processor;
@@ -102,15 +102,15 @@ public abstract class ProcessorBase
     /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    protected async Task<(IStreamProcessorState, IProcessingResult)> ProcessEvent(StreamEvent evt, IStreamProcessorState currentState,
+    protected async Task<(T, IProcessingResult)> ProcessEvent(StreamEvent evt, T currentState,
         ExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Processing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
+        Logger.LogTrace("Processing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
 
         var before = Stopwatch.GetTimestamp();
         var processingResult = await _processor.Process(evt.Event, evt.Partition, executionContext, cancellationToken).ConfigureAwait(false);
         var elapsed = Stopwatch.GetElapsedTime(before);
-        return (await HandleProcessingResult(processingResult, evt, elapsed, currentState).ConfigureAwait(false), processingResult);
+        return (HandleProcessingResult(processingResult, evt, elapsed, currentState), processingResult);
     }
 
     /// <summary>
@@ -123,21 +123,20 @@ public abstract class ProcessorBase
     /// <param name="executionContext">The <see cref="ExecutionContext"/> to use for processing the event.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
-    protected async Task<(IStreamProcessorState, IProcessingResult)> RetryProcessingEvent(StreamEvent evt, IStreamProcessorState currentState,
+    protected async Task<(T, IProcessingResult)> RetryProcessingEvent(StreamEvent evt, T currentState,
         string failureReason,
         uint processingAttempts, ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
-        Logger.LogInformation("ReProcessing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
+        Logger.LogTrace("ReProcessing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
         var start = Stopwatch.GetTimestamp();
         var processingResult = await _processor.Process(
             evt.Event, evt.Partition, failureReason, processingAttempts - 1, executionContext, cancellationToken).ConfigureAwait(false);
         var elapsed = Stopwatch.GetElapsedTime(start);
-        var updatedState = await HandleProcessingResult(processingResult, evt, elapsed, currentState).ConfigureAwait(false);
-        return (updatedState, processingResult);
+        return (HandleProcessingResult(processingResult, evt, elapsed, currentState), processingResult);
     }
 
-    protected Task PersistNewState(IStreamProcessorState newState, CancellationToken cancellationToken)
+    protected Task PersistNewState(T newState, CancellationToken cancellationToken)
     {
         return _streamProcessorStates.Persist(Identifier, newState, cancellationToken);
     }
@@ -150,10 +149,9 @@ public abstract class ProcessorBase
     /// <param name="processingTime">The time it took to process the event.</param>
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="IStreamProcessorState" />.</returns>
-    async Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, TimeSpan processingTime,
-        IStreamProcessorState currentState)
+    T HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, TimeSpan processingTime, T currentState)
     {
-        Logger.LogInformation("Processing result for event at position {ProcessingPosition} is {ProcessingResult}", processedEvent.CurrentProcessingPosition,
+        Logger.LogTrace("Result of {ProcessingPosition} in partition {Partition} is {ProcessingResult}", processedEvent.CurrentProcessingPosition, processedEvent.Partition,
             processingResult.GetType().Name);
         var newState = currentState.WithResult(processingResult, processedEvent, DateTimeOffset.UtcNow);
         OnProcessingResult(processingResult, processedEvent, processingTime);

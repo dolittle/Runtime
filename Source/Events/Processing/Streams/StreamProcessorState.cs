@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Actors;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -56,8 +57,7 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
     /// </summary>
     /// <param name="position">The <see cref="ProcessingPosition"/>position of the stream.</param>
     /// <param name="lastSuccessfullyProcessed">Timestamp of last successful Stream process.</param>
-    public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(
-        new ProcessingPosition(position.StreamPosition, position.EventLogPosition), string.Empty,
+    public StreamProcessorState(ProcessingPosition position, DateTimeOffset lastSuccessfullyProcessed) : this(position, string.Empty,
         lastSuccessfullyProcessed, 0, lastSuccessfullyProcessed, false)
     {
     }
@@ -129,7 +129,24 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         return false;
     }
 
+    static List<(StreamProcessorState, IProcessingResult, StreamEvent)> _globalHistory = new();
+
+    public List<(StreamProcessorState, IProcessingResult, StreamEvent, StreamProcessorState)> History { get; private set; } = new();
+
     public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
+    {
+        _globalHistory.Add((this, result, processedEvent));
+        VerifyEventHasValidProcessingPosition(processedEvent);
+        
+        var r =  InnerWithResult(result, processedEvent, timestamp);
+        History.Add((this, result, processedEvent, r));
+
+        r.History = History;
+        
+        return r;
+    }
+
+    StreamProcessorState InnerWithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
     {
         if (result.Retry)
         {
@@ -140,7 +157,16 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
             ? WithSuccessfullyProcessed(processedEvent, timestamp)
             : WithFailure(result, processedEvent, DateTimeOffset.MaxValue, timestamp);
     }
-    
+
+    void VerifyEventHasValidProcessingPosition(StreamEvent processedEvent)
+    {
+        if (processedEvent.CurrentProcessingPosition.StreamPosition != Position.StreamPosition)
+        {
+            Console.WriteLine(_globalHistory);
+            throw new ArgumentException($"The processed event does not match the current position of the stream processor. Expected {Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));
+        }
+    }
+
     public StreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset _)
     {
         if (failedProcessing.Succeeded)

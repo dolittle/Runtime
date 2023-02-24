@@ -210,7 +210,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
             return Try<IStreamProcessorState>.Succeeded(new StreamProcessorState(ProcessingPosition.Initial, DateTimeOffset.UtcNow));
         }
 
-
         return await position.ReduceAsync(WithEventLogPosition);
 
         Task<Try<IStreamProcessorState>> WithEventLogPosition(IStreamProcessorState state)

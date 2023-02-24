@@ -15,7 +15,7 @@ using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 
-public class NonPartitionedProcessor : ProcessorBase
+public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
 {
     public NonPartitionedProcessor(
         StreamProcessorId streamProcessorId,
@@ -32,34 +32,48 @@ public class NonPartitionedProcessor : ProcessorBase
     {
     }
 
+    
 
     public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken)
     {
         try
         {
+            var currentState = AsNonPartitioned(state);
             while (!cancellationToken.IsCancellationRequested)
             {
-                var evt = await messages.ReadAsync(cancellationToken);
-
-                var (streamProcessorState, processingResult) = await ProcessEvent(evt, state, GetExecutionContextForEvent(evt), cancellationToken);
-                await PersistNewState(streamProcessorState, cancellationToken);
-
-                while (processingResult.Retry)
+                try
                 {
-                    if (state.TryGetTimespanToRetry(out var retryTimeout))
+                    var evt = await messages.ReadAsync(cancellationToken);
+
+                    (currentState, var processingResult) = await ProcessEvent(evt, currentState, GetExecutionContextForEvent(evt), cancellationToken);
+                    await PersistNewState(currentState, cancellationToken);
+
+                    while (processingResult is { Succeeded: false, Retry: true })
                     {
-                        Logger.LogInformation("Will retry processing event {evt.Position} after {Timeout}", evt, retryTimeout);
-                        await Task.Delay(retryTimeout, cancellationToken);
-                    }
-                    else
-                    {
-                        Logger.LogInformation("Will retry processing event {evt.Position} directly", evt);
+                        if (state.TryGetTimespanToRetry(out var retryTimeout))
+                        {
+                            Logger.LogInformation("Will retry processing event {evt.Position} after {Timeout}", evt, retryTimeout);
+                            await Task.Delay(retryTimeout, cancellationToken);
+                        }
+                        else
+                        {
+                            Logger.LogInformation("Will retry processing event {evt.Position} directly", evt);
+                        }
+
+                        (currentState, processingResult) = await RetryProcessingEvent(evt, currentState, processingResult.FailureReason,
+                            currentState.ProcessingAttempts + 1,
+                            GetExecutionContextForEvent(evt), cancellationToken);
                     }
 
-                    (state, processingResult) = await RetryProcessingEvent(evt, state, processingResult.FailureReason,
-                        AsNonPartitioned(streamProcessorState).ProcessingAttempts + 1,
-                        GetExecutionContextForEvent(evt), cancellationToken);
-                    await PersistNewState(state, cancellationToken);
+                    if (!processingResult.Succeeded)
+                    {
+                        Logger.StoppedFailingEventHandler(Identifier.EventProcessorId, Identifier.ScopeId, currentState.FailureReason);
+                        return;
+                    }
+                }
+                finally
+                {
+                    await PersistNewState(currentState, CancellationToken.None);
                 }
             }
         }
