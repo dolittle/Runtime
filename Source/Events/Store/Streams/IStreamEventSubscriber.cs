@@ -21,6 +21,6 @@ public interface IStreamEventSubscriber
     /// <param name="partitioned">Whether the events should be tagged with "partitioned"</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IEnumerable<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
+    ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IReadOnlyCollection<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
         CancellationToken cancellationToken);
 }

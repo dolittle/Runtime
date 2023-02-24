@@ -26,6 +26,7 @@ public class state_with_failing_partititons
     protected static readonly ProcessingPosition FailingProcessingPosition = new(18, 36);
     protected static readonly ProcessingPosition FailingProcessingPosition2 = new(20, 38);
     protected static readonly ProcessingPosition CurrentProcessingPosition = new(22, 42);
+    protected static readonly ProcessingPosition NextProcessingPosition = CurrentProcessingPosition.IncrementWithStream();
 
     protected static readonly StreamEvent retry_event = new(
         committed_events.single(FailingProcessingPosition.EventLogPosition),

@@ -129,25 +129,10 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         return false;
     }
 
-    static List<(StreamProcessorState, IProcessingResult, StreamEvent)> _globalHistory = new();
-
-    public List<(StreamProcessorState, IProcessingResult, StreamEvent, StreamProcessorState)> History { get; private set; } = new();
-
     public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
     {
-        _globalHistory.Add((this, result, processedEvent));
         VerifyEventHasValidProcessingPosition(processedEvent);
         
-        var r =  InnerWithResult(result, processedEvent, timestamp);
-        History.Add((this, result, processedEvent, r));
-
-        r.History = History;
-        
-        return r;
-    }
-
-    StreamProcessorState InnerWithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
-    {
         if (result.Retry)
         {
             return WithFailure(result, processedEvent, timestamp.Add(result.RetryTimeout), timestamp);
@@ -162,7 +147,6 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
     {
         if (processedEvent.CurrentProcessingPosition.StreamPosition != Position.StreamPosition)
         {
-            Console.WriteLine(_globalHistory);
             throw new ArgumentException($"The processed event does not match the current position of the stream processor. Expected {Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));
         }
     }

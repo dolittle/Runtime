@@ -8,12 +8,13 @@ namespace Dolittle.Runtime.Events.Processing;
 /// <summary>
 /// Represents a skipped event in the stream, used if the event partition is failing <see cref="IProcessingResult" />.
 /// </summary>
-public class SkippedProcessing : SuccessfulProcessing
+public class SkippedProcessing : IProcessingResult
 {
     public static readonly SkippedProcessing Instance = new();
     
     /// <inheritdoc/>
     public bool Succeeded => true;
+    public bool Skipped => true;
 
     /// <inheritdoc/>
     public string FailureReason => string.Empty;

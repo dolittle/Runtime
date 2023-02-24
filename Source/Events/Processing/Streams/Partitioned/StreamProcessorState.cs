@@ -93,28 +93,19 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         return false;
     }
 
-    static List<(StreamProcessorState, IProcessingResult, StreamEvent)> _globalHistory = new();
-
-    public List<(StreamProcessorState, IProcessingResult, StreamEvent)> History { get; private set; } = new();
 
     public StreamProcessorState WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
     {
-        _globalHistory.Add((this, result, processedEvent));
-        History.Add((this, result, processedEvent));
         VerifyEventHasValidProcessingPosition(processedEvent);
-        
-        var r =  InnerWithResult(result, processedEvent, timestamp);
 
-        r.History = History;
-        
-        return r;
-    }
-
-    StreamProcessorState InnerWithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp)
-    {
         if (result.Retry)
         {
             return WithFailure(result, processedEvent, timestamp.Add(result.RetryTimeout), timestamp);
+        }
+
+        if (result is SkippedProcessing)
+        {
+            return this with { Position = Position.IncrementWithStream() };
         }
 
         return result.Succeeded
@@ -153,7 +144,9 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
 
         if (!FailingPartitions.TryGetValue(processedEvent.Partition, out var failingPartitionState))
         {
-            throw new ArgumentException($"The processed event does not match the current position of the stream processor. Expected {Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));
+            throw new ArgumentException(
+                $"The processed event does not match the current position of the stream processor. Expected {Position}, got {processedEvent.CurrentProcessingPosition}",
+                nameof(processedEvent));
         }
 
         if (failingPartitionState.Position.StreamPosition <= processedEvent.CurrentProcessingPosition.StreamPosition)
@@ -161,8 +154,9 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
             return;
         }
 
-        Console.WriteLine(History.Count);
-        throw new ArgumentException($"The processed event does not match the current position of the partition. Expected {failingPartitionState.Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));
+        throw new ArgumentException(
+            $"The processed event does not match the current position of the partition. Expected {failingPartitionState.Position}, got {processedEvent.CurrentProcessingPosition}",
+            nameof(processedEvent));
     }
 
     StreamProcessorState UpdateFailingPartition(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retriedAt,
@@ -242,7 +236,7 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         {
             FailingPartitions = FailingPartitions.RemoveRange(noLongerFailingPartitions)
         };
-    
+
     public StreamProcessorState WithoutFailingPartition(PartitionId noLongerFailingPartition) =>
         this with
         {

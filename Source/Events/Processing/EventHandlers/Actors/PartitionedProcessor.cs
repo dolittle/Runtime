@@ -113,13 +113,11 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
                     {
                         case NextAction.ProcessCatchUpEvent:
                             var CatchUpEvent = await messages.ReadAsync(cancellationToken);
-                            // Logger.LogInformation("Processing CatchUp event {Partition}:{ProcessingPosition}", CatchUpEvent.Partition,
                             //     CatchUpEvent.CurrentProcessingPosition);
                             currentState = await HandleCatchUpEvent(CatchUpEvent, currentState, cancellationToken);
                             break;
                         case NextAction.ProcessNextEvent:
                             var evt = await messages.ReadAsync(cancellationToken);
-                            // Logger.LogInformation("Processing next event {Partition}:{ProcessingPosition}", evt.Partition, evt.CurrentProcessingPosition);
                             currentState = await HandleNewEvent(evt, currentState, cancellationToken);
                             break;
                         case NextAction.ProcessFailedEvents:

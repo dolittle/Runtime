@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using MongoStreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 using EventHorizonConsumerProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.EventProcessor;
+using StreamEvent = Dolittle.Runtime.Events.Store.Streams.StreamEvent;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.given;
 
@@ -60,6 +62,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     static CancellationTokenSource? cancel_event_handlers_source;
 
     static Dictionary<EventHandlerInfo, Try<IStreamDefinition>> persisted_stream_definitions = default!;
+
 
     Establish context = () =>
     {
@@ -104,35 +107,30 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         committed_events = new CommittedEvents(all_committed_events);
     }
 
-    protected static IEnumerable<Dolittle.Runtime.Events.Store.Streams.StreamEvent> get_partitioned_events_in_stream(IEventHandler event_handler,
+    protected static IEnumerable<StreamEvent> get_partitioned_events_in_stream(IEventHandler event_handler,
         PartitionId partition_id)
     {
-        if (event_handler.Info.Partitioned)
-        {
-            var fetcher = event_fetchers.GetPartitionedFetcherFor(
-                event_handler.Info.Id.Scope,
-                new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(
-                    StreamId.EventLog,
-                    event_handler.Info.Id.EventHandler.Value,
-                    event_handler.Info.EventTypes,
-                    event_handler.Info.Partitioned)), CancellationToken.None).Result;
+        using var cts = new CancellationTokenSource(100);
 
-            return fetcher.FetchInPartition(partition_id, StreamPosition.Start, CancellationToken.None).Result!.Result!;
+        var reader = stream_event_subscriber.Subscribe(event_handler.Info.Id.Scope, event_handler.Info.EventTypes.ToList(), ProcessingPosition.Initial,
+            event_handler.Info.Partitioned, cts.Token);
+
+        var events = new List<StreamEvent>();
+
+        try
+        {
+            while (!cts.IsCancellationRequested)
+            {
+                var evt = Task.Run(async () => await reader.ReadAsync(CancellationToken.None),cts.Token).GetAwaiter().GetResult();
+                events.Add(evt);
+            }
+        }
+        catch (Exception)
+        {
+            // ignored
         }
 
-        var rangeFetcher = event_fetchers.GetRangeFetcherFor(event_handler.Info.Id.Scope,
-            new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(
-                StreamId.EventLog,
-                event_handler.Info.Id.EventHandler.Value,
-                event_handler.Info.EventTypes,
-                event_handler.Info.Partitioned)), CancellationToken.None).Result;
-
-        return rangeFetcher
-            .FetchRange(new StreamPositionRange(StreamPosition.Start, ulong.MaxValue), CancellationToken.None)
-            .ToListAsync()
-            .GetAwaiter()
-            .GetResult()
-            .Where(_ => _.Event.EventSource.Value == partition_id.Value);
+        return events.Where(_ => _.Partition == partition_id);
     }
 
     protected static async Task commit_events_for_each_event_type(IEnumerable<(int number_of_events, EventSourceId event_source, ScopeId scope_id)> commit)

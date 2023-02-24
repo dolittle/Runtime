@@ -30,27 +30,29 @@ public class StreamEventSubscriber : IStreamEventSubscriber
             channel.Writer,
             position,
             evt => evt.Public,
+            false,
             cancellationToken);
         return channel.Reader;
     }
 
-    public ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IEnumerable<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
+    public ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IReadOnlyCollection<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
         CancellationToken cancellationToken)
     {
         var eventTypes = artifactIds.Select(_ => _.Value.ToProtobuf()).ToHashSet();
 
         var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
         ToStreamEvents(
-            _eventLogStream.SubscribeAll(scopeId, position.EventLogPosition, cancellationToken),
+            _eventLogStream.Subscribe(scopeId, position.EventLogPosition, artifactIds, cancellationToken),
             channel.Writer,
             position,
             evt => eventTypes.Contains(evt.EventType.Id),
+            partitioned,
             cancellationToken);
         return channel.Reader;
     }
 
     static void ToStreamEvents(ChannelReader<EventLogBatch> reader, ChannelWriter<StreamEvent> writer, ProcessingPosition startingPosition,
-        Func<Contracts.CommittedEvent, bool> include,
+        Func<Contracts.CommittedEvent, bool> include, bool partitioned,
         CancellationToken cancellationToken) =>
         _ = Task.Run(async () =>
         {
@@ -66,7 +68,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
                     {
                         if (include(evt))
                         {
-                            var streamEvent = new StreamEvent(evt.FromProtobuf(), current, StreamId.EventLog, evt.EventSourceId, true);
+                            var streamEvent = new StreamEvent(evt.FromProtobuf(), current, StreamId.EventLog, evt.EventSourceId, partitioned);
                             await writer.WriteAsync(streamEvent, cancellationToken);
                             current = current.Increment();
                         }
