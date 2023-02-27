@@ -24,4 +24,8 @@
         <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".dolittle\runtime.yml" />
+    </ItemGroup>
+
 </Project>
