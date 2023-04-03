@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/bin/bash
+set -eo pipefail
 
 usage() {
     cat <<EOM
-    Description: Removes 
+    Description:
+    Removes old backup files, creates a new mongo dump file, verifies it's valid by a dry run of mongorestore
 
     Usage:
     $(basename $0) <mongo_host> <archive_location> [<backup_filename_prefix>] [<days_of_history_to_keep>]
