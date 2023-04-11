@@ -213,7 +213,6 @@ public class StreamProcessorActor : IDisposable, IActor
         {
             if (_stopEverything.IsCancellationRequested)
             {
-                _logger.ErrorWhileRunningEventHandler(default, _identifier.EventProcessorId, _identifier.ScopeId);
                 _stopEverything.Cancel();
             }
 
