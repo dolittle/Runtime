@@ -31,9 +31,13 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
     public static class Messages
     {
         public record ReceiveArguments(bool NotValidateExecutionContext, CancellationToken CancellationToken);
+
         public record Accept(TConnectResponse Response, CancellationToken CancellationToken);
+
         public record Reject(TConnectResponse Response);
+
         public record Call(TRequest Request, ExecutionContext ExecutionContext);
+
         public record CallResponse(TResponse Response, ReverseCallId CallId);
     }
 
@@ -74,6 +78,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             {
                 ExceptionDispatchInfo.Capture(getResult.Exception).Throw();
             }
+
             var (receivedArguments, arguments, executionContext) = getResult.Result;
             Arguments = arguments;
             ExecutionContext = executionContext;
@@ -82,7 +87,8 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
 
         public async Task Accept(TConnectResponse response, CancellationToken cancellationToken)
         {
-            var request = await _actorSystem.Root.RequestAsync<Try>(_actor, new Messages.Accept(response, cancellationToken), CancellationToken.None).ConfigureAwait(false);
+            var request = await _actorSystem.Root.RequestAsync<Try>(_actor, new Messages.Accept(response, cancellationToken), CancellationToken.None)
+                .ConfigureAwait(false);
             if (!request.Success)
             {
                 ExceptionDispatchInfo.Capture(request.Exception).Throw();
@@ -100,11 +106,13 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
 
         public async Task<TResponse> Call(TRequest request, ExecutionContext executionContext, CancellationToken cancellationToken)
         {
-            var getResult = await _actorSystem.Root.RequestAsync<Try<TResponse>>(_actor, new Messages.Call(request, executionContext), CancellationToken.None).ConfigureAwait(false);
+            var getResult = await _actorSystem.Root.RequestAsync<Try<TResponse>>(_actor, new Messages.Call(request, executionContext), CancellationToken.None)
+                .ConfigureAwait(false);
             if (!getResult.Success)
             {
                 ExceptionDispatchInfo.Capture(getResult.Exception).Throw();
             }
+
             return getResult.Result;
         }
     }
@@ -134,6 +142,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         _metricsCollector = metricsCollector;
         _logger = logger;
     }
+
     public Task ReceiveAsync(IContext context)
         => context.Message switch
         {
@@ -155,8 +164,9 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         }
         else
         {
-            Log.CouldNotFindCallId(_logger);
+            _logger.CouldNotFindCallId();
         }
+
         return Task.CompletedTask;
     }
 
@@ -179,7 +189,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         var arguments = _messageConverter.GetConnectArguments(clientToRuntimeStream.Current);
         if (arguments is null)
         {
-            Log.ReceivedInitialMessageByArgumentsNotSet(_logger);
+            _logger.ReceivedInitialMessageByArgumentsNotSet();
             RespondFailedWithoutError();
             return;
         }
@@ -187,38 +197,40 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         var callContext = _messageConverter.GetArgumentsContext(arguments);
         if (callContext?.PingInterval == null)
         {
-            Log.ReceivedArgumentsButPingIntervalNotSet(_logger);
+            _logger.ReceivedArgumentsButPingIntervalNotSet();
             RespondFailedWithoutError();
             return;
         }
 
         if (callContext?.ExecutionContext == null)
         {
-            Log.ReceivedArgumentsButCallExecutionContextNotSet(_logger);
+            _logger.ReceivedArgumentsButCallExecutionContextNotSet();
             RespondFailedWithoutError();
             return;
         }
 
-        var createExecutionContext = msg.NotValidateExecutionContext 
+        var createExecutionContext = msg.NotValidateExecutionContext
             ? Try<ExecutionContext>.Succeeded(callContext.ExecutionContext.ToExecutionContext())
             : _executionContextFactory.TryCreateUsing(callContext.ExecutionContext);
         if (!createExecutionContext.Success)
         {
-            Log.ReceivedInvalidExecutionContext(_logger, createExecutionContext.Exception);
+            _logger.ReceivedInvalidExecutionContext(createExecutionContext.Exception);
             RespondFailedWithoutError();
             return;
         }
-        
+
         RespondSucceeded(arguments, createExecutionContext.Result);
 
         void RespondWithError(Exception ex)
         {
             context.Respond(Try<(bool, TConnectArguments?, ExecutionContext?)>.Failed(ex));
         }
+
         void RespondFailedWithoutError()
         {
             context.Respond(Try<(bool, TConnectArguments?, ExecutionContext?)>.Succeeded((false, null, null)));
         }
+
         void RespondSucceeded(TConnectArguments arguments, ExecutionContext executionContext)
         {
             context.Respond(Try<(bool, TConnectArguments?, ExecutionContext?)>.Succeeded((true, arguments, executionContext)));
@@ -233,6 +245,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             context.Respond(Try.Failed(hasNotResponded.Exception));
             return;
         }
+
         _accepted = true;
         try
         {
@@ -255,12 +268,13 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         {
             respond(Try.Failed(e));
         }
+
         void RespondSuccess()
         {
             respond(Try.Succeeded);
         }
     }
-    
+
     async Task OnReject(Messages.Reject msg, Action<Try> respond)
     {
         var hasNotResponded = CheckHasNotResponded();
@@ -269,6 +283,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             respond(Try.Failed(hasNotResponded.Exception));
             return;
         }
+
         _rejected = true;
         try
         {
@@ -289,6 +304,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         {
             return RespondError(new CannotPerformCallOnCompletedReverseCallConnection());
         }
+
         if (_rejected)
         {
             return RespondError(new ReverseCallDispatcherAlreadyRejected());
@@ -304,6 +320,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
                 {
                     _calls.Remove(callId);
                 }
+
                 return Respond(result);
             },
             (ex, _) =>
@@ -318,6 +335,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             respond(Try<TResponse>.Failed(ex));
             return Task.CompletedTask;
         }
+
         Task Respond(Try<TResponse> result)
         {
             respond(result);
@@ -385,7 +403,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
                 var response = _messageConverter.GetResponse(message);
                 if (response != null)
                 {
-                    Log.ReceivedResponse(_logger);
+                    _logger.ReceivedResponse();
                     var callContext = _messageConverter.GetResponseContext(response);
                     if (callContext?.CallId != null)
                     {
@@ -394,20 +412,24 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
                     }
                     else
                     {
-                        Log.ReceivedResponseButCallContextNotSet(_logger);
+                        _logger.ReceivedResponseButCallContextNotSet();
                     }
                 }
                 else
                 {
-                    Log.ReceivedMessageButDidNotContainResponse(_logger);
+                    _logger.ReceivedMessageButDidNotContainResponse();
                 }
             }
+        }
+        catch (System.IO.IOException ex) when (ex.Message.StartsWith("The client reset the request stream", StringComparison.Ordinal))
+        {
+            _logger.ClientDisconnected();
         }
         catch (Exception ex)
         {
             if (!cts.Token.IsCancellationRequested)
             {
-                Log.ErrorWhileHandlingClientMessages(_logger, ex);
+                _logger.ErrorWhileHandlingClientMessages(ex);
             }
         }
     }
@@ -431,6 +453,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             {
             }
         }
+
         _reverseCallConnection?.Dispose();
         return ValueTask.CompletedTask;
     }
@@ -441,10 +464,12 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         {
             return new ReverseCallDispatcherAlreadyAccepted();
         }
+
         if (_rejected)
         {
             return new ReverseCallDispatcherAlreadyRejected();
         }
+
         return Try.Succeeded;
     }
 }
