@@ -16,6 +16,8 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 // ReSharper disable once ClassNeverInstantiated.Global
 public class StreamSubscriptionActor : IActor
 {
+    const int MinWaitMs = 100;
+    const int MaxJitterMs = 400;
     readonly ScopeId _scope;
     readonly TenantId _tenantId;
     readonly ILogger<StreamSubscriptionActor> _logger;
@@ -65,6 +67,7 @@ public class StreamSubscriptionActor : IActor
             catch (Exception e)
             {
                 _logger.ErrorFetchingCatchupEvents(e);
+                await Task.Delay(MinWaitMs + new Random().Next(MaxJitterMs));
             }
         }
     }

@@ -30,7 +30,7 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "Error fetching events from aggregate")]
     internal static partial void ErrorFetchingEventsFromAggregate(this ILogger logger, Exception ex);
 
-    [LoggerMessage(0, LogLevel.Warning, "Error fetching catchup events")]
+    [LoggerMessage(0, LogLevel.Warning, "Error fetching catchup events. Will retry after debounce.")]
     internal static partial void ErrorFetchingCatchupEvents(this ILogger logger, Exception ex);
 
     [LoggerMessage(0, LogLevel.Warning, "Error publishing subscribed events")]
