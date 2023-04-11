@@ -38,6 +38,6 @@ public class and_definition_is_not_persisted : given.all_dependencies
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_have_result_for_tenant = () => result.ContainsKey(TenantId.Development).ShouldBeTrue();
+    It should_have_result_for_tenant = () => result.ContainsKey(tenant).ShouldBeTrue();
     It should_be_a_successful_result = () => result[tenant].Succeeded.ShouldBeTrue();
 }
