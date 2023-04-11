@@ -21,12 +21,14 @@ public interface IEventLogStream
     /// <param name="scope">The <see cref="ScopeId"/>.</param>
     /// <param name="from">From offset, inclusive</param>
     /// <param name="eventTypes">Included event types, min 1</param>
+    /// <param name="subscriptionName">Debug name</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     ChannelReader<EventLogBatch> Subscribe(
         ScopeId scope,
         EventLogSequenceNumber from,
         IReadOnlyCollection<ArtifactId> eventTypes,
+        string subscriptionName,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -34,9 +36,10 @@ public interface IEventLogStream
     /// </summary>
     /// <param name="scopeId">The <see cref="ScopeId"/>.</param>
     /// <param name="from">From offset, inclusive</param>
+    /// <param name="subscriptionName">Debug name</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<EventLogBatch> SubscribeAll(ScopeId scopeId, EventLogSequenceNumber from, CancellationToken cancellationToken);
+    ChannelReader<EventLogBatch> SubscribeAll(ScopeId scopeId, EventLogSequenceNumber from, string subscriptionName, CancellationToken cancellationToken);
     
     /// <summary>
     /// Subscribe to the complete event log stream at the given offset, including public events only

@@ -35,14 +35,19 @@ public class StreamEventSubscriber : IStreamEventSubscriber
         return channel.Reader;
     }
 
-    public ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IReadOnlyCollection<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
+    public ChannelReader<StreamEvent> Subscribe(
+        ScopeId scopeId,
+        IReadOnlyCollection<ArtifactId> artifactIds,
+        ProcessingPosition position,
+        bool partitioned,
+        string subscriptionName,
         CancellationToken cancellationToken)
     {
         var eventTypes = artifactIds.Select(_ => _.Value.ToProtobuf()).ToHashSet();
 
         var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
         ToStreamEvents(
-            _eventLogStream.Subscribe(scopeId, position.EventLogPosition, artifactIds, cancellationToken),
+            _eventLogStream.Subscribe(scopeId, position.EventLogPosition, artifactIds, subscriptionName, cancellationToken),
             channel.Writer,
             position,
             evt => eventTypes.Contains(evt.EventType.Id),

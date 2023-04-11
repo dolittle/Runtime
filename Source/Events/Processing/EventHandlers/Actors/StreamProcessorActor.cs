@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -213,7 +212,6 @@ public class StreamProcessorActor : IDisposable, IActor
         {
             if (_stopEverything.IsCancellationRequested)
             {
-                _logger.ErrorWhileRunningEventHandler(default, _identifier.EventProcessorId, _identifier.ScopeId);
                 _stopEverything.Cancel();
             }
 

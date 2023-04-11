@@ -145,7 +145,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var cts = new CancellationTokenSource();
         var events = StartSubscription(from, cts.Token);
         var firstEventReady = events.WaitToReadAsync(cts.Token).AsTask();
-        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events,context));
+        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events, context));
         _stoppingToken = cts;
     }
 
@@ -191,10 +191,14 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     ChannelReader<StreamEvent> StartSubscription(ProcessingPosition from, CancellationToken token)
     {
-        return _eventSubscriber.Subscribe(Identifier.ScopeId, _filterDefinition.Types.ToList(), from, _filterDefinition.Partitioned,
+        return _eventSubscriber.Subscribe(
+            Identifier.ScopeId,
+            _filterDefinition.Types.ToList(),
+            from,
+            _filterDefinition.Partitioned,
+            $"sp:{Identifier.EventProcessorId}",
             token);
     }
-
 
 
     /// <summary>

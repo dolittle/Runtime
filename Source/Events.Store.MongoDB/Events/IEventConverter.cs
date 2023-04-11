@@ -43,4 +43,11 @@ public interface IEventConverter
     /// <param name="partitioned">Whether or not the Event is partitioned.</param>
     /// <returns>The converted <see cref="runtime.Streams.StreamEvent" />.</returns>
     runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned);
+
+    /// <summary>
+    /// Converts a <see cref="mongoDB.Event" /> to <see cref="runtime.CommittedEvent" />.
+    /// </summary>
+    /// <param name="event">The <see cref="mongoDB.Event" /> to be converted.</param>
+    /// <returns>The converted <see cref="runtime.CommittedEvent" />.</returns>
+    runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event);
 }

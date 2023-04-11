@@ -63,7 +63,7 @@ public class EventConverter : IEventConverter
             @event.Partition,
             partitioned);
 
-    runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
+    public runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
         @event.Aggregate.WasAppliedByAggregate
             ? ToRuntimeCommittedAggregateEvent(@event)
             : @event.EventHorizon.FromEventHorizon

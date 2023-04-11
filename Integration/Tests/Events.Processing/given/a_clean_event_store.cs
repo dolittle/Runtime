@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.Domain.Tenancy;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;

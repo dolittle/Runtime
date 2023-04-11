@@ -19,8 +19,14 @@ public interface IStreamEventSubscriber
     /// <param name="artifactIds">The set of subscribed events</param>
     /// <param name="position">The <see cref="ProcessingPosition"/> to continue from (inclusive)</param>
     /// <param name="partitioned">Whether the events should be tagged with "partitioned"</param>
+    /// <param name="subscriptionName">Identifier for the given subscription, used for debugging only</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    ChannelReader<StreamEvent> Subscribe(ScopeId scopeId, IReadOnlyCollection<ArtifactId> artifactIds, ProcessingPosition position, bool partitioned,
+    ChannelReader<StreamEvent> Subscribe(
+        ScopeId scopeId,
+        IReadOnlyCollection<ArtifactId> artifactIds,
+        ProcessingPosition position,
+        bool partitioned,
+        string subscriptionName,
         CancellationToken cancellationToken);
 }
