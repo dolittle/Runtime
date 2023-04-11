@@ -39,7 +39,7 @@ static partial class Log
     
     
     [LoggerMessage(0, LogLevel.Debug, "{StreamProcessorId}: EventLogSequenceNumber is already set - skipping")]
-    internal static partial void EventLogSequenceNumberAlreadySet(this ILogger logger, StreamProcessorId id);
+    internal static partial void EventLogSequenceNumberAlreadySet(this ILogger logger, StreamProcessorId streamProcessorId);
     
     static readonly Action<ILogger, int, string, Exception> _eventsReceivedForCommitting = LoggerMessage
         .Define<int, string>(
