@@ -3,7 +3,6 @@
 
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Actors;
-using Dolittle.Runtime.Events.Store.Streams;
 using FluentAssertions;
 using Machine.Specifications;
 

@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using Integration.Tests.Services.given;
 using Machine.Specifications;
-using Proto;
 
 namespace Integration.Tests.Services.ReverseCalls.when_initiating;
 
