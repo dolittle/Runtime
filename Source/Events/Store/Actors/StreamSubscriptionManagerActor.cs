@@ -116,8 +116,10 @@ public class StreamSubscriptionManagerActor : IActor
             PidAddress = request.PidAddress,
             SubscriptionId = request.SubscriptionId,
             ScopeId = request.ScopeId,
-            CurrentHighWatermark = _nextSequenceNumber
+            CurrentHighWatermark = _nextSequenceNumber,
+            SubscriptionName = request.SubscriptionName
         });
+        
         context.Respond(new EventStoreSubscriptionAck
         {
             SubscriptionId = request.SubscriptionId,

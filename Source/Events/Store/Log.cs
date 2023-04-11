@@ -33,8 +33,8 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "Error fetching catchup events. Will retry after debounce.")]
     internal static partial void ErrorFetchingCatchupEvents(this ILogger logger, Exception ex);
 
-    [LoggerMessage(0, LogLevel.Warning, "Error publishing subscribed events")]
-    internal static partial void ErrorPublishingSubscribedEvents(this ILogger logger, Exception ex);
+    [LoggerMessage(0, LogLevel.Warning, "Error publishing subscribed events for {SubscriptionName}")]
+    internal static partial void ErrorPublishingSubscribedEvents(this ILogger logger, Exception ex, string subscriptionName);
     
     static readonly Action<ILogger, int, string, Exception> _eventsReceivedForCommitting = LoggerMessage
         .Define<int, string>(
