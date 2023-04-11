@@ -40,7 +40,7 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
     {
         if (request.State.Position.EventLogPosition.Value > EventLogSequenceNumber.Initial.Value)
         {
-            _logger.LogInformation("EventLogSequenceNumber is already set - skipping");
+            _logger.EventLogSequenceNumberAlreadySet(request.Id);
             return Task.FromResult(Try<IStreamProcessorState>.Succeeded(request.State));
         }
 

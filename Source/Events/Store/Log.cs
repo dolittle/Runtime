@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Microsoft.Extensions.Logging;
 using Proto;
 
@@ -35,6 +36,10 @@ static partial class Log
 
     [LoggerMessage(0, LogLevel.Warning, "Error publishing subscribed events for {SubscriptionName}")]
     internal static partial void ErrorPublishingSubscribedEvents(this ILogger logger, Exception ex, string subscriptionName);
+    
+    
+    [LoggerMessage(0, LogLevel.Debug, "{StreamProcessorId}: EventLogSequenceNumber is already set - skipping")]
+    internal static partial void EventLogSequenceNumberAlreadySet(this ILogger logger, StreamProcessorId id);
     
     static readonly Action<ILogger, int, string, Exception> _eventsReceivedForCommitting = LoggerMessage
         .Define<int, string>(
