@@ -70,7 +70,7 @@ mongodump --host=$mongo_host --gzip --archive=$mongodump_file
 
 echo "Verifying the backup file $mongodump_file"
 
-mongorestore --gzip --archive=$mongodump_file  --dryRun --objcheck
+mongorestore --gzip --archive=$mongodump_file
 
 RESTORE_RESULT=$?
 
