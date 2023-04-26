@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
-using Dolittle.Runtime.Events.Store.Streams;
 using FluentAssertions;
 
 namespace Events.Processing.Tests.Partitioned;

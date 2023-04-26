@@ -4,7 +4,6 @@
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
-using Moq;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_TimeToRetryForUnpartitionedStreamProcessor.when_failing;

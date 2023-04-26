@@ -9,7 +9,6 @@ using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Proto;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given;
 

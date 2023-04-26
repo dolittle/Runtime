@@ -41,6 +41,7 @@ public class EventLogStream : IEventLogStream
         ScopeId scope,
         EventLogSequenceNumber from,
         IReadOnlyCollection<ArtifactId> eventTypes,
+        string subscriptionName,
         CancellationToken cancellationToken)
     {
         if (!eventTypes.Any())
@@ -48,14 +49,15 @@ public class EventLogStream : IEventLogStream
             throw new ArgumentException("No event types passed");
         }
 
-        return StartSubscription(scope, from, eventTypes, cancellationToken);
+        return StartSubscription(scope, from, eventTypes, subscriptionName, cancellationToken);
     }
 
     public ChannelReader<EventLogBatch> SubscribeAll(
         ScopeId scope,
         EventLogSequenceNumber from,
+        string subscriptionName,
         CancellationToken cancellationToken) =>
-        StartSubscription(scope, from, ImmutableList<ArtifactId>.Empty, cancellationToken);
+        StartSubscription(scope, from, ImmutableList<ArtifactId>.Empty, subscriptionName, cancellationToken);
 
     public ChannelReader<EventLogBatch> SubscribePublic(EventLogSequenceNumber from, CancellationToken cancellationToken)
     {
@@ -65,14 +67,14 @@ public class EventLogStream : IEventLogStream
         return channel.Reader;
     }
 
-    ChannelReader<EventLogBatch> StartSubscription(
-        ScopeId scope,
+    ChannelReader<EventLogBatch> StartSubscription(ScopeId scope,
         EventLogSequenceNumber from,
         IReadOnlyCollection<ArtifactId> eventTypes,
+        string subscriptionName,
         CancellationToken cancellationToken)
     {
         var channel = Channel.CreateBounded<EventLogBatch>(ChannelSize);
-        var filterConfig = new EventLogStreamActor.FilterConfig(eventTypes.ToImmutableHashSet());
+        var filterConfig = new EventLogStreamActor.FilterConfig(eventTypes.ToImmutableHashSet(), subscriptionName: subscriptionName);
         _actorSystem.Root.Spawn(_createProps.PropsFor<EventLogStreamActor>(channel.Writer, scope, from, filterConfig, cancellationToken));
         return channel.Reader;
     }
@@ -81,7 +83,7 @@ public class EventLogStream : IEventLogStream
 // ReSharper disable once ClassNeverInstantiated.Global
 public class EventLogStreamActor : IActor
 {
-    public record FilterConfig(IReadOnlyCollection<ArtifactId> _eventTypes, bool publicOnly = false);
+    public record FilterConfig(IReadOnlyCollection<ArtifactId> _eventTypes, bool publicOnly = false, string subscriptionName = "unnamed");
 
     readonly ChannelWriter<EventLogBatch> _channelWriter;
     readonly CancellationToken _cancellationToken;
@@ -93,6 +95,7 @@ public class EventLogStreamActor : IActor
     readonly Uuid _subscriptionId;
     readonly Uuid _scope;
     readonly bool _publicOnly;
+    readonly string _subscriptionName;
 
     public EventLogStreamActor(
         ChannelWriter<EventLogBatch> channelWriter,
@@ -107,6 +110,7 @@ public class EventLogStreamActor : IActor
         _nextOffset = nextOffset;
         _eventTypes = filterConfig._eventTypes;
         _publicOnly = filterConfig.publicOnly;
+        _subscriptionName = filterConfig.subscriptionName;
         _eventStoreClient = eventStoreClient;
         _logger = logger;
         _cancellationToken = cancellationToken;
@@ -169,7 +173,8 @@ public class EventLogStreamActor : IActor
             PidId = context.Self.Id,
             ScopeId = _scope,
             SubscriptionId = _subscriptionId,
-            IncludePublicOnly = _publicOnly
+            IncludePublicOnly = _publicOnly,
+            SubscriptionName = _subscriptionName
         };
         await _eventStoreClient.RegisterSubscription(eventStoreSubscriptionRequest, _cancellationToken).ConfigureAwait(false);
         context.ReenterAfterCancellation(_cancellationToken, () => context.Stop(context.Self));

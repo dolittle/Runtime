@@ -23,6 +23,7 @@ message EventStoreSubscriptionRequest{
     string pid_address = 5;
     uint64 from_offset = 6;
     bool include_public_only = 7;
+    string subscription_name = 8; // Debug name
 }
 
 message StartEventStoreSubscription{
@@ -33,6 +34,7 @@ message StartEventStoreSubscription{
     string pid_address = 5;
     uint64 from_offset = 6;
     uint64 current_high_watermark = 7;
+    string subscription_name = 8; // Debug name
 }
 
 message EventStoreSubscriptionAck{

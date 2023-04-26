@@ -124,12 +124,10 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
                 .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(limit)
+                .Project(evt => _eventConverter.ToRuntimeCommittedEvent(evt))
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-            return new CommittedEvents(
-                events.Select(_ => _eventConverter.ToRuntimeStreamEvent(_))
-                    .Select(_ => _.Event)
-                    .ToList());
+            return new CommittedEvents(events);
         }
         catch (Exception ex)
         {

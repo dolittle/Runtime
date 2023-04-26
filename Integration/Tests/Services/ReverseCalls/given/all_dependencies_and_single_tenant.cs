@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Data;
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Clients;
-using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.Hosting;
 using Grpc.Core;
 using Integration.Tests.Services.given;

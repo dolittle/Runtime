@@ -4,7 +4,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -113,7 +112,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         using var cts = new CancellationTokenSource(100);
 
         var reader = stream_event_subscriber.Subscribe(event_handler.Info.Id.Scope, event_handler.Info.EventTypes.ToList(), ProcessingPosition.Initial,
-            event_handler.Info.Partitioned, cts.Token);
+            event_handler.Info.Partitioned, $"get_partitioned_events_in_stream:{event_handler.Info.Id.EventHandler.Value}", cts.Token);
 
         var events = new List<StreamEvent>();
 

@@ -4,14 +4,8 @@
 using System;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
-using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
-using Event = Dolittle.Runtime.Events.Store.MongoDB.Events.Event;
 
 namespace Integration.Tests.Events.Store.MongoDB.given;
 

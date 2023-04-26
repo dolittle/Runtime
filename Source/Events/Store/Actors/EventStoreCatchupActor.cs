@@ -16,7 +16,7 @@ record EventLogCatchupResponse(EventLogSequenceNumber FromOffset, EventLogSequen
 
 public class EventStoreCatchupActor : IActor
 {
-    const int BatchSize = 1000;
+    const int BatchSize = 200;
 
     readonly IFetchCommittedEvents _eventsFetcher;
     readonly ILogger<EventStoreCatchupActor> _logger;

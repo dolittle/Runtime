@@ -13,9 +13,6 @@
     <a href="https://hub.docker.com/r/dolittle/runtime"><img src="https://img.shields.io/docker/v/dolittle/runtime?label=dolittle%2Fruntime&logo=docker&sort=semver" alt="Latest Docker image"></a>
     <a href="https://github.com/dolittle/Runtime/actions?query=workflow%3ARuntime"><img src="https://github.com/dolittle/Runtime/workflows/.NET%20Docker%20Image%20CI/CD/badge.svg" alt="Build status"></a>
     <a href="https://github.com/dolittle/runtime/actions?query=workflow%3ACodeQL"><img src="https://github.com/dolittle/runtime/workflows/CodeQL/badge.svg" alt="CodeQL status"></a>
-    <a href="https://www.codacy.com/gh/dolittle/Runtime/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dolittle/Runtime&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/6647c889f86a45dbbca13794511edcd3"/></a>
-    <a href="https://www.codacy.com/gh/dolittle/Runtime/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dolittle/Runtime&amp;utm_campaign=Badge_Coverage"><img src="https://app.codacy.com/project/badge/Coverage/6647c889f86a45dbbca13794511edcd3"/></a>
-    
 </p>
 
 

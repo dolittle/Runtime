@@ -16,6 +16,8 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 // ReSharper disable once ClassNeverInstantiated.Global
 public class StreamSubscriptionActor : IActor
 {
+    const int MinWaitMs = 100;
+    const int MaxJitterMs = 400;
     readonly ScopeId _scope;
     readonly TenantId _tenantId;
     readonly ILogger<StreamSubscriptionActor> _logger;
@@ -23,6 +25,7 @@ public class StreamSubscriptionActor : IActor
     Func<Contracts.CommittedEvent, bool>? _shouldIncludeEvent;
     PID _target;
     Uuid _subscriptionId;
+    string _subscriptionName;
 
     public StreamSubscriptionActor(ScopeId scope, TenantId tenantId, ILogger<StreamSubscriptionActor> logger)
     {
@@ -44,6 +47,7 @@ public class StreamSubscriptionActor : IActor
     async Task OnStartEventStoreSubscription(StartEventStoreSubscription request, IContext context)
     {
         _subscriptionId = request.SubscriptionId;
+        _subscriptionName = request.SubscriptionName;
         _target = PID.FromAddress(request.PidAddress, request.PidId);
         _shouldIncludeEvent = CreateFilter(request.EventTypeIds);
         var fromOffset = request.FromOffset;
@@ -65,6 +69,7 @@ public class StreamSubscriptionActor : IActor
             catch (Exception e)
             {
                 _logger.ErrorFetchingCatchupEvents(e);
+                await Task.Delay(MinWaitMs + new Random().Next(MaxJitterMs));
             }
         }
     }
@@ -83,7 +88,7 @@ public class StreamSubscriptionActor : IActor
 
     Task OnCommittedEventsRequest(CommittedEventsRequest request, IContext context)
         => Publish(ToSubscriptionEvent(request), context);
-    
+
     async Task Publish(SubscriptionEvents subscriptionEvent, IContext context)
     {
         while (!context.CancellationToken.IsCancellationRequested)
@@ -105,7 +110,7 @@ public class StreamSubscriptionActor : IActor
             }
             catch (Exception e)
             {
-                _logger.ErrorPublishingSubscribedEvents(e);
+                _logger.ErrorPublishingSubscribedEvents(e, _subscriptionName);
             }
         }
     }
@@ -118,7 +123,7 @@ public class StreamSubscriptionActor : IActor
             ToOffset = request.ToOffset,
             Events = { request.Events.Where(_shouldIncludeEvent!) }
         };
-    
+
     SubscriptionEvents ToSubscriptionEvent(EventLogCatchupResponse response) =>
         new()
         {
