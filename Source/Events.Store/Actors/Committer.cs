@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -51,6 +50,7 @@ public class Committer : IActor
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/>.</param>
     /// <param name="aggregateRootVersions">The <see cref="IFetchAggregateRootVersions"/>.</param>
     /// <param name="lifecycleHooks">The <see cref="IApplicationLifecycleHooks"/>.</param>
+    /// <param name="metrics">The <see cref="IMetricsCollector"/></param>
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public Committer(
         TenantId tenant,

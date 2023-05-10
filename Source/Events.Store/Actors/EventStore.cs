@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,6 @@ using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Tenancy;
-using Microsoft.Extensions.Logging;
 using Proto;
 using Failure = Dolittle.Runtime.Protobuf.Failure;
 
@@ -30,7 +28,6 @@ public class EventStore : EventStoreBase
     readonly TenantId _tenant;
     readonly ICreateProps _propsFactory;
     readonly ITenants _tenants;
-    readonly ILogger<EventStore> _logger;
     readonly Dictionary<ScopeId, PID> _streamSubscriptionManagerPIDs = new();
     
     PID? _committer;
@@ -44,14 +41,12 @@ public class EventStore : EventStoreBase
     /// <param name="tenantId"></param>
     /// <param name="propsFactory"></param>
     /// <param name="tenants"></param>
-    /// <param name="logger"></param>
-    public EventStore(IContext context, TenantId tenantId, ICreateProps propsFactory, ITenants tenants, ILogger<EventStore> logger)
+    public EventStore(IContext context, TenantId tenantId, ICreateProps propsFactory, ITenants tenants)
         : base(context)
     {
         _tenant = tenantId;
         _propsFactory = propsFactory;
         _tenants = tenants;
-        _logger = logger;
     }
 
     /// <inheritdoc />

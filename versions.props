@@ -8,8 +8,9 @@
         <CoverletVersion>3.1.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
-        <GrpcVersion>2.46.0</GrpcVersion>
-        <GrpcToolsVersion>2.46.3</GrpcToolsVersion>
+        <GrpcVersion>2.53.0</GrpcVersion>
+        <GrpcTestingVersion>2.46.6</GrpcTestingVersion>
+        <GrpcToolsVersion>2.54.0</GrpcToolsVersion>
         <MachineSpecificationsRunnerVersion>2.10.2</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
         <McMasterVersion>3.1.0</McMasterVersion>
@@ -27,7 +28,7 @@
         <PrometheusVersion>6.0.0</PrometheusVersion>
         <PrometheusNetDotNetRuntimeVersion>4.2.4</PrometheusNetDotNetRuntimeVersion>
         <ProtoActorVersion>0.33.1-alpha.0.13</ProtoActorVersion>
-        <ProtobufVersion>3.19.4</ProtobufVersion>
+        <ProtobufVersion>3.23.0</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
         <SystemLinqAsyncVersion>5.1.0</SystemLinqAsyncVersion>
