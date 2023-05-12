@@ -50,6 +50,7 @@ public class Committer : IActor
     /// <param name="committedEvents">The <see cref="IFetchCommittedEvents"/>.</param>
     /// <param name="aggregateRootVersions">The <see cref="IFetchAggregateRootVersions"/>.</param>
     /// <param name="lifecycleHooks">The <see cref="IApplicationLifecycleHooks"/>.</param>
+    /// <param name="metrics">The <see cref="IMetricsCollector"/></param>
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public Committer(
         TenantId tenant,

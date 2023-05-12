@@ -14,6 +14,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.MongoDB;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -39,6 +40,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
+    /// <param name="logger"></param>
     public CommittedEventsFetcher(
         IStreams streams,
         IEventConverter eventConverter,
@@ -54,18 +56,35 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken)
     {
         var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
-        return (ulong)await eventLog.CountDocumentsAsync(
+        var eventCount = (ulong)await eventLog.CountDocumentsAsync(
                 _eventFilter.Empty,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-        // TODO: This is for getting the sequence number from the last event.
-        // var lastEvent = await eventLog
-        //     .Find(_eventFilter.Empty)
-        //     .Sort(Builders<MongoDB.Events.Event>.Sort.Descending(_ => _.EventLogSequenceNumber))
-        //     .Limit(1)
-        //     .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-        //
-        // return lastEvent?.EventLogSequenceNumber ?? 0ul;
+
+        if (eventCount == 0) return 0ul; // No events means no need to double check
+
+        var lastEvent = await eventLog
+            .Find(_eventFilter.Empty)
+            .Sort(Builders<MongoDB.Events.Event>.Sort.Descending(_ => _.EventLogSequenceNumber))
+            .Limit(1)
+            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        if (lastEvent is null)
+        {
+            // Should not be possible
+            _logger.LogError("No last event found, but event count was {EventCount}", eventCount);
+            return 0ul;
+        }
+        
+        var nextSequenceNumber = lastEvent.EventLogSequenceNumber + 1;
+
+        if(nextSequenceNumber != eventCount)
+        {
+            _logger.LogError("Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber, eventCount);
+        }
+        
+        return nextSequenceNumber;
+
     }
 
     /// <inheritdoc />

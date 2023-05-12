@@ -1,3 +1,14 @@
+# [8.9.2] - 2023-5-10 [PR: #736](https://github.com/dolittle/Runtime/pull/736)
+## Summary
+
+* Updates gRPC libraries.
+* Added tolerance for removed events from main event log.
+
+### Added
+
+- Ability to tolerate events missing from eventlog. Before it would stop working when events were deleted. This has been changed to only logging and continuing to be able to commit new events.
+
+
 # [8.9.1] - 2023-2-3 [PR: #729](https://github.com/dolittle/Runtime/pull/729)
 ## Summary
 
