@@ -12,11 +12,10 @@
         <ProjectReference Include="../Embeddings.Store/Embeddings.Store.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+        <ProjectReference Include="..\MongoDB\MongoDB.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
-        <PackageReference Include="MongoDB.Driver.Core.Extensions.OpenTelemetry" Version="$(MongoDBOpenTelemetryVersion)" />
     </ItemGroup>
 </Project>
