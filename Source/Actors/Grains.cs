@@ -24,6 +24,6 @@ public class Grains : ICanAddServicesForTypesWith<GrainAttribute>
                     provider.GetRequiredService<Cluster>(),
                     "Groot"))
             .AddTransient(type)
-            .AddSingleton(new GrainAndActor(type, attribute.ActorType, false));
+            .AddSingleton(new GrainAndActor(type, attribute.ActorType, attribute.Kind, false));
     }
 }

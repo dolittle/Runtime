@@ -8,6 +8,7 @@ using Proto;
 using Proto.Cluster;
 using Proto.Remote;
 using Proto.Cluster.Partition;
+using Proto.Cluster.SingleNode;
 using Proto.Cluster.Testing;
 using Proto.DependencyInjection;
 using Proto.OpenTelemetry;
@@ -35,8 +36,8 @@ public static class HostBuilderExtensions
                     .WithProtoMessages(provider.GetRequiredService<IProtobufFileDescriptors>().All.ToArray()))
                 .WithCluster(ClusterConfig.Setup(
                         "Dolittle",
-                        new TestProvider(new TestProviderOptions(), new InMemAgent()),
-                        new PartitionIdentityLookup())
+                        new SingleNodeProvider(),
+                        new SingleNodeLookup())
                     .WithDiscoveredClusterKinds(provider)))
             .AddSingleton(provider => provider.GetRequiredService<ActorSystem>().Root.WithTracing())
             .AddSingleton(provider => provider.GetRequiredService<ActorSystem>().Cluster()));
