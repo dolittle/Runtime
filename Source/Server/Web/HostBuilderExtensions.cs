@@ -25,7 +25,7 @@ public static class HostBuilderExtensions
                     services.AddKestrelConfiguration();
                     services.AddControllers();
                     services.AddHealthChecks()
-                        .AddCheck<ClusterHealthCheck>("proto-cluster");
+                        .AddCheck<ClusterHealthCheck>("ProtoClusterHealthCheck");
                     services.AddRouting();
                     services.AddEndpointsApiExplorer();
                     services.AddSwaggerGen(options =>
