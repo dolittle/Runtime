@@ -73,15 +73,16 @@ public static class OpenTelemetryConfigurationExtensions
     static void AddOpenTelemetryTracing(this IHostBuilder builder, ResourceBuilder resourceBuilder, Uri otlpEndpoint)
     {
         builder.ConfigureServices(services =>
-            services.AddOpenTelemetryTracing(builder =>
-            {
-                builder.SetResourceBuilder(resourceBuilder)
-                    .AddHttpClientInstrumentation()
-                    .AddAspNetCoreInstrumentation()
-                    .AddMongoDBInstrumentation()
-                    .AddGrpcClientInstrumentation()
-                    .AddProtoActorInstrumentation()
-                    .AddOtlpExporter(options => { options.Endpoint = otlpEndpoint; });
-            }));
+            services.AddOpenTelemetry()
+                .WithTracing(_ =>
+                {
+                    _.SetResourceBuilder(resourceBuilder)
+                        .AddHttpClientInstrumentation()
+                        .AddAspNetCoreInstrumentation()
+                        .AddMongoDBInstrumentation()
+                        .AddGrpcClientInstrumentation()
+                        .AddProtoActorInstrumentation()
+                        .AddOtlpExporter(options => { options.Endpoint = otlpEndpoint; });
+                }));
     }
 }

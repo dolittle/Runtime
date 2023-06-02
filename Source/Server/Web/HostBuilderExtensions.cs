@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Proto.Cluster;
 
 namespace Dolittle.Runtime.Server.Web;
 
@@ -23,7 +24,8 @@ public static class HostBuilderExtensions
                 {
                     services.AddKestrelConfiguration();
                     services.AddControllers();
-                    services.AddHealthChecks();
+                    services.AddHealthChecks()
+                        .AddCheck<ClusterHealthCheck>("ProtoClusterHealthCheck");
                     services.AddRouting();
                     services.AddEndpointsApiExplorer();
                     services.AddSwaggerGen(options =>
@@ -35,15 +37,12 @@ public static class HostBuilderExtensions
                 webHost.Configure(app =>
                 {
                     app.UseHealthChecks("/healthz");
-                    
+
                     app.UseSwagger();
                     app.UseSwaggerUI();
-                   
+
                     app.UseRouting();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapControllers();
-                    });
+                    app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
                 });
             }));
 }

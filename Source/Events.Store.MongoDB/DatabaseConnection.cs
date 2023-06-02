@@ -7,7 +7,7 @@ using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
-
+using Dolittle.Runtime.MongoDB;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -44,7 +44,7 @@ public class DatabaseConnection : IDatabaseConnection
             Servers = config.Servers.Select(MongoServerAddress.Parse),
             GuidRepresentation = GuidRepresentation.Standard,
             MaxConnectionPoolSize = config.MaxConnectionPoolSize,
-            ClusterConfigurator = cb => cb.Subscribe(new DiagnosticsActivityEventSubscriber())
+            ClusterConfigurator = cb => cb.AddTelemetry()
         };
 
         MongoClient = new MongoClient(settings.Freeze());

@@ -87,7 +87,7 @@ public class FailingPartitions : IFailingPartitions
         {
             var partition = kvp.Key;
             var failingPartitionState = kvp.Value;
-            while (ShouldProcessNextEventInPartition(failingPartitionState.Position.StreamPosition, streamProcessorState.Position.StreamPosition) &&
+            while (IsBeforeCurrentHighWatermark(failingPartitionState.Position.StreamPosition, streamProcessorState.Position.StreamPosition) &&
                    ShouldRetryProcessing(failingPartitionState))
             {
                 var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, cancellationToken);
@@ -106,8 +106,13 @@ public class FailingPartitions : IFailingPartitions
                     {
                         throw new StreamEventInWrongPartition(streamEvent, partition);
                     }
-                    if (!ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position.StreamPosition))
+                    if (!IsBeforeCurrentHighWatermark(streamEvent.Position, streamProcessorState.Position.StreamPosition))
                     {
+                        // We have caught up to the current high watermark
+                        // Remove the failing state for this partition
+                        streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken)
+                            .ConfigureAwait(false);
+                        // Return
                         break;
                     }
 
@@ -237,7 +242,7 @@ public class FailingPartitions : IFailingPartitions
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
 
-    static bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
+    static bool IsBeforeCurrentHighWatermark(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
         failingPartitionPosition.Value < streamProcessorPosition.Value;
 
     static bool ShouldRetryProcessing(FailingPartitionState state) =>
