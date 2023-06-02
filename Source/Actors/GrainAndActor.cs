@@ -13,10 +13,6 @@ namespace Dolittle.Runtime.Actors;
 /// <param name="Grain">The type of the grain.</param>
 /// <param name="Actor">The type of the grain actor.</param>
 /// <param name="IsPerTenant">Whether the grain is per tenant.</param>
-public record GrainAndActor(Type Grain, Type Actor, bool IsPerTenant)
+public record GrainAndActor(Type Grain, Type Actor, string Kind, bool IsPerTenant)
 {
-    /// <summary>
-    /// The <see cref="ClusterKind.Name"/> of the grain.
-    /// </summary>
-    public string Kind => Grain.Name;
 }

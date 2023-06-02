@@ -36,7 +36,6 @@ public class TenantGrainsServices : ICanAddServicesForTypesWith<TenantGrainAttri
     /// <inheritdoc />
     public void AddServiceFor(Type type, TenantGrainAttribute attribute, IServiceCollection services)
     {
-        services
-            .AddSingleton(new GrainAndActor(type, attribute.ActorType, true));
+        services.AddSingleton(new GrainAndActor(type, attribute.ActorType, attribute.Kind, true));
     }
 }

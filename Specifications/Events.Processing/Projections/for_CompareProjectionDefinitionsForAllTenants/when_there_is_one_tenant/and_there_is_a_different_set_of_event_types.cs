@@ -43,6 +43,6 @@ public class and_there_is_a_different_set_of_event_types : given.all_dependencie
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_have_result_for_tenant = () => result.ContainsKey(TenantId.Development);
+    It should_have_result_for_tenant = () => result.Keys.ShouldContain(tenant);
     It should_not_be_a_successful_result = () => result[tenant].Succeeded.ShouldBeFalse();
 }

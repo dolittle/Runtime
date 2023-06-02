@@ -27,7 +27,7 @@
         <PollyVersion>7.2.3</PollyVersion>
         <PrometheusVersion>6.0.0</PrometheusVersion>
         <PrometheusNetDotNetRuntimeVersion>4.2.4</PrometheusNetDotNetRuntimeVersion>
-        <ProtoActorVersion>0.33.1-alpha.0.13</ProtoActorVersion>
+        <ProtoActorVersion>1.2.0</ProtoActorVersion>
         <ProtobufVersion>3.23.0</ProtobufVersion>
         <SwashbuckleVersion>6.3.0</SwashbuckleVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
