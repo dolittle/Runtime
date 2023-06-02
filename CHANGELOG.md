@@ -1,3 +1,24 @@
+# [8.9.3] - 2023-6-2 [PR: #738](https://github.com/dolittle/Runtime/pull/738)
+## Summary
+
+This pull request includes various enhancements, bug fixes, and code updates. Please find below the details of the changes:
+
+### Added
+
+- Implemented filtering to MongoDB traces, removing unnecessary noise.
+- Introduced Proto.Actor healthchecks for improved monitoring and diagnostics.
+
+### Changed
+
+- Upgraded the Proto.Actor dependency and transitioned to a single node provider/lookup. This change reduces overhead when running as a single server.
+- Upgraded OTEL libraries
+
+### Fixed
+
+- Fixed an edge case in the catch-up logic that could cause processing to stall.
+- Addressed test assertion issues.
+
+
 # [8.9.2] - 2023-5-10 [PR: #736](https://github.com/dolittle/Runtime/pull/736)
 ## Summary
 
