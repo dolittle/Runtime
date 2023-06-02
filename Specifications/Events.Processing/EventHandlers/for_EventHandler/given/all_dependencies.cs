@@ -115,7 +115,7 @@ public class all_dependencies
 
         var eventSubscriber = new Mock<IStreamEventSubscriber>();
         var eventLogPositionEnricher = new Mock<IMapStreamPositionToEventLogPosition>().Object;
-        
+
         create_scoped_processor_props = (StreamProcessorId streamProcessorId,
             TypeFilterWithEventSourcePartitionDefinition filterDefinition,
             IEventProcessor processor,
@@ -124,17 +124,18 @@ public class all_dependencies
             ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
             TenantId tenantId) => Props.FromProducer(() => new TenantScopedStreamProcessorActor(
             streamProcessorId,
-        filterDefinition,
+            filterDefinition,
             processor,
             eventSubscriber.Object,
             stream_processor_states,
-        executionContext,
+            executionContext,
             eventLogPositionEnricher,
-        NullLogger<TenantScopedStreamProcessorActor>.Instance, 
+            NullLogger<TenantScopedStreamProcessorActor>.Instance,
             onProcessed,
-        onFailedToProcess,
+            onFailedToProcess,
+            Mock.Of<IEventFetchers>(),
             tenantId
-            ));
+        ));
 
 
         create_processor_props = (

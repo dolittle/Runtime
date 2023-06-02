@@ -17,7 +17,7 @@ public interface IEventFetchers
     /// <param name="scopeId">The <see cref="ScopeId" />.</param>
     /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromStream" />.</returns>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="ICanFetchEventsFromStream" />.</returns>
     Task<ICanFetchEventsFromStream> GetFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
     /// <summary>
@@ -26,7 +26,7 @@ public interface IEventFetchers
     /// <param name="scopeId">The <see cref="ScopeId" />.</param>
     /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromPartitionedStream" />.</returns>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="ICanFetchEventsFromPartitionedStream" />.</returns>
     Task<ICanFetchEventsFromPartitionedStream> GetPartitionedFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
     /// <summary>
@@ -35,7 +35,7 @@ public interface IEventFetchers
     /// <param name="scopeId">The <see cref="ScopeId" />.</param>
     /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchRangeOfEventsFromStream" />.</returns>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="ICanFetchRangeOfEventsFromStream" />.</returns>
     Task<ICanFetchRangeOfEventsFromStream> GetRangeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
     /// <summary>
@@ -44,7 +44,7 @@ public interface IEventFetchers
     /// <param name="scopeId">The <see cref="ScopeId" />.</param>
     /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventTypesFromStream" />.</returns>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="ICanFetchEventTypesFromStream" />.</returns>
     Task<ICanFetchEventTypesFromStream> GetTypeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
     /// <summary>
@@ -53,6 +53,6 @@ public interface IEventFetchers
     /// <param name="scopeId">The <see cref="ScopeId" />.</param>
     /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-    /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventTypesFromPartitionedStream" />.</returns>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="ICanFetchEventTypesFromPartitionedStream" />.</returns>
     Task<ICanFetchEventTypesFromPartitionedStream> GetPartitionedTypeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 }

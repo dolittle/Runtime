@@ -139,16 +139,17 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         try
         {
             var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
-            var events = await eventLog
+            var raw = await eventLog
                 .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(limit)
-                .Project(evt => _eventConverter.ToRuntimeCommittedEvent(evt))
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+            var events = raw.Select(evt => _eventConverter.ToRuntimeCommittedEvent(evt)).ToList();
+            
             return new CommittedEvents(events);
         }
-        catch (Exception ex)
+        catch (MongoWaitQueueFullException ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }

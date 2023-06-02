@@ -34,7 +34,6 @@ public delegate Props CreateTenantScopedStreamProcessorProps(StreamProcessorId s
 /// </summary>
 public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 {
-    readonly IStreamDefinition _sourceStreamDefinition;
     readonly TenantId _tenantId;
     readonly TypeFilterWithEventSourcePartitionDefinition _filterDefinition;
     readonly IEventProcessor _processor;
@@ -44,6 +43,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly IMapStreamPositionToEventLogPosition _eventLogPositionEnricher;
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
+    readonly IEventFetchers _eventFetchers;
 
     CancellationTokenSource? _stoppingToken;
     readonly bool _partitioned;
@@ -61,6 +61,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
     /// <param name="eventSubscriber"></param>
     /// <param name="onProcessed"></param>
+    /// <param name="eventFetchers"></param>
     /// <param name="onFailedToProcess"></param>
     public TenantScopedStreamProcessorActor(
         StreamProcessorId streamProcessorId,
@@ -73,6 +74,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         ILogger<TenantScopedStreamProcessorActor> logger,
         ScopedStreamProcessorProcessedEvent onProcessed,
         ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
+        IEventFetchers eventFetchers,
         TenantId tenantId)
     {
         Identifier = streamProcessorId;
@@ -80,6 +82,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         _onProcessed = onProcessed;
         _onFailedToProcess = onFailedToProcess;
         _tenantId = tenantId;
+        _eventFetchers = eventFetchers;
         _eventLogPositionEnricher = eventLogPositionEnricher;
         _eventSubscriber = eventSubscriber;
         _streamProcessorStates = streamProcessorStates;
@@ -141,7 +144,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
         var initialState = processingPosition.Result;
 
-        var from = initialState.EarliestProcessingPosition;
+        var from = initialState.Position;
         var cts = new CancellationTokenSource();
         var events = StartSubscription(from, cts.Token);
         var firstEventReady = events.WaitToReadAsync(cts.Token).AsTask();
@@ -155,14 +158,19 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         {
             if (_partitioned)
             {
+                var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
+                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);
+
                 var processor = new PartitionedProcessor(
                     Identifier,
+                    _filterDefinition.Types,
                     _processor,
                     _streamProcessorStates,
                     _executionContext,
                     _onProcessed,
                     _onFailedToProcess,
                     _tenantId,
+                    (ICanFetchEventsFromPartitionedStream)fetcher,
                     Logger);
 
                 await processor.Process(events, streamProcessorState, context.CancellationToken);

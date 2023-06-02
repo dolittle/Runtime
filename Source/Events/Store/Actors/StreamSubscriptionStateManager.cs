@@ -15,7 +15,7 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-[TenantGrain(typeof(StreamSubscriptionStateActor), typeof(StreamSubscriptionStateClient))]
+[TenantGrain(typeof(StreamSubscriptionStateActor), typeof(StreamSubscriptionStateClient), "dolittle.runtime.events.actors.StreamSubscriptionState")]
 public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
 {
     readonly ISubscriptionStateRepository _repository;
@@ -115,10 +115,11 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
                     SubscriptionId = subscriptionId
                 },
             };
-            if(bucket is not null)
+            if (bucket is not null)
             {
                 streamProcessorStateResponse.Bucket.Add(bucket);
             }
+
             respond(streamProcessorStateResponse);
         }
     }
@@ -149,7 +150,8 @@ public class StreamSubscriptionStateManager : StreamSubscriptionStateBase
                     }
                     else
                     {
-                        _logger.LogWarning("Got unexpected stream processor key type {StreamProcessorKeyType} for scope {ScopeId}", streamProcessorKey.IdCase, scopeId);
+                        _logger.LogWarning("Got unexpected stream processor key type {StreamProcessorKeyType} for scope {ScopeId}", streamProcessorKey.IdCase,
+                            scopeId);
                     }
                 }
 

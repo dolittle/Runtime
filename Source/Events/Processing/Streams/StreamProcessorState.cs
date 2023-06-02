@@ -144,6 +144,8 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
 
     void VerifyEventHasValidProcessingPosition(StreamEvent processedEvent)
     {
+        
+        
         if (processedEvent.CurrentProcessingPosition.StreamPosition != Position.StreamPosition)
         {
             throw new ArgumentException($"The processed event does not match the current position of the stream processor. Expected {Position}, got {processedEvent.CurrentProcessingPosition}", nameof(processedEvent));

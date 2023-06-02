@@ -20,7 +20,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 /// Represents a fetcher.
 /// </summary>
 /// <typeparam name="TEvent">The type of the stored event.</typeparam>
-public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsFromPartitionedStream, ICanFetchRangeOfEventsFromStream, ICanFetchEventTypesFromStream, ICanFetchEventTypesFromPartitionedStream
+public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsFromPartitionedStream, ICanFetchRangeOfEventsFromStream,
+    ICanFetchEventTypesFromStream, ICanFetchEventTypesFromPartitionedStream
     where TEvent : class
 {
     const int FetchEventsBatchSize = 100;
@@ -30,7 +31,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     readonly IMongoCollection<TEvent> _collection;
     readonly FilterDefinitionBuilder<TEvent> _filter;
     readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
-    readonly Expression<Func<TEvent, StreamEvent>> _eventToStreamEvent;
+    readonly Func<TEvent, StreamEvent> _eventToStreamEvent;
     readonly Expression<Func<TEvent, Guid>> _eventToArtifactId;
     readonly Expression<Func<TEvent, uint>> _eventToArtifactGeneration;
     readonly Expression<Func<TEvent, string>> _partitionIdExpression = default;
@@ -61,7 +62,8 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         _collection = collection;
         _filter = filter;
         _sequenceNumberExpression = sequenceNumberExpression;
-        _eventToStreamEvent = eventToStreamEvent;
+        _eventToStreamEvent = eventToStreamEvent.Compile();
+
         _eventToArtifactId = eventToArtifactId;
         _eventToArtifactGeneration = eventToArtifactGeneration;
     }
@@ -97,11 +99,11 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     {
         try
         {
-            var events = await _collection.Find(
-                    _filter.Gte(_sequenceNumberExpression, position.Value))
+            var results = await _collection.Find(_filter.Gte(_sequenceNumberExpression, position.Value))
                 .Limit(FetchEventsBatchSize)
-                .Project(_eventToStreamEvent)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
+            var events = results.Select(_eventToStreamEvent).ToList();
+
             return events == default || events.Count == 0
                 ? new NoEventInStreamAtPosition(_stream, _scope, position)
                 : events;
@@ -133,15 +135,44 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         ThrowIfNotConstructedWithPartitionIdExpression();
         try
         {
-            var events = await _collection.Find(
+            var results = await _collection.Find(
                     _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
                     & _filter.Gte(_sequenceNumberExpression, position.Value))
                 .Limit(FetchEventsBatchSize)
-                .Project(_eventToStreamEvent)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
+            var events = results.Select(_eventToStreamEvent).ToList();
+
             return events == default || events.Count == 0
                 ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, position)
                 : events;
+        }
+        catch (MongoWaitQueueFullException ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+
+    public async Task<(IList<StreamEvent> events, bool hasMoreEvents)> FetchInPartition(PartitionId partitionId, StreamPosition from, StreamPosition to, ISet<Guid> artifactIds,
+        CancellationToken cancellationToken)
+    {
+        ThrowIfNotConstructedWithPartitionIdExpression();
+        try
+        {
+            var composedFilter = _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
+                                 & _filter.Gte(_sequenceNumberExpression, from.Value)
+                                 & _filter.Lt(_sequenceNumberExpression, to.Value);
+            if (artifactIds.Any())
+            {
+                composedFilter &= _filter.In(_eventToArtifactId, artifactIds);
+            }
+
+            var results = await _collection.Find(composedFilter)
+                .Limit(FetchEventsBatchSize)
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            var events = results.Select(_eventToStreamEvent).ToList();
+            
+            return (events, events.Count < FetchEventsBatchSize);
+
         }
         catch (MongoWaitQueueFullException ex)
         {
@@ -156,11 +187,11 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     {
         try
         {
-            return _collection.Find(
+            var results = _collection.Find(
                     _filter.Gte(_sequenceNumberExpression, range.From.Value)
                     & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                .Project(_eventToStreamEvent)
                 .ToAsyncEnumerable(cancellationToken);
+            return results.Select(_eventToStreamEvent);
         }
         catch (MongoWaitQueueFullException ex)
         {
@@ -213,12 +244,12 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
                 set.Add(new Artifact(artifactWithGenerations.Id, generation));
             }
         }
+
         return set;
     }
 
     class ArtifactWithGenerations
     {
-
         public ArtifactWithGenerations(Guid id, IEnumerable<uint> generations)
         {
             Id = id;
