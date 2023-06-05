@@ -74,103 +74,104 @@ public class FailingPartitions : IFailingPartitions
         StreamProcessorState streamProcessorState,
         CancellationToken cancellationToken)
     {
-        if (streamProcessorState.FailingPartitions.Count > 0)
-        {
-            streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken)
-                .ConfigureAwait(false)).Result as StreamProcessorState;
-        }
-
         var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
 
-        // TODO: Failing partitions should be actorified
         foreach (var kvp in failingPartitionsList)
         {
-            var partition = kvp.Key;
-            var failingPartitionState = kvp.Value;
-            while (ShouldProcessNextEventInPartition(failingPartitionState.Position.StreamPosition, streamProcessorState.Position.StreamPosition) &&
-                   ShouldRetryProcessing(failingPartitionState))
+            streamProcessorState = await ProcessPartition(streamProcessorId, streamProcessorState, kvp, cancellationToken);
+        }
+
+        return streamProcessorState;
+    }
+
+    async Task<StreamProcessorState> ProcessPartition(IStreamProcessorId streamProcessorId, StreamProcessorState streamProcessorState, KeyValuePair<PartitionId, FailingPartitionState> kvp,
+        CancellationToken cancellationToken)
+    {
+        var partition = kvp.Key;
+        var failingPartitionState = kvp.Value;
+        while (IsBeforeCurrentHighWatermark(failingPartitionState.Position.StreamPosition, streamProcessorState.Position.StreamPosition) &&
+               ShouldRetryProcessing(failingPartitionState))
+        {
+            var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, cancellationToken);
+            if (!tryGetEvents.Success)
             {
-                var tryGetEvents = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, cancellationToken);
-                
-                // var tryGetEvents = await _eventFetcherPolicies.Fetching.ExecuteAsync(
-                //     _ => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position.StreamPosition, _),
-                //     cancellationToken).ConfigureAwait(false);
-                if (!tryGetEvents.Success)
+                break;
+            }
+
+            foreach (var streamEvent in tryGetEvents.Result)
+            {
+                if (streamEvent.Partition != partition)
+                {
+                    throw new StreamEventInWrongPartition(streamEvent, partition);
+                }
+
+                if (!IsBeforeCurrentHighWatermark(streamEvent.Position, streamProcessorState.Position.StreamPosition))
+                {
+                    // We have caught up to the current high watermark
+                    // Remove the failing state for this partition
+                    streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken)
+                        .ConfigureAwait(false);
+                    return streamProcessorState;
+                }
+
+                if (!ShouldRetryProcessing(failingPartitionState))
                 {
                     break;
                 }
 
-                foreach (var streamEvent in tryGetEvents.Result)
+                var processingResult = await RetryProcessingEvent(
+                    failingPartitionState,
+                    streamEvent.Event,
+                    partition,
+                    _createExecutionContextForEvent(streamEvent),
+                    cancellationToken).ConfigureAwait(false);
+
+                if (processingResult.Succeeded)
                 {
-                    if (streamEvent.Partition != partition)
-                    {
-                        throw new StreamEventInWrongPartition(streamEvent, partition);
-                    }
-                    if (!ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position.StreamPosition))
-                    {
-                        break;
-                    }
-
-                    if (!ShouldRetryProcessing(failingPartitionState))
-                    {
-                        break;
-                    }
-
-                    var processingResult = await RetryProcessingEvent(
-                        failingPartitionState,
-                        streamEvent.Event,
+                    (streamProcessorState, failingPartitionState) = await ChangePositionInFailingPartition(
+                        streamProcessorId,
+                        streamProcessorState,
                         partition,
-                        _createExecutionContextForEvent(streamEvent),
+                        streamEvent.Position + 1,
+                        failingPartitionState.LastFailed,
                         cancellationToken).ConfigureAwait(false);
-
-                    if (processingResult.Succeeded)
-                    {
-                        (streamProcessorState, failingPartitionState) = await ChangePositionInFailingPartition(
-                            streamProcessorId,
-                            streamProcessorState,
-                            partition,
-                            streamEvent.Position + 1,
-                            failingPartitionState.LastFailed,
-                            cancellationToken).ConfigureAwait(false);
-                    }
-                    else if (processingResult.Retry)
-                    {
-                        (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(
-                            streamProcessorId,
-                            streamProcessorState,
-                            partition,
-                            failingPartitionState.ProcessingAttempts + 1,
-                            processingResult.RetryTimeout,
-                            processingResult.FailureReason,
-                            streamEvent.Position,
-                            DateTimeOffset.UtcNow,
-                            cancellationToken).ConfigureAwait(false);
-                        // Important to not process the next events if this failed
-                        break;
-                    }
-                    else
-                    {
-                        (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(
-                            streamProcessorId,
-                            streamProcessorState,
-                            partition,
-                            failingPartitionState.ProcessingAttempts + 1,
-                            DateTimeOffset.MaxValue,
-                            processingResult.FailureReason,
-                            streamEvent.Position,
-                            DateTimeOffset.UtcNow,
-                            cancellationToken).ConfigureAwait(false);
-                        // Important to not process the next events if this failed
-                        break;
-                    }
+                }
+                else if (processingResult.Retry)
+                {
+                    (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(
+                        streamProcessorId,
+                        streamProcessorState,
+                        partition,
+                        failingPartitionState.ProcessingAttempts + 1,
+                        processingResult.RetryTimeout,
+                        processingResult.FailureReason,
+                        streamEvent.Position,
+                        DateTimeOffset.UtcNow,
+                        cancellationToken).ConfigureAwait(false);
+                    // Important to not process the next events if this failed
+                    break;
+                }
+                else
+                {
+                    (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(
+                        streamProcessorId,
+                        streamProcessorState,
+                        partition,
+                        failingPartitionState.ProcessingAttempts + 1,
+                        DateTimeOffset.MaxValue,
+                        processingResult.FailureReason,
+                        streamEvent.Position,
+                        DateTimeOffset.UtcNow,
+                        cancellationToken).ConfigureAwait(false);
+                    // Important to not process the next events if this failed
+                    break;
                 }
             }
+        }
 
-            if (ShouldRetryProcessing(failingPartitionState))
-            {
-                streamProcessorState =
-                    await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken).ConfigureAwait(false);
-            }
+        if (ShouldRetryProcessing(failingPartitionState))
+        {
+            streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition, cancellationToken).ConfigureAwait(false);
         }
 
         return streamProcessorState;
@@ -237,7 +238,7 @@ public class FailingPartitions : IFailingPartitions
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>
         _streamProcessorStates.Persist(streamProcessorId, newState, cancellationToken);
 
-    static bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
+    static bool IsBeforeCurrentHighWatermark(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
         failingPartitionPosition.Value < streamProcessorPosition.Value;
 
     static bool ShouldRetryProcessing(FailingPartitionState state) =>

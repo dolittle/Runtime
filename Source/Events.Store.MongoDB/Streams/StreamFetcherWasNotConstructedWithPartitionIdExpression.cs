@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 public class StreamFetcherWasNotConstructedWithPartitionIdExpression : Exception
 {
     public StreamFetcherWasNotConstructedWithPartitionIdExpression()
-        : base($"The StreamFetcher was constructed without a ParitionId expression. It cannot be used for fetching events or types in a specific partition")
+        : base($"The StreamFetcher was constructed without a PartitionId expression. It cannot be used for fetching events or types in a specific partition")
     {
     }
 }

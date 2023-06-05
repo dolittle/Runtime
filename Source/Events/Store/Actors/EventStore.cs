@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 /// <summary>
 /// Represents the event store grain. 
 /// </summary>
-[TenantGrain(typeof(EventStoreActor), typeof(EventStoreClient))]
+[TenantGrain(typeof(EventStoreActor), typeof(EventStoreClient), "dolittle.runtime.events.actors.EventStore")]
 // ReSharper disable once UnusedType.Global
 public class EventStore : EventStoreBase
 {

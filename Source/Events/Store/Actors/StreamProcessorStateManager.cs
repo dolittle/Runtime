@@ -14,7 +14,7 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-[TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient))]
+[TenantGrain(typeof(StreamProcessorStateActor), typeof(StreamProcessorStateClient),"dolittle.runtime.events.actors.StreamProcessorState")]
 public class StreamProcessorStateManager : StreamProcessorStateBase
 {
     readonly IStreamProcessorStateRepository _repository;
@@ -226,6 +226,7 @@ public class StreamProcessorStateManager : StreamProcessorStateBase
         if (!_changedSubscriptionStates.TryGetValue(scope, out var changedScopedSubscriptionStates))
         {
             _changedSubscriptionStates.Add(scope, changedScopedSubscriptionStates = new());
+            
         }
 
         changedScopedSubscriptionStates[id] = state;

@@ -16,19 +16,26 @@ public class GrainAttribute : Attribute
     /// </summary>
     /// <param name="actorType">The <see cref="Type"/> of the grain actor.</param>
     /// <param name="clientType">The <see cref="Type"/> of the grain client.</param>
-    public GrainAttribute(Type actorType, Type clientType)
+    /// <param name="kind">The kind (type address) of the grain.</param>
+    public GrainAttribute(Type actorType, Type clientType, string kind)
     {
         ActorType = actorType;
         ClientType = clientType;
+        Kind = kind;
     }
-    
+
     /// <summary>
     /// Gets the <see cref="Type"/> of the grain actor.
     /// </summary>
     public Type ActorType { get; }
-    
+
     /// <summary>
     /// Gets the <see cref="Type"/> of the grain client.
     /// </summary>
     public Type ClientType { get; }
+
+    /// <summary>
+    /// Gets the kind (type address) of the grain.
+    /// </summary>
+    public string Kind { get; }
 }

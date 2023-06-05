@@ -18,7 +18,7 @@ public class FilterDefinitionDiscriminatorConvention : IDiscriminatorConvention
     const string Type = "Type";
 
     /// <summary>
-    /// Represents the differnet kinds of FilterDefinitions we have.
+    /// Represents the different kinds of FilterDefinitions we have.
     /// </summary>
     public enum FilterType
     {

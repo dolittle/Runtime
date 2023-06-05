@@ -50,4 +50,7 @@ public interface IEventConverter
     /// <param name="event">The <see cref="mongoDB.Event" /> to be converted.</param>
     /// <returns>The converted <see cref="runtime.CommittedEvent" />.</returns>
     runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event);
+
+    /// <inheritdoc/>
+    runtime.Streams.StreamEvent ToPartitionedRuntimeStreamEvent(mongoDB.Event @event);
 }
