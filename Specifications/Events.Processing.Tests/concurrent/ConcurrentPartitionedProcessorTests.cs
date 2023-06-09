@@ -40,11 +40,9 @@ public class ConcurrentPartitionedProcessorTests
         var state = new State(StreamProcessorState.New, NoWaitingReceipts());
 
         using var cancellationTokenSource = new CancellationTokenSource(100);
-        await state.Invoking(async _ => { await WaitForNextAction(ChannelWithoutEvents(), state, cancellationTokenSource.Token); }).Should()
+        await state.Invoking(async _ => { await WaitForNextAction(ChannelWithoutEvents(), state, cancellationTokenSource!.Token); }).Should()
             .ThrowAsync<OperationCanceledException>();
     }
-
-    private static Channel<StreamEvent> ChannelWithoutEvents() => Channel.CreateBounded<StreamEvent>(100);
 
     [Fact]
     public async Task ShouldReturnProcessNextEventWhenMessageAvailable()
@@ -100,6 +98,51 @@ public class ConcurrentPartitionedProcessorTests
         nextAction.Should().Be(NextAction.ReceiveResult);
     }
 
+    [Fact]
+    public async Task ShouldReturnReceiveResultWhenActiveRequestsCompletedAndNoRetryAndNoMessageAvailable()
+    {
+        var state = new State(StreamProcessorState.New, WithWaitingReceipt());
+
+        var (nextAction, partitionId) = await WaitForNextAction(ChannelWithoutEvents(), state, CancellationTokens.FromSeconds(1));
+
+        nextAction.Should().Be(NextAction.ReceiveResult);
+        partitionId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ShouldReturnProcessFailedEventWhenRetryTimeExpiredAndMessageAvailable()
+    {
+        var state = new State(FailingProcessorStateWithRetryIn(TimeSpan.Zero, "failing-partition"), NoWaitingReceipts());
+
+        var (nextAction, partitionId) = await WaitForNextAction(ChannelWithEvent(), state, CancellationTokens.FromSeconds(1));
+
+        nextAction.Should().Be(NextAction.ProcessFailedEvent);
+        partitionId.Should().Be(new PartitionId("failing-partition"));
+    }
+
+    [Fact]
+    public async Task ShouldReturnProcessNextEventWhenRetryTimeNotExpiredAndMessageAvailable()
+    {
+        var state = new State(FailingProcessorStateWithRetryIn(TimeSpan.FromSeconds(1), "failing-partition"), NoWaitingReceipts());
+
+        var (nextAction, partitionId) = await WaitForNextAction(ChannelWithEvent(), state, CancellationTokens.FromSeconds(2));
+
+        nextAction.Should().Be(NextAction.ProcessNextEvent);
+        partitionId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ShouldReturnProcessNextEventWhenRetryTimeNotExpiredAndMessageAvailableAfterDelay()
+    {
+        var state = new State(FailingProcessorStateWithRetryIn(TimeSpan.FromSeconds(1), "failing-partition"), NoWaitingReceipts());
+
+        var (nextAction, partitionId) =
+            await WaitForNextAction(ChannelWithEventAvailableAfter(TimeSpan.FromMicroseconds(50)), state, CancellationTokens.FromSeconds(2));
+
+        nextAction.Should().Be(NextAction.ProcessNextEvent);
+        partitionId.Should().BeNull();
+    }
+
     private static ActiveRequests NoWaitingReceipts() => new(5);
 
     private static ActiveRequests WithWaitingReceipt()
@@ -131,4 +174,17 @@ public class ConcurrentPartitionedProcessorTests
         events.Writer.WriteAsync(FirstStreamEvent).GetAwaiter().GetResult();
         return events;
     }
+
+    private static Channel<StreamEvent> ChannelWithEventAvailableAfter(TimeSpan timeSpan)
+    {
+        var events = Channel.CreateBounded<StreamEvent>(100);
+        Task.Run(async () =>
+        {
+            await Task.Delay(timeSpan);
+            events.Writer.WriteAsync(FirstStreamEvent).GetAwaiter().GetResult();
+        });
+        return events;
+    }
+
+    private static Channel<StreamEvent> ChannelWithoutEvents() => Channel.CreateBounded<StreamEvent>(100);
 }
