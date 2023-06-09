@@ -34,4 +34,8 @@ public interface ICanFetchEventsFromPartitionedStream : ICanFetchEventsFromStrea
     /// <returns>The <see cref="Try{TResult}" /> with <see cref="StreamEvent" /> result.</returns>
     Task<(IList<StreamEvent> events, bool hasMoreEvents)> FetchInPartition(PartitionId partitionId, StreamPosition from, StreamPosition to, ISet<Guid> artifactIds,
         CancellationToken cancellationToken);
+
+    Task<(StreamEvent? events, bool hasMoreEvents)> FetchNextEventInPartition(PartitionId partitionId, StreamPosition from, StreamPosition to,
+        ISet<Guid> artifactIds,
+        CancellationToken cancellationToken);
 }

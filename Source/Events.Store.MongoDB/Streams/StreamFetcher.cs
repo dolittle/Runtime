@@ -152,7 +152,8 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         }
     }
 
-    public async Task<(IList<StreamEvent> events, bool hasMoreEvents)> FetchInPartition(PartitionId partitionId, StreamPosition from, StreamPosition to, ISet<Guid> artifactIds,
+    public async Task<(IList<StreamEvent> events, bool hasMoreEvents)> FetchInPartition(PartitionId partitionId, StreamPosition from, StreamPosition to,
+        ISet<Guid> artifactIds,
         CancellationToken cancellationToken)
     {
         ThrowIfNotConstructedWithPartitionIdExpression();
@@ -170,9 +171,43 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
                 .Limit(FetchEventsBatchSize)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             var events = results.Select(_eventToStreamEvent).ToList();
-            
-            return (events, events.Count < FetchEventsBatchSize);
 
+            return (events, events.Count < FetchEventsBatchSize);
+        }
+        catch (MongoWaitQueueFullException ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+
+    public async Task<(StreamEvent? events, bool hasMoreEvents)> FetchNextEventInPartition(PartitionId partitionId, StreamPosition from, StreamPosition to,
+        ISet<Guid> artifactIds,
+        CancellationToken cancellationToken)
+    {
+        ThrowIfNotConstructedWithPartitionIdExpression();
+        try
+        {
+            var composedFilter = _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
+                                 & _filter.Gte(_sequenceNumberExpression, from.Value)
+                                 & _filter.Lt(_sequenceNumberExpression, to.Value);
+            if (artifactIds.Any())
+            {
+                composedFilter &= _filter.In(_eventToArtifactId, artifactIds);
+            }
+
+            var results = await _collection.Find(composedFilter)
+                .Limit(2)
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            if (results.Count == 0)
+                return (null, false);
+
+            return results.Count switch
+            {
+                0 => (null, false),
+                1 => (_eventToStreamEvent(results[0]), false),
+                _ => (_eventToStreamEvent(results[0]), true)
+            };
         }
         catch (MongoWaitQueueFullException ex)
         {

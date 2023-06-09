@@ -14,7 +14,7 @@ public class ActorPropsAdder : ICanAddServices
 {
     public void AddTo(IServiceCollection services)
     {
-        services.AddSingleton<CreateStreamProcessorActorProps>(sp => StreamProcessorActor.CreateFactory(new CreateProps(sp)));
+        services.AddSingleton<CreateStreamProcessorActorProps>(sp => EventHandlerProcessorActor.CreateFactory(new CreateProps(sp)));
         services.AddScoped<Func<TenantId, CreateTenantScopedStreamProcessorProps>>(globalServiceProvider =>
             tenant =>
             {

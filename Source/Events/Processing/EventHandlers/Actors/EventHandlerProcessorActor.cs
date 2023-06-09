@@ -29,19 +29,21 @@ public delegate Props CreateStreamProcessorActorProps(
     StreamProcessorProcessedEvent processedEvent,
     StreamProcessorFailedToProcessEvent failedToProcessEvent,
     ExecutionContext executionContext,
+    EventHandlerInfo eventHandlerInfo,
     CancellationTokenSource cancellationTokenSource);
 
 /// <summary>
 /// Represents a system for working with all the <see cref="TenantScopedStreamProcessorActor" /> registered for <see cref="ITenants.All" />.
 /// </summary>
-public class StreamProcessorActor : IDisposable, IActor
+public class EventHandlerProcessorActor : IDisposable, IActor
 {
     readonly StreamProcessorId _identifier;
     readonly ITenants _tenants;
     readonly Func<TenantId, IStreamProcessorStates> _getStreamProcessorStates;
+    readonly EventHandlerInfo _eventHandlerInfo;
     readonly Func<TenantId, IEventProcessor> _createEventProcessorFor;
     readonly Streams.IMetricsCollector _metrics;
-    readonly ILogger<StreamProcessorActor> _logger;
+    readonly ILogger<EventHandlerProcessorActor> _logger;
     readonly Func<TenantId, CreateTenantScopedStreamProcessorProps> _getCreateScopedStreamProcessorProps;
     readonly StreamProcessorProcessedEvent _onProcessedEvent;
     readonly StreamProcessorFailedToProcessEvent _onFailedToProcessEvent;
@@ -55,7 +57,7 @@ public class StreamProcessorActor : IDisposable, IActor
 
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StreamProcessorActor"/> class.
+    /// Initializes a new instance of the <see cref="EventHandlerProcessorActor"/> class.
     /// </summary>
     /// <param name="streamProcessorId">The identifier of the stream processor.</param>
     /// <param name="streamDefinition">The definition of the stream the processor should process events from.</param>
@@ -68,8 +70,9 @@ public class StreamProcessorActor : IDisposable, IActor
     /// <param name="getCreateScopedStreamProcessorProps">The factory to us to get the scoped stream processor creator per tenant.</param>
     /// <param name="tenants"></param>
     /// <param name="getStreamProcessorStates"></param>
+    /// <param name="eventHandlerInfo"></param>
     /// <param name="stoppingToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
-    public StreamProcessorActor(
+    public EventHandlerProcessorActor(
         StreamProcessorId streamProcessorId,
         IStreamDefinition streamDefinition,
         Func<TenantId, IEventProcessor> createEventProcessorFor,
@@ -77,10 +80,11 @@ public class StreamProcessorActor : IDisposable, IActor
         Streams.IMetricsCollector metrics,
         StreamProcessorProcessedEvent onProcessedEvent,
         StreamProcessorFailedToProcessEvent onFailedToProcessEvent,
-        ILogger<StreamProcessorActor> logger,
+        ILogger<EventHandlerProcessorActor> logger,
         Func<TenantId, CreateTenantScopedStreamProcessorProps> getCreateScopedStreamProcessorProps,
         ITenants tenants,
         Func<TenantId, IStreamProcessorStates> getStreamProcessorStates,
+        EventHandlerInfo eventHandlerInfo,
         CancellationTokenSource stoppingToken)
     {
         if (streamDefinition.FilterDefinition is not TypeFilterWithEventSourcePartitionDefinition filter)
@@ -93,6 +97,7 @@ public class StreamProcessorActor : IDisposable, IActor
         _identifier = streamProcessorId;
         _tenants = tenants;
         _getStreamProcessorStates = getStreamProcessorStates;
+        _eventHandlerInfo = eventHandlerInfo;
         _createEventProcessorFor = createEventProcessorFor;
         _metrics = metrics;
         _logger = logger;
@@ -105,8 +110,8 @@ public class StreamProcessorActor : IDisposable, IActor
     }
 
     public static CreateStreamProcessorActorProps CreateFactory(ICreateProps provider)
-        => (streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext, cancellationTokenSource) =>
-            CreatePropsFor(provider, streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext,
+        => (streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext, eventHandlerInfo, cancellationTokenSource) =>
+            CreatePropsFor(provider, streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext, eventHandlerInfo,
                 cancellationTokenSource);
 
     static Props CreatePropsFor(ICreateProps provider,
@@ -116,9 +121,10 @@ public class StreamProcessorActor : IDisposable, IActor
         StreamProcessorProcessedEvent processedEvent,
         StreamProcessorFailedToProcessEvent failedToProcessEvent,
         ExecutionContext executionContext,
+        EventHandlerInfo eventHandlerInfo,
         CancellationTokenSource cancellationTokenSource)
-        => provider.PropsFor<StreamProcessorActor>(
-            streamProcessorId, streamDefinition, createEventProcessorFor, executionContext, processedEvent, failedToProcessEvent, cancellationTokenSource);
+        => provider.PropsFor<EventHandlerProcessorActor>(
+            streamProcessorId, streamDefinition, createEventProcessorFor, executionContext, processedEvent, failedToProcessEvent, eventHandlerInfo, cancellationTokenSource);
 
     public async Task ReceiveAsync(IContext context)
     {
@@ -277,7 +283,7 @@ public class StreamProcessorActor : IDisposable, IActor
         }
 
         var props = _getCreateScopedStreamProcessorProps(tenant).Invoke(_identifier, _filter, _createEventProcessorFor(tenant), _executionContext,
-            OnProcessed, FailedToProcessedEvent, tenant);
+            OnProcessed, FailedToProcessedEvent, _eventHandlerInfo, tenant);
 
         var tenantProcessorPid = context.Spawn(props);
 

@@ -86,7 +86,7 @@ public class EventHandler : JobBase
 
         var eventHandlers = new List<IEventHandler>();
         eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.Create(
-            new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default),
+            new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default, Concurrency),
             _dispatcher.Object,
             CancellationToken.None)));
         _eventHandlersToRun = eventHandlers;
@@ -122,6 +122,10 @@ public class EventHandler : JobBase
     /// </summary>
     // [Params(1, 10)] TODO: We can maybe enable this in the future, but as of now it seems that the performance depends on the amount of events processed.
     public int EventTypes { get; set; } = 1;
+    
+    
+    [Params(1, 20)]
+    public int Concurrency { get; set; } = 1;
     
     /// <summary>
     /// Gets the number of events committed per configured event type.

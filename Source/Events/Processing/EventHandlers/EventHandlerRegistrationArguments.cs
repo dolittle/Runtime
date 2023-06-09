@@ -21,7 +21,9 @@ public record EventHandlerRegistrationArguments
     /// <param name="eventTypes">The Event types that the Event Handler handles.</param>
     /// <param name="partitioned">Whether the Event Handler is partitioned or unpartitioned.</param>
     /// <param name="scope">The Scope the Event Handler will be handling events in.</param>
-    public EventHandlerRegistrationArguments(ExecutionContext executionContext, EventProcessorId eventHandler, IEnumerable<ArtifactId> eventTypes, bool partitioned, ScopeId scope)
+    /// <param name="concurrency">How many concurrent calls the Event Handler can process simultaneously</param>
+    public EventHandlerRegistrationArguments(ExecutionContext executionContext, EventProcessorId eventHandler, IEnumerable<ArtifactId> eventTypes,
+        bool partitioned, ScopeId scope, int concurrency)
     {
         ExecutionContext = executionContext;
         EventHandler = eventHandler;
@@ -30,6 +32,7 @@ public record EventHandlerRegistrationArguments
         Scope = scope;
         Alias = EventHandlerAlias.NotSet;
         HasAlias = false;
+        Concurrency = concurrency > 0 ? concurrency : 1;
     }
 
     /// <summary>
@@ -41,7 +44,9 @@ public record EventHandlerRegistrationArguments
     /// <param name="partitioned">Whether the Event Handler is partitioned or unpartitioned.</param>
     /// <param name="scope">The Scope the Event Handler will be handling events in.</param>
     /// <param name="alias">The alias of the Event Handler.</param>
-    public EventHandlerRegistrationArguments(ExecutionContext executionContext, EventProcessorId eventHandler, IEnumerable<ArtifactId> eventTypes, bool partitioned, ScopeId scope, EventHandlerAlias alias)
+    /// <param name="concurrency">How many concurrent calls the Event Handler can process simultaneously</param>
+    public EventHandlerRegistrationArguments(ExecutionContext executionContext, EventProcessorId eventHandler, IEnumerable<ArtifactId> eventTypes,
+        bool partitioned, ScopeId scope, EventHandlerAlias alias, int concurrency = 1)
     {
         ExecutionContext = executionContext;
         EventHandler = eventHandler;
@@ -49,39 +54,45 @@ public record EventHandlerRegistrationArguments
         Partitioned = partitioned;
         Scope = scope;
         Alias = alias;
+        Concurrency = concurrency > 0 ? concurrency : 1;
         HasAlias = true;
     }
+
+    /// <summary>
+    /// How many concurrent calls the Event Handler can process simultaneously.
+    /// </summary>
+    public int Concurrency { get; set; }
 
     /// <summary>
     /// Gets the ExecutionContext of the Client while registering.
     /// </summary>
     public ExecutionContext ExecutionContext { get; }
-        
+
     /// <summary>
     /// Gets the identifier of the Event Handler.
     /// </summary>
     public EventProcessorId EventHandler { get; }
-        
+
     /// <summary>
     /// Gets the Event types that the Event Handler handles.
     /// </summary>
     public IEnumerable<ArtifactId> EventTypes { get; }
-        
+
     /// <summary>
     /// Gets a value indicating whether the Event Handler is partitioned or unpartitioned.
     /// </summary>
     public bool Partitioned { get; }
-        
+
     /// <summary>
     /// Gets the Scope the Event Handler will be handling events in.
     /// </summary>
     public ScopeId Scope { get; }
-        
+
     /// <summary>
     /// Gets the alias of the Event Handler if set, or <see cref="EventHandlerAlias.NotSet"/> if not passed from the Client.
     /// </summary>
     public EventHandlerAlias Alias { get; }
-        
+
     /// <summary>
     /// Gets a value indicating whether or not the Client passed along an alias for the Event Handler.
     /// </summary>

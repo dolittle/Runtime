@@ -122,6 +122,7 @@ public class all_dependencies
             ExecutionContext executionContext,
             ScopedStreamProcessorProcessedEvent onProcessed,
             ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
+            EventHandlerInfo EventHandlerInfo,
             TenantId tenantId) => Props.FromProducer(() => new TenantScopedStreamProcessorActor(
             streamProcessorId,
             filterDefinition,
@@ -134,9 +135,9 @@ public class all_dependencies
             onProcessed,
             onFailedToProcess,
             Mock.Of<IEventFetchers>(),
+            EventHandlerInfo,
             tenantId
         ));
-
 
         create_processor_props = (
             StreamProcessorId streamProcessorId,
@@ -145,18 +146,23 @@ public class all_dependencies
             StreamProcessorProcessedEvent processedEvent,
             StreamProcessorFailedToProcessEvent failedToProcessEvent,
             ExecutionContext executionContext,
-            CancellationTokenSource cancellationTokenSource) => Props.FromProducer(() => new StreamProcessorActor(streamProcessorId,
-            streamDefinition,
-            createEventProcessorFor,
-            executionContext,
-            new Mock<Streams.IMetricsCollector>().Object,
-            processedEvent,
-            failedToProcessEvent,
-            NullLogger<StreamProcessorActor>.Instance,
-            tenant => create_scoped_processor_props,
-            tenants,
-            tenant => stream_processor_states,
-            cancellationTokenSource));
+            EventHandlerInfo eventHandlerInfo,
+            CancellationTokenSource cancellationTokenSource) => Props.FromProducer(() =>
+        {
+            return new EventHandlerProcessorActor(streamProcessorId,
+                streamDefinition,
+                createEventProcessorFor,
+                executionContext,
+                new Mock<Streams.IMetricsCollector>().Object,
+                processedEvent,
+                failedToProcessEvent,
+                NullLogger<EventHandlerProcessorActor>.Instance,
+                tenant => create_scoped_processor_props,
+                tenants,
+                tenant => stream_processor_states,
+                eventHandlerInfo,
+                cancellationTokenSource);
+        });
     };
 
     private Cleanup cleanup = () => { _ = actor_system.ShutdownAsync(); };

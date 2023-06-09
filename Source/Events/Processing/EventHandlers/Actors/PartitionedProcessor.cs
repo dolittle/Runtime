@@ -198,7 +198,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
             };
         }
 
-        var (processorState, _) = await ProcessEvent(evt, state.ProcessorState, GetExecutionContextForEvent(evt), cancellationToken);
+        var (processorState, _) = await ProcessEventAndHandleResult(evt, state.ProcessorState, cancellationToken);
         state = state with
         {
             ProcessorState = processorState
@@ -243,12 +243,11 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
         var (events, hasMoreEvents) = await _fetcher.FetchInPartition(partition, startPosition, highWatermark, _handledTypes, cancellationToken);
         foreach (var streamEvent in events)
         {
-            var (newState, processingResult) = await RetryProcessingEvent(
+            var (newState, processingResult) = await RetryProcessingEventAndHandleResult(
                 streamEvent,
                 state.ProcessorState,
                 failingPartitionState.Reason,
                 failingPartitionState.ProcessingAttempts,
-                GetExecutionContextForEvent(streamEvent),
                 cancellationToken).ConfigureAwait(false);
             await PersistNewState(newState, CancellationToken.None);
 
