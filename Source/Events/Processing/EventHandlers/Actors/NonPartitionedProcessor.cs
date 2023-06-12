@@ -45,7 +45,7 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
                 {
                     var evt = await messages.ReadAsync(cancellationToken);
 
-                    (currentState, var processingResult) = await ProcessEvent(evt, currentState, GetExecutionContextForEvent(evt), cancellationToken);
+                    (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, cancellationToken);
                     await PersistNewState(currentState, cancellationToken);
 
                     while (processingResult is { Succeeded: false, Retry: true })
@@ -60,9 +60,8 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
                             Logger.LogInformation("Will retry processing event {evt.Position} directly", evt);
                         }
 
-                        (currentState, processingResult) = await RetryProcessingEvent(evt, currentState, processingResult.FailureReason,
-                            currentState.ProcessingAttempts + 1,
-                            GetExecutionContextForEvent(evt), cancellationToken);
+                        (currentState, processingResult) = await RetryProcessingEventAndHandleResult(evt, currentState, processingResult.FailureReason,
+                            currentState.ProcessingAttempts + 1, cancellationToken);
                     }
 
                     if (!processingResult.Succeeded)

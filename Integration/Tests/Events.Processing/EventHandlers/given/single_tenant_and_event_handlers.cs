@@ -54,6 +54,8 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
     protected static Dictionary<ScopeId, CommittedEvents> scoped_committed_events = default!;
     protected static IWriteEventHorizonEvents event_horizon_events_writer = default!;
     protected static EventLogSequenceNumber external_event_sequence_number = default!;
+    protected static int concurrency = 1;
+
 
     static ICommitExternalEvents external_event_committer = default!;
     static int number_of_events_handled;
@@ -120,7 +122,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         {
             while (!cts.IsCancellationRequested)
             {
-                var evt = Task.Run(async () => await reader.ReadAsync(CancellationToken.None),cts.Token).GetAwaiter().GetResult();
+                var evt = Task.Run(async () => await reader.ReadAsync(CancellationToken.None), cts.Token).GetAwaiter().GetResult();
                 events.Add(evt);
             }
         }
@@ -215,7 +217,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         {
             var (partitioned, max_event_types_to_filter, scope, fast, implicitFilter) = _;
             var registration_arguments = new EventHandlerRegistrationArguments(
-                Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope);
+                Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope, concurrency);
             return event_handler_factory.Create(registration_arguments, dispatcher.Object, CancellationToken.None);
         }).ToArray();
     }

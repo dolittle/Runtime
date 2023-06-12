@@ -105,7 +105,8 @@ public class ActorEventHandler : IEventHandler
         _arguments.HasAlias,
         _arguments.Alias,
         _arguments.EventTypes,
-        _arguments.Partitioned);
+        _arguments.Partitioned,
+        _arguments.Concurrency);
 
     public ScopeId Scope => _arguments.Scope.Value;
 
@@ -221,8 +222,17 @@ public class ActorEventHandler : IEventHandler
         }
 
         var props = _createStreamProcessorActorProps.Invoke(StreamProcessorId, FilteredStreamDefinition, _eventProcessorForTenant,
-            ProcessedEvent, FailedToProcessEvent, _executionContext, _cancellationTokenSource);
-        _eventHandlerKindPid = _actorSystem.Root.SpawnNamed(props, EventProcessor.Value.ToString());
+            ProcessedEvent, FailedToProcessEvent, _executionContext, Info, _cancellationTokenSource);
+        try
+        {
+            _eventHandlerKindPid = _actorSystem.Root.SpawnNamed(props, EventProcessor.Value.ToString());
+
+        }
+        catch (ProcessNameExistException ex)
+        {
+            _logger.ErrorWhileStartingEventHandler(ex, EventProcessor, Scope);
+            ExceptionDispatchInfo.Capture(ex).Throw();
+        }
 
 
         // _logger.StartingEventHandler(FilterDefinition.TargetStream);

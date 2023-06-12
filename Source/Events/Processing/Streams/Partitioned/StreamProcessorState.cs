@@ -34,9 +34,6 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
     {
     }
 
-    // public StreamProcessorState(ProcessingPosition position, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
-    //     : this(position.StreamPosition, position.EventLogPosition, failingPartitions, lastSuccessfullyProcessed){}
-
     /// <summary>
     /// Gets a new, initial, <see cref="StreamProcessorState" />.
     /// </summary>

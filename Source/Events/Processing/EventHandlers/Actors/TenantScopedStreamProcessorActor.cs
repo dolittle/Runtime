@@ -27,6 +27,7 @@ public delegate Props CreateTenantScopedStreamProcessorProps(StreamProcessorId s
     ExecutionContext executionContext,
     ScopedStreamProcessorProcessedEvent onProcessed,
     ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
+    EventHandlerInfo eventHandlerInfo,
     TenantId tenantId);
 
 /// <summary>
@@ -47,10 +48,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     CancellationTokenSource? _stoppingToken;
     readonly bool _partitioned;
+    readonly int _concurrency;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantScopedStreamProcessorActor"/> class.
     /// </summary>
+    /// <param name="eventHandlerInfo"></param>
     /// <param name="tenantId">The <see cref="TenantId"/>.</param>
     /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
     /// <param name="filterDefinition"></param>
@@ -75,6 +78,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         ScopedStreamProcessorProcessedEvent onProcessed,
         ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
         IEventFetchers eventFetchers,
+        EventHandlerInfo eventHandlerInfo,
         TenantId tenantId)
     {
         Identifier = streamProcessorId;
@@ -90,11 +94,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         _processor = processor;
         _executionContext = executionContext;
         _partitioned = filterDefinition.Partitioned;
+        _concurrency = eventHandlerInfo.Concurrency;
     }
 
     public static CreateTenantScopedStreamProcessorProps CreateFactory(ICreateProps createProps)
-        => (streamProcessorId, filterDefinition, processor, executionContext, onProcessed, onFailedToProcess, tenantId) =>
-            PropsFor(createProps, streamProcessorId, filterDefinition, processor, executionContext, onProcessed, onFailedToProcess, tenantId);
+        => (streamProcessorId, filterDefinition, processor, executionContext, onProcessed, onFailedToProcess, eventHandlerInfo, tenantId) =>
+            PropsFor(createProps, streamProcessorId, filterDefinition, processor, executionContext, onProcessed, onFailedToProcess, eventHandlerInfo, tenantId);
 
     static Props PropsFor(ICreateProps createProps,
         StreamProcessorId streamProcessorId,
@@ -103,11 +108,19 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         ExecutionContext executionContext,
         ScopedStreamProcessorProcessedEvent onProcessed,
         ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
+        EventHandlerInfo eventHandlerInfo,
         TenantId tenantId
     )
     {
-        return createProps.PropsFor<TenantScopedStreamProcessorActor>(streamProcessorId, filterDefinition, processor, executionContext, onProcessed,
-            onFailedToProcess, tenantId);
+        return createProps.PropsFor<TenantScopedStreamProcessorActor>(
+            streamProcessorId,
+            filterDefinition,
+            processor,
+            executionContext,
+            onProcessed,
+            onFailedToProcess,
+            eventHandlerInfo,
+            tenantId);
     }
 
     public async Task ReceiveAsync(IContext context)
@@ -156,7 +169,27 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     {
         try
         {
-            if (_partitioned)
+            if (_concurrency > 1 && _partitioned)
+            {
+                var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
+                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);
+
+                var processor = new ConcurrentPartitionedProcessor(
+                    Identifier,
+                    _filterDefinition.Types,
+                    _processor,
+                    _streamProcessorStates,
+                    _executionContext,
+                    _onProcessed,
+                    _onFailedToProcess,
+                    _tenantId,
+                    (ICanFetchEventsFromPartitionedStream)fetcher,
+                    _concurrency,
+                    Logger);
+
+                await processor.Process(events, streamProcessorState, context.CancellationToken);
+            }
+            else if (_partitioned)
             {
                 var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
                 var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);

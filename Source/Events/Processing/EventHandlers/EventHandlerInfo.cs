@@ -14,4 +14,5 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 /// <param name="Alias">The alias of the Event Handler.</param>
 /// <param name="EventTypes">The Event types that the Event Handler handles..</param>
 /// <param name="Partitioned">Whether the Event Handler is partitioned.</param>
-public record EventHandlerInfo(EventHandlerId Id, bool HasAlias, EventHandlerAlias Alias, IEnumerable<ArtifactId> EventTypes, bool Partitioned);
+/// <param name="Concurrency">How many events the handler can process simultaneously.</param>
+public record EventHandlerInfo(EventHandlerId Id, bool HasAlias, EventHandlerAlias Alias, IEnumerable<ArtifactId> EventTypes, bool Partitioned, int Concurrency);

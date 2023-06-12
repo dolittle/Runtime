@@ -25,13 +25,15 @@ public class EventHandlersProtocol : IEventHandlersProtocol
                 arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
                 arguments.Partitioned,
                 arguments.ScopeId.ToGuid(),
-                arguments.Alias),
+                arguments.Alias,
+                arguments.Concurrency),
             false => new EventHandlerRegistrationArguments(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
                 arguments.EventHandlerId.ToGuid(),
                 arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
                 arguments.Partitioned,
-                arguments.ScopeId.ToGuid()),
+                arguments.ScopeId.ToGuid(),
+                arguments.Concurrency),
         };
 
     /// <inheritdoc/>
