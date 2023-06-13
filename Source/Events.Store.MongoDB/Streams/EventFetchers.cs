@@ -113,6 +113,7 @@ public class EventFetchers : IEventFetchers
                 await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
                 Builders<MongoDB.Events.Event>.Filter,
                 _ => _.EventLogSequenceNumber,
+                _ => _.EventLogSequenceNumber,
                 _ => _eventConverter.ToPartitionedRuntimeStreamEvent(_),
                 _ => _.Metadata.TypeId,
                 _ => _.Metadata.TypeGeneration,
@@ -126,6 +127,7 @@ public class EventFetchers : IEventFetchers
             await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
             Builders<MongoDB.Events.Event>.Filter,
             _ => _.EventLogSequenceNumber,
+            _ => _.EventLogSequenceNumber,
             _ => _eventConverter.ToRuntimeStreamEvent(_),
             _ => _.Metadata.TypeId,
             _ => _.Metadata.TypeGeneration);
@@ -138,6 +140,7 @@ public class EventFetchers : IEventFetchers
             scopeId,
             collection,
             Builders<Events.StreamEvent>.Filter,
+            _ => _.StreamPosition,
             _ => _.StreamPosition,
             _ => _eventConverter.ToRuntimeStreamEvent(_, streamId, partitioned),
             _ => _.Metadata.TypeId,

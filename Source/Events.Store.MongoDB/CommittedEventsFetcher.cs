@@ -87,52 +87,6 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
     }
 
-    /// <inheritdoc />
-    public async Task<StreamPosition> GetStreamPositionFromArtifactSet(ScopeId scope, EventLogSequenceNumber to, IEnumerable<ArtifactId> eventTypes,
-        CancellationToken cancellationToken)
-    {
-        if (to == EventLogSequenceNumber.Initial) return StreamPosition.Start;
-
-        var filter = _eventFilter.And(
-            _eventFilter.Lte(_ => _.EventLogSequenceNumber, to.Value),
-            ToMongoFilterDefinition(eventTypes)
-        );
-        var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
-        return (ulong)await eventLog.CountDocumentsAsync(
-                filter,
-                cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-    }
-
-    public Task<Try<EventLogSequenceNumber>> GetEventLogSequenceFromArtifactSet(ScopeId scope, StreamPosition nextStreamPosition, IEnumerable<ArtifactId> eventTypes,
-        CancellationToken cancellationToken)
-    {
-        if (nextStreamPosition == StreamPosition.Start) return Task.FromResult(Try<EventLogSequenceNumber>.Succeeded(EventLogSequenceNumber.Initial));
-        return Try<EventLogSequenceNumber>.DoAsync(async () =>
-        {
-            var filter = ToMongoFilterDefinition(eventTypes);
-            var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
-            var value = Convert.ToInt32(nextStreamPosition.Value);
-            
-            var evt = await eventLog.Find(filter)
-                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
-                .Limit(value)
-                .Skip(value-1)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            _logger.LogInformation("StreamPosition {Position} mapped to event log sequence {Sequence} for {Scope} with event types {@EventTypes}", value, evt?.EventLogSequenceNumber, scope, eventTypes);
-            if (evt == null) throw new ArgumentException("Could not find event log sequence number");
-
-            return new EventLogSequenceNumber(evt.EventLogSequenceNumber + 1);
-        });
-    }
-
-    FilterDefinition<Events.Event> ToMongoFilterDefinition(IEnumerable<ArtifactId> artifactIds)
-    {
-        var eventTypes = artifactIds.Select(_ => _.Value).ToHashSet();
-        return _eventFilter.In(_ => _.Metadata.TypeId, eventTypes);
-    }
-
     /// <inheritdoc/>
     public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken)
     {

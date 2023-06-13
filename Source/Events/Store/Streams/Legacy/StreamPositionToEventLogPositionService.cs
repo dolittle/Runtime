@@ -60,14 +60,18 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
         {
             Position = state.Position with
             {
-                EventLogPosition = await GetEventLogPosition(id, state.Position.StreamPosition, cancellationToken)
+                EventLogPosition = await GetEventLogPosition(id, true, state.Position.StreamPosition, cancellationToken)
             },
             FailingPartitions = await Enrich(id, state.FailingPartitions, cancellationToken)
         });
 
-    async Task<EventLogSequenceNumber> GetEventLogPosition(StreamProcessorId id, StreamPosition streamPosition, CancellationToken cancellationToken)
+    async Task<EventLogSequenceNumber> GetEventLogPosition(StreamProcessorId id, bool partitioned, StreamPosition streamPosition, CancellationToken cancellationToken)
     {
-        var eventLogPosition = await _getEventLogSequenceFromStreamPosition.TryGetEventLogPositionForStreamProcessor(id, streamPosition, cancellationToken);
+        if(streamPosition == StreamPosition.Start)
+        {
+            return EventLogSequenceNumber.Initial;
+        }
+        var eventLogPosition = await _getEventLogSequenceFromStreamPosition.TryGetEventLogPositionForStreamProcessor(id, partitioned, streamPosition, cancellationToken);
 
         if (!eventLogPosition.Success)
         {
@@ -90,7 +94,7 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
             {
                 Position = failingPartition.Value.Position with
                 {
-                    EventLogPosition = await GetEventLogPosition(id, failingPartition.Value.Position.StreamPosition, cancellationToken)
+                    EventLogPosition = await GetEventLogPosition(id, true, failingPartition.Value.Position.StreamPosition, cancellationToken)
                 },
             });
         }
@@ -104,7 +108,7 @@ public class StreamPositionToEventLogPositionService : IMapStreamPositionToEvent
         {
             Position = state.Position with
             {
-                EventLogPosition = await GetEventLogPosition(id, state.Position.StreamPosition, cancellationToken)
+                EventLogPosition = await GetEventLogPosition(id, false, state.Position.StreamPosition, cancellationToken)
             }
         });
 }

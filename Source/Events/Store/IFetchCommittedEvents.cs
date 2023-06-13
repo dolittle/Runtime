@@ -69,25 +69,25 @@ public interface IFetchCommittedEvents
     Task<CommittedAggregateEvents> FetchForAggregateAfter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion after,
         CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Get the number of events matching the filter before and including the given <see cref="EventLogSequenceNumber"/>.
-    /// </summary>
-    /// <param name="scope"></param>
-    /// <param name="to"></param>
-    /// <param name="eventTypes"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<StreamPosition> GetStreamPositionFromArtifactSet(ScopeId scope, EventLogSequenceNumber to, IEnumerable<ArtifactId> eventTypes,
-        CancellationToken cancellationToken);
+    // /// <summary>
+    // /// Get the number of events matching the filter before and including the given <see cref="EventLogSequenceNumber"/>.
+    // /// </summary>
+    // /// <param name="scope"></param>
+    // /// <param name="to"></param>
+    // /// <param name="eventTypes"></param>
+    // /// <param name="cancellationToken"></param>
+    // /// <returns></returns>
+    // Task<StreamPosition> GetStreamPositionFromArtifactSet(ScopeId scope, EventLogSequenceNumber to, IEnumerable<ArtifactId> eventTypes,
+    //     CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Get the number of events matching the filter before and including the given <see cref="EventLogSequenceNumber"/>.
-    /// </summary>
-    /// <param name="scope"></param>
-    /// <param name="nextStreamPosition"></param>
-    /// <param name="eventTypes"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<Try<EventLogSequenceNumber>> GetEventLogSequenceFromArtifactSet(ScopeId scope, StreamPosition nextStreamPosition, IEnumerable<ArtifactId> eventTypes,
-        CancellationToken cancellationToken);
+    // /// <summary>
+    // /// Get the number of events matching the filter before and including the given <see cref="EventLogSequenceNumber"/>.
+    // /// </summary>
+    // /// <param name="scope"></param>
+    // /// <param name="nextStreamPosition"></param>
+    // /// <param name="eventTypes"></param>
+    // /// <param name="cancellationToken"></param>
+    // /// <returns></returns>
+    // Task<Try<EventLogSequenceNumber>> GetEventLogSequenceFromArtifactSet(ScopeId scope, StreamPosition nextStreamPosition, IEnumerable<ArtifactId> eventTypes,
+    //     CancellationToken cancellationToken);
 }

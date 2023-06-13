@@ -39,13 +39,21 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
             //TODO: This can be improved by taking as many as possible instead of just the first
             var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
             _metrics.IncrementTotalEventsFetched();
-            return new [] { @event };
+            return new[] { @event };
         }
         catch (Exception ex)
         {
             return ex;
         }
     }
+
+    /// Unused
+    public Task<Try<StreamEvent>> FetchSingle(StreamPosition _, CancellationToken cancellationToken) =>
+        throw new NotImplementedException("unused for eventhorizon");
+
+    /// Unused
+    public Task<Try<StreamEvent>> FetchLast(CancellationToken cancellationToken) =>
+        throw new NotImplementedException("unused for eventhorizon");
 
     /// <inheritdoc />
     public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
@@ -65,7 +73,8 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
     public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
 
     /// <inheritdoc/>
-    public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
+    public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) =>
+        Task.Delay(60 * 1000, token);
 
     /// <inheritdoc/>
     public Task WaitForEvent(ScopeId scope, StreamId stream, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
