@@ -1,3 +1,12 @@
+# [8.9.4] - 2023-6-16 [PR: #743](https://github.com/dolittle/Runtime/pull/743)
+## Summary
+
+Added the ability to not require producer consent when consuming from event horizon.
+
+To disable required consent, use the following configuration: `DOLITTLE__RUNTIME__EVENTHORIZON__REQUIRECONSENT=false`
+This will then pass NoConsent (empty guid) as a valid consent for the consumer, and allow it to consume as normal.
+
+
 # [8.9.3] - 2023-6-2 [PR: #738](https://github.com/dolittle/Runtime/pull/738)
 ## Summary
 
