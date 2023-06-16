@@ -31,6 +31,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     readonly IMongoCollection<TEvent> _collection;
     readonly FilterDefinitionBuilder<TEvent> _filter;
     readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
+    readonly Expression<Func<TEvent, object>> _sequenceNumberSortByExpression;
     readonly Func<TEvent, StreamEvent> _eventToStreamEvent;
     readonly Expression<Func<TEvent, Guid>> _eventToArtifactId;
     readonly Expression<Func<TEvent, uint>> _eventToArtifactGeneration;
@@ -53,6 +54,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         IMongoCollection<TEvent> collection,
         FilterDefinitionBuilder<TEvent> filter,
         Expression<Func<TEvent, ulong>> sequenceNumberExpression,
+        Expression<Func<TEvent, object>> sequenceNumberSortByExpression,
         Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
         Expression<Func<TEvent, Guid>> eventToArtifactId,
         Expression<Func<TEvent, uint>> eventToArtifactGeneration)
@@ -62,6 +64,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         _collection = collection;
         _filter = filter;
         _sequenceNumberExpression = sequenceNumberExpression;
+        _sequenceNumberSortByExpression = sequenceNumberSortByExpression;
         _eventToStreamEvent = eventToStreamEvent.Compile();
 
         _eventToArtifactId = eventToArtifactId;
@@ -76,6 +79,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     /// <param name="collection">The <see cref="IMongoCollection{TDocument}" />.</param>
     /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
     /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
+    /// <param name="sequenceNumberSortByExpression"></param>
     /// <param name="eventToStreamEvent">The <see cref="Expression{T}" /> for projecting the stored event to a <see cref="StreamEvent" />.</param>
     /// <param name="eventToArtifact">The <see cref="Expression{T}" /> for projecting the stored event to <see cref="Artifact" />.</param>
     /// <param name="partitionIdExpression">The <see cref="Expression{T}" /> for getting the <see cref="Guid" /> for the Partition Id from the stored event.</param>
@@ -85,11 +89,13 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         IMongoCollection<TEvent> collection,
         FilterDefinitionBuilder<TEvent> filter,
         Expression<Func<TEvent, ulong>> sequenceNumberExpression,
+        Expression<Func<TEvent, object>> sequenceNumberSortByExpression,
         Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
         Expression<Func<TEvent, Guid>> eventToArtifactId,
         Expression<Func<TEvent, uint>> eventToArtifactGeneration,
         Expression<Func<TEvent, string>> partitionIdExpression)
-        : this(stream, scope, collection, filter, sequenceNumberExpression, eventToStreamEvent, eventToArtifactId, eventToArtifactGeneration)
+        : this(stream, scope, collection, filter, sequenceNumberExpression, sequenceNumberSortByExpression, eventToStreamEvent, eventToArtifactId,
+            eventToArtifactGeneration)
     {
         _partitionIdExpression = partitionIdExpression;
     }
@@ -114,14 +120,54 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<Try<StreamEvent>> FetchSingle(StreamPosition position, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var events = await _collection.Find(_filter.Eq(_sequenceNumberExpression, position.Value))
+                .SingleOrDefaultAsync(cancellationToken);
+
+            return events is null
+                ? new NoEventInStreamAtPosition(_stream, _scope, position)
+                : _eventToStreamEvent(events);
+        }
+        catch (MongoWaitQueueFullException ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+
+    public async Task<Try<StreamEvent>> FetchLast(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var events = await _collection.Find(_filter.Empty)
+                .SortByDescending(_sequenceNumberSortByExpression)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return events is null
+                ? new NoEventInStreamAtPosition(_stream, _scope, StreamPosition.Start)
+                : _eventToStreamEvent(events);
+        }
+        catch (MongoWaitQueueFullException ex)
+        {
+            throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+    }
+
     /// <inheritdoc />
     public async Task<Try<StreamPosition>> GetNextStreamPosition(CancellationToken cancellationToken)
     {
         try
         {
-            // TODO: Do not do this, get last document instead.
-            var numEvents = await _collection.CountDocumentsAsync(_filter.Empty, cancellationToken: cancellationToken).ConfigureAwait(false);
-            return Try<StreamPosition>.Succeeded((ulong)numEvents);
+            var last = await FetchLast(cancellationToken);
+            if (!last.Success)
+            {
+                return Try<StreamPosition>.Succeeded(StreamPosition.Start);
+            }
+
+            return last.Result.Position.Increment();
         }
         catch (MongoWaitQueueFullException ex)
         {

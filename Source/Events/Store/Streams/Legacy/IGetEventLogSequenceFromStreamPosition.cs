@@ -10,6 +10,6 @@ namespace Dolittle.Runtime.Events.Store.Streams.Legacy;
 
 public interface IGetEventLogSequenceFromStreamPosition
 {
-    Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, StreamPosition streamPosition,
+    Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, bool partitioned, StreamPosition streamPosition,
         CancellationToken cancellationToken);
 }

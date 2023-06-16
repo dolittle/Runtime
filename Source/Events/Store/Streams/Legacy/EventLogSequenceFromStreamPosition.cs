@@ -15,35 +15,44 @@ namespace Dolittle.Runtime.Events.Store.Streams.Legacy;
 [Singleton, PerTenant]
 public class EventLogSequenceFromStreamPosition: IGetEventLogSequenceFromStreamPosition
 {
-    readonly IFetchCommittedEvents _committedEventsFetcher;
-    readonly IFilterDefinitions _filterDefinitions;
+    readonly IEventFetchers _eventFetchers;
 
-    public EventLogSequenceFromStreamPosition(IFetchCommittedEvents committedEventsFetcher,
-        IFilterDefinitions filterDefinitions)
+    public EventLogSequenceFromStreamPosition(IEventFetchers eventFetchers)
     {
-        _committedEventsFetcher = committedEventsFetcher;
-        _filterDefinitions = filterDefinitions;
+        _eventFetchers = eventFetchers;
     }
 
-    public async Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, StreamPosition streamPosition,
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="partitioned"></param>
+    /// <param name="streamPosition"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<Try<EventLogSequenceNumber>> TryGetEventLogPositionForStreamProcessor(StreamProcessorId id, bool partitioned, StreamPosition streamPosition,
         CancellationToken cancellationToken)
     {
-        var tryGetFilter = await _filterDefinitions.TryGetFromStream(id.ScopeId, id.EventProcessorId.Value, cancellationToken);
-        if (!tryGetFilter.Success)
+        var sourceStream = new StreamId(id.SourceStreamId);
+        IStreamDefinition streamDefinition = new StreamDefinition(new FilterDefinition(sourceStream, sourceStream, partitioned));
+        var fetcher = await _eventFetchers.GetFetcherFor(id.ScopeId, streamDefinition, cancellationToken);
+
+        var eventFromStream = await fetcher.FetchSingle(streamPosition, cancellationToken);
+
+        if (!eventFromStream.Success)
         {
-            return tryGetFilter.Exception;
+            // We are at the end of the stream, get the last event
+            var lastEvent = await fetcher.FetchLast(cancellationToken);
+            if (lastEvent.Success)
+            {
+                return lastEvent.Result.Event.EventLogSequenceNumber.Increment();
+            }
+            // No Events, start from the beginning
+            return EventLogSequenceNumber.Initial;
         }
+        
+        
 
-        var filter = tryGetFilter.Result;
-        if (filter is not TypeFilterWithEventSourcePartitionDefinition typeFilter)
-        {
-            return Try<EventLogSequenceNumber>.Failed(new ArgumentException("Invalid filter type: " + filter.GetType().Name));
-        }
-
-        var artifacts = typeFilter.Types;
-
-        var hopefullyEventLogSequence =
-            await _committedEventsFetcher.GetEventLogSequenceFromArtifactSet(id.ScopeId, streamPosition, artifacts, cancellationToken);
-        return hopefullyEventLogSequence;
+        return eventFromStream.Result.Event.EventLogSequenceNumber;
     }
 }
