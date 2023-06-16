@@ -208,6 +208,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
             var composedFilter = _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
                                  & _filter.Gte(_sequenceNumberExpression, from.Value)
                                  & _filter.Lt(_sequenceNumberExpression, to.Value);
+            
             if (artifactIds.Any())
             {
                 composedFilter &= _filter.In(_eventToArtifactId, artifactIds);

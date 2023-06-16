@@ -88,6 +88,13 @@ public interface IConvertReverseCallMessages<TClientMessage, TServerMessage, TCo
     Pong? GetPong(TClientMessage message);
 
     /// <summary>
+    /// If the protocol supports it, and it is of the correct type, get <see cref="InitiateDisconnect" /> from the <typeparamref name="TClientMessage"/>.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    InitiateDisconnect? GetInitiateDisconnect(TClientMessage message) => null;
+
+    /// <summary>
     /// Creates a <typeparamref name="TConnectResponse"/> signifying a failed connection.
     /// </summary>
     /// <param name="failureMessage">The reason for failure.</param>

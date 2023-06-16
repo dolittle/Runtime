@@ -25,6 +25,16 @@ public interface IEventProcessor
     EventProcessorId Identifier { get; }
 
     /// <summary>
+    /// Let the processor know that it should shut down.
+    /// </summary>
+    CancellationToken ShutdownToken => CancellationToken.None;
+    
+    /// <summary>
+    /// Do not wait for graceful shutdown after this has been cancelled
+    /// </summary>
+    CancellationToken DeadlineToken => CancellationToken.None;
+
+    /// <summary>
     /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
     /// </summary>
     /// <param name="event">The <see cref="CommittedEvent" />.</param>
@@ -44,5 +54,6 @@ public interface IEventProcessor
     /// <param name="executionContext">The execution context to process the event in.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns><see cref="IProcessingResult" />.</returns>
-    Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken);
+    Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext,
+        CancellationToken cancellationToken);
 }

@@ -53,6 +53,8 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     bool _accepted;
     bool _rejected;
 
+    readonly CancellationTokenSource _shutdownTokenSource = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
     /// </summary>
@@ -74,6 +76,8 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
         _metricsCollector = metricsCollector;
         _logger = logger;
     }
+
+    public CancellationToken ShutdownToken => _shutdownTokenSource.Token;
 
     /// <inheritdoc/>
     public TConnectArguments Arguments { get; private set; }
@@ -113,7 +117,9 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
                 return false;
             }
 
-            var createExecutionContext = notValidateExecutionContext? Try<ExecutionContext>.Succeeded(callContext.ExecutionContext.ToExecutionContext()) : _executionContextFactory.TryCreateUsing(callContext.ExecutionContext);
+            var createExecutionContext = notValidateExecutionContext
+                ? Try<ExecutionContext>.Succeeded(callContext.ExecutionContext.ToExecutionContext())
+                : _executionContextFactory.TryCreateUsing(callContext.ExecutionContext);
             if (!createExecutionContext.Success)
             {
                 Log.ReceivedInvalidExecutionContext(_logger, createExecutionContext.Exception);
@@ -124,6 +130,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
             ExecutionContext = createExecutionContext.Result;
             return true;
         }
+
         Log.ReceivedInitialMessageByArgumentsNotSet(_logger);
         return false;
     }
@@ -202,6 +209,12 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
     }
 
     /// <inheritdoc/>
+    public Task WriteMessage(TServerMessage message, CancellationToken cancellationToken)
+    {
+        return _reverseCallConnection.ClientStream.WriteAsync(message);
+    }
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         Dispose(true);
@@ -218,6 +231,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
         {
             return;
         }
+
         if (disposing)
         {
             _reverseCallConnection.Dispose();
@@ -235,6 +249,15 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
             while (!jointCts.IsCancellationRequested && await clientToRuntimeStream.MoveNext(jointCts.Token).ConfigureAwait(false))
             {
                 var message = clientToRuntimeStream.Current;
+                var initiateDisconnect = _messageConverter.GetInitiateDisconnect(message);
+                if (initiateDisconnect is not null)
+                {
+                    _logger.ReceivedInitiateDisconnect();
+                    _shutdownTokenSource.Cancel();
+                    // TODO: deadline based on grace period
+                    continue;
+                }
+
                 var response = _messageConverter.GetResponse(message);
                 if (response != null)
                 {
@@ -300,6 +323,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
         {
             throw new ReverseCallDispatcherAlreadyAccepted();
         }
+
         if (_rejected)
         {
             throw new ReverseCallDispatcherAlreadyRejected();

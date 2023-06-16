@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -35,6 +36,8 @@ public delegate Props CreateTenantScopedStreamProcessorProps(StreamProcessorId s
 /// </summary>
 public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 {
+    static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
+
     readonly TenantId _tenantId;
     readonly TypeFilterWithEventSourcePartitionDefinition _filterDefinition;
     readonly IEventProcessor _processor;
@@ -45,10 +48,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
     readonly IEventFetchers _eventFetchers;
+    readonly List<IDisposable> _cleanup = new();
 
     CancellationTokenSource? _stoppingToken;
     readonly bool _partitioned;
     readonly int _concurrency;
+    CancellationTokenSource _deadlineCancellationTokenSource;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantScopedStreamProcessorActor"/> class.
@@ -158,21 +163,48 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var initialState = processingPosition.Result;
 
         var from = initialState.Position;
-        var cts = new CancellationTokenSource();
-        var events = StartSubscription(from, cts.Token);
-        var firstEventReady = events.WaitToReadAsync(cts.Token).AsTask();
-        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events, context));
-        _stoppingToken = cts;
+        _stoppingToken = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken);
+        var deadlineToken = GetDeadlineToken(_processor, _stoppingToken);
+
+        var events = StartSubscription(from, _stoppingToken.Token);
+        var firstEventReady = events.WaitToReadAsync(_stoppingToken.Token).AsTask();
+        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events, context, _stoppingToken.Token, deadlineToken));
     }
 
-    async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context)
+    /// <summary>
+    /// Get the deadline token for the processor. If the processor has a deadline token, use that.
+    /// Otherwise, create a new token which times out a given time after the stopping token is triggered.
+    /// </summary>
+    /// <param name="processor"></param>
+    /// <param name="stoppingToken"></param>
+    /// <returns></returns>
+    CancellationToken GetDeadlineToken(IEventProcessor processor, CancellationTokenSource stoppingToken)
+    {
+        if (_processor.DeadlineToken != CancellationToken.None)
+        {
+            return processor.DeadlineToken;
+        }
+
+        _deadlineCancellationTokenSource = new CancellationTokenSource();
+        _cleanup.Add(_deadlineCancellationTokenSource);
+        var cancellationTokenRegistration = stoppingToken.Token.Register(async () =>
+        {
+            await Task.Delay(_defaultTimeout);
+            _deadlineCancellationTokenSource.Cancel();
+        });
+        _cleanup.Add(cancellationTokenRegistration);
+        return _deadlineCancellationTokenSource.Token;
+    }
+
+    async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context, CancellationToken stoppingToken,
+        CancellationToken deadlineToken)
     {
         try
         {
             if (_concurrency > 1 && _partitioned)
             {
                 var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
-                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);
+                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, stoppingToken);
 
                 var processor = new ConcurrentPartitionedProcessor(
                     Identifier,
@@ -187,12 +219,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                     _concurrency,
                     Logger);
 
-                await processor.Process(events, streamProcessorState, context.CancellationToken);
+                await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
             else if (_partitioned)
             {
                 var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
-                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);
+                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, stoppingToken);
 
                 var processor = new PartitionedProcessor(
                     Identifier,
@@ -206,7 +238,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                     (ICanFetchEventsFromPartitionedStream)fetcher,
                     Logger);
 
-                await processor.Process(events, streamProcessorState, context.CancellationToken);
+                await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
             else
             {
@@ -221,11 +253,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                     _tenantId,
                     Logger);
 
-                await processor.Process(events, streamProcessorState, context.CancellationToken);
+                await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
         }
         finally
         {
+            // ReSharper disable once MethodHasAsyncOverload
             context.Stop(context.Self);
         }
     }
@@ -279,5 +312,10 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     {
         _stoppingToken?.Cancel();
         _stoppingToken?.Dispose();
+        foreach (var disposable in _cleanup)
+        {
+            disposable.Dispose();
+        }
+        _cleanup.Clear();
     }
 }

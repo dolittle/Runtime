@@ -7,6 +7,7 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
+using InitiateDisconnect = Dolittle.Runtime.Services.InitiateDisconnect;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 
@@ -38,7 +39,11 @@ public class EventHandlersProtocol : IEventHandlersProtocol
 
     /// <inheritdoc/>
     public EventHandlerRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
-        => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = EventHandlersFailures.FailedToRegisterEventHandler.Value.ToProtobuf(), Reason = failureMessage } };
+        => new()
+        {
+            Failure = new Dolittle.Protobuf.Contracts.Failure
+                { Id = EventHandlersFailures.FailedToRegisterEventHandler.Value.ToProtobuf(), Reason = failureMessage }
+        };
 
     /// <inheritdoc/>
     public ReverseCallArgumentsContext GetArgumentsContext(EventHandlerRegistrationRequest message)
@@ -75,6 +80,21 @@ public class EventHandlersProtocol : IEventHandlersProtocol
     /// <inheritdoc/>
     public void SetRequestContext(ReverseCallRequestContext context, HandleEventRequest request)
         => request.CallContext = context;
+
+    public InitiateDisconnect? GetInitiateDisconnect(EventHandlerClientToRuntimeMessage message)
+    {
+        if (message.MessageCase != EventHandlerClientToRuntimeMessage.MessageOneofCase.InitiateDisconnect)
+        {
+            return null;
+        }
+
+        var gracePeriod = message.InitiateDisconnect.GracePeriod?.ToTimeSpan();
+
+        return new InitiateDisconnect
+        {
+            GracePeriod = gracePeriod
+        };
+    }
 
     /// <inheritdoc/>
     public ConnectArgumentsValidationResult ValidateConnectArguments(EventHandlerRegistrationArguments arguments)

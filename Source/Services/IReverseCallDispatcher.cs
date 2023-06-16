@@ -35,6 +35,8 @@ public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnect
     /// Gets the <see cref="ExecutionContext"/> received from the initial Connect call from the client.
     /// </summary>
     ExecutionContext ExecutionContext { get; }
+    
+    CancellationToken ShutdownToken { get; }
 
     /// <summary>
     /// Waits for the initial Connect call arguments from the client.
@@ -68,4 +70,12 @@ public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnect
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns the <typeparamref name="TResponse"/> from the client.</returns>
     Task<TResponse> Call(TRequest request, ExecutionContext executionContext, CancellationToken cancellationToken);
+    
+    /// <summary>
+    /// Write a message to the client without waiting for a response.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task WriteMessage(TServerMessage message, CancellationToken cancellationToken);
 }

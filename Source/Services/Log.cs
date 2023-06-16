@@ -23,6 +23,9 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Trace, "Received response.")]
     internal static partial void ReceivedResponse(this ILogger logger);
     
+    [LoggerMessage(0, LogLevel.Debug, "Received InitiateDisconnect.")]
+    internal static partial void ReceivedInitiateDisconnect(this ILogger logger);
+    
     [LoggerMessage(0, LogLevel.Warning, "Could not find the call id from the received response from the client. The message will be ignored.")]
     internal static partial void CouldNotFindCallId(this ILogger logger);
 

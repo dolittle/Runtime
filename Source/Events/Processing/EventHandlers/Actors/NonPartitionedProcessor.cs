@@ -32,9 +32,9 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
     {
     }
 
-    
 
-    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken)
+    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken,
+        CancellationToken deadlineToken)
     {
         try
         {
@@ -45,8 +45,8 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
                 {
                     var evt = await messages.ReadAsync(cancellationToken);
 
-                    (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, cancellationToken);
-                    await PersistNewState(currentState, cancellationToken);
+                    (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, deadlineToken);
+                    await PersistNewState(currentState, deadlineToken);
 
                     while (processingResult is { Succeeded: false, Retry: true })
                     {
@@ -60,8 +60,13 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
                             Logger.LogInformation("Will retry processing event {evt.Position} directly", evt);
                         }
 
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
                         (currentState, processingResult) = await RetryProcessingEventAndHandleResult(evt, currentState, processingResult.FailureReason,
-                            currentState.ProcessingAttempts + 1, cancellationToken);
+                            currentState.ProcessingAttempts + 1, deadlineToken);
                     }
 
                     if (!processingResult.Succeeded)
@@ -72,7 +77,7 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
                 }
                 finally
                 {
-                    await PersistNewState(currentState, CancellationToken.None);
+                    await PersistNewState(currentState, deadlineToken);
                 }
             }
         }

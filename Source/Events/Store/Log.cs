@@ -62,7 +62,7 @@ static partial class Log
     
     static readonly Action<ILogger, Exception> _subscriptionReturnedDeadLetter = LoggerMessage
         .Define(
-            LogLevel.Warning,
+            LogLevel.Debug,
             new EventId(0, nameof(SubscriptionReturnedDeadLetter)),
             "Subscription target returned dead letter response");
 

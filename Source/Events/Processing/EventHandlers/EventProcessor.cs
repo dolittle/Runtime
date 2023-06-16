@@ -49,6 +49,8 @@ public class EventProcessor : IEventProcessor
     /// <inheritdoc />
     public EventProcessorId Identifier { get; }
 
+    public CancellationToken ShutdownToken => _dispatcher.ShutdownToken;
+
     /// <inheritdoc />
     public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
     {

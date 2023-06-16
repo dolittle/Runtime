@@ -70,7 +70,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
         _handledTypes = handledEventTypes.Select(_ => _.Value).ToImmutableHashSet();
     }
 
-    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken)
+    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken, CancellationToken deadlineToken)
     {
         try
         {
@@ -93,13 +93,13 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
                             currentState = await HandleNewEvent(evt, currentState, cancellationToken);
                             break;
                         case NextAction.ProcessFailedEvents:
-                            currentState = await CatchUpForPartition(currentState, partitionId!, cancellationToken);
+                            currentState = await CatchUpForPartition(currentState, partitionId!, cancellationToken,deadlineToken);
                             break;
                     }
                 }
                 finally
                 {
-                    await PersistNewState(currentState.ProcessorState, CancellationToken.None);
+                    await PersistNewState(currentState.ProcessorState, deadlineToken);
                 }
             }
         }
@@ -231,7 +231,8 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
     async Task<State> CatchUpForPartition(
         State state,
         PartitionId partition,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        CancellationToken deadlineToken)
     {
         var failingPartitionState = state.ProcessorState.FailingPartitions[partition];
         if (!ShouldRetryProcessing(failingPartitionState)) return state; // Should not really happen, since we explicitly wait for each partition
@@ -243,13 +244,17 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
         var (events, hasMoreEvents) = await _fetcher.FetchInPartition(partition, startPosition, highWatermark, _handledTypes, cancellationToken);
         foreach (var streamEvent in events)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return state;
+            }
             var (newState, processingResult) = await RetryProcessingEventAndHandleResult(
                 streamEvent,
                 state.ProcessorState,
                 failingPartitionState.Reason,
                 failingPartitionState.ProcessingAttempts,
                 cancellationToken).ConfigureAwait(false);
-            await PersistNewState(newState, CancellationToken.None);
+            await PersistNewState(newState, deadlineToken);
 
             state = state with
             {
@@ -268,7 +273,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
         if (hasMoreEvents) // No more events before the high water mark for this partition, remove it
         {
             state = state with { ProcessorState = state.ProcessorState.WithoutFailingPartition(partition) };
-            await PersistNewState(state.ProcessorState, CancellationToken.None);
+            await PersistNewState(state.ProcessorState, deadlineToken);
         }
 
         return state;

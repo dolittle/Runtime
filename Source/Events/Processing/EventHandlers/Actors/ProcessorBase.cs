@@ -149,21 +149,21 @@ public abstract class ProcessorBase<T> where T : IStreamProcessorState<T>
     /// <param name="failureReason">The reason for why processing failed the last time.</param>
     /// <param name="processingAttempts">The number of times that this event has been processed before.</param>
     /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
-    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <param name="deadlineToken">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="IStreamProcessorState" />.</returns>
     protected async Task<(T, IProcessingResult)> RetryProcessingEventAndHandleResult(StreamEvent evt, T currentState,
         string failureReason,
         uint processingAttempts,
-        CancellationToken cancellationToken)
+        CancellationToken deadlineToken)
     {
         Logger.LogTrace("ReProcessing event at position {ProcessingPosition}", evt.CurrentProcessingPosition);
-        var (processingResult, elapsed) = await RetryProcessingEvent(evt, failureReason, processingAttempts, cancellationToken);
+        var (processingResult, elapsed) = await RetryProcessingEvent(evt, failureReason, processingAttempts, deadlineToken);
         return (HandleProcessingResult(processingResult, evt, elapsed, currentState), processingResult);
     }
 
-    protected Task PersistNewState(T newState, CancellationToken cancellationToken)
+    protected Task PersistNewState(T newState, CancellationToken deadlineToken)
     {
-        return _streamProcessorStates.Persist(Identifier, newState, cancellationToken);
+        return _streamProcessorStates.Persist(Identifier, newState, deadlineToken);
     }
 
     /// <summary>

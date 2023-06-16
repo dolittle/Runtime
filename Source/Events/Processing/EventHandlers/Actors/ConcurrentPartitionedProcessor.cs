@@ -74,17 +74,18 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
 
         public async ValueTask<Task<ReceiveResult>> GetNextCompleted(CancellationToken cancellationToken)
         {
-            var result = await _reader.ReadAsync(cancellationToken).ConfigureAwait(false);
-            if (result.partition != PartitionId.None)
+            var (partition, callback) = await _reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+            if (partition != PartitionId.None)
             {
-                _currentPartitions.Remove(result.partition);
+                _currentPartitions.Remove(partition);
             }
 
-            return result.callback;
+            return callback;
         }
 
         public bool IsEmpty => _currentPartitions.Count == 0;
         public bool IsFull => _currentPartitions.Count == _concurrency;
+        public int Count => _currentPartitions.Count;
     }
 
     internal record State(StreamProcessorState ProcessorState, ActiveRequests ActiveRequests)
@@ -119,7 +120,6 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
             this with { ProcessorState = ProcessorState.WithResult(SkippedProcessing.Instance, streamEvent, DateTimeOffset.UtcNow) };
     }
 
-    bool _catchingUp = true;
     readonly ImmutableHashSet<Guid> _handledTypes;
     readonly int _concurrency;
 
@@ -145,7 +145,8 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         _handledTypes = handledEventTypes.Select(_ => _.Value).ToImmutableHashSet();
     }
 
-    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken)
+    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken,
+        CancellationToken deadlineToken)
     {
         var currentState = new State(AsPartitioned(state), new ActiveRequests(_concurrency));
         try
@@ -158,15 +159,15 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
                     switch (nextAction)
                     {
                         case NextAction.ReceiveResult:
-                            currentState = await ProcessReceiveResult(currentState, cancellationToken);
+                            currentState = await ProcessReceiveResult(currentState, cancellationToken, deadlineToken);
                             break;
 
                         case NextAction.ProcessNextEvent:
-                            currentState = await ProcessNextEvent(messages, currentState, cancellationToken);
+                            currentState = await ProcessNextEvent(messages, currentState, cancellationToken, deadlineToken);
 
                             break;
                         case NextAction.ProcessFailedEvent:
-                            currentState = await CatchUpForPartition(currentState, partitionId!, cancellationToken);
+                            currentState = await CatchUpForPartition(currentState, partitionId!, cancellationToken, deadlineToken);
 
                             break;
                         case NextAction.Completed:
@@ -175,7 +176,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
                 }
                 finally
                 {
-                    await PersistNewState(currentState.ProcessorState, CancellationToken.None);
+                    await PersistNewState(currentState.ProcessorState, deadlineToken);
                 }
             }
         }
@@ -190,44 +191,55 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         finally
         {
             // If there are requests in-flight, let's try to wait for them to complete
-            await WaitForCompletions(currentState);
+
+            await WaitForCompletions(currentState, deadlineToken);
         }
     }
 
-    async Task WaitForCompletions(State currentState)
+    async Task WaitForCompletions(State currentState, CancellationToken deadlineToken)
     {
         if (currentState.ActiveRequests.IsEmpty)
             return;
 
-        var timeout = CancellationTokens.FromSeconds(10);
-        while (!currentState.ActiveRequests.IsEmpty)
+        Logger.WaitingForCompletions(Identifier.EventProcessorId, Identifier.ScopeId, currentState.ActiveRequests.Count);
+
+        try
         {
-            currentState = await ProcessReceiveResult(currentState, timeout);
+            var timeout = CancellationTokens.FromSeconds(10);
+            while (!currentState.ActiveRequests.IsEmpty && !deadlineToken.IsCancellationRequested)
+            {
+                currentState = await ProcessReceiveResult(currentState, timeout, deadlineToken);
+            }
+            Logger.FinishedWaitingForCompletions(Identifier.EventProcessorId, Identifier.ScopeId);
+        }
+        catch (Exception e)
+        {
+            Logger.FailedWaitingForCompletions(e, Identifier.EventProcessorId, Identifier.ScopeId, currentState.ActiveRequests.Count);
         }
     }
 
-    async Task<State> ProcessNextEvent(ChannelReader<StreamEvent> messages, State currentState, CancellationToken cancellationToken)
+    async Task<State> ProcessNextEvent(ChannelReader<StreamEvent> messages, State currentState, CancellationToken stoppingToken, CancellationToken deadlineToken)
     {
-        var evt = await messages.ReadAsync(cancellationToken);
+        var evt = await messages.ReadAsync(stoppingToken);
         if (currentState.ProcessorState.FailingPartitions.TryGetValue(evt.Partition, out _))
         {
             await currentState.ActiveRequests.AddSkipped(Task.FromResult(AsSkippedEvent(evt)));
             return currentState;
         }
 
-        var newTask = ProcessEventAndReturnStateUpdateCallback(evt, cancellationToken);
+        var newTask = ProcessEventAndReturnStateUpdateCallback(evt, deadlineToken);
         await currentState.ActiveRequests.Add(evt.Partition, newTask);
         return currentState;
     }
 
     ReceiveResult AsSkippedEvent(StreamEvent evt) => current => current.WithSkippedEvent(evt);
 
-    async Task<State> ProcessReceiveResult(State currentState, CancellationToken cancellationToken)
+    async Task<State> ProcessReceiveResult(State currentState, CancellationToken cancellationToken, CancellationToken deadlineToken)
     {
         var readAsync = await currentState.ActiveRequests.GetNextCompleted(cancellationToken);
         var receive = await readAsync;
         currentState = receive(currentState);
-        await PersistNewState(currentState.ProcessorState, CancellationToken.None);
+        await PersistNewState(currentState.ProcessorState, deadlineToken);
         return currentState;
     }
 
@@ -243,18 +255,18 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         };
     }
 
-    async Task<ReceiveResult> ProcessEventRetryAndReturnStateUpdateCallback(StreamEvent evt, FailingPartitionState partitionState,
-        CancellationToken cancellationToken)
-    {
-        var (processingResult, elapsed) = await RetryProcessingEvent(evt, partitionState.Reason, partitionState.ProcessingAttempts, cancellationToken);
-
-        return state =>
-        {
-            var updatedState = HandleProcessingResult(processingResult, evt, elapsed, state.ProcessorState);
-
-            return state with { ProcessorState = updatedState };
-        };
-    }
+    // async Task<ReceiveResult> ProcessEventRetryAndReturnStateUpdateCallback(StreamEvent evt, FailingPartitionState partitionState,
+    //     CancellationToken cancellationToken)
+    // {
+    //     var (processingResult, elapsed) = await RetryProcessingEvent(evt, partitionState.Reason, partitionState.ProcessingAttempts, cancellationToken);
+    //
+    //     return state =>
+    //     {
+    //         var updatedState = HandleProcessingResult(processingResult, evt, elapsed, state.ProcessorState);
+    //
+    //         return state with { ProcessorState = updatedState };
+    //     };
+    // }
 
     internal enum NextAction
     {
@@ -396,10 +408,9 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         }
     }
 
-    async Task<State> CatchUpForPartition(
-        State state,
+    async Task<State> CatchUpForPartition(State state,
         PartitionId partition,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, CancellationToken deadlineToken)
     {
         var failingPartitionState = state.ProcessorState.FailingPartitions[partition];
         if (!ShouldRetryProcessing(failingPartitionState)) return state; // Should not really happen, since we explicitly wait for each partition
@@ -413,11 +424,11 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         {
             // No more events before the high water mark for this partition, remove it
             state = state with { ProcessorState = state.ProcessorState.WithoutFailingPartition(partition) };
-            await PersistNewState(state.ProcessorState, CancellationToken.None);
+            await PersistNewState(state.ProcessorState, deadlineToken);
             return state;
         }
 
-        var newTask = ProcessEventAndReturnStateUpdateCallback(evt, cancellationToken);
+        var newTask = ProcessEventAndReturnStateUpdateCallback(evt, deadlineToken);
         await state.ActiveRequests.Add(evt.Partition, newTask);
         return state;
     }

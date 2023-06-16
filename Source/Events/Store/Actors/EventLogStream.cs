@@ -131,19 +131,28 @@ public class EventLogStreamActor : IActor
 
     async Task OnSubscriptionEvents(SubscriptionEvents request, IContext context)
     {
-        if (request.FromOffset == _nextOffset)
+        try
         {
-            _nextOffset = request.ToOffset + 1;
-            Ack(_nextOffset, context);
-            await _channelWriter.WriteAsync(new EventLogBatch(
-                request.FromOffset,
-                request.ToOffset,
-                request.Events), _cancellationToken).ConfigureAwait(false);
+            if (request.FromOffset == _nextOffset)
+            {
+                _nextOffset = request.ToOffset + 1;
+                Ack(_nextOffset, context);
+                await _channelWriter.WriteAsync(new EventLogBatch(
+                    request.FromOffset,
+                    request.ToOffset,
+                    request.Events), _cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                Ack(_nextOffset, context);
+                _logger.LogUnexpectedOffset(_nextOffset, request.FromOffset);
+            }
         }
-        else
+        catch (OperationCanceledException)
         {
-            Ack(_nextOffset, context);
-            _logger.LogUnexpectedOffset(_nextOffset, request.FromOffset);
+            // ReSharper disable once MethodHasAsyncOverload
+            // Subscription cancelled
+            context.Stop(context.Self);
         }
     }
 
@@ -156,11 +165,12 @@ public class EventLogStreamActor : IActor
     async Task OnStopping()
     {
         _channelWriter.Complete();
-        await _eventStoreClient.CancelSubscription(new CancelEventStoreSubscription
+        var cancelEventStoreSubscription = new CancelEventStoreSubscription
         {
             ScopeId = _scope,
             SubscriptionId = _subscriptionId
-        }, CancellationTokens.FromSeconds(5)).ConfigureAwait(false);
+        };
+        await _eventStoreClient.CancelSubscription(cancelEventStoreSubscription, CancellationTokens.FromSeconds(5)).ConfigureAwait(false);
     }
 
     async Task OnStarted(IContext context)
@@ -177,6 +187,12 @@ public class EventLogStreamActor : IActor
             SubscriptionName = _subscriptionName
         };
         await _eventStoreClient.RegisterSubscription(eventStoreSubscriptionRequest, _cancellationToken).ConfigureAwait(false);
-        context.ReenterAfterCancellation(_cancellationToken, () => context.Stop(context.Self));
+        context.ReenterAfterCancellation(_cancellationToken, () =>
+        {
+            if (!context.CancellationToken.IsCancellationRequested)
+            {
+                context.Stop(context.Self);
+            }
+        });
     }
 }
