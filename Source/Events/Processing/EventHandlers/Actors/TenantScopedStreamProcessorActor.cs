@@ -84,11 +84,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         EventHandlerInfo eventHandlerInfo,
         TenantId tenantId)
     {
-        if (processor.ShutdownToken is null)
-        {
-            throw new ArgumentException("The processor must support graceful shutdown");
-        }
-
         Identifier = streamProcessorId;
         Logger = logger;
         _onProcessed = onProcessed;
@@ -167,15 +162,23 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
         var from = initialState.Position;
 
-        var linkedShutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken!.Value, context.CancellationToken);
-        var linkedDeadlineTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.DeadlineToken!.Value, context.CancellationToken);
-        _cleanup.Add(linkedShutdownTokenSource);
-        _cleanup.Add(linkedDeadlineTokenSource);
+        var shutdownToken = context.CancellationToken;
+        var deadlineToken = context.CancellationToken;
+        if (_processor.ShutdownToken is not null && _processor.DeadlineToken is not null)
+        {
+            // Processor supports graceful shutdown. Register the shutdown token and deadline token
+            var linkedShutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken!.Value, context.CancellationToken);
+            var linkedDeadlineTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.DeadlineToken!.Value, context.CancellationToken);
+            _cleanup.Add(linkedShutdownTokenSource);
+            _cleanup.Add(linkedDeadlineTokenSource);
+            shutdownToken = linkedShutdownTokenSource.Token;
+            deadlineToken = linkedDeadlineTokenSource.Token;
+        }
 
-        var events = StartSubscription(from, linkedShutdownTokenSource.Token);
-        var firstEventReady = events.WaitToReadAsync(linkedShutdownTokenSource.Token).AsTask();
+        var events = StartSubscription(from, shutdownToken);
+        var firstEventReady = events.WaitToReadAsync(shutdownToken).AsTask();
         context.ReenterAfter(firstEventReady,
-            _ => StartProcessing(initialState, events, context, linkedShutdownTokenSource.Token, linkedDeadlineTokenSource.Token));
+            _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
     }
 
     async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context, CancellationToken stoppingToken,

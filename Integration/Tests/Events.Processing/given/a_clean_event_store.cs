@@ -25,8 +25,6 @@ class a_clean_event_store : a_runtime_with_a_single_tenant
     protected static IStreamDefinitionRepository stream_definition_repository;
     protected static IStreamEventSubscriber stream_event_subscriber;
 
-
-
     Establish context = () =>
     {
         event_store = runtime.Host.Services.GetRequiredService<Func<TenantId, IEventStore>>()(execution_context.Tenant);
