@@ -87,13 +87,15 @@ public interface IConvertReverseCallMessages<TClientMessage, TServerMessage, TCo
     /// <returns>The <see cref="Pong"/> in the message.</returns>
     Pong? GetPong(TClientMessage message);
 
+    bool SupportsGracefulShutdown => false;
+    
     /// <summary>
     /// If the protocol supports it, and it is of the correct type, get <see cref="InitiateDisconnect" /> from the <typeparamref name="TClientMessage"/>.
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
     InitiateDisconnect? GetInitiateDisconnect(TClientMessage message) => null;
-
+    
     /// <summary>
     /// Creates a <typeparamref name="TConnectResponse"/> signifying a failed connection.
     /// </summary>

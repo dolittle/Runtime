@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
@@ -66,8 +67,8 @@ static partial class LoggerExtensions
 
     static readonly Action<ILogger, Guid, Guid, Exception> _eventHandlerDisconnected = LoggerMessage
         .Define<Guid, Guid>(
-            LogLevel.Debug,
-            new EventId(414482081, nameof(EventHandlerDisconnected)),
+            LogLevel.Information,
+            new EventId(414482081, nameof(EventHandlerDisconnectedForTenant)),
             "Event handler: {EventHandler} in scope: {Scope} disconnected");
 
     static readonly Action<ILogger, Guid, Exception> _startingEventHandler = LoggerMessage
@@ -159,6 +160,9 @@ static partial class LoggerExtensions
     [LoggerMessage(0, LogLevel.Information, "Failing eventHandler was cancelled, no retries scheduled: {EventHandler} in scope: {Scope}. Error: {Reason}")]
     internal static partial void StoppedFailingEventHandler(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, string reason);
 
+    [LoggerMessage(0, LogLevel.Debug, "Event handler: {EventHandler} in scope: {Scope} disconnected for tenant {TenantId}")]
+    internal static partial void EventHandlerDisconnectedForTenant(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, TenantId tenantId);
+    
     internal static void EventHandlerDisconnected(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
         => _eventHandlerDisconnected(logger, handlerId, scopeId, null);
 

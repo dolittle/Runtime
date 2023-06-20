@@ -45,11 +45,15 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         public record InitDisconnect(InitiateDisconnect InitiateDisconnect);
     }
 
+    public record Tokens(CancellationTokenSource? ShutdownTokenSource, CancellationTokenSource? DeadlineTokenSource);
+
     public class Wrapper : IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>
     {
         readonly ActorSystem _actorSystem;
         readonly PID _actor;
-        readonly CancellationTokenSource _shutdownTokenSource = new();
+
+        readonly CancellationTokenSource? _shutdownTokenSource;
+        readonly CancellationTokenSource? _deadlineTokenSource;
 
         public Wrapper(
             ActorSystem actorSystem,
@@ -58,18 +62,22 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             IPingedConnection<TClientMessage, TServerMessage> connection,
             IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter)
         {
+            _shutdownTokenSource = messageConverter.SupportsGracefulShutdown ? new CancellationTokenSource() : null;
+            _deadlineTokenSource = messageConverter.SupportsGracefulShutdown ? new CancellationTokenSource() : null;
             _actorSystem = actorSystem;
             _actor = actorSystem.Root.SpawnNamed(
                 propsCreator.PropsFor<ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(
                     connection,
                     messageConverter,
-                    _shutdownTokenSource),
+                    new Tokens(_shutdownTokenSource, _deadlineTokenSource)),
                 $"reverse-call-dispatcher-{requestId.Value}");
         }
 
         public void Dispose() => _actor.Stop(_actorSystem);
 
-        public CancellationToken ShutdownToken => _shutdownTokenSource.Token;
+        public CancellationToken? ShutdownToken => _shutdownTokenSource?.Token;
+
+        public CancellationToken? DeadlineToken => _deadlineTokenSource?.Token;
 
         public TConnectArguments? Arguments { get; private set; }
 
@@ -135,12 +143,13 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         }
     }
 
+    readonly CancellationTokenSource? _shutdownTokenSource;
+    readonly CancellationTokenSource? _deadlineTokenSource;
     readonly IPingedConnection<TClientMessage, TServerMessage> _reverseCallConnection;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
     readonly ICreateExecutionContexts _executionContextFactory;
     readonly IMetricsCollector _metricsCollector;
     readonly ILogger<ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> _logger;
-    readonly CancellationTokenSource _shutdownTokenSource;
     readonly Dictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
 
     bool _disposed;
@@ -153,9 +162,11 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
         ICreateExecutionContexts executionContextFactory,
         IMetricsCollector metricsCollector,
-        ILogger<ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> logger,
-        CancellationTokenSource _shutdownTokenSource)
+        Tokens tokens,
+        ILogger<ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> logger)
     {
+        _shutdownTokenSource = tokens.ShutdownTokenSource;
+        _deadlineTokenSource = tokens.DeadlineTokenSource;
         _reverseCallConnection = reverseCallConnection;
         _messageConverter = messageConverter;
         _executionContextFactory = executionContextFactory;
@@ -173,15 +184,29 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             Messages.Call message => OnCall(context, message, context.Respond),
             Messages.CallResponse response => OnCallResponse(response),
             Messages.Send response => OnSend(response, context.Respond),
-            Messages.InitDisconnect initDisconnect => OnInitDisconnect(initDisconnect),
+            Messages.InitDisconnect initDisconnect => OnInitDisconnect(initDisconnect, context),
             Stopped => DisposeAsync().AsTask(),
             _ => Task.CompletedTask
         };
 
-    Task OnInitDisconnect(Messages.InitDisconnect msg)
+    Task OnInitDisconnect(Messages.InitDisconnect msg, IContext ctx)
     {
-        _shutdownTokenSource.Cancel();
-        // TODO: deadline for graceful shutdown
+        _logger.ReceivedInitiateDisconnect();
+        _shutdownTokenSource!.Cancel();
+        var gradePeriod = msg.InitiateDisconnect.GracePeriod ?? TimeSpan.FromSeconds(20);
+        ctx.ReenterAfter(Task.Delay(gradePeriod), () =>
+        {
+            try
+            {
+                _deadlineTokenSource!.Cancel();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            ;
+        });
         return Task.CompletedTask;
     }
 
@@ -469,7 +494,7 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
                     context.Send(context.Self, new Messages.InitDisconnect(initiateDisconnect));
                     continue;
                 }
-                
+
                 var response = _messageConverter.GetResponse(message);
                 if (response != null)
                 {
@@ -521,10 +546,30 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             }
             catch
             {
+                // ignored
             }
         }
 
         _reverseCallConnection?.Dispose();
+        try
+        {
+            _shutdownTokenSource?.Cancel();
+            _shutdownTokenSource?.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
+        try
+        {
+            _deadlineTokenSource?.Cancel();
+            _deadlineTokenSource?.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
+        
         return ValueTask.CompletedTask;
     }
 

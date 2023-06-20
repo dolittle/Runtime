@@ -81,6 +81,8 @@ public class EventHandlersProtocol : IEventHandlersProtocol
     public void SetRequestContext(ReverseCallRequestContext context, HandleEventRequest request)
         => request.CallContext = context;
 
+    public bool SupportsGracefulShutdown => true;
+
     public InitiateDisconnect? GetInitiateDisconnect(EventHandlerClientToRuntimeMessage message)
     {
         if (message.MessageCase != EventHandlerClientToRuntimeMessage.MessageOneofCase.InitiateDisconnect)

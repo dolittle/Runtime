@@ -36,7 +36,15 @@ public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnect
     /// </summary>
     ExecutionContext ExecutionContext { get; }
     
-    CancellationToken ShutdownToken { get; }
+    /// <summary>
+    /// I
+    /// </summary>
+    CancellationToken? ShutdownToken { get; }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    CancellationToken? DeadlineToken { get; }
 
     /// <summary>
     /// Waits for the initial Connect call arguments from the client.

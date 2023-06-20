@@ -50,10 +50,8 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly IEventFetchers _eventFetchers;
     readonly List<IDisposable> _cleanup = new();
 
-    CancellationTokenSource? _stoppingToken;
     readonly bool _partitioned;
     readonly int _concurrency;
-    CancellationTokenSource _deadlineCancellationTokenSource;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantScopedStreamProcessorActor"/> class.
@@ -86,6 +84,11 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         EventHandlerInfo eventHandlerInfo,
         TenantId tenantId)
     {
+        if (processor.ShutdownToken is null)
+        {
+            throw new ArgumentException("The processor must support graceful shutdown");
+        }
+
         Identifier = streamProcessorId;
         Logger = logger;
         _onProcessed = onProcessed;
@@ -163,37 +166,16 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var initialState = processingPosition.Result;
 
         var from = initialState.Position;
-        _stoppingToken = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken);
-        var deadlineToken = GetDeadlineToken(_processor, _stoppingToken);
 
-        var events = StartSubscription(from, _stoppingToken.Token);
-        var firstEventReady = events.WaitToReadAsync(_stoppingToken.Token).AsTask();
-        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events, context, _stoppingToken.Token, deadlineToken));
-    }
+        var linkedShutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken!.Value, context.CancellationToken);
+        var linkedDeadlineTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.DeadlineToken!.Value, context.CancellationToken);
+        _cleanup.Add(linkedShutdownTokenSource);
+        _cleanup.Add(linkedDeadlineTokenSource);
 
-    /// <summary>
-    /// Get the deadline token for the processor. If the processor has a deadline token, use that.
-    /// Otherwise, create a new token which times out a given time after the stopping token is triggered.
-    /// </summary>
-    /// <param name="processor"></param>
-    /// <param name="stoppingToken"></param>
-    /// <returns></returns>
-    CancellationToken GetDeadlineToken(IEventProcessor processor, CancellationTokenSource stoppingToken)
-    {
-        if (_processor.DeadlineToken != CancellationToken.None)
-        {
-            return processor.DeadlineToken;
-        }
-
-        _deadlineCancellationTokenSource = new CancellationTokenSource();
-        _cleanup.Add(_deadlineCancellationTokenSource);
-        var cancellationTokenRegistration = stoppingToken.Token.Register(async () =>
-        {
-            await Task.Delay(_defaultTimeout);
-            _deadlineCancellationTokenSource.Cancel();
-        });
-        _cleanup.Add(cancellationTokenRegistration);
-        return _deadlineCancellationTokenSource.Token;
+        var events = StartSubscription(from, linkedShutdownTokenSource.Token);
+        var firstEventReady = events.WaitToReadAsync(linkedShutdownTokenSource.Token).AsTask();
+        context.ReenterAfter(firstEventReady,
+            _ => StartProcessing(initialState, events, context, linkedShutdownTokenSource.Token, linkedDeadlineTokenSource.Token));
     }
 
     async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context, CancellationToken stoppingToken,
@@ -255,6 +237,16 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
                 await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
+
+            Logger.EventHandlerDisconnectedForTenant(Identifier.EventProcessorId, Identifier.ScopeId, _tenantId);
+        }
+        catch (OperationCanceledException e)
+        {
+            Logger.CancelledRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorWhileRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
         }
         finally
         {
@@ -310,12 +302,11 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     public void Dispose()
     {
-        _stoppingToken?.Cancel();
-        _stoppingToken?.Dispose();
         foreach (var disposable in _cleanup)
         {
             disposable.Dispose();
         }
+
         _cleanup.Clear();
     }
 }

@@ -50,6 +50,9 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     /// <inheritdoc />
     public EventProcessorId Identifier => Definition.TargetStream.Value;
 
+    public CancellationToken? ShutdownToken { get; } = null;
+    public CancellationToken? DeadlineToken { get; } = null;
+
     /// <inheritdoc/>
     public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, ExecutionContext executionContext, CancellationToken cancellationToken);
 

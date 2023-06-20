@@ -65,8 +65,6 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <inheritdoc />
     public IEventHandler Create(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
     {
-        using var linkedShutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, dispatcher.ShutdownToken);
-        
         EventProcessor Converter(TenantId _) => new(arguments.Scope, arguments.EventHandler, dispatcher, _loggerFactory.CreateLogger<EventProcessor>());
         return new ActorEventHandler(_streamDefinitions,
             arguments,
@@ -79,7 +77,7 @@ public class EventHandlerFactory : IEventHandlerFactory
             _actorSystem,
             _tenants,
             _createStreamProcessorActorProps,
-            linkedShutdownTokenSource.Token
+            cancellationToken
         );
     }
 

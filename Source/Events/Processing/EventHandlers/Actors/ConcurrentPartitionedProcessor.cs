@@ -39,7 +39,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         public ActiveRequests(int concurrency)
         {
             _concurrency = concurrency;
-            _currentlyProcessing = Channel.CreateBounded<(PartitionId, Task<ReceiveResult>)>(new BoundedChannelOptions(concurrency)
+            _currentlyProcessing = Channel.CreateUnbounded<(PartitionId, Task<ReceiveResult>)>(new UnboundedChannelOptions
             {
                 SingleReader = true,
                 SingleWriter = true
@@ -84,7 +84,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         }
 
         public bool IsEmpty => _currentPartitions.Count == 0;
-        public bool IsFull => _currentPartitions.Count == _concurrency;
+        public bool IsFull => _currentPartitions.Count >= _concurrency;
         public int Count => _currentPartitions.Count;
     }
 
@@ -180,14 +180,6 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
                 }
             }
         }
-        catch (OperationCanceledException e)
-        {
-            Logger.CancelledRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorWhileRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
-        }
         finally
         {
             // If there are requests in-flight, let's try to wait for them to complete
@@ -210,6 +202,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
             {
                 currentState = await ProcessReceiveResult(currentState, timeout, deadlineToken);
             }
+
             Logger.FinishedWaitingForCompletions(Identifier.EventProcessorId, Identifier.ScopeId);
         }
         catch (Exception e)
@@ -218,7 +211,8 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         }
     }
 
-    async Task<State> ProcessNextEvent(ChannelReader<StreamEvent> messages, State currentState, CancellationToken stoppingToken, CancellationToken deadlineToken)
+    async Task<State> ProcessNextEvent(ChannelReader<StreamEvent> messages, State currentState, CancellationToken stoppingToken,
+        CancellationToken deadlineToken)
     {
         var evt = await messages.ReadAsync(stoppingToken);
         if (currentState.ProcessorState.FailingPartitions.TryGetValue(evt.Partition, out _))
@@ -228,7 +222,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         }
 
         var newTask = ProcessEventAndReturnStateUpdateCallback(evt, deadlineToken);
-        await currentState.ActiveRequests.Add(evt.Partition, newTask);
+        await currentState.ActiveRequests.Add(evt.Partition, newTask).ConfigureAwait(false);
         return currentState;
     }
 
@@ -255,19 +249,6 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         };
     }
 
-    // async Task<ReceiveResult> ProcessEventRetryAndReturnStateUpdateCallback(StreamEvent evt, FailingPartitionState partitionState,
-    //     CancellationToken cancellationToken)
-    // {
-    //     var (processingResult, elapsed) = await RetryProcessingEvent(evt, partitionState.Reason, partitionState.ProcessingAttempts, cancellationToken);
-    //
-    //     return state =>
-    //     {
-    //         var updatedState = HandleProcessingResult(processingResult, evt, elapsed, state.ProcessorState);
-    //
-    //         return state with { ProcessorState = updatedState };
-    //     };
-    // }
-
     internal enum NextAction
     {
         /// <summary>
@@ -279,12 +260,6 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         /// Receive the result of the current event being processed
         /// </summary>
         ReceiveResult,
-
-        /// <summary>
-        /// Process an event from before the current position in the event stream.
-        /// Skips events in non failing partitions
-        /// </summary>
-        ProcessCatchUpEvent,
 
         /// <summary>
         /// Retry processing of failed events.

@@ -27,12 +27,12 @@ public interface IEventProcessor
     /// <summary>
     /// Let the processor know that it should shut down.
     /// </summary>
-    CancellationToken ShutdownToken => CancellationToken.None;
-    
+    CancellationToken? ShutdownToken => null;
+
     /// <summary>
     /// Do not wait for graceful shutdown after this has been cancelled
     /// </summary>
-    CancellationToken DeadlineToken => CancellationToken.None;
+    CancellationToken? DeadlineToken => null;
 
     /// <summary>
     /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.

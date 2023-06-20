@@ -72,44 +72,33 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
 
     public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken, CancellationToken deadlineToken)
     {
-        try
+        var currentState = new State(AsPartitioned(state));
+
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var currentState = new State(AsPartitioned(state));
+            var (nextAction, partitionId) = await WaitForNextAction(messages, currentState, cancellationToken);
 
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                var (nextAction, partitionId) = await WaitForNextAction(messages, currentState, cancellationToken);
-
-                try
+                switch (nextAction)
                 {
-                    switch (nextAction)
-                    {
-                        case NextAction.ProcessCatchUpEvent:
-                            _ = await messages.ReadAsync(cancellationToken);
-                            // Skip message, handled in the catch-up process
-                            break;
-                        case NextAction.ProcessNextEvent:
-                            var evt = await messages.ReadAsync(cancellationToken);
-                            currentState = await HandleNewEvent(evt, currentState, cancellationToken);
-                            break;
-                        case NextAction.ProcessFailedEvents:
-                            currentState = await CatchUpForPartition(currentState, partitionId!, cancellationToken,deadlineToken);
-                            break;
-                    }
-                }
-                finally
-                {
-                    await PersistNewState(currentState.ProcessorState, deadlineToken);
+                    case NextAction.ProcessCatchUpEvent:
+                        _ = await messages.ReadAsync(cancellationToken);
+                        // Skip message, handled in the catch-up process
+                        break;
+                    case NextAction.ProcessNextEvent:
+                        var evt = await messages.ReadAsync(cancellationToken);
+                        currentState = await HandleNewEvent(evt, currentState, deadlineToken);
+                        break;
+                    case NextAction.ProcessFailedEvents:
+                        currentState = await CatchUpForPartition(currentState, partitionId!, cancellationToken,deadlineToken);
+                        break;
                 }
             }
-        }
-        catch (OperationCanceledException e)
-        {
-            Logger.CancelledRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorWhileRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
+            finally
+            {
+                await PersistNewState(currentState.ProcessorState, deadlineToken);
+            }
         }
     }
 
@@ -188,7 +177,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
         }
     }
 
-    async Task<State> HandleNewEvent(StreamEvent evt, State state, CancellationToken cancellationToken)
+    async Task<State> HandleNewEvent(StreamEvent evt, State state, CancellationToken deadlineToken)
     {
         if (state.ProcessorState.FailingPartitions.TryGetValue(evt.Partition, out _))
         {
@@ -198,7 +187,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
             };
         }
 
-        var (processorState, _) = await ProcessEventAndHandleResult(evt, state.ProcessorState, cancellationToken);
+        var (processorState, _) = await ProcessEventAndHandleResult(evt, state.ProcessorState, deadlineToken);
         state = state with
         {
             ProcessorState = processorState
@@ -253,7 +242,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
                 state.ProcessorState,
                 failingPartitionState.Reason,
                 failingPartitionState.ProcessingAttempts,
-                cancellationToken).ConfigureAwait(false);
+                deadlineToken).ConfigureAwait(false);
             await PersistNewState(newState, deadlineToken);
 
             state = state with

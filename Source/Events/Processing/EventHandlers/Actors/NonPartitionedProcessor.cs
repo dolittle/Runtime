@@ -36,58 +36,47 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
     public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken,
         CancellationToken deadlineToken)
     {
-        try
+        var currentState = AsNonPartitioned(state);
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var currentState = AsNonPartitioned(state);
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                try
+                var evt = await messages.ReadAsync(cancellationToken);
+
+                (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, deadlineToken);
+                await PersistNewState(currentState, deadlineToken);
+
+                while (processingResult is { Succeeded: false, Retry: true })
                 {
-                    var evt = await messages.ReadAsync(cancellationToken);
-
-                    (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, deadlineToken);
-                    await PersistNewState(currentState, deadlineToken);
-
-                    while (processingResult is { Succeeded: false, Retry: true })
+                    if (state.TryGetTimespanToRetry(out var retryTimeout))
                     {
-                        if (state.TryGetTimespanToRetry(out var retryTimeout))
-                        {
-                            Logger.LogInformation("Will retry processing event {evt.Position} after {Timeout}", evt, retryTimeout);
-                            await Task.Delay(retryTimeout, cancellationToken);
-                        }
-                        else
-                        {
-                            Logger.LogInformation("Will retry processing event {evt.Position} directly", evt);
-                        }
-
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            return;
-                        }
-
-                        (currentState, processingResult) = await RetryProcessingEventAndHandleResult(evt, currentState, processingResult.FailureReason,
-                            currentState.ProcessingAttempts + 1, deadlineToken);
+                        Logger.LogInformation("Will retry processing event {evt.Position} after {Timeout}", evt, retryTimeout);
+                        await Task.Delay(retryTimeout, cancellationToken);
+                    }
+                    else
+                    {
+                        Logger.LogInformation("Will retry processing event {evt.Position} directly", evt);
                     }
 
-                    if (!processingResult.Succeeded)
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        Logger.StoppedFailingEventHandler(Identifier.EventProcessorId, Identifier.ScopeId, currentState.FailureReason);
                         return;
                     }
+
+                    (currentState, processingResult) = await RetryProcessingEventAndHandleResult(evt, currentState, processingResult.FailureReason,
+                        currentState.ProcessingAttempts + 1, deadlineToken);
                 }
-                finally
+
+                if (!processingResult.Succeeded)
                 {
-                    await PersistNewState(currentState, deadlineToken);
+                    Logger.StoppedFailingEventHandler(Identifier.EventProcessorId, Identifier.ScopeId, currentState.FailureReason);
+                    return;
                 }
             }
-        }
-        catch (OperationCanceledException e)
-        {
-            Logger.CancelledRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
-        }
-        catch (Exception e)
-        {
-            Logger.ErrorWhileRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
+            finally
+            {
+                await PersistNewState(currentState, deadlineToken);
+            }
         }
     }
 
