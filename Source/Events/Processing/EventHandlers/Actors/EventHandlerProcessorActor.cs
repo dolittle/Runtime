@@ -164,7 +164,7 @@ public class EventHandlerProcessorActor : IDisposable, IActor
             {
                 await context.StopAsync(pid);
                 await _getStreamProcessorStates(reprocess.TenantId).Persist(_identifier,
-                    CreateProcessorState(reprocess.ProcessingPosition, _filter.Partitioned), context.CancellationToken);
+                    CreateProcessorState(reprocess.ProcessingPosition, _filter.Partitioned), CancellationToken.None);
                 InitTenant(reprocess.TenantId, context);
             }
             else

@@ -38,13 +38,22 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
 
         public record Call(TRequest Request, ExecutionContext ExecutionContext);
 
+        public record Send(TServerMessage Request);
+
         public record CallResponse(TResponse Response, ReverseCallId CallId);
+
+        public record InitDisconnect(InitiateDisconnect InitiateDisconnect);
     }
+
+    public record Tokens(CancellationTokenSource? ShutdownTokenSource, CancellationTokenSource? DeadlineTokenSource);
 
     public class Wrapper : IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>
     {
         readonly ActorSystem _actorSystem;
         readonly PID _actor;
+
+        readonly CancellationTokenSource? _shutdownTokenSource;
+        readonly CancellationTokenSource? _deadlineTokenSource;
 
         public Wrapper(
             ActorSystem actorSystem,
@@ -53,15 +62,22 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             IPingedConnection<TClientMessage, TServerMessage> connection,
             IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter)
         {
+            _shutdownTokenSource = messageConverter.SupportsGracefulShutdown ? new CancellationTokenSource() : null;
+            _deadlineTokenSource = messageConverter.SupportsGracefulShutdown ? new CancellationTokenSource() : null;
             _actorSystem = actorSystem;
             _actor = actorSystem.Root.SpawnNamed(
                 propsCreator.PropsFor<ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(
                     connection,
-                    messageConverter),
+                    messageConverter,
+                    new Tokens(_shutdownTokenSource, _deadlineTokenSource)),
                 $"reverse-call-dispatcher-{requestId.Value}");
         }
 
         public void Dispose() => _actor.Stop(_actorSystem);
+
+        public CancellationToken? ShutdownToken => _shutdownTokenSource?.Token;
+
+        public CancellationToken? DeadlineToken => _deadlineTokenSource?.Token;
 
         public TConnectArguments? Arguments { get; private set; }
 
@@ -115,8 +131,20 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
 
             return getResult.Result;
         }
+
+        public async Task WriteMessage(TServerMessage message, CancellationToken cancellationToken)
+        {
+            var getResult = await _actorSystem.Root.RequestAsync<Try>(_actor, new Messages.Send(message), CancellationToken.None)
+                .ConfigureAwait(false);
+            if (!getResult.Success)
+            {
+                ExceptionDispatchInfo.Capture(getResult.Exception).Throw();
+            }
+        }
     }
 
+    readonly CancellationTokenSource? _shutdownTokenSource;
+    readonly CancellationTokenSource? _deadlineTokenSource;
     readonly IPingedConnection<TClientMessage, TServerMessage> _reverseCallConnection;
     readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
     readonly ICreateExecutionContexts _executionContextFactory;
@@ -134,13 +162,17 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
         ICreateExecutionContexts executionContextFactory,
         IMetricsCollector metricsCollector,
+        Tokens tokens,
         ILogger<ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>> logger)
     {
+        _shutdownTokenSource = tokens.ShutdownTokenSource;
+        _deadlineTokenSource = tokens.DeadlineTokenSource;
         _reverseCallConnection = reverseCallConnection;
         _messageConverter = messageConverter;
         _executionContextFactory = executionContextFactory;
         _metricsCollector = metricsCollector;
         _logger = logger;
+        this._shutdownTokenSource = _shutdownTokenSource;
     }
 
     public Task ReceiveAsync(IContext context)
@@ -151,9 +183,32 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             Messages.Reject reject => OnReject(reject, context.Respond),
             Messages.Call message => OnCall(context, message, context.Respond),
             Messages.CallResponse response => OnCallResponse(response),
+            Messages.Send response => OnSend(response, context.Respond),
+            Messages.InitDisconnect initDisconnect => OnInitDisconnect(initDisconnect, context),
             Stopped => DisposeAsync().AsTask(),
             _ => Task.CompletedTask
         };
+
+    Task OnInitDisconnect(Messages.InitDisconnect msg, IContext ctx)
+    {
+        _logger.ReceivedInitiateDisconnect();
+        _shutdownTokenSource!.Cancel();
+        var gradePeriod = msg.InitiateDisconnect.GracePeriod ?? TimeSpan.FromSeconds(20);
+        ctx.ReenterAfter(Task.Delay(gradePeriod), () =>
+        {
+            try
+            {
+                _deadlineTokenSource!.Cancel();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            ;
+        });
+        return Task.CompletedTask;
+    }
 
 
     Task OnCallResponse(Messages.CallResponse msg)
@@ -298,6 +353,38 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
         }
     }
 
+    async Task OnSend(Messages.Send command, Action<Try> respond)
+    {
+        if (_disposed)
+        {
+            RespondError(new CannotPerformCallOnCompletedReverseCallConnection());
+            return;
+        }
+
+        if (_rejected)
+        {
+            RespondError(new ReverseCallDispatcherAlreadyRejected());
+            return;
+        }
+
+        try
+        {
+            await _reverseCallConnection.ClientStream.WriteAsync(command.Request).ConfigureAwait(false);
+            respond(Try.Succeeded);
+        }
+        catch (Exception e)
+        {
+            RespondError(e);
+        }
+
+
+        void RespondError(Exception ex)
+        {
+            respond(Try.Failed(ex));
+        }
+    }
+
+
     Task OnCall(IContext context, Messages.Call msg, Action<Try<TResponse>> respond)
     {
         if (_disposed)
@@ -400,6 +487,14 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             while (!cts.Token.IsCancellationRequested && await reader.MoveNext(cts.Token).ConfigureAwait(false))
             {
                 var message = reader.Current;
+                var initiateDisconnect = _messageConverter.GetInitiateDisconnect(message);
+                if (initiateDisconnect is not null)
+                {
+                    _logger.ReceivedInitiateDisconnect();
+                    context.Send(context.Self, new Messages.InitDisconnect(initiateDisconnect));
+                    continue;
+                }
+
                 var response = _messageConverter.GetResponse(message);
                 if (response != null)
                 {
@@ -451,10 +546,30 @@ public class ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnect
             }
             catch
             {
+                // ignored
             }
         }
 
         _reverseCallConnection?.Dispose();
+        try
+        {
+            _shutdownTokenSource?.Cancel();
+            _shutdownTokenSource?.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
+        try
+        {
+            _deadlineTokenSource?.Cancel();
+            _deadlineTokenSource?.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
+        
         return ValueTask.CompletedTask;
     }
 

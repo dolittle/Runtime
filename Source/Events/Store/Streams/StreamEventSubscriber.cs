@@ -74,7 +74,8 @@ public class StreamEventSubscriber : IStreamEventSubscriber
                         if (include(evt))
                         {
                             var streamEvent = new StreamEvent(evt.FromProtobuf(), current, StreamId.EventLog, evt.EventSourceId, partitioned);
-                            await writer.WriteAsync(streamEvent, cancellationToken);
+                            // ReSharper disable once MethodSupportsCancellation
+                            await writer.WriteAsync(streamEvent);
                             current = current.Increment();
                         }
                     }

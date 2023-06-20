@@ -6,7 +6,6 @@ using System.Threading;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Tenancy;
@@ -29,7 +28,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers;
 public class EventHandlerFactory : IEventHandlerFactory
 {
     readonly CreateStreamProcessorActorProps _createStreamProcessorActorProps;
-    readonly IStreamProcessors _streamProcessors;
     readonly IStreamDefinitions _streamDefinitions;
     readonly IMetricsCollector _metrics;
     readonly ILoggerFactory _loggerFactory;
@@ -39,21 +37,19 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <summary>
     /// Initializes a new instance of the <see cref="EventHandlerFactory"/> class.
     /// </summary>
-    /// <param name="streamProcessors">The <see cref="IStreamProcessors"/>.</param>
     /// <param name="streamDefinitions">The <see cref="IStreamDefinitions"/>.</param>
     /// <param name="metrics">The collector to use for metrics.</param>
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     /// <param name="tenants">The <see cref="ITenants"/>.</param>
     /// <param name="actorSystem"></param>
+    /// <param name="createStreamProcessorActorProps">Create Actor props for </param>
     public EventHandlerFactory(
-        IStreamProcessors streamProcessors,
         IStreamDefinitions streamDefinitions,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory,
         ITenants tenants,
         ActorSystem actorSystem, CreateStreamProcessorActorProps createStreamProcessorActorProps)
     {
-        _streamProcessors = streamProcessors;
         _streamDefinitions = streamDefinitions;
         _metrics = metrics;
         _loggerFactory = loggerFactory;
@@ -65,7 +61,7 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <inheritdoc />
     public IEventHandler Create(EventHandlerRegistrationArguments arguments, ReverseCallDispatcher dispatcher, CancellationToken cancellationToken)
     {
-        EventProcessor Converter(TenantId _) => new EventProcessor(arguments.Scope, arguments.EventHandler, dispatcher, _loggerFactory.CreateLogger<EventProcessor>());
+        EventProcessor Converter(TenantId _) => new(arguments.Scope, arguments.EventHandler, dispatcher, _loggerFactory.CreateLogger<EventProcessor>());
         return new ActorEventHandler(_streamDefinitions,
             arguments,
             Converter,

@@ -108,6 +108,10 @@ public class StreamSubscriptionActor : IActor
                 context.Stop(context.Self);
                 return;
             }
+            catch (TimeoutException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                // Stopping, no need to log
+            }
             catch (Exception e)
             {
                 _logger.ErrorPublishingSubscribedEvents(e, _subscriptionName);

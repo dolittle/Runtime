@@ -21,7 +21,6 @@ public class mapping_a_failing_partitioned_state : given.a_failing_partitioned_s
         before = stream_processor_state;
         as_protobuf = stream_processor_state.ToProtobuf();
         after = (StreamProcessorState)as_protobuf.FromProtobuf();
-        Console.WriteLine(after);
     };
 
     It should_not_be_lossy = () => after.Should().BeEquivalentTo(before);

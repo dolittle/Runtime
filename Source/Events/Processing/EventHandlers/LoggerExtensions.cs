@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
@@ -66,8 +67,8 @@ static partial class LoggerExtensions
 
     static readonly Action<ILogger, Guid, Guid, Exception> _eventHandlerDisconnected = LoggerMessage
         .Define<Guid, Guid>(
-            LogLevel.Debug,
-            new EventId(414482081, nameof(EventHandlerDisconnected)),
+            LogLevel.Information,
+            new EventId(414482081, nameof(EventHandlerDisconnectedForTenant)),
             "Event handler: {EventHandler} in scope: {Scope} disconnected");
 
     static readonly Action<ILogger, Guid, Exception> _startingEventHandler = LoggerMessage
@@ -112,7 +113,8 @@ static partial class LoggerExtensions
             new EventId(250914604, nameof(EventProcessorIsProcessingAgain)),
             "Event processor: {EventProcessor} is processing event type: {EventTypeId} for partition: {PartitionId} again for the {RetryCount} time, because of: {FailureReason}");
 
-    internal static void ReceivedEventHandler(this ILogger logger, StreamId sourceStream, EventProcessorId handler, ScopeId scope, IEnumerable<ArtifactId> types, bool partitioned)
+    internal static void ReceivedEventHandler(this ILogger logger, StreamId sourceStream, EventProcessorId handler, ScopeId scope,
+        IEnumerable<ArtifactId> types, bool partitioned)
         => _receivedEventHandler(logger, sourceStream, handler, scope, string.Join(", ", types.Select(_ => $"'{_.Value}'")), partitioned, null);
 
     internal static void EventHandlerIsInvalid(this ILogger logger, EventProcessorId handler)
@@ -139,15 +141,27 @@ static partial class LoggerExtensions
     internal static void CouldNotStartEventHandler(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
         => _couldNotStartEventHandler(logger, handlerId, scopeId, null);
 
-    
-    [LoggerMessage(0,LogLevel.Warning, "An error occurred while running event handler: {EventHandler} in scope: {Scope}")]
+
+    [LoggerMessage(0, LogLevel.Warning, "An error occurred while running event handler: {EventHandler} in scope: {Scope}")]
     internal static partial void ErrorWhileRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope);
+
+    [LoggerMessage(0, LogLevel.Information, "Waiting for completions: {EventHandler} in scope: {Scope}, {RequestsInFlight} requests in flight")]
+    internal static partial void WaitingForCompletions(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, int requestsInFlight);
     
-    [LoggerMessage(0,LogLevel.Information, "EventHandler was cancelled: {EventHandler} in scope: {Scope}")]
+    [LoggerMessage(0, LogLevel.Information, "All handlers complete: {EventHandler} in scope: {Scope}")]
+    internal static partial void FinishedWaitingForCompletions(this ILogger logger, EventProcessorId eventHandler, ScopeId scope);
+
+    [LoggerMessage(0, LogLevel.Error, "Failed while waiting for completions: {EventHandler} in scope: {Scope}")]
+    internal static partial void FailedWaitingForCompletions(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope, int requestsInFlight);
+
+    [LoggerMessage(0, LogLevel.Information, "EventHandler was cancelled: {EventHandler} in scope: {Scope}")]
     internal static partial void CancelledRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope);
-    
-    [LoggerMessage(0,LogLevel.Information, "Failing eventHandler was cancelled, no retries scheduled: {EventHandler} in scope: {Scope}. Error: {Reason}")]
+
+    [LoggerMessage(0, LogLevel.Information, "Failing eventHandler was cancelled, no retries scheduled: {EventHandler} in scope: {Scope}. Error: {Reason}")]
     internal static partial void StoppedFailingEventHandler(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, string reason);
+
+    [LoggerMessage(0, LogLevel.Debug, "Event handler: {EventHandler} in scope: {Scope} disconnected for tenant {TenantId}")]
+    internal static partial void EventHandlerDisconnectedForTenant(this ILogger logger, EventProcessorId eventHandler, ScopeId scope, TenantId tenantId);
     
     internal static void EventHandlerDisconnected(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
         => _eventHandlerDisconnected(logger, handlerId, scopeId, null);
@@ -170,6 +184,7 @@ static partial class LoggerExtensions
     internal static void EventProcessorIsProcessing(this ILogger logger, EventProcessorId handlerId, ArtifactId eventType, PartitionId partition)
         => _eventProcessorIsProcessing(logger, handlerId, eventType, partition, null);
 
-    internal static void EventProcessorIsProcessingAgain(this ILogger logger, EventProcessorId handlerId, ArtifactId eventType, PartitionId partition, uint retryCount, string failureReason)
+    internal static void EventProcessorIsProcessingAgain(this ILogger logger, EventProcessorId handlerId, ArtifactId eventType, PartitionId partition,
+        uint retryCount, string failureReason)
         => _eventProcessorIsProcessingAgain(logger, handlerId, eventType, partition, retryCount, failureReason, null);
 }

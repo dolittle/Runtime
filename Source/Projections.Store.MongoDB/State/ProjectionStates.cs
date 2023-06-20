@@ -58,13 +58,14 @@ public class ProjectionStates : IProjectionStates
             var collection = await _projections.GetStates(scope, projection, token).ConfigureAwait(false);
             var projectionState = await collection
                 .Find(CreateKeyFilter(key))
-                .Project(_ => _.ContentRaw)
                 .SingleOrDefaultAsync(token)
                 .ConfigureAwait(false);
             
-            return string.IsNullOrEmpty(projectionState)
+            
+            
+            return projectionState is null || (string.IsNullOrEmpty(projectionState.ContentRaw))
                 ? Try<ProjectionState>.Failed(new ProjectionStateDoesNotExist(projection, key, scope))
-                : new ProjectionState(projectionState);
+                : new ProjectionState(projectionState.ContentRaw);
         }
         catch (Exception ex)
         {
@@ -80,15 +81,10 @@ public class ProjectionStates : IProjectionStates
             var collection = await _projections.GetStates(scope, projection, token).ConfigureAwait(false);
             var states = collection
                 .Find(Builders<Projection>.Filter.Empty)
-                .Project(_ => new Tuple<ProjectionState, ProjectionKey>(_.ContentRaw, _.Key))
-                .ToAsyncEnumerable(token);
+                .ToAsyncEnumerable(token)
+                .Select(_ => (new ProjectionState(_.ContentRaw), new ProjectionKey(_.Key)));
             
-            var result = states.Select(_ =>
-            {
-                return (_.Item1, _.Item2);
-            });
-
-            return Try<IAsyncEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(result);
+            return Try<IAsyncEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(states);
         }
         catch (Exception ex)
         {

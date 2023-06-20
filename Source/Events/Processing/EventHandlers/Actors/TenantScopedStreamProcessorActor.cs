@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -35,6 +36,8 @@ public delegate Props CreateTenantScopedStreamProcessorProps(StreamProcessorId s
 /// </summary>
 public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 {
+    static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
+
     readonly TenantId _tenantId;
     readonly TypeFilterWithEventSourcePartitionDefinition _filterDefinition;
     readonly IEventProcessor _processor;
@@ -45,8 +48,8 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
     readonly IEventFetchers _eventFetchers;
+    readonly List<IDisposable> _cleanup = new();
 
-    CancellationTokenSource? _stoppingToken;
     readonly bool _partitioned;
     readonly int _concurrency;
 
@@ -158,21 +161,35 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var initialState = processingPosition.Result;
 
         var from = initialState.Position;
-        var cts = new CancellationTokenSource();
-        var events = StartSubscription(from, cts.Token);
-        var firstEventReady = events.WaitToReadAsync(cts.Token).AsTask();
-        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events, context));
-        _stoppingToken = cts;
+
+        var shutdownToken = context.CancellationToken;
+        var deadlineToken = context.CancellationToken;
+        if (_processor.ShutdownToken is not null && _processor.DeadlineToken is not null)
+        {
+            // Processor supports graceful shutdown. Register the shutdown token and deadline token
+            var linkedShutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken!.Value, context.CancellationToken);
+            var linkedDeadlineTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.DeadlineToken!.Value, context.CancellationToken);
+            _cleanup.Add(linkedShutdownTokenSource);
+            _cleanup.Add(linkedDeadlineTokenSource);
+            shutdownToken = linkedShutdownTokenSource.Token;
+            deadlineToken = linkedDeadlineTokenSource.Token;
+        }
+
+        var events = StartSubscription(from, shutdownToken);
+        var firstEventReady = events.WaitToReadAsync(shutdownToken).AsTask();
+        context.ReenterAfter(firstEventReady,
+            _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
     }
 
-    async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context)
+    async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context, CancellationToken stoppingToken,
+        CancellationToken deadlineToken)
     {
         try
         {
             if (_concurrency > 1 && _partitioned)
             {
                 var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
-                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);
+                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, stoppingToken);
 
                 var processor = new ConcurrentPartitionedProcessor(
                     Identifier,
@@ -187,12 +204,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                     _concurrency,
                     Logger);
 
-                await processor.Process(events, streamProcessorState, context.CancellationToken);
+                await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
             else if (_partitioned)
             {
                 var streamDefinition = new StreamDefinition(new FilterDefinition(SourceStream: StreamId.EventLog, StreamId.EventLog, Partitioned: true));
-                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, CancellationToken.None);
+                var fetcher = await _eventFetchers.GetFetcherFor(Identifier.ScopeId, streamDefinition, stoppingToken);
 
                 var processor = new PartitionedProcessor(
                     Identifier,
@@ -206,7 +223,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                     (ICanFetchEventsFromPartitionedStream)fetcher,
                     Logger);
 
-                await processor.Process(events, streamProcessorState, context.CancellationToken);
+                await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
             else
             {
@@ -221,11 +238,22 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                     _tenantId,
                     Logger);
 
-                await processor.Process(events, streamProcessorState, context.CancellationToken);
+                await processor.Process(events, streamProcessorState, stoppingToken, deadlineToken);
             }
+
+            Logger.EventHandlerDisconnectedForTenant(Identifier.EventProcessorId, Identifier.ScopeId, _tenantId);
+        }
+        catch (OperationCanceledException e)
+        {
+            Logger.CancelledRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
+        }
+        catch (Exception e)
+        {
+            Logger.ErrorWhileRunningEventHandler(e, Identifier.EventProcessorId, Identifier.ScopeId);
         }
         finally
         {
+            // ReSharper disable once MethodHasAsyncOverload
             context.Stop(context.Self);
         }
     }
@@ -277,7 +305,11 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     public void Dispose()
     {
-        _stoppingToken?.Cancel();
-        _stoppingToken?.Dispose();
+        foreach (var disposable in _cleanup)
+        {
+            disposable.Dispose();
+        }
+
+        _cleanup.Clear();
     }
 }
