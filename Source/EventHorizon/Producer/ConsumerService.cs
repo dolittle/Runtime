@@ -105,11 +105,22 @@ public class ConsumerService : ConsumerBase
                 _metrics.IncrementTotalRejectedSubscriptions();
                 await dispatcher.Reject(failureResponse, context.CancellationToken).ConfigureAwait(false);
                 return;
-            } else {
-                consent = ConsentId.NoConsent;
             }
-        }
 
+            consent = ConsentId.NoConsent;
+        }
+        
+        if (!_tenants.All.Contains(arguments.ProducerTenant))
+        {
+            await dispatcher.Reject(new SubscriptionResponse
+            {
+                Failure = new ProtobufContracts.Failure
+                {
+                    Id = SubscriptionFailures.MissingProducerTenant.ToProtobuf(),
+                    Reason = $"Producer tenant '{arguments.ProducerTenant}' does not exist"
+                }
+            }, context.CancellationToken).ConfigureAwait(false);
+        }
 
         _metrics.IncrementTotalAcceptedSubscriptions();
         Log.SuccessfullySubscribed(

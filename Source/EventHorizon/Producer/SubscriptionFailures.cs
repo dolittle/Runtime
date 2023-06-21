@@ -14,6 +14,7 @@ public static class SubscriptionFailures
     /// Gets the <see cref="FailureId" /> that represents the 'MissingConsent' failure type.
     /// </summary>
     public static FailureId MissingConsent => FailureId.Create("be1ba4e6-81e3-49c4-bec2-6c7e262bfb77");
+    public static FailureId MissingProducerTenant => FailureId.Create("733d0c4f-fc25-4b60-acdf-cac5ee661f23");
 
     /// <summary>
     /// Gets the <see cref="FailureId" /> that represents the 'MissingSubscriptionArguments' failure type.
