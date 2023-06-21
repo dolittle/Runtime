@@ -220,7 +220,7 @@ public class EventHandlerProcessorActor : IDisposable, IActor
             {
                 _stopEverything.Cancel();
             }
-
+            
             _streamProcessors.Remove(stoppedChild.Key);
         }
 
