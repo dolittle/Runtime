@@ -61,6 +61,11 @@ public class FilterValidators : IFilterValidators
     public async Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
         where TDefinition : IFilterDefinition
     {
+        if (!filter.Definition.CanBeValidated)
+        {
+            return FilterValidationResult.Succeeded();
+        }
+        
         var tryGetProcessorState = await _streamProcessorStates
             .TryGetFor(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken)
             .ConfigureAwait(false);

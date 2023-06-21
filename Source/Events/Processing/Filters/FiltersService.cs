@@ -138,6 +138,7 @@ public class FiltersService : FiltersBase
         {
             return;
         }
+
         using var dispatcher = tryConnect.Result.dispatcher;
         var arguments = tryConnect.Result.arguments;
         var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
@@ -186,6 +187,7 @@ public class FiltersService : FiltersBase
         {
             return;
         }
+
         using var dispatcher = tryConnect.Result.dispatcher;
         var arguments = tryConnect.Result.arguments;
         var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
@@ -206,7 +208,7 @@ public class FiltersService : FiltersBase
         await RegisterFilter(
             dispatcher,
             arguments.Scope,
-            filterDefinition, 
+            filterDefinition,
             tenant => _createPartitionedFilterProcessorFor(
                 tenant,
                 arguments.Scope,
@@ -235,6 +237,7 @@ public class FiltersService : FiltersBase
         {
             return;
         }
+
         using var dispatcher = tryConnect.Result.dispatcher;
         var arguments = tryConnect.Result.arguments;
         var createExecutionContext = await CreateExecutionContextOrReject(dispatcher, arguments.ExecutionContext, cts.Token).ConfigureAwait(false);
@@ -256,15 +259,16 @@ public class FiltersService : FiltersBase
             ScopeId.Default,
             filterDefinition,
             tenant => _createPublicFilterProcessorFor(
-                    tenant,
-                    filterDefinition,
-                    dispatcher),
+                tenant,
+                filterDefinition,
+                dispatcher),
             executionContext,
             cts.Token).ConfigureAwait(false);
     }
 
     Task<Try<ExecutionContext>> CreateExecutionContextOrReject<TClientMessage, TConnectRequest, TResponse>(
-        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse>
+            dispatcher,
         ExecutionContext requestExecutionContext,
         CancellationToken cancellationToken)
         where TClientMessage : IMessage, new()
@@ -278,10 +282,11 @@ public class FiltersService : FiltersBase
                 var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Execution context is invalid: {exception.Message}");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
             });
-        
+
 
     async Task<bool> RejectIfInvalidFilterId<TClientMessage, TConnectRequest, TResponse>(
-        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse>
+            dispatcher,
         EventProcessorId filterId,
         CancellationToken cancellationToken)
         where TClientMessage : IMessage, new()
@@ -301,7 +306,8 @@ public class FiltersService : FiltersBase
     }
 
     async Task RegisterFilter<TFilterDefinition, TClientMessage, TConnectRequest, TResponse>(
-        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse>
+            dispatcher,
         ScopeId scopeId,
         TFilterDefinition filterDefinition,
         Func<TenantId, IFilterProcessor<TFilterDefinition>> getFilterProcessor,
@@ -357,7 +363,7 @@ public class FiltersService : FiltersBase
         }
 
         var tasks = new TaskGroup(tryStartFilter.Result);
-        
+
         tasks.OnFirstTaskFailure += (_, ex) => _logger.ErrorWhileRunningFilter(ex, filterDefinition.TargetStream, scopeId);
         tasks.OnAllTasksCompleted += () => _logger.FilterStopped(filterDefinition.TargetStream, scopeId);
 
@@ -365,7 +371,8 @@ public class FiltersService : FiltersBase
     }
 
     async Task<Try<IEnumerable<Task>>> TryStartFilter<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
-        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse>
+            dispatcher,
         StreamProcessor streamProcessor,
         ScopeId scopeId,
         TFilterDefinition filterDefinition,
@@ -437,14 +444,17 @@ public class FiltersService : FiltersBase
         CancellationToken cancellationToken)
         where TFilterDefinition : IFilterDefinition
     {
-        _logger.ValidatingFilter(filterDefinition.TargetStream);
-        var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
-
-        if (filterValidationResults.Any(_ => !_.Value.Success))
+        if (filterDefinition.CanBeValidated)
         {
-            var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Success);
-            _logger.FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
-            throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+            _logger.ValidatingFilter(filterDefinition.TargetStream);
+            var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
+
+            if (filterValidationResults.Any(_ => !_.Value.Success))
+            {
+                var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Success);
+                _logger.FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+                throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+            }
         }
 
         var filteredStreamDefinition = new StreamDefinition(filterDefinition);
@@ -453,7 +463,8 @@ public class FiltersService : FiltersBase
     }
 
     Task WriteFailedRegistrationResponse<TClientMessage, TConnectRequest, TResponse>(
-        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+        IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse>
+            dispatcher,
         Failure failure,
         CancellationToken cancellationToken)
         where TClientMessage : IMessage, new()
