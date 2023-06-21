@@ -16,4 +16,6 @@ public record ConsentId(Guid Value) : ConceptAs<Guid>(Value)
     /// </summary>
     /// <param name="reason"><see cref="Guid"/> representation.</param>
     public static implicit operator ConsentId(Guid reason) => new(reason);
+    
+    public static readonly ConsentId NoConsent = Guid.Empty;
 }

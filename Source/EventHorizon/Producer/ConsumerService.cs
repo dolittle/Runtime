@@ -32,6 +32,7 @@ public class ConsumerService : ConsumerBase
     readonly IConsumerProtocol _protocol;
     readonly IEventHorizons _eventHorizons;
     readonly IMetricsCollector _metrics;
+    readonly IOptions<EventHorizonGlobalSettings> _globalSettings;
     readonly ILogger _logger;
 
     /// <summary>
@@ -43,6 +44,7 @@ public class ConsumerService : ConsumerBase
     /// <param name="protocol">The <see cref="IConsumerProtocol" />.</param>
     /// <param name="eventHorizons">The <see cref="IEventHorizons"/>.</param>
     /// <param name="metrics">The system for capturing metrics.</param>
+    /// <param name="globalSettings"></param>
     /// <param name="logger"><see cref="ILogger"/> for logging.</param>
     public ConsumerService(
         Func<TenantId, IOptions<EventHorizonsPerMicroserviceConfiguration>> getEventHorizonsConfiguration,
@@ -51,6 +53,7 @@ public class ConsumerService : ConsumerBase
         IConsumerProtocol protocol,
         IEventHorizons eventHorizons,
         IMetricsCollector metrics,
+        IOptions<EventHorizonGlobalSettings> globalSettings,
         ILogger logger)
     {
         _getEventHorizonsConfiguration = getEventHorizonsConfiguration;
@@ -59,6 +62,7 @@ public class ConsumerService : ConsumerBase
         _protocol = protocol;
         _eventHorizons = eventHorizons;
         _metrics = metrics;
+        _globalSettings = globalSettings;
         _logger = logger;
     }
 
@@ -70,12 +74,12 @@ public class ConsumerService : ConsumerBase
     {
         Log.IncomingEventHorizonSubscription(_logger);
         var connectResult = await _reverseCalls.Connect(
-                producerStream,
-                consumerStream,
-                context,
-                _protocol,
-                context.CancellationToken,
-                true).ConfigureAwait(false);
+            producerStream,
+            consumerStream,
+            context,
+            _protocol,
+            context.CancellationToken,
+            true).ConfigureAwait(false);
         if (!connectResult.Success)
         {
             return;
@@ -93,12 +97,19 @@ public class ConsumerService : ConsumerBase
             arguments.Partition,
             arguments.PublicStream);
 
-        if (!TryGetConsent(arguments, out var consent, out var failureResponse))
+        var consentFound = TryGetConsent(arguments, out var consent, out var failureResponse);
+        if (!consentFound)
         {
-            _metrics.IncrementTotalRejectedSubscriptions();
-            await dispatcher.Reject(failureResponse, context.CancellationToken).ConfigureAwait(false);
-            return;
+            if (_globalSettings.Value.RequireConsent)
+            {
+                _metrics.IncrementTotalRejectedSubscriptions();
+                await dispatcher.Reject(failureResponse, context.CancellationToken).ConfigureAwait(false);
+                return;
+            } else {
+                consent = ConsentId.NoConsent;
+            }
         }
+
 
         _metrics.IncrementTotalAcceptedSubscriptions();
         Log.SuccessfullySubscribed(
@@ -114,11 +125,11 @@ public class ConsumerService : ConsumerBase
 
     bool TryGetConsent(ConsumerSubscriptionArguments arguments, out ConsentId consent, out SubscriptionResponse failureResponse)
     {
-        consent = default;
+        consent = ConsentId.NoConsent;
         try
         {
             return TryGetEventHorizonsConfiguration(arguments, out var eventHorizonsConfiguration, out failureResponse)
-                && TryGetConsentFromConfiguration(arguments, eventHorizonsConfiguration, out consent, out failureResponse);
+                   && TryGetConsentFromConfiguration(arguments, eventHorizonsConfiguration, out consent, out failureResponse);
         }
         catch (Exception ex)
         {
@@ -135,7 +146,8 @@ public class ConsumerService : ConsumerBase
         }
     }
 
-    bool TryGetEventHorizonsConfiguration(ConsumerSubscriptionArguments arguments, out EventHorizonsPerMicroserviceConfiguration eventHorizonsConfiguration, out SubscriptionResponse failureResponse)
+    bool TryGetEventHorizonsConfiguration(ConsumerSubscriptionArguments arguments, out EventHorizonsPerMicroserviceConfiguration eventHorizonsConfiguration,
+        out SubscriptionResponse failureResponse)
     {
         eventHorizonsConfiguration = default;
         failureResponse = default;
@@ -146,7 +158,7 @@ public class ConsumerService : ConsumerBase
             {
                 Log.ProducerTenantIsNotConfigured(_logger, arguments.ProducerTenant);
                 failureResponse = new SubscriptionResponse
-                { 
+                {
                     Failure = new ProtobufContracts.Failure
                     {
                         Id = SubscriptionFailures.MissingConsent.ToProtobuf(),
@@ -155,6 +167,7 @@ public class ConsumerService : ConsumerBase
                 };
                 return false;
             }
+
             eventHorizonsConfiguration = _getEventHorizonsConfiguration(arguments.ProducerTenant).Value;
             return true;
         }
@@ -162,7 +175,7 @@ public class ConsumerService : ConsumerBase
         {
             Log.NoConsentsConfiguredForProducerTenant(_logger, arguments.ProducerTenant);
             failureResponse = new SubscriptionResponse
-            { 
+            {
                 Failure = new ProtobufContracts.Failure
                 {
                     Id = SubscriptionFailures.MissingConsent.ToProtobuf(),
@@ -172,6 +185,7 @@ public class ConsumerService : ConsumerBase
             return false;
         }
     }
+
     bool TryGetConsentFromConfiguration(
         ConsumerSubscriptionArguments arguments,
         EventHorizonsPerMicroserviceConfiguration eventHorizonsConfiguration,
@@ -195,14 +209,17 @@ public class ConsumerService : ConsumerBase
                 $"There are no consents configured for Consumer Microservice {arguments.ConsumerMicroservice}");
             return false;
         }
+
         foreach (var consent in eventHorizonConfiguration.Consents)
         {
-            if (consent.ConsumerTenant == arguments.ConsumerTenant.Value && consent.Stream == arguments.PublicStream.Value && consent.Partition == arguments.Partition.Value)
+            if (consent.ConsumerTenant == arguments.ConsumerTenant.Value && consent.Stream == arguments.PublicStream.Value &&
+                consent.Partition == arguments.Partition.Value)
             {
                 consentId = consent.Consent;
                 return true;
             }
         }
+
         failureResponse = CreateNoConsentsConfiguredResponse(
             arguments,
             $"There are no consents configured for Consumer Tenant {arguments.ConsumerTenant} from Public Stream {arguments.PublicStream} and Partition {arguments.Partition}");
