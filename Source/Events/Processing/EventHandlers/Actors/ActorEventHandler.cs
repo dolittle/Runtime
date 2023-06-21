@@ -240,7 +240,7 @@ public class ActorEventHandler : IEventHandler
         try
         {
             var runningDispatcher = _acceptRegistration(_cancellationTokenSource.Token);
-            var processorDone = _actorSystem.WatchAsync(_eventHandlerKindPid);
+            var processorDone = _actorSystem.DeathWatch(_eventHandlerKindPid);
 
 
             await PersistFilter().ConfigureAwait(false);

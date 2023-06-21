@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 static class ActorSystemExtensions
 {
     // Wait for the actor represented by the PID to be terminated
-    public static Task WatchAsync(this ActorSystem system, PID pid)
+    public static Task DeathWatch(this ActorSystem system, PID pid)
     {
         var tcs = new TaskCompletionSource();
         system.Root.Spawn(Props.FromFunc(ctx =>
