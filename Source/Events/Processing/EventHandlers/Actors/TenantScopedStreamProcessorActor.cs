@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
@@ -36,8 +37,6 @@ public delegate Props CreateTenantScopedStreamProcessorProps(StreamProcessorId s
 /// </summary>
 public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 {
-    static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(10);
-
     readonly TenantId _tenantId;
     readonly TypeFilterWithEventSourcePartitionDefinition _filterDefinition;
     readonly IEventProcessor _processor;
@@ -48,10 +47,13 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
     readonly IEventFetchers _eventFetchers;
+    readonly IApplicationLifecycleHooks _lifecycleHooks;
     readonly List<IDisposable> _cleanup = new();
 
     readonly bool _partitioned;
     readonly int _concurrency;
+
+    static readonly TimeSpan _runtimeShutdownTimeout = TimeSpan.FromSeconds(30);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantScopedStreamProcessorActor"/> class.
@@ -69,6 +71,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     /// <param name="onProcessed"></param>
     /// <param name="eventFetchers"></param>
     /// <param name="onFailedToProcess"></param>
+    /// <param name="lifecycleHooks"></param>
     public TenantScopedStreamProcessorActor(
         StreamProcessorId streamProcessorId,
         TypeFilterWithEventSourcePartitionDefinition filterDefinition,
@@ -82,13 +85,15 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
         IEventFetchers eventFetchers,
         EventHandlerInfo eventHandlerInfo,
-        TenantId tenantId)
+        TenantId tenantId,
+        IApplicationLifecycleHooks lifecycleHooks)
     {
         Identifier = streamProcessorId;
         Logger = logger;
         _onProcessed = onProcessed;
         _onFailedToProcess = onFailedToProcess;
         _tenantId = tenantId;
+        _lifecycleHooks = lifecycleHooks;
         _eventFetchers = eventFetchers;
         _eventLogPositionEnricher = eventLogPositionEnricher;
         _eventSubscriber = eventSubscriber;
@@ -162,23 +167,47 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
         var from = initialState.Position;
 
-        var shutdownToken = context.CancellationToken;
-        var deadlineToken = context.CancellationToken;
-        if (_processor.ShutdownToken is not null && _processor.DeadlineToken is not null)
-        {
-            // Processor supports graceful shutdown. Register the shutdown token and deadline token
-            var linkedShutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.ShutdownToken!.Value, context.CancellationToken);
-            var linkedDeadlineTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_processor.DeadlineToken!.Value, context.CancellationToken);
-            _cleanup.Add(linkedShutdownTokenSource);
-            _cleanup.Add(linkedDeadlineTokenSource);
-            shutdownToken = linkedShutdownTokenSource.Token;
-            deadlineToken = linkedDeadlineTokenSource.Token;
-        }
+        var (shutdownToken, deadlineToken) = GetCancellationTokens(context);
 
         var events = StartSubscription(from, shutdownToken);
         var firstEventReady = events.WaitToReadAsync(shutdownToken).AsTask();
         context.ReenterAfter(firstEventReady,
             _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
+    }
+
+    (CancellationToken shutdownToken, CancellationToken deadlineToken) GetCancellationTokens(IContext context)
+    {
+        var systemShutdownHook = _lifecycleHooks.RegisterShutdownHook();
+        var shutdownAffectingTokens = new List<CancellationToken>
+        {
+            context.CancellationToken,
+            systemShutdownHook.SystemStoppingToken
+        };
+        if (_processor.ShutdownToken is not null)
+        {
+            shutdownAffectingTokens.Add(_processor.ShutdownToken!.Value);
+        }
+
+        var shutdownTokenSource = CancellationTokenSource.CreateLinkedTokenSource(shutdownAffectingTokens.ToArray());
+        var deadlineTokenSource = _processor.DeadlineToken is not null
+            ? CancellationTokenSource.CreateLinkedTokenSource(_processor.DeadlineToken!.Value)
+            : new CancellationTokenSource();
+
+        var cancellationTokenRegistration = shutdownTokenSource.Token.Register(() =>
+        {
+            if (_processor.ShutdownToken is null || !_processor.ShutdownToken.Value.IsCancellationRequested)
+            {
+                // If the source of the shutdown is not the processor itself, then we need to cancel the deadline token after a set delay
+                deadlineTokenSource.CancelAfter(_runtimeShutdownTimeout);
+            }
+        });
+
+        _cleanup.Add(systemShutdownHook); // Important to dispose this, otherwise the system will not shut down cleanly
+        _cleanup.Add(shutdownTokenSource);
+        _cleanup.Add(deadlineTokenSource);
+        _cleanup.Add(cancellationTokenRegistration);
+
+        return (shutdownTokenSource.Token, deadlineTokenSource.Token);
     }
 
     async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamEvent> events, IContext context, CancellationToken stoppingToken,
@@ -309,7 +338,6 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         {
             disposable.Dispose();
         }
-
         _cleanup.Clear();
     }
 }

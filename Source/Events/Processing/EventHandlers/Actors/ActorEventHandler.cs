@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -55,7 +56,6 @@ public class ActorEventHandler : IEventHandler
     /// <summary>
     /// Initializes a new instance of <see cref="EventHandler"/>.
     /// </summary>
-    /// <param name="filterStreamProcessors">The <see cref="IFilterStreamProcessors"/>.</param>
     /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
     /// <param name="arguments">Connecting arguments.</param>
     /// <param name="eventProcessorForTenant">The event processor.</param>
@@ -226,7 +226,6 @@ public class ActorEventHandler : IEventHandler
         try
         {
             _eventHandlerKindPid = _actorSystem.Root.SpawnNamed(props, EventProcessor.Value.ToString());
-
         }
         catch (ProcessNameExistException ex)
         {
@@ -235,16 +234,20 @@ public class ActorEventHandler : IEventHandler
         }
 
 
+
         // _logger.StartingEventHandler(FilterDefinition.TargetStream);
+        // Ensure that the event handler can terminate gracefully if the application is shutting down.
         try
         {
             var runningDispatcher = _acceptRegistration(_cancellationTokenSource.Token);
+            var processorDone = _actorSystem.DeathWatch(_eventHandlerKindPid);
 
 
             await PersistFilter().ConfigureAwait(false);
             var tasks = new List<Task>
             {
-                runningDispatcher
+                runningDispatcher,
+                processorDone
             };
             var taskGroup = new TaskGroup(tasks);
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
@@ -42,13 +43,13 @@ public class EventHandlerFactory : IEventHandlerFactory
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
     /// <param name="tenants">The <see cref="ITenants"/>.</param>
     /// <param name="actorSystem"></param>
-    /// <param name="createStreamProcessorActorProps">Create Actor props for </param>
+    /// <param name="createStreamProcessorActorProps">Create Actor props for stream processor actor</param>
     public EventHandlerFactory(
         IStreamDefinitions streamDefinitions,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory,
         ITenants tenants,
-        ActorSystem actorSystem, CreateStreamProcessorActorProps createStreamProcessorActorProps)
+        ActorSystem actorSystem, CreateStreamProcessorActorProps createStreamProcessorActorProps, IApplicationLifecycleHooks lifecycleHooks)
     {
         _streamDefinitions = streamDefinitions;
         _metrics = metrics;

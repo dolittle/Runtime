@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -136,7 +137,8 @@ public class all_dependencies
             onFailedToProcess,
             Mock.Of<IEventFetchers>(),
             EventHandlerInfo,
-            tenantId
+            tenantId,
+            new ApplicationLifecycleHooks()
         ));
 
         create_processor_props = (
