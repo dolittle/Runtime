@@ -12,7 +12,7 @@ namespace Integration.Tests.Events.Processing.EventHandlers.with_a_single.scoped
 
 class single_tenant_and_event_handlers : EventHandlers.given.single_tenant_and_event_handlers
 {
-    protected static ScopeId event_handler_scope;
+    protected static ScopeId event_handler_scope = default!;
     
     Establish context = () => event_handler_scope = "3c641c00-f7f0-4222-9ac7-1d88200e09f7";
     

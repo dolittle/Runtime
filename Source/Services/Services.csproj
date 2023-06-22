@@ -12,6 +12,7 @@
         <ProjectReference Include="../Metrics/Metrics.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="..\Actors\Actors.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,5 +23,6 @@
         <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="$(GrpcVersion)" />
         <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="$(GrpcVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
     </ItemGroup>
 </Project>

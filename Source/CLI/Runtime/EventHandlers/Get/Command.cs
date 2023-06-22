@@ -40,7 +40,7 @@ public class Command : CommandBase
     /// The "--tenant" argument used to provide a Tenant Id.
     /// </summary>
     [Option("--tenant", CommandOptionType.SingleValue, Description = "Only show Event Handler information for the specified Tenant")]
-    TenantId Tenant { get; init; }
+    TenantId? Tenant { get; init; }
         
     /// <summary>
     /// The Event Handler identifier argument used to provide the unique identifier of the Event Handler to get.

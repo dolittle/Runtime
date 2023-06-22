@@ -34,7 +34,7 @@ public class EventFetchers : IEventFetchers
         var stream = streamDefinition.StreamId;
         if (stream == StreamId.EventLog)
         {
-            return await CreateStreamFetcherForEventLog(scopeId, cancellationToken).ConfigureAwait(false);
+            return await CreateStreamFetcherForEventLog(scopeId, cancellationToken, streamDefinition.Partitioned).ConfigureAwait(false);
         }
 
         if (streamDefinition.Public)
@@ -54,16 +54,19 @@ public class EventFetchers : IEventFetchers
     }
 
     /// <inheritdoc/>
-    public async Task<ICanFetchEventsFromPartitionedStream> GetPartitionedFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
+    public async Task<ICanFetchEventsFromPartitionedStream> GetPartitionedFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition,
+        CancellationToken cancellationToken)
     {
         if (!streamDefinition.Partitioned)
         {
             throw new CannotGetPartitionedFetcherForUnpartitionedStream(streamDefinition);
         }
+
         if (streamDefinition.StreamId == StreamId.EventLog)
         {
             throw new CannotGetPartitionedFetcherForEventLog();
         }
+
         if (streamDefinition.Public)
         {
             return CreateStreamFetcherForStreamEventCollection(
@@ -81,7 +84,8 @@ public class EventFetchers : IEventFetchers
     }
 
     /// <inheritdoc/>
-    public async Task<ICanFetchRangeOfEventsFromStream> GetRangeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
+    public async Task<ICanFetchRangeOfEventsFromStream> GetRangeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition,
+        CancellationToken cancellationToken)
     {
         return await GetFetcherFor(scopeId, streamDefinition, cancellationToken).ConfigureAwait(false) as ICanFetchRangeOfEventsFromStream;
     }
@@ -93,28 +97,50 @@ public class EventFetchers : IEventFetchers
     }
 
     /// <inheritdoc/>
-    public async Task<ICanFetchEventTypesFromPartitionedStream> GetPartitionedTypeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
+    public async Task<ICanFetchEventTypesFromPartitionedStream> GetPartitionedTypeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition,
+        CancellationToken cancellationToken)
     {
         return await GetPartitionedFetcherFor(scopeId, streamDefinition, cancellationToken).ConfigureAwait(false) as ICanFetchEventTypesFromPartitionedStream;
     }
 
-    async Task<StreamFetcher<MongoDB.Events.Event>> CreateStreamFetcherForEventLog(ScopeId scopeId, CancellationToken cancellationToken) =>
-        new(
+    async Task<StreamFetcher<MongoDB.Events.Event>> CreateStreamFetcherForEventLog(ScopeId scopeId, CancellationToken cancellationToken, bool partitioned)
+    {
+        if (partitioned)
+        {
+            return new StreamFetcher<Events.Event>(
+                StreamId.EventLog,
+                scopeId,
+                await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
+                Builders<MongoDB.Events.Event>.Filter,
+                _ => _.EventLogSequenceNumber,
+                _ => _.EventLogSequenceNumber,
+                _ => _eventConverter.ToPartitionedRuntimeStreamEvent(_),
+                _ => _.Metadata.TypeId,
+                _ => _.Metadata.TypeGeneration,
+                _ => _.Metadata.EventSource);
+
+        }
+        
+        return new StreamFetcher<Events.Event>(
             StreamId.EventLog,
             scopeId,
             await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
             Builders<MongoDB.Events.Event>.Filter,
             _ => _.EventLogSequenceNumber,
+            _ => _.EventLogSequenceNumber,
             _ => _eventConverter.ToRuntimeStreamEvent(_),
             _ => _.Metadata.TypeId,
             _ => _.Metadata.TypeGeneration);
+    }
 
-    StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId, ScopeId scopeId, bool partitioned) =>
+    StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId,
+        ScopeId scopeId, bool partitioned) =>
         new(
             streamId,
             scopeId,
             collection,
             Builders<Events.StreamEvent>.Filter,
+            _ => _.StreamPosition,
             _ => _.StreamPosition,
             _ => _eventConverter.ToRuntimeStreamEvent(_, streamId, partitioned),
             _ => _.Metadata.TypeId,

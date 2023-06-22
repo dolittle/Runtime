@@ -77,6 +77,6 @@ public class EventProcessor : IEventProcessor
             _logger.LogWarning(e, "Failed to commit external event");
             _metrics.IncrementTotalEventHorizonEventWritesFailed();
         }
-        return new SuccessfulProcessing();
+        return SuccessfulProcessing.Instance;
     }
 }

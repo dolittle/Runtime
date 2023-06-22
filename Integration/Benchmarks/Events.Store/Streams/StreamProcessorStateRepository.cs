@@ -21,14 +21,14 @@ namespace Integration.Benchmarks.Events.Store.Streams;
 /// </summary>
 public class StreamProcessorStateRepository : JobBase
 {
-    Dictionary<TenantId, IResilientStreamProcessorStateRepository> _streamProcessorStates;
+    Dictionary<TenantId, IStreamProcessorStates> _streamProcessorStates;
     (StreamProcessorId, StreamProcessorState)[] _nonPartitionedStates;
     (StreamProcessorId, PartitionedStreamProcessorState)[] _partitionedStates;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
     {
-        _streamProcessorStates = ConfiguredTenants.ToDictionary(tenant => tenant, tenant => services.GetRequiredService<Func<TenantId, IResilientStreamProcessorStateRepository>>()(tenant));
+        _streamProcessorStates = ConfiguredTenants.ToDictionary(tenant => tenant, tenant => services.GetRequiredService<Func<TenantId, IStreamProcessorStates>>()(tenant));
     }
 
     [IterationSetup]
@@ -83,7 +83,7 @@ public class StreamProcessorStateRepository : JobBase
                 var (id, state) = _nonPartitionedStates[y];
                 _nonPartitionedStates[y] = (id, state with
                 {
-                    Position = state.Position + 1,
+                    Position = state.Position.IncrementWithStream(),
                     LastSuccessfullyProcessed = DateTimeOffset.UtcNow
                 });
             }
@@ -109,7 +109,7 @@ public class StreamProcessorStateRepository : JobBase
                 var (id, state) = _partitionedStates[y];
                 _partitionedStates[y] = (id, state with
                 {
-                    Position = state.Position + 1,
+                    Position = state.Position.IncrementWithStream(),
                     LastSuccessfullyProcessed = DateTimeOffset.UtcNow
                 });
             }

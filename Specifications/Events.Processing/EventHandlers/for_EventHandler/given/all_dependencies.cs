@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
@@ -13,23 +15,29 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Environment = Dolittle.Runtime.Domain.Platform.Environment;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationRequest,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
-                                    Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
-                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
+    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
+    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
+    Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
+    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 using Version = Dolittle.Runtime.Domain.Platform.Version;
 using static Moq.It;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Events.Store.Streams.Legacy;
+using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Proto;
+using Failure = Dolittle.Runtime.Protobuf.Failure;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given;
 
@@ -56,10 +64,20 @@ public class all_dependencies
     protected static ActivitySpanId span_id = ActivitySpanId.CreateRandom();
     protected static Claims claims = Claims.Empty;
     protected static CultureInfo culture_info = CultureInfo.InvariantCulture;
+    protected static ActorSystem actor_system;
+    protected static CreateStreamProcessorActorProps create_processor_props;
+    protected static CreateTenantScopedStreamProcessorProps create_scoped_processor_props;
+    protected static in_memory_stream_processor_states stream_processor_states;
+
+    protected static ITenants tenants =
+        new Tenants(Options.Create(new TenantsConfiguration(new Dictionary<TenantId, TenantConfiguration>
+        {
+            { tenant, new TenantConfiguration() }
+        })));
 
     protected static Failure failure;
 
-    Establish context = () =>
+    private Establish context = () =>
     {
         stream_processors = new Mock<IStreamProcessors>(MockBehavior.Strict);
         filter_validation = new Mock<IValidateFilterForAllTenants>(MockBehavior.Strict);
@@ -68,7 +86,7 @@ public class all_dependencies
         reverse_call_dispatcher.Setup(
             _ => _.Reject(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>())
         ).Callback((EventHandlerRegistrationResponse e, CancellationToken ct) => failure = e.Failure);
-        
+
         stream_writer = new Mock<IWriteEventsToStreams>(MockBehavior.Strict);
         metrics_collector = new Mock<IMetricsCollector>();
         logger_factory = new NullLoggerFactory();
@@ -91,5 +109,63 @@ public class all_dependencies
             "alias");
 
         factory_for_stream_writer = (tenant_id) => stream_writer.Object;
+
+        actor_system = new ActorSystem();
+
+        stream_processor_states = new in_memory_stream_processor_states();
+
+        var eventSubscriber = new Mock<IStreamEventSubscriber>();
+        var eventLogPositionEnricher = new Mock<IMapStreamPositionToEventLogPosition>().Object;
+
+        create_scoped_processor_props = (StreamProcessorId streamProcessorId,
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition,
+            IEventProcessor processor,
+            ExecutionContext executionContext,
+            ScopedStreamProcessorProcessedEvent onProcessed,
+            ScopedStreamProcessorFailedToProcessEvent onFailedToProcess,
+            EventHandlerInfo EventHandlerInfo,
+            TenantId tenantId) => Props.FromProducer(() => new TenantScopedStreamProcessorActor(
+            streamProcessorId,
+            filterDefinition,
+            processor,
+            eventSubscriber.Object,
+            stream_processor_states,
+            executionContext,
+            eventLogPositionEnricher,
+            NullLogger<TenantScopedStreamProcessorActor>.Instance,
+            onProcessed,
+            onFailedToProcess,
+            Mock.Of<IEventFetchers>(),
+            EventHandlerInfo,
+            tenantId,
+            new ApplicationLifecycleHooks()
+        ));
+
+        create_processor_props = (
+            StreamProcessorId streamProcessorId,
+            IStreamDefinition streamDefinition,
+            Func<TenantId, IEventProcessor> createEventProcessorFor,
+            StreamProcessorProcessedEvent processedEvent,
+            StreamProcessorFailedToProcessEvent failedToProcessEvent,
+            ExecutionContext executionContext,
+            EventHandlerInfo eventHandlerInfo,
+            CancellationTokenSource cancellationTokenSource) => Props.FromProducer(() =>
+        {
+            return new EventHandlerProcessorActor(streamProcessorId,
+                streamDefinition,
+                createEventProcessorFor,
+                executionContext,
+                new Mock<Streams.IMetricsCollector>().Object,
+                processedEvent,
+                failedToProcessEvent,
+                NullLogger<EventHandlerProcessorActor>.Instance,
+                tenant => create_scoped_processor_props,
+                tenants,
+                tenant => stream_processor_states,
+                eventHandlerInfo,
+                cancellationTokenSource);
+        });
     };
+
+    private Cleanup cleanup = () => { _ = actor_system.ShutdownAsync(); };
 }

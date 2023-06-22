@@ -3,7 +3,6 @@
 
 using System;
 using Proto;
-using Proto.Cluster;
 
 namespace Dolittle.Runtime.Actors;
 

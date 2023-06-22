@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Processing;
 public static class committed_events
 {
     public static CommittedEvent single() => single(EventLogSequenceNumber.Initial);
-
+    
     public static CommittedEvent single(EventLogSequenceNumber event_log_sequence_number) => single(event_log_sequence_number, "{\"something\":42}");
     public static CommittedEvent single(string content) => single(EventLogSequenceNumber.Initial, content);
     public static CommittedEvent single(EventLogSequenceNumber event_log_sequence_number, string content) => new(

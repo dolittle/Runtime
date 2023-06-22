@@ -7,7 +7,7 @@ using Moq;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 
-public class MyClient : ClientBase<MyClient>
+public class MyClient : Grpc.Core.ClientBase<MyClient>
 {
     readonly Mock<IAsyncStreamReader<MyServerMessage>> _server_stream;
     readonly Mock<IClientStreamWriter<MyClientMessage>> _client_stream;

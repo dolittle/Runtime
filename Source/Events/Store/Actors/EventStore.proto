@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+package dolittle.runtime.events.actors;
+
+option csharp_namespace = "Dolittle.Runtime.Events.Store.Actors";
+
+import "Runtime/Events/EventStore.proto";
+import "Runtime/Events/Committed.proto";
+
+import "Protobuf/Failure.proto";
+import "Protobuf/Uuid.proto";
+import "Artifacts/Artifact.proto";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+
+message EventStoreSubscriptionRequest{
+    protobuf.Uuid subscription_id = 1;
+    protobuf.Uuid scope_id = 2;
+    repeated protobuf.Uuid event_type_ids = 3;
+    string pid_id = 4;
+    string pid_address = 5;
+    uint64 from_offset = 6;
+    bool include_public_only = 7;
+    string subscription_name = 8; // Debug name
+}
+
+message StartEventStoreSubscription{
+    protobuf.Uuid subscription_id = 1;
+    protobuf.Uuid scope_id = 2;
+    repeated protobuf.Uuid event_type_ids = 3;
+    string pid_id = 4;
+    string pid_address = 5;
+    uint64 from_offset = 6;
+    uint64 current_high_watermark = 7;
+    string subscription_name = 8; // Debug name
+}
+
+message EventStoreSubscriptionAck{
+    protobuf.Uuid subscription_id = 1;
+    protobuf.Uuid scope_id = 2;
+    bool ok = 3;
+}
+
+message CancelEventStoreSubscription{
+    protobuf.Uuid subscription_id = 1;
+    protobuf.Uuid scope_id = 2;
+}
+
+message CancelEventStoreSubscriptionAck{
+    protobuf.Uuid subscription_id = 1;
+}
+
+message CommittedEventsRequest{
+    uint64 from_offset = 1;
+    uint64 to_offset = 2;
+    repeated CommittedEvent events = 3;
+}
+
+message SubscriptionEvents{
+    protobuf.Uuid subscription_id = 1;
+    uint64 from_offset = 2;
+    uint64 to_offset = 3;
+    repeated CommittedEvent events = 4;
+}
+
+message SubscriptionEventsAck{
+    uint64 continue_from_offset = 1;
+}
+
+message CommitExternalEventsRequest{
+    CommittedEvent event = 1;
+    protobuf.Uuid scope_id = 2;
+}
+message CommitExternalEventsResponse{
+    protobuf.Failure failure = 1;
+}
+
+service EventStore {
+    rpc Commit (CommitEventsRequest) returns (CommitEventsResponse);
+    rpc CommitForAggregate (CommitAggregateEventsRequest) returns (CommitAggregateEventsResponse);
+    rpc CommitExternal (CommitExternalEventsRequest) returns (CommitExternalEventsResponse);
+    rpc RegisterSubscription(EventStoreSubscriptionRequest) returns (EventStoreSubscriptionAck);
+    rpc CancelSubscription(CancelEventStoreSubscription) returns (CancelEventStoreSubscriptionAck);
+}
+
+message StreamSubscriptionId{
+    protobuf.Uuid scope_id = 1;
+    protobuf.Uuid consumer_tenant_id = 2;
+    protobuf.Uuid producer_microservice_id = 3;
+    protobuf.Uuid producer_tenant_id = 4;
+    protobuf.Uuid stream_id = 5;
+    string partition_id = 6;
+}
+
+message StreamProcessorId{
+    protobuf.Uuid scope_id = 1;
+    protobuf.Uuid event_processor_id = 2;
+    protobuf.Uuid source_stream_id = 3;
+}
+
+message StreamProcessorKey{
+    oneof id {
+        StreamProcessorId stream_processor_id = 1;
+        StreamSubscriptionId subscription_id = 2;
+    }
+}
+
+message StreamProcessorStateResponse{
+    StreamProcessorKey stream_key = 1;
+    repeated Bucket bucket = 2;
+}
+
+message SetStreamProcessorStateRequest{
+    StreamProcessorKey stream_key = 1;
+    Bucket bucket = 2;
+}
+
+message GetStreamProcessorPartitionStateResponse{
+    StreamProcessorKey stream_key = 1;
+    Bucket partition = 2;
+    bool partitioned = 3;
+}
+
+message ProcessingFailure{
+    string event_source_id = 1;
+    uint64 offset = 2;
+    uint64 event_log_offset = 3;
+    string failure_reason = 4;
+    uint32 processing_attempts = 5;
+    google.protobuf.Timestamp retry_time = 6;
+    google.protobuf.Timestamp last_failed = 7;
+}
+
+
+
+message Bucket{
+    uint32 bucket_id = 1;
+    uint64 current_offset = 2;
+    uint64 current_event_log_offset = 3;
+    repeated ProcessingFailure failures = 4;
+    google.protobuf.Timestamp last_successfully_processed = 5;
+    bool partitioned = 6;
+}
+
+message SetPartitionedStreamProcessorStateRequest{
+    StreamProcessorKey stream_id = 1;
+    uint64 current_offset = 2;
+    uint64 current_event_log_offset = 3;
+    map<string, uint64> failing_event_sources = 4;
+}
+
+
+service StreamProcessorState {
+    rpc GetByProcessorId (StreamProcessorId) returns (StreamProcessorStateResponse);
+    rpc SetByProcessorId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
+}
+
+service StreamSubscriptionState {
+    rpc GetBySubscriptionId (StreamSubscriptionId) returns (StreamProcessorStateResponse);
+    rpc SetBySubscriptionId (SetStreamProcessorStateRequest) returns (google.protobuf.Empty);
+}

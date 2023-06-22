@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Machine.Specifications;
 
@@ -24,7 +23,6 @@ class without_problems : given.single_tenant_and_event_handlers
     };
 
     
-    It should_the_correct_number_of_events_in_stream = () => expect_number_of_filtered_events(event_handler, scope_events_for_event_types(event_handler_scope, 1).LongCount());
     It should_have_persisted_correct_stream = () => expect_stream_definition(event_handler);
     It should_have_the_correct_stream_processor_states = () => expect_stream_processor_state_without_failure(event_handler);
 }

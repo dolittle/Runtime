@@ -46,6 +46,6 @@ public class and_mongodb_copy_to_collection_has_changed : given.all_dependencies
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_have_result_for_tenant = () => result.Keys.ShouldContain(tenant);
+    It should_have_result_for_tenant = () => result.ContainsKey(tenant).ShouldBeTrue();
     It should_not_be_a_successful_result = () => result[tenant].Succeeded.ShouldBeFalse();
 }

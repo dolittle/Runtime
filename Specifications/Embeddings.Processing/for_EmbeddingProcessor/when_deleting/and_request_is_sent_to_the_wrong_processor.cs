@@ -2,13 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Domain.Platform;
-using Dolittle.Runtime.Execution;
 using Machine.Specifications;
-using Environment = Dolittle.Runtime.Domain.Platform.Environment;
-using Version = Dolittle.Runtime.Domain.Platform.Version;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting;
 

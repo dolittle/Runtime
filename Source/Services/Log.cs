@@ -9,58 +9,64 @@ namespace Dolittle.Runtime.Services;
 static partial class Log
 {
     [LoggerMessage(0, LogLevel.Warning, "Received arguments, but ping interval was not set")]
-    internal static partial void ReceivedArgumentsButPingIntervalNotSet(ILogger logger);
+    internal static partial void ReceivedArgumentsButPingIntervalNotSet(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Warning, "Received arguments, but call execution context was not set.")]
-    internal static partial void ReceivedArgumentsButCallExecutionContextNotSet(ILogger logger);
+    internal static partial void ReceivedArgumentsButCallExecutionContextNotSet(this ILogger logger);
 
     [LoggerMessage(0, LogLevel.Warning, "Received invalid execution context.")]
-    internal static partial void ReceivedInvalidExecutionContext(ILogger logger, Exception exception);
+    internal static partial void ReceivedInvalidExecutionContext(this ILogger logger, Exception exception);
     
     [LoggerMessage(0, LogLevel.Warning, "Received initial message from client, but arguments was not set.")]
-    internal static partial void ReceivedInitialMessageByArgumentsNotSet(ILogger logger);
+    internal static partial void ReceivedInitialMessageByArgumentsNotSet(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Trace, "Received response.")]
-    internal static partial void ReceivedResponse(ILogger logger);
+    internal static partial void ReceivedResponse(this ILogger logger);
+    
+    [LoggerMessage(0, LogLevel.Debug, "Received InitiateDisconnect.")]
+    internal static partial void ReceivedInitiateDisconnect(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Warning, "Could not find the call id from the received response from the client. The message will be ignored.")]
-    internal static partial void CouldNotFindCallId(ILogger logger);
+    internal static partial void CouldNotFindCallId(this ILogger logger);
 
     [LoggerMessage(0, LogLevel.Warning, "Received response from reverse call client, but the call context was not set.")]
-    internal static partial void ReceivedResponseButCallContextNotSet(ILogger logger);
+    internal static partial void ReceivedResponseButCallContextNotSet(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Warning, "Received message from reverse call client, but it did not contain a response.")]
-    internal static partial void ReceivedMessageButDidNotContainResponse(ILogger logger);
+    internal static partial void ReceivedMessageButDidNotContainResponse(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Warning, "An error occurred during handling of client messages")]
-    internal static partial void ErrorWhileHandlingClientMessages(ILogger logger, Exception ex);
+    internal static partial void ErrorWhileHandlingClientMessages(this ILogger logger, Exception ex);
+    
+    [LoggerMessage(0, LogLevel.Information, "The client reset the request stream (client disconnected)")]
+    internal static partial void ClientDisconnected(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Debug, "Starting all endpoints")]
-    internal static partial void StartingAllEndpoints(ILogger logger);
+    internal static partial void StartingAllEndpoints(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Debug, "Preparing endpoint for {VisibilityType} visibility - running on port {Port}")]
-    internal static partial void PreparingEndpoint(ILogger logger, EndpointVisibility visibilityType, int port);
+    internal static partial void PreparingEndpoint(this ILogger logger, EndpointVisibility visibilityType, int port);
     
     [LoggerMessage(0, LogLevel.Debug, "{VisibilityType} endpoint is disabled")]
-    internal static partial void EndpointDisabled(ILogger logger, EndpointVisibility visibilityType);
+    internal static partial void EndpointDisabled(this ILogger logger, EndpointVisibility visibilityType);
 
     [LoggerMessage(0, LogLevel.Debug, "Bind services from {Implementation}")]
-    internal static partial void BindServicesFromImplementation(ILogger logger, string implementation);
+    internal static partial void BindServicesFromImplementation(this ILogger logger, string implementation);
     
     [LoggerMessage(0, LogLevel.Trace, "Service : {ServiceName}")]
-    internal static partial void BoundService(ILogger logger, string serviceName);
+    internal static partial void BoundService(this ILogger logger, string serviceName);
 
     [LoggerMessage(0, LogLevel.Trace, "Waiting for connection arguments")]
-    internal static partial void WaitingForConnectionArguments(ILogger logger);
+    internal static partial void WaitingForConnectionArguments(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Trace, "Received connection arguments")]
-    internal static partial void ReceivedConnectionArguments(ILogger logger);
+    internal static partial void ReceivedConnectionArguments(this ILogger logger);
     
     [LoggerMessage(0, LogLevel.Warning, "Connection arguments were not received")]
-    internal static partial void ConnectionArgumentsNotReceived(ILogger logger);
+    internal static partial void ConnectionArgumentsNotReceived(this ILogger logger);
 
     [LoggerMessage(0, LogLevel.Trace, "Connection arguments were not valid")]
-    internal static partial void ReceivedInvalidConnectionArguments(ILogger logger);
+    internal static partial void ReceivedInvalidConnectionArguments(this ILogger logger);
     
     
 

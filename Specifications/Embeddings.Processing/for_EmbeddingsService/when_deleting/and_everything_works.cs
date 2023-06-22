@@ -38,7 +38,7 @@ public class and_everything_works : given.all_dependencies
 
         embedding_processor
             .Setup(_ => _.Delete(key, execution_context, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
     };
 
     static DeleteResponse result;

@@ -47,6 +47,7 @@ public class and_deleting_fails : given.all_dependencies
     {
         result = embedding_service.Delete(request, call_context).GetAwaiter().GetResult();
     };
+
     It should_have_a_failure = () => result.Failure.ShouldNotBeNull();
     It should_have_a_failure_with_correct_failure_id = () => result.Failure.Id.ShouldEqual(EmbeddingFailures.FailedToDeleteEmbedding.ToProtobuf());
 }

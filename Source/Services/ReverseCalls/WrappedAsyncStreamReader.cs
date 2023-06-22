@@ -83,12 +83,9 @@ public class WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectAr
     public Task<bool> MoveNext(CancellationToken cancellationToken)
     {
         _logger.ReadingMessage(_requestId);
-        if (_firstMoveNextCalled)
-        {
-            return MoveNextSkippingPongsAndRecordMetrics(cancellationToken);
-        }
-
-        return FirstMoveNext(cancellationToken);
+        return _firstMoveNextCalled
+            ? MoveNextSkippingPongsAndRecordMetrics(cancellationToken)
+            : FirstMoveNext(cancellationToken);
     }
 
     async Task<bool> FirstMoveNext(CancellationToken cancellationToken)
@@ -147,9 +144,7 @@ public class WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectAr
     }
 
     bool CurrentMessageIsPong()
-    {
-        return _messageConverter.GetPong(_originalStream.Current) != default;
-    }
+        => _messageConverter.GetPong(_originalStream.Current) != default;
 
     void FetchReverseCallArgumentsContextFromFirstMessage(TClientMessage message)
     {

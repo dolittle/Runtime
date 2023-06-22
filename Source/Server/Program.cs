@@ -14,7 +14,6 @@ using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Hosting;
 using Dolittle.Runtime.Tenancy;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -54,7 +53,7 @@ static void VerifyConfiguration(IServiceProvider provider)
         var config = provider.GetRequiredService<IOptions<TenantsConfiguration>>();
         if (!config.Value.Any())
         {
-            logger.LogWarning("No tenants are configured in the Runtime. Without any tenants the Runtime will no function properly.");
+            logger.LogWarning("No tenants are configured in the Runtime. Without any tenants the Runtime will not function properly.");
         }
     }
     catch (Exception e)

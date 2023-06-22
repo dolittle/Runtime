@@ -12,13 +12,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 /// </summary>
 public class GetNextEventToReceiveForSubscription : IGetNextEventToReceiveForSubscription
 {
-    readonly IStreamProcessorStateRepository _repository;
+    readonly IStreamProcessorStates _repository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetNextEventToReceiveForSubscription"/> class.
     /// </summary>
     /// <param name="repository">The stream processor state repository to use for getting subscription states.</param>
-    public GetNextEventToReceiveForSubscription(IStreamProcessorStateRepository repository)
+    public GetNextEventToReceiveForSubscription(IStreamProcessorStates repository)
     {
         _repository = repository;
     }
@@ -28,7 +28,7 @@ public class GetNextEventToReceiveForSubscription : IGetNextEventToReceiveForSub
     {
         var tryGetState = await _repository.TryGetFor(subscriptionId, cancellationToken).ConfigureAwait(false);
         return tryGetState.Success
-            ? tryGetState.Result.Position
+            ? tryGetState.Result.Position.StreamPosition
             : StreamPosition.Start;
     }
 }

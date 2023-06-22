@@ -53,6 +53,15 @@ public class EventConverter : IEventConverter
             StreamId.EventLog,
             PartitionId.None,
             false);
+    
+    /// <inheritdoc/>
+    public runtime.Streams.StreamEvent ToPartitionedRuntimeStreamEvent(mongoDB.Event @event) =>
+        new(
+            ToRuntimeCommittedEvent(@event),
+            @event.EventLogSequenceNumber,
+            StreamId.EventLog,
+            @event.Metadata.EventSource,
+            true);
 
     /// <inheritdoc/>
     public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned) =>
@@ -63,7 +72,7 @@ public class EventConverter : IEventConverter
             @event.Partition,
             partitioned);
 
-    runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
+    public runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
         @event.Aggregate.WasAppliedByAggregate
             ? ToRuntimeCommittedAggregateEvent(@event)
             : @event.EventHorizon.FromEventHorizon

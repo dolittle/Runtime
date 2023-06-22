@@ -5,13 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Dolittle.Runtime.Events.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using CommittedEvent = Dolittle.Runtime.Events.Store.CommittedEvent;
 using StreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 

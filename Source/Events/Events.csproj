@@ -6,12 +6,41 @@
         <RootNamespace>Dolittle.Runtime.Events</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-    </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Polly" Version="$(PollyVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="System.Linq.Async" Version="$(SystemLinqAsyncVersion)" />
+        <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
+        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
+    </ItemGroup>
+   
+    <ItemGroup>
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+        <ProjectReference Include="../Actors/Actors.csproj" />
+        <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Bootstrap/Bootstrap.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
+
+
+    <ItemGroup>
+        <Protobuf Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." GrpcServices="None" />
+        <ProtoGrain Include="**/*.proto" AdditionalImportDirs="$(ContractsRootPath);." />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Processing\Streams\Actors" />
+    </ItemGroup>
+    
 </Project>

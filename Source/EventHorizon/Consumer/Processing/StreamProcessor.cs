@@ -20,7 +20,7 @@ public class StreamProcessor : IStreamProcessor
     readonly SubscriptionId _identifier;
     readonly ExecutionContext _executionContext;
     readonly IEventProcessor _eventProcessor;
-    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IStreamProcessorStates _streamProcessorStates;
     readonly EventsFromEventHorizonFetcher _eventsFetcher;
     readonly IEventFetcherPolicies _eventsFetcherPolicy;
     readonly IMetricsCollector _metrics;
@@ -44,7 +44,7 @@ public class StreamProcessor : IStreamProcessor
         ExecutionContext executionContext,
         IEventProcessor eventProcessor,
         EventsFromEventHorizonFetcher eventsFetcher,
-        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IStreamProcessorStates streamProcessorStates,
         IEventFetcherPolicies eventsFetcherPolicy,
         IMetricsCollector metrics,
         ILoggerFactory loggerFactory)
@@ -78,6 +78,8 @@ public class StreamProcessor : IStreamProcessor
         _started = true;
 
         var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, cancellationToken).ConfigureAwait(false);
+        
+        
         if (!tryGetStreamProcessorState.Success)
         {
             Log.StreamProcessorPersistingNewState(_logger, _identifier);
@@ -86,7 +88,7 @@ public class StreamProcessor : IStreamProcessor
         }
         else
         {
-            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position);
+            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position.StreamPosition);
         }
 
         _metrics.IncrementTotalStreamProcessorStarted();
@@ -101,7 +103,6 @@ public class StreamProcessor : IStreamProcessor
             _executionContext,
             _eventsFetcherPolicy,
             _eventsFetcher,
-            new TimeToRetryForUnpartitionedStreamProcessor(),
             _loggerFactory.CreateLogger<ScopedStreamProcessor>()).Start(cancellationToken).ConfigureAwait(false);
     }
 }

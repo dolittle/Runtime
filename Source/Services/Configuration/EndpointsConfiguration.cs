@@ -14,17 +14,17 @@ public record EndpointsConfiguration
     /// <summary>
     /// Gets the configuration for the public endpoint.
     /// </summary>
-    public EndpointConfiguration Public { get; init; } = new() {Port = 50052};
+    public EndpointConfiguration Public { get; set; } = new() {Port = 50052};
     
     /// <summary>
     /// Gets the configuration for the private endpoint.
     /// </summary>
-    public EndpointConfiguration Private { get; init; } = new() {Port = 50053};
+    public EndpointConfiguration Private { get; set; } = new() {Port = 50053};
     
     /// <summary>
     /// Gets the configuration for the management endpoint.
     /// </summary>
-    public EndpointConfiguration Management { get; init; } = new() {Port = 51052};
+    public EndpointConfiguration Management { get; set; } = new() {Port = 51052};
     
     /// <summary>
     /// Gets the configuration for the management web endpoint.

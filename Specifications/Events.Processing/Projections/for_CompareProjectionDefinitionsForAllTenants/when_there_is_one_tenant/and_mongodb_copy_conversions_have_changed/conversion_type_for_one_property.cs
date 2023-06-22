@@ -58,6 +58,6 @@ public class conversion_type_for_one_property : given.all_dependencies
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-    It should_have_result_for_tenant = () => result.Keys.ShouldContain(tenant);
+    It should_have_result_for_tenant = () => result.ContainsKey(tenant).ShouldBeTrue();
     It should_not_be_a_successful_result = () => result[tenant].Succeeded.ShouldBeFalse();
 }

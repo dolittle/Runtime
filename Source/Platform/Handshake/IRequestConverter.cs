@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using Dolittle.Runtime.Handshake.Contracts;
 using Dolittle.Runtime.Protobuf;
 
@@ -18,5 +19,5 @@ public interface IRequestConverter
     /// <param name="parsed">The parsed handshake request, if parsing succeeded.</param>
     /// <param name="failure">The failure, if the parsing failed.</param>
     /// <returns>True if the parsing succeeded, false if not.</returns>
-    bool TryConvert(HandshakeRequest request, out Request parsed, out Failure failure);
+    bool TryConvert(HandshakeRequest request, [NotNullWhen(true)] out Request? parsed, [NotNullWhen(false)] out Failure? failure);
 }

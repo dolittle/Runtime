@@ -24,13 +24,12 @@ public interface IConvertReverseCallMessages<TClientMessage, TServerMessage, TCo
     where TRequest : class
     where TResponse : class
 {
-
     /// <summary>
     /// Gets the <typeparamref name="TConnectResponse"/> from a <typeparamref name="TServerMessage"/>.
     /// </summary>
     /// <param name="message">The <typeparamref name="TClientMessage"/> to get the connect arguments from.</param>
     /// <returns>The <typeparamref name="TConnectResponse"/> in the message.</returns>
-    TConnectArguments GetConnectArguments(TClientMessage message);
+    TConnectArguments? GetConnectArguments(TClientMessage message);
 
     /// <summary>
     /// Sets the <typeparamref name="TConnectResponse"/> in a <typeparamref name="TServerMessage"/>.
@@ -51,14 +50,14 @@ public interface IConvertReverseCallMessages<TClientMessage, TServerMessage, TCo
     /// </summary>
     /// <param name="message">The <typeparamref name="TClientMessage"/>.</param>
     /// <returns>The <typeparamref name="TResponse"/>.</returns>
-    TResponse GetResponse(TClientMessage message);
+    TResponse? GetResponse(TClientMessage message);
 
     /// <summary>
     /// Gets the <see cref="ReverseCallArgumentsContext" /> from the <typeparamref name="TConnectArguments"/>.
     /// </summary>
     /// <param name="message">The <typeparamref name="TConnectArguments"/>.</param>
     /// <returns>The <see cref="ReverseCallArgumentsContext" />.</returns>
-    ReverseCallArgumentsContext GetArgumentsContext(TConnectArguments message);
+    ReverseCallArgumentsContext? GetArgumentsContext(TConnectArguments message);
 
     /// <summary>
     /// Sets the <see cref="ReverseCallRequestContext"/> in a <typeparamref name="TRequest"/>.
@@ -72,7 +71,7 @@ public interface IConvertReverseCallMessages<TClientMessage, TServerMessage, TCo
     /// </summary>
     /// <param name="message">The <typeparamref name="TResponse"/> to get the context from.</param>
     /// <returns>The <see cref="ReverseCallResponseContext"/> in the request.</returns>
-    ReverseCallResponseContext GetResponseContext(TResponse message);
+    ReverseCallResponseContext? GetResponseContext(TResponse message);
 
     /// <summary>
     /// Sets the <see cref="Ping" /> in the <typeparamref name="TServerMessage"/>.
@@ -86,8 +85,17 @@ public interface IConvertReverseCallMessages<TClientMessage, TServerMessage, TCo
     /// </summary>
     /// <param name="message">The <typeparamref name="TClientMessage"/> to get the pong from.</param>
     /// <returns>The <see cref="Pong"/> in the message.</returns>
-    Pong GetPong(TClientMessage message);
+    Pong? GetPong(TClientMessage message);
 
+    bool SupportsGracefulShutdown => false;
+    
+    /// <summary>
+    /// If the protocol supports it, and it is of the correct type, get <see cref="InitiateDisconnect" /> from the <typeparamref name="TClientMessage"/>.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    InitiateDisconnect? GetInitiateDisconnect(TClientMessage message) => null;
+    
     /// <summary>
     /// Creates a <typeparamref name="TConnectResponse"/> signifying a failed connection.
     /// </summary>

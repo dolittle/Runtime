@@ -25,7 +25,7 @@ public class and_starting_them_again : given.two_tenants_and_processors
             {
                 await Task.Delay(10).ConfigureAwait(false);
             }
-            return Try.Succeeded();
+            return Try.Succeeded;
 
         });
 
@@ -36,7 +36,7 @@ public class and_starting_them_again : given.two_tenants_and_processors
             {
                 await Task.Delay(10).ConfigureAwait(false);
             }
-            return Try.Succeeded();
+            return Try.Succeeded;
 
         });
 

@@ -135,7 +135,9 @@ public class Subscription : ISubscription
 
         try
         {
-            var (connection, response) = await ConnectToEventHorizon(cancellationToken).ConfigureAwait(false);
+            var connectionAndResponse = await ConnectToEventHorizon(cancellationToken).ConfigureAwait(false);
+            var response = connectionAndResponse.Item2;
+            using var connection = connectionAndResponse.Item1;
             if (response.Success)
             {
                 _metrics.IncrementCurrentConnectedSubscriptions();

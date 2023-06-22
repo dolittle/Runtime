@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using Dolittle.Runtime.Events.Processing.EventHandlers.Actors;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
 
 public class an_event_handler_with_non_writeable_target_stream : all_dependencies
 {
-    protected static EventHandler event_handler;
+    protected static ActorEventHandler event_handler;
     protected static Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> filter_processor;
     protected static Mock<IEventProcessor> event_processor;
     
@@ -32,12 +33,8 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
 
         filter_processor = new Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
         event_processor = new Mock<IEventProcessor>();
-        event_handler = new EventHandler(
-            stream_processors.Object,
-            filter_validation.Object,
-            stream_definitions.Object,
+        event_handler = new ActorEventHandler(stream_definitions.Object,
             arguments,
-            tenant => filter_processor.Object,
             tenant => event_processor.Object,
             cancellation => reverse_call_dispatcher.Object.Accept(new EventHandlerRegistrationResponse(), cancellation),
             (failure, cancellation) => reverse_call_dispatcher.Object.Reject(new EventHandlerRegistrationResponse
@@ -47,6 +44,10 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
             metrics_collector.Object,
             logger_factory.CreateLogger<EventHandler>(),
             execution_context,
-            cancellation_token);
+            actor_system,
+            tenants,
+            create_processor_props,
+            cancellation_token
+            );
     };
 }

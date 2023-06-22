@@ -76,7 +76,7 @@ public class ManagementClient : IManagementClient
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime, TenantId tenant = null)
+    public async Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime, TenantId? tenant = null)
     {
         var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
         var request = new GetAllRequest

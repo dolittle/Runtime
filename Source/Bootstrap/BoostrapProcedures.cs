@@ -40,7 +40,7 @@ public class BoostrapProcedures : IBootstrapProcedures
         foreach (var procedure in _procedures)
         {
             tasks.Add(procedure.Perform());
-            tasks.AddRange(_tenants.Select(tenant => procedure.PerformForTenant(tenant)));
+            tasks.AddRange(_tenants.Select(procedure.PerformForTenant));
         }
         return Task.WhenAll(tasks);
     }

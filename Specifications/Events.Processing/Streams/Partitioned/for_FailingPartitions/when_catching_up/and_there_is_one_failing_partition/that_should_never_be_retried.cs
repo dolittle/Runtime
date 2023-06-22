@@ -14,17 +14,20 @@ public class that_should_never_be_retried : given.all_dependencies
 {
     static StreamProcessorState result;
 
-    Establish context = () =>
+    private Establish context = () =>
     {
-        stream_processor_state.FailingPartitions[failing_partition_id] = new FailingPartitionState(
+        stream_processor_state = stream_processor_state.WithFailingPartition(failing_partition_id, new FailingPartitionState(
             failing_partition_state.Position,
             DateTimeOffset.MaxValue,
             failing_partition_state.Reason,
             failing_partition_state.ProcessingAttempts,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow));
+        stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
     };
 
-    Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
+    Because of = () =>
+        result =
+            failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
     It should_return_a_state = () => result.ShouldNotBeNull();
     It should_return_a_state_of_the_expected_type = () => result.ShouldBeOfExactType<StreamProcessorState>();

@@ -28,7 +28,7 @@ public class all_dependencies
     protected static TenantId tenant_id;
     protected static StreamId source_stream_id;
     protected static StreamProcessorId stream_processor_id;
-    protected static IResilientStreamProcessorStateRepository stream_processor_state_repository;
+    protected static IStreamProcessorStates stream_processor_state_repository;
     protected static Mock<ICanFetchEventsFromPartitionedStream> events_fetcher;
     protected static IFailingPartitions failing_partitiones;
     protected static Mock<IStreamProcessors> stream_processors;
@@ -41,7 +41,7 @@ public class all_dependencies
     {
         execution_context = execution_contexts.create();
         cancellation_token_source = new CancellationTokenSource();
-        var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
+        var in_memory_stream_processor_state_repository = new in_memory_stream_processor_states();
         event_processor_id = Guid.NewGuid();
         scope_id = Guid.NewGuid();
         tenant_id = Guid.NewGuid();
@@ -75,13 +75,12 @@ public class all_dependencies
             (processor, stream, arg3) => failing_partitiones,
             new EventFetcherPolicies(Mock.Of<ILogger>()),
             event_waiter,
-            new TimeToRetryForPartitionedStreamProcessor(),
             Mock.Of<ILogger<ScopedStreamProcessor>>());
         
         action_to_perform_before_reprocessing = new Mock<Func<TenantId, CancellationToken, Task<Try>>>();
         action_to_perform_before_reprocessing
             .Setup(_ => _(It.IsAny<TenantId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Try.Succeeded());
+            .ReturnsAsync(Try.Succeeded);
     };
     Cleanup clean = () => cancellation_token_source.Dispose();
 
@@ -90,7 +89,7 @@ public class all_dependencies
         cancellation_token_source.CancelAfter(cancelAfter);
         return stream_processor.Start(cancellation_token_source.Token);
     }
-    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
+    protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, ProcessingPosition position, Func<TenantId, CancellationToken, Task<Try>> beforeReprocessingAction, TimeSpan cancelAfter)
     {
         var result = stream_processor.Start(cancellation_token_source.Token);
         Task.Delay(setPositionAfter).GetAwaiter().GetResult();

@@ -3,17 +3,17 @@ tenants:
     resources:
       eventStore:
         servers:
-          - localhost
+        - localhost
         database: event_store
         maxConnectionPoolSize: 1000
       projections:
         servers:
-          - localhost
+        - localhost
         database: projections
         maxConnectionPoolSize: 1000
       embeddings:
         servers:
-          - localhost
+        - localhost
         database: embeddings
         maxConnectionPoolSize: 1000
       readModels:

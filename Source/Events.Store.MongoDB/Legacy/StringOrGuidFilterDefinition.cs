@@ -6,6 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 
@@ -44,6 +45,8 @@ public class StringOrGuidFilterDefinition<TDocument> : FilterDefinition<TDocumen
         writer.WriteEndDocument();
         return document;
     }
+
+    public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider) => Render(documentSerializer, serializerRegistry);
 
     void RenderEqualityQuery(IBsonWriter writer)
     {

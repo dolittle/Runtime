@@ -1,0 +1,48 @@
+opentelemetry:
+  serviceName: "Consumer-Runtime"
+endpoints: 
+  private:
+    port: 5055
+  public:
+    port: 5054
+  management:
+    port: 5252
+  managementweb:
+    port: 5452
+  metrics:
+    port: 9701
+  web:
+    port: 8009
+platform:
+  applicationName: "EventHorizon Tutorial"
+  applicationID: "5bd8762f-6c39-4ba2-a141-d041c8668894"
+  microserviceName: "Consumer"
+  microserviceID: "a14bb24e-51f3-4d83-9eba-44c4cffe6bb9"
+  customerName: "Dolittle Tacos"
+  customerID: "c2d49e3e-9bd4-4e54-9e13-3ea4e04d8230"
+  environment: "Tutorial"
+microservices:
+  f39b1f61-d360-4675-b859-53c05c87c0e6:
+    host: localhost
+    port: 5052
+tenants:
+  445f8ea8-1a6f-40d7-b2fc-796dba92dc44:
+    resources:
+      eventStore:
+        servers:
+        - localhost
+        database: "consumer_event_store"
+      projections:
+        servers:
+        - localhost
+        database: "consumer_projections"
+        maxConnectionPoolSize: 1000
+      embeddings:
+        servers:
+        - localhost
+        database: "consumer_embeddings"
+        maxConnectionPoolSize: 1000
+      readModels:
+        host: "mongodb://localhost:27017"
+        database: "consumer_readmodels"
+        useSSL: false

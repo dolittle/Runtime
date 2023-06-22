@@ -8,9 +8,7 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using CommittedEvent = Dolittle.Runtime.Events.Store.CommittedEvent;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using StreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 

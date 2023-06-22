@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Rudimentary</AssemblyName>
         <RootNamespace>Dolittle.Runtime.Rudimentary</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)"/>
-        <PackageReference Include="System.Linq.Async" Version="$(SystemLinqAsyncVersion)"/>
+        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
+        <PackageReference Include="System.Linq.Async" Version="$(SystemLinqAsyncVersion)" />
     </ItemGroup>
 </Project>

@@ -25,7 +25,7 @@ public class and_performing_action_fails : all_dependencies
         var event_with_partition = new StreamEvent(first_event, StreamPosition.Start, Guid.NewGuid(), partition_id, false);
         event_processor
             .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
+            .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         setup_event_stream(event_with_partition);
 
         action_to_perform_before_reprocessing
@@ -33,12 +33,12 @@ public class and_performing_action_fails : all_dependencies
             .ReturnsAsync(Try.Failed(new Exception()));
     };
 
-    Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100),0, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
+    Because of = () => start_stream_processor_set_position_after_and_cancel_after(TimeSpan.FromMilliseconds(100),ProcessingPosition.Initial, action_to_perform_before_reprocessing.Object, TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
         
     It should_not_process_event_again = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-    It should_not_fetch_event_again = () => events_fetcher.Verify(_ => _.Fetch((ulong)0, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-    It should_have_current_position_equal_one = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(1));
+    It should_not_fetch_event_again = () => events_fetcher.Verify(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+    It should_have_current_position_equal_one = () => current_stream_processor_state.Position.ShouldEqual(new ProcessingPosition(1,1));
     It should_not_be_failing = () => current_stream_processor_state.IsFailing.ShouldBeFalse();
-    It should_try_fetching_next_event = () => events_fetcher.Verify(_ => _.Fetch((ulong)1, Moq.It.IsAny<CancellationToken>()), Moq.Times.AtLeastOnce);
+    It should_try_fetching_next_event = () => events_fetcher.Verify(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()), Moq.Times.AtLeastOnce);
     It should_perform_the_action = () => action_to_perform_before_reprocessing.Verify(_ => _(tenant_id, Moq.It.IsAny<CancellationToken>()), Times.Once);
 }

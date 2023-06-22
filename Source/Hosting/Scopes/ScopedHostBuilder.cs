@@ -58,10 +58,12 @@ public class ScopedHostBuilder : IHostBuilder
 
     /// <inheritdoc />
     public IHostBuilder UseServiceProviderFactory<TContainerBuilder>(IServiceProviderFactory<TContainerBuilder> factory)
+        where TContainerBuilder: notnull
         => throw new OperationNotSupportedOnScopedHostBuilder(nameof(UseServiceProviderFactory));
 
     /// <inheritdoc />
     public IHostBuilder UseServiceProviderFactory<TContainerBuilder>(Func<HostBuilderContext, IServiceProviderFactory<TContainerBuilder>> factory)
+        where TContainerBuilder: notnull
         => throw new OperationNotSupportedOnScopedHostBuilder(nameof(UseServiceProviderFactory));
 
     /// <inheritdoc />

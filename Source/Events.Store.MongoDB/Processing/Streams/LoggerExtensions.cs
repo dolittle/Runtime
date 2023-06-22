@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 
-static class LoggerExtensions
+static partial class LoggerExtensions
 {
     static readonly Action<ILogger, IStreamProcessorId, Exception> _gettingStreamProcessorState = LoggerMessage
         .Define<IStreamProcessorId>(
@@ -26,4 +26,7 @@ static class LoggerExtensions
 
     internal static void PersistingStreamProcessorState(this ILogger logger, IStreamProcessorId streamProcessor)
         => _persistingStreamProcessorState(logger, streamProcessor, null);
+    
+    [LoggerMessage(0, LogLevel.Information, "Retrieving all stream processor state")]
+    internal static partial void GettingAllStreamProcessorState(this ILogger logger);
 }

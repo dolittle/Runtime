@@ -4,10 +4,14 @@
     <AssemblyName>Dolittle.Runtime.Events.Processing.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../specs.props" />
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Events/Events.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Source/Events.Processing/Events.Processing.csproj" />
+    <Folder Include="Processors\partitioned" />
   </ItemGroup>
+
+  <Import Project="../../specs.props" />
   
 </Project>

@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
-using Newtonsoft.Json;
 using IContentSerializer = Dolittle.Runtime.CLI.Serialization.ISerializer;
 
 namespace Dolittle.Runtime.CLI.Configuration.Files;

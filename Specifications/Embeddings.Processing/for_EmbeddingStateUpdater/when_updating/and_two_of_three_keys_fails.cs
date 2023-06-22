@@ -81,7 +81,7 @@ public class and_two_of_three_keys_fails : given.all_dependencies
             .Returns(Task.FromResult<Partial<EmbeddingCurrentState>>(projection_result_c));
         embedding_store
             .Setup(_ => _.TryReplace(embedding, projection_key_c, projection_result_c.Version, projection_result_c.State, cancellation_token))
-            .Returns(Task.FromResult(Try.Succeeded()));
+            .Returns(Task.FromResult(Try.Succeeded));
     };
 
     static Try result;

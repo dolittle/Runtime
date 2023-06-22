@@ -12,9 +12,10 @@
 
   <ItemGroup>
     <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+    <ProjectReference Include="../Events/Events.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
     <ProjectReference Include="../Services/Services.csproj" />
-    <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
+    <ProjectReference Include="../Events/Events.csproj" />
   </ItemGroup>
 
 </Project>

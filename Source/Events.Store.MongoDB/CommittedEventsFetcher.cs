@@ -12,7 +12,10 @@ using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.MongoDB;
+using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using IAggregateRoots = Dolittle.Runtime.Events.Store.MongoDB.Aggregates.IAggregateRoots;
@@ -90,18 +93,17 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         try
         {
             var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
-            var events = await eventLog
+            var raw = await eventLog
                 .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(limit)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-            return new CommittedEvents(
-                events.Select(_ => _eventConverter.ToRuntimeStreamEvent(_))
-                    .Select(_ => _.Event)
-                    .ToList());
+            var events = raw.Select(evt => _eventConverter.ToRuntimeCommittedEvent(evt)).ToList();
+            
+            return new CommittedEvents(events);
         }
-        catch (Exception ex)
+        catch (MongoWaitQueueFullException ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }

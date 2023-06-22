@@ -26,8 +26,8 @@ public class StreamProcessorState : AbstractStreamProcessorState
     /// <param name="processingAttempts">The number of times the event at <see cref="AbstractStreamProcessorState.Position" /> has been processed.</param>
     /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
     /// <param name="isFailing">Whether the stream processor is failing.</param>
-    public StreamProcessorState(Guid eventProcessorId, Guid sourceStreamId, ulong position, DateTime retryTime, string failureReason, uint processingAttempts, DateTime lastSuccessfullyProcessed, bool isFailing)
-        : base(eventProcessorId, sourceStreamId, position, lastSuccessfullyProcessed)
+    public StreamProcessorState(Guid eventProcessorId, Guid sourceStreamId, ulong position, ulong eventLogPosition, DateTime retryTime, string failureReason, uint processingAttempts, DateTime lastSuccessfullyProcessed, bool isFailing)
+        : base(eventProcessorId, sourceStreamId, position, eventLogPosition,lastSuccessfullyProcessed)
     {
         RetryTime = retryTime;
         FailureReason = failureReason;
@@ -59,7 +59,7 @@ public class StreamProcessorState : AbstractStreamProcessorState
     /// <inheritdoc/>
     public override IStreamProcessorState ToRuntimeRepresentation() =>
         new runtime.StreamProcessorState(
-            Position,
+            new ProcessingPosition(Position, EventLogPosition),
             FailureReason,
             RetryTime,
             ProcessingAttempts,

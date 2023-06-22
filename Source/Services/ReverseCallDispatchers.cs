@@ -1,11 +1,16 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Actors;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Services.Actors;
+using Dolittle.Runtime.Services.Configuration;
 using Dolittle.Runtime.Services.ReverseCalls;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Proto;
 
 namespace Dolittle.Runtime.Services;
 
@@ -14,6 +19,9 @@ namespace Dolittle.Runtime.Services;
 /// </summary>
 public class ReverseCallDispatchers : IReverseCallDispatchers
 {
+    readonly ActorSystem _actorSystem;
+    readonly ICreateProps _props;
+    readonly ReverseCallsConfiguration _reverseCallsConfig;
     readonly IIdentifyRequests _requestIdentifier;
     readonly ICreateExecutionContexts _executionContextCreator;
     readonly IMetricsCollector _metricsCollector;
@@ -29,12 +37,18 @@ public class ReverseCallDispatchers : IReverseCallDispatchers
     /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
     /// <param name="pingedConnectionFactory">The <see cref="IKeepConnectionsAlive"/> for creating pinged connections.</param>
     public ReverseCallDispatchers(
+        ActorSystem actorSystem,
+        ICreateProps props,
+        IOptions<ReverseCallsConfiguration> reverseCallsConfig,
         IIdentifyRequests requestIdentifier,
         ICreateExecutionContexts executionContextCreator,
         IMetricsCollector metricsCollector,
         ILoggerFactory loggerFactory,
         IKeepConnectionsAlive pingedConnectionFactory)
     {
+        _actorSystem = actorSystem;
+        _props = props;
+        _reverseCallsConfig = reverseCallsConfig.Value;
         _requestIdentifier = requestIdentifier;
         _executionContextCreator = executionContextCreator;
         _metricsCollector = metricsCollector;
@@ -54,10 +68,23 @@ public class ReverseCallDispatchers : IReverseCallDispatchers
         where TConnectResponse : class
         where TRequest : class
         where TResponse : class
-        => new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-            _pingedConnectionFactory.CreatePingedReverseCallConnection(_requestIdentifier.GetRequestIdFor(context), clientStream, serverStream, context, messageConverter),
+    {
+        var requestId = _requestIdentifier.GetRequestIdFor(context);
+        var connection = _pingedConnectionFactory.CreatePingedReverseCallConnection(requestId, clientStream, serverStream, context, messageConverter);
+        if (_reverseCallsConfig.UseActors)
+        {
+            return new ReverseCallDispatcherActor<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>.Wrapper(
+                _actorSystem,
+                _props,
+                requestId,
+                connection,
+                messageConverter);
+        }
+        return new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+            connection,
             messageConverter,
             _executionContextCreator,
             _metricsCollector,
             _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
+    }
 }

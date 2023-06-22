@@ -15,12 +15,12 @@ public class MongoDBConfiguration
     /// <summary>
     /// Gets or sets the MongoDB host.
     /// </summary>
-    public string Host { get; set; }
+    public string? Host { get; set; }
 
     /// <summary>
     /// Gets or sets the database name.
     /// </summary>
-    public string Database { get; set; }
+    public string? Database { get; set; }
 
     /// <summary>
     /// Gets or sets the value indicating whether or not to use SSL.
