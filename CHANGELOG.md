@@ -1,3 +1,27 @@
+# [9.0.0] - 2023-6-22 [PR: #748](https://github.com/dolittle/Runtime/pull/748)
+## Summary
+Major upgrade of the runtime, focusing on performance and  ease of use.
+Does away with written streams for eventhandlers, and changes it to stream directly from the eventlog. Perfomance is roughly 2X the latest V8 releases, even without enabling concurrency.
+
+It also does away with several limitations around changing existing eventhandlers, and will no longer validate that the new event set matches the old one.
+
+### Added
+- Concurrency support for eventhandlers
+
+### Changed
+- Event handler CLI will now use eventlog stream position instead of the eventhandler stream position.
+- Internal libraries have been updated, improving runtime performanced.
+
+### Fixed
+- Both the runtime and SDK will now always disconnect cleanly, and wait until all current processing is completed.
+
+### Removed
+- Limitations around changing consumed event handler event types after the fact
+- Embeddings
+- Eventhandler streams
+- Public filter validation (improves startup time for producers)
+
+
 # [8.9.4] - 2023-6-16 [PR: #743](https://github.com/dolittle/Runtime/pull/743)
 ## Summary
 
