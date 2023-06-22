@@ -27,4 +27,9 @@ public interface IFilterDefinition
     /// Gets a value indicating whether the filter defines a public stream definition.
     /// </summary>
     bool Public { get; }
+
+    /// <summary>
+    /// Determine if the filter supports validation
+    /// </summary>
+    public bool CanBeValidated => !Public;
 }

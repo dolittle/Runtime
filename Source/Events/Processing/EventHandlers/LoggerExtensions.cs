@@ -151,7 +151,7 @@ static partial class LoggerExtensions
     [LoggerMessage(0, LogLevel.Information, "All handlers complete: {EventHandler} in scope: {Scope}")]
     internal static partial void FinishedWaitingForCompletions(this ILogger logger, EventProcessorId eventHandler, ScopeId scope);
 
-    [LoggerMessage(0, LogLevel.Error, "Failed while waiting for completions: {EventHandler} in scope: {Scope}")]
+    [LoggerMessage(0, LogLevel.Error, "Failed while waiting for completions: {EventHandler} in scope: {Scope}, with {RequestsInFlight} requests in flight")]
     internal static partial void FailedWaitingForCompletions(this ILogger logger, Exception ex, EventProcessorId eventHandler, ScopeId scope, int requestsInFlight);
 
     [LoggerMessage(0, LogLevel.Information, "EventHandler was cancelled: {EventHandler} in scope: {Scope}")]

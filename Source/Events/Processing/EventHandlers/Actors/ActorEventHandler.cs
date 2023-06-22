@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -232,7 +231,6 @@ public class ActorEventHandler : IEventHandler
             _logger.ErrorWhileStartingEventHandler(ex, EventProcessor, Scope);
             ExceptionDispatchInfo.Capture(ex).Throw();
         }
-
 
 
         // _logger.StartingEventHandler(FilterDefinition.TargetStream);

@@ -105,11 +105,15 @@ public class ConsumerService : ConsumerBase
                 _metrics.IncrementTotalRejectedSubscriptions();
                 await dispatcher.Reject(failureResponse, context.CancellationToken).ConfigureAwait(false);
                 return;
-            } else {
-                consent = ConsentId.NoConsent;
             }
-        }
 
+            if (!_tenants.All.Contains(arguments.ProducerTenant))
+            {
+                await dispatcher.Reject(MissingProducerTenantResponse(arguments), context.CancellationToken).ConfigureAwait(false);
+            }
+
+            consent = ConsentId.NoConsent;
+        }
 
         _metrics.IncrementTotalAcceptedSubscriptions();
         Log.SuccessfullySubscribed(
@@ -122,6 +126,16 @@ public class ConsumerService : ConsumerBase
             arguments.PublicStream);
         await _eventHorizons.Start(dispatcher, arguments, consent, context.CancellationToken).ConfigureAwait(false);
     }
+
+    static SubscriptionResponse MissingProducerTenantResponse(ConsumerSubscriptionArguments arguments) =>
+        new()
+        {
+            Failure = new ProtobufContracts.Failure
+            {
+                Id = SubscriptionFailures.MissingProducerTenant.ToProtobuf(),
+                Reason = $"Producer tenant '{arguments.ProducerTenant}' does not exist"
+            }
+        };
 
     bool TryGetConsent(ConsumerSubscriptionArguments arguments, out ConsentId consent, out SubscriptionResponse failureResponse)
     {

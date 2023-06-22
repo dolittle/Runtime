@@ -265,6 +265,8 @@ public class EventHandlerProcessorActor : IDisposable, IActor
         {
             InitTenant(tenantId, context);
         }
+
+        context.ReenterAfterCancellation(_stopEverything.Token, () => context.Stop(context.Self));
     }
 
     void InitTenant(TenantId tenant, IContext context)
