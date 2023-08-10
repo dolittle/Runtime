@@ -24,6 +24,16 @@ public class EventStoreConfiguration
     public string Database { get; set; }
 
     /// <summary>
+    /// MongoDB username
+    /// </summary>
+    public string? UserName { get; set; }
+
+    /// <summary>
+    /// MongoDB password
+    /// </summary>
+    public string? Password { get; set; }
+
+    /// <summary>
     /// Gets or sets the maximum connection pool size for the MongoDB client.
     /// </summary>
     public int MaxConnectionPoolSize { get; set; } = MongoDefaults.MaxConnectionPoolSize;

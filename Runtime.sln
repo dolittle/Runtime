@@ -129,6 +129,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".meta", ".meta", "{CAF1D781
 		default.props = default.props
 		versions.props = versions.props
 		specs.props = specs.props
+		tests.props = tests.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{89A4E435-785F-4CDF-91B4-A14EAB91084B}"
@@ -147,6 +148,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configuration.Management", "Source\Configuration.Management\Configuration.Management.csproj", "{9ACC3932-CD9F-429A-A1F3-6476C9A12BC0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Integration\Tests\Services\Services.csproj", "{C4C5230B-13BC-43A4-84D6-1BD408A694B0}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{C4446054-773D-4B63-A88B-3D35B71F6F66}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
@@ -165,6 +167,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Store.MongoDB", "Integration\Tests\Events.Store.MongoDB\Events.Store.MongoDB.csproj", "{02CE4263-12B0-4DDC-AB20-452D2257D4D5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Processing.Tests", "Specifications\Events.Processing.Tests\Events.Processing.Tests.csproj", "{F83E289C-91DC-42B9-BD8C-ED15E0D044E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Processing.MongoDB", "Integration\Tests\Events.Processing.MongoDB\Events.Processing.MongoDB.csproj", "{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -899,6 +903,18 @@ Global
 		{F83E289C-91DC-42B9-BD8C-ED15E0D044E0}.Release|x64.Build.0 = Release|Any CPU
 		{F83E289C-91DC-42B9-BD8C-ED15E0D044E0}.Release|x86.ActiveCfg = Release|Any CPU
 		{F83E289C-91DC-42B9-BD8C-ED15E0D044E0}.Release|x86.Build.0 = Release|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Debug|x64.Build.0 = Debug|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Debug|x86.Build.0 = Debug|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Release|x64.ActiveCfg = Release|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Release|x64.Build.0 = Release|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Release|x86.ActiveCfg = Release|Any CPU
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{79AB0F5F-4DA5-40C5-9A0B-BE392F16B7C0} = {562DC4C5-91AB-4280-B40C-A2E0C43AA21C}
@@ -965,5 +981,6 @@ Global
 		{AC1D9095-A820-4B4B-BD98-A88E08790C16} = {C4446054-773D-4B63-A88B-3D35B71F6F66}
 		{02CE4263-12B0-4DDC-AB20-452D2257D4D5} = {37343684-7BA7-40C1-9904-B8C434B8BD19}
 		{F83E289C-91DC-42B9-BD8C-ED15E0D044E0} = {95D3ED76-BB5F-442F-A99A-F48FF34FEDA6}
+		{0AFD26E8-7C6A-4730-9391-CBC6A69EAB22} = {37343684-7BA7-40C1-9904-B8C434B8BD19}
 	EndGlobalSection
 EndGlobal

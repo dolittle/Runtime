@@ -171,8 +171,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
         var events = StartSubscription(from, shutdownToken);
         var firstEventReady = events.WaitToReadAsync(shutdownToken).AsTask();
-        context.ReenterAfter(firstEventReady,
-            _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
+        context.ReenterAfter(firstEventReady, _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
     }
 
     (CancellationToken shutdownToken, CancellationToken deadlineToken) GetCancellationTokens(IContext context)

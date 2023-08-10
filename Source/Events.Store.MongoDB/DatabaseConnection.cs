@@ -39,6 +39,8 @@ public class DatabaseConnection : IDatabaseConnection
     public DatabaseConnection(IOptions<EventStoreConfiguration> configuration, IConfigureBackwardsCompatibility backwardsCompatibility)
     {
         var config = configuration.Value;
+
+        
         var settings = new MongoClientSettings
         {
             Servers = config.Servers.Select(MongoServerAddress.Parse),
@@ -46,6 +48,10 @@ public class DatabaseConnection : IDatabaseConnection
             MaxConnectionPoolSize = config.MaxConnectionPoolSize,
             ClusterConfigurator = cb => cb.AddTelemetry()
         };
+        if (config is { UserName: not null, Password: not null })
+        {
+            settings.Credential = MongoCredential.CreateCredential(null, config.UserName, config.Password);
+        }
 
         MongoClient = new MongoClient(settings.Freeze());
         Database = MongoClient.GetDatabase(config.Database);
