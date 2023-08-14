@@ -82,6 +82,8 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
     /// <inheritdoc/>
     public bool Partitioned => false;
 
+    public int FailingPartitionCount => IsFailing ? 1 : 0;
+    
     public Bucket ToProtobuf()
     {
         var protobuf = new Bucket()

@@ -161,11 +161,12 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var processingPosition = await LoadProcessingPosition(context);
         if (!processingPosition.Success)
         {
-            Logger.LogError(processingPosition.Exception, "Failed to load processing position for {StreamProcessorId}", Identifier);
+            Logger.FailedToLoadProcessingPosition(processingPosition.Exception, Identifier);
             throw processingPosition.Exception;
         }
 
         var initialState = processingPosition.Result;
+        LogInitialState(initialState);
 
         var from = initialState.Position;
 
@@ -175,6 +176,19 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var firstEventReady = events.WaitToReadAsync(shutdownToken).AsTask();
         context.ReenterAfter(firstEventReady,
             _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
+    }
+
+    void LogInitialState(IStreamProcessorState initialState)
+    {
+        if (initialState.FailingPartitionCount > 0)
+        {
+            Logger.StartingStreamProcessorWithFailingPartitions(Identifier, initialState.Position, initialState.FailingPartitionCount,
+                initialState.EarliestProcessingPosition);
+        }
+        else
+        {
+            Logger.StartingStreamProcessor(Identifier, initialState.Position);
+        }
     }
 
     (CancellationToken shutdownToken, CancellationToken deadlineToken) GetCancellationTokens(IContext context)

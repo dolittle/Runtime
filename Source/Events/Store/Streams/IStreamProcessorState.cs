@@ -19,6 +19,11 @@ public interface IStreamProcessorState
     /// Gets a value indicating whether this <see cref="AbstractScopedStreamProcessor" /> is partitioned or not.
     /// </summary>
     bool Partitioned { get; }
+    
+    /// <summary>
+    /// Check if the processor has recorded any failures.
+    /// </summary>
+    int FailingPartitionCount { get; }
 
     Bucket ToProtobuf();
 
