@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Store;
 [Singleton, PerTenant]
 public class EventLogStream : IEventLogStream
 {
-    const int ChannelSize = 100;
+    const int ChannelSize = 3;
 
     readonly ActorSystem _actorSystem;
     readonly ICreateProps _createProps;
