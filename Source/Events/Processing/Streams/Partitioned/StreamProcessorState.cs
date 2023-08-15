@@ -43,6 +43,8 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
     /// <inheritdoc/>
     public bool Partitioned => true;
 
+    public int FailingPartitionCount => FailingPartitions.Count;
+    
     public Bucket ToProtobuf() => new()
     {
         BucketId = 0,

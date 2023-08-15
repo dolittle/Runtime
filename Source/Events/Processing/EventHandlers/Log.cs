@@ -46,4 +46,16 @@ static partial class Log
 
     [LoggerMessage(0, LogLevel.Trace, "Unregistering stream processor with id: {StreamProcessorId}")]
     internal static partial void FilterStreamProcessorUnregistered(this ILogger logger, StreamProcessorId streamProcessorId);
+    
+    [LoggerMessage(0, LogLevel.Information, "Starting stream processor {StreamProcessorId} at {Position}")]
+    internal static partial void StartingStreamProcessor(this ILogger logger, StreamProcessorId streamProcessorId, ProcessingPosition position);
+    
+    [LoggerMessage(0, LogLevel.Information, "Starting stream processor {StreamProcessorId} at {Position}. Failing partition count: {FailingPartitions}, Earliest failing position: {EarliestPosition}")]
+    internal static partial void StartingStreamProcessorWithFailingPartitions(this ILogger logger, StreamProcessorId streamProcessorId, ProcessingPosition position, int failingPartitions, ProcessingPosition earliestPosition);
+    
+    // Logger.LogError(processingPosition.Exception, "Failed to load processing position for {StreamProcessorId}", Identifier);
+    
+    [LoggerMessage(0, LogLevel.Error, "Failed to load processing position for {StreamProcessorId}")]
+    internal static partial void FailedToLoadProcessingPosition(this ILogger logger, Exception ex, StreamProcessorId streamProcessorId);
+    
 }
