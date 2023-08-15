@@ -1,3 +1,16 @@
+# [9.0.1] - 2023-8-15 [PR: #750](https://github.com/dolittle/Runtime/pull/750)
+## Summary
+
+Stream processor improvements
+
+### Changed
+- Reduced event log batches in-flight per subscription, reducing memory usage.
+ 
+### Fixed
+- Fixed edge case where processor would not retry old events before new events were present
+- Minor fixes in stream processor state bootstrapping which affected logging.
+
+
 # [9.0.0] - 2023-6-22 [PR: #748](https://github.com/dolittle/Runtime/pull/748)
 ## Summary
 Major upgrade of the runtime, focusing on performance and  ease of use.
