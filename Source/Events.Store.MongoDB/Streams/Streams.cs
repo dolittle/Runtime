@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.Streams;
-
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
@@ -51,6 +50,7 @@ public class Streams : EventStoreConnection, IStreams
         {
             throw new CannotGetEventLogStream();
         }
+
         return GetStreamCollection(scopeId, streamId, token);
     }
 
@@ -116,22 +116,60 @@ public class Streams : EventStoreConnection, IStreams
 
     void CreateCollectionsAndIndexesForEventLog()
     {
-        Log.CreatingIndexesFor(_logger, EventLogCollectionName);
-        DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
-            Builders<MongoDB.Events.Event>.IndexKeys
-                .Ascending(_ => _.Metadata.EventSource)));
+        const string metadataEventsourceIndex = "Metadata.EventSource_1";
+        const string oldAggregateIndex = "Metadata.EventSource_1_Aggregate.TypeId_1";
+        const string aggregateIndex = "aggregate_version_index";
 
-        DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
-            Builders<MongoDB.Events.Event>.IndexKeys
-                .Ascending(_ => _.Aggregate.TypeId)
-                .Ascending(_ => _.Metadata.EventSource)
-                .Ascending(_ => _.Aggregate.Version),
-            new CreateIndexOptions<MongoDB.Events.Event>
+        var existing = DefaultEventLog.Indexes.List().ToList();
+        var createAggregateVersionIndex = true;
+        var createEventSourceIndex = true;
+        foreach (var doc in existing)
+        {
+            if (doc.TryGetValue("name", out var nameValue))
             {
-                Unique = true,
-                PartialFilterExpression = Builders<MongoDB.Events.Event>.Filter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
+                var name = nameValue.AsString;
+                switch (name)
+                {
+                    case aggregateIndex:
+                        createAggregateVersionIndex = false;
+                        break;
+                    case metadataEventsourceIndex:
+                        createEventSourceIndex = false;
+                        break;
+                    case oldAggregateIndex:
+                        DefaultEventLog.Indexes.DropOne(oldAggregateIndex);
+                        break;
+                }
             }
-        ));
+        }
+
+        Log.CreatingIndexesFor(_logger, EventLogCollectionName);
+        if (createEventSourceIndex)
+        {
+            DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
+                Builders<MongoDB.Events.Event>.IndexKeys
+                    .Ascending(_ => _.Metadata.EventSource), new CreateIndexOptions
+                {
+                    Unique = false,
+                    Name = metadataEventsourceIndex
+                }));
+        }
+
+        if (createAggregateVersionIndex)
+        {
+            DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
+                Builders<MongoDB.Events.Event>.IndexKeys
+                    .Ascending(_ => _.Aggregate.TypeId)
+                    .Ascending(_ => _.Metadata.EventSource)
+                    .Ascending(_ => _.Aggregate.Version),
+                new CreateIndexOptions<MongoDB.Events.Event>
+                {
+                    Name = aggregateIndex,
+                    Unique = true,
+                    PartialFilterExpression = Builders<MongoDB.Events.Event>.Filter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
+                }
+            ));
+        }
     }
 
     void CreateCollectionsAndIndexesForStreamDefinitions()
@@ -189,7 +227,8 @@ public class Streams : EventStoreConnection, IStreams
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<MongoDB.Streams.StreamDefinition> streamDefinitions, CancellationToken cancellationToken)
+    async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<MongoDB.Streams.StreamDefinition> streamDefinitions,
+        CancellationToken cancellationToken)
     {
         Log.CreatingIndexesFor(_logger, streamDefinitions.CollectionNamespace.CollectionName);
         await streamDefinitions.Indexes.CreateOneAsync(

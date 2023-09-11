@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates;
@@ -135,7 +136,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     }
 
     async IAsyncEnumerable<CommittedAggregateEvents> DoFetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot,
-        FilterDefinition<MongoDB.Events.Event> filter, CancellationToken cancellationToken)
+        FilterDefinition<MongoDB.Events.Event> filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         AggregateRootVersion version;
         try
@@ -157,7 +158,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         try
         {
             stream = _streams.DefaultEventLog
-                .Find(filter & EventsFromAggregateFilter(eventSource, aggregateRoot, version))
+                .Find(EventsFromAggregateFilter(eventSource, aggregateRoot, version) & filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
                 .Project(evt => new AggregateEventProjection
                 {
@@ -217,8 +218,8 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
     FilterDefinition<Events.Event> EventsFromAggregateFilter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion aggregateRootVersion)
         => _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
-           & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
            & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
+           & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
            & _eventFilter.Lte(_ => _.Aggregate.Version, aggregateRootVersion.Value);
 
     Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scope, CancellationToken cancellationToken)
