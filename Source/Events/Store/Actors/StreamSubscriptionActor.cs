@@ -66,6 +66,11 @@ public class StreamSubscriptionActor : IActor
             {
                 return;
             }
+            catch(TimeoutException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                // Stopping, no need to log
+                return;
+            }
             catch (Exception e)
             {
                 _logger.ErrorFetchingCatchupEvents(e);
