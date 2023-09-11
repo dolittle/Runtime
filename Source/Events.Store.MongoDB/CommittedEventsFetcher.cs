@@ -143,9 +143,13 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         {
             version = await _aggregateRoots.FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (MongoWaitQueueFullException ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new EventStoreUnavailable("Unable to fetch version", ex);
         }
 
         if (version <= AggregateRootVersion.Initial)
