@@ -123,8 +123,15 @@ public class Streams : EventStoreConnection, IStreams
 
         DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
             Builders<MongoDB.Events.Event>.IndexKeys
+                .Ascending(_ => _.Aggregate.TypeId)
                 .Ascending(_ => _.Metadata.EventSource)
-                .Ascending(_ => _.Aggregate.TypeId)));
+                .Ascending(_ => _.Aggregate.Version),
+            new CreateIndexOptions<MongoDB.Events.Event>
+            {
+                Unique = true,
+                PartialFilterExpression = Builders<MongoDB.Events.Event>.Filter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
+            }
+        ));
     }
 
     void CreateCollectionsAndIndexesForStreamDefinitions()
