@@ -16,12 +16,12 @@
         <McMasterVersion>3.1.0</McMasterVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <MicrosoftDotNetVersion>3.1.6</MicrosoftDotNetVersion>
-        <MicrosoftDotNetTestVersion>16.4.0</MicrosoftDotNetTestVersion>
+        <MicrosoftDotNetTestVersion>17.7.2</MicrosoftDotNetTestVersion>
         <MicrosoftExtensionsVersion>6.0.0</MicrosoftExtensionsVersion>
         <MongoDBDriverVersion>2.19.2</MongoDBDriverVersion>
         <MongoDBOpenTelemetryVersion>1.0.0</MongoDBOpenTelemetryVersion>
         <MoqVersion>4.18.*</MoqVersion>
-        <FluentAssertionsVersion>6.10.0</FluentAssertionsVersion>
+        <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
         <NetEscapadesYaml>2.2.0</NetEscapadesYaml>
         <NewtonsoftVersion>13.0.1</NewtonsoftVersion>
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
@@ -38,5 +38,6 @@
         <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>
         <SystemDynamicVersion>4.3.0</SystemDynamicVersion>
         <SystemReflectionVersion>4.7.0</SystemReflectionVersion>
+        <XUnitVersion>2.5.0</XUnitVersion>
     </PropertyGroup>
 </Project>
