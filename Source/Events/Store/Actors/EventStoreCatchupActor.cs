@@ -11,7 +11,8 @@ using Proto;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
-record EventLogCatchupRequest(ScopeId Scope, EventLogSequenceNumber From, int MaxCount);
+record EventLogCatchupRequest(ScopeId Scope, EventLogSequenceNumber From, EventLogSequenceNumber To, ISet<Guid> ArtifactIds);
+
 record EventLogCatchupResponse(EventLogSequenceNumber FromOffset, EventLogSequenceNumber ToOffset, IReadOnlyCollection<Contracts.CommittedEvent> Events);
 
 public class EventStoreCatchupActor : IActor
@@ -38,37 +39,39 @@ public class EventStoreCatchupActor : IActor
 
     Task OnEventLogCatchupRequest(EventLogCatchupRequest request, IContext context)
     {
-        var maxEvents = Math.Min(request.MaxCount, BatchSize);
+        var maxEvents = Math.Min(request.To - request.From, BatchSize);
         if (maxEvents < 1)
         {
             context.Respond(new EventLogCatchupResponse(request.From, request.From, ImmutableList<Contracts.CommittedEvent>.Empty));
             return Task.CompletedTask;
         }
 
-        context.ReenterAfter(_eventsFetcher.FetchCommittedEvents(request.Scope, request.From, maxEvents, context.CancellationToken), task =>
-        {
-            if (task.IsCompletedSuccessfully)
+        context.ReenterAfter(
+            _eventsFetcher.FetchCommittedEvents(request.Scope, request.From, request.To, BatchSize, request.ArtifactIds, context.CancellationToken), task =>
             {
-                var committedEvents = task.Result;
-                var fromOffset = request.From;
-                var toOffset = committedEvents.Count > 0 ? committedEvents[^1].EventLogSequenceNumber : fromOffset;
-                context.Respond(new EventLogCatchupResponse(fromOffset, toOffset, committedEvents.ToProtobuf().ToImmutableList()));
-            }
-            else
-            {
-                var aggregateException = task.Exception;
-                if (aggregateException is not null)
+                if (task.IsCompletedSuccessfully)
                 {
-                    _logger.ErrorFetchingCatchupEvents(aggregateException);
+                    var committedEvents = task.Result;
+                    var fromOffset = request.From;
+                    var toOffset = committedEvents.Count == BatchSize ? committedEvents[^1].EventLogSequenceNumber : (EventLogSequenceNumber)(request.To - 1);
+                    context.Respond(new EventLogCatchupResponse(fromOffset, toOffset, committedEvents.ToProtobuf().ToImmutableList()));
                 }
-                if (!context.CancellationToken.IsCancellationRequested)
+                else
                 {
-                    return OnEventLogCatchupRequest(request, context); // Retry
-                }
-            }
+                    var aggregateException = task.Exception;
+                    if (aggregateException is not null)
+                    {
+                        _logger.ErrorFetchingCatchupEvents(aggregateException);
+                    }
 
-            return Task.CompletedTask;
-        });
+                    if (!context.CancellationToken.IsCancellationRequested)
+                    {
+                        return OnEventLogCatchupRequest(request, context); // Retry
+                    }
+                }
+
+                return Task.CompletedTask;
+            });
 
         return Task.CompletedTask;
     }

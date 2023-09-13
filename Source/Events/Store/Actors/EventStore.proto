@@ -33,6 +33,7 @@ message StartEventStoreSubscription{
     string pid_id = 4;
     string pid_address = 5;
     uint64 from_offset = 6;
+    // Next offset to be processed
     uint64 current_high_watermark = 7;
     string subscription_name = 8; // Debug name
 }
@@ -63,6 +64,11 @@ message SubscriptionEvents{
     uint64 from_offset = 2;
     uint64 to_offset = 3;
     repeated CommittedEvent events = 4;
+}
+
+message SubscriptionWasReset{
+    protobuf.Uuid subscription_id = 1;
+    string reason = 2;
 }
 
 message SubscriptionEventsAck{

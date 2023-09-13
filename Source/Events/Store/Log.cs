@@ -60,12 +60,12 @@ static partial class Log
         => _unexpectedEventLogOffset(logger, actual, expected, null);
     
     
-    static readonly Action<ILogger, Exception> _subscriptionReturnedDeadLetter = LoggerMessage
-        .Define(
+    static readonly Action<ILogger, string, Exception?> _subscriptionReturnedDeadLetter = LoggerMessage
+        .Define<string>(
             LogLevel.Debug,
             new EventId(0, nameof(SubscriptionReturnedDeadLetter)),
-            "Subscription target returned dead letter response");
+            "Subscription target returned dead letter response for {SubscriptionName}");
 
-    internal static void SubscriptionReturnedDeadLetter(this ILogger logger, DeadLetterException deadLetter)
-        => _subscriptionReturnedDeadLetter(logger, deadLetter);
+    internal static void SubscriptionReturnedDeadLetter(this ILogger logger, string subscriptionId)
+        => _subscriptionReturnedDeadLetter(logger, subscriptionId, null);
 }

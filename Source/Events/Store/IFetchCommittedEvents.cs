@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,10 +32,12 @@ public interface IFetchCommittedEvents
     /// </summary>
     /// <param name="scopeId">The <see cref="ScopeId"/>.</param>
     /// <param name="from">EventLogSequenceNumber to read from (inclusive)</param>
+    /// <param name="to">EventLogSequenceNumber to read to (exclusive)</param>
     /// <param name="limit">Max number of events to retrieve</param>
+    /// <param name="artifactIds">Which event types to fetch. Empty set fetches all types</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns></returns>
-    Task<CommittedEvents> FetchCommittedEvents(ScopeId scopeId, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken);
+    Task<CommittedEvents> FetchCommittedEvents(ScopeId scopeId, EventLogSequenceNumber from, EventLogSequenceNumber to, int limit, ISet<Guid> artifactIds, CancellationToken cancellationToken);
 
     /// <summary>
     /// Fetches the <see cref="CommittedAggregateEvents"/> applied to an Event Source by an Aggregate Root.

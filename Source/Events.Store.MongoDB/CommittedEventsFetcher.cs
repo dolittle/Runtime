@@ -92,13 +92,18 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken)
+    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, EventLogSequenceNumber to, int limit, ISet<Guid> artifactSet, CancellationToken cancellationToken)
     {
         try
         {
             var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+            var filter = _eventFilter.Gte(e => e.EventLogSequenceNumber, from) & _eventFilter.Lt(e => e.EventLogSequenceNumber, to);
+            if (artifactSet.Count > 0)
+            {
+                filter &= _eventFilter.In(_ => _.Metadata.TypeId, artifactSet);
+            }
             var raw = await eventLog
-                .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
+                .Find(filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(limit)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
