@@ -129,6 +129,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".meta", ".meta", "{CAF1D781
 		default.props = default.props
 		versions.props = versions.props
 		specs.props = specs.props
+		tests.props = tests.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{89A4E435-785F-4CDF-91B4-A14EAB91084B}"
@@ -147,6 +148,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configuration.Management", "Source\Configuration.Management\Configuration.Management.csproj", "{9ACC3932-CD9F-429A-A1F3-6476C9A12BC0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Integration\Tests\Services\Services.csproj", "{C4C5230B-13BC-43A4-84D6-1BD408A694B0}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{C4446054-773D-4B63-A88B-3D35B71F6F66}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore

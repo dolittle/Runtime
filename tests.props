@@ -1,0 +1,34 @@
+<Project>
+    <Import Project="versions.props"/>
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <IsTestProject>true</IsTestProject>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <NoWarn>IDE1006;IDE0044;IDE0051;IDE0052;CA2211;CS0612;CS0169;CS8981;RCS1169;RCS1018;RCS1213</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftDotNetTestVersion)"/>
+        <PackageReference Include="Moq" Version="$(MoqVersion)"/>
+        <PackageReference Include="xunit" Version="$(XUnitVersion)"/>
+        <PackageReference Include="Grpc.Core.Testing" Version="$(GrpcTestingVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitVersion)">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <ContractsRootPath>$(NuGetPackageRoot)dolittle.contracts/$(ContractsVersion)/protos/</ContractsRootPath>
+    </PropertyGroup>
+</Project>

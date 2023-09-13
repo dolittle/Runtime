@@ -19,7 +19,6 @@ jobs:
           - 'Events.Processing.EventHandlers.EventHandler'
           - 'Events.Processing.EventHandlers.FastEventHandler'
           - 'Events.Processing.EventHandlers.Filter'
-          - 'Events.Processing.Projections.Projection'
     env:
       BENCHMARK_NAME: Integration.Benchmarks.${{ matrix.benchmark }}
 

@@ -125,8 +125,20 @@ public class EventLogStreamActor : IActor
             Started => OnStarted(context),
             Stopping => OnStopping(),
             SubscriptionEvents request => OnSubscriptionEvents(request, context),
+            SubscriptionWasReset request => OnReset(request, context),
             _ => Task.CompletedTask
         };
+    }
+
+    async Task OnReset(SubscriptionWasReset request, IContext context)
+    {
+        if (!context.CancellationToken.IsCancellationRequested)
+        {
+            _logger.LogError("Subscription {SubscriptionId} was reset because {Reason}", request.SubscriptionId, request.Reason);
+            _channelWriter.Complete(new SubscriptionError(request.Reason));
+            // ReSharper disable once MethodHasAsyncOverload
+            context.Stop(context.Self);
+        }
     }
 
     async Task OnSubscriptionEvents(SubscriptionEvents request, IContext context)
@@ -164,7 +176,7 @@ public class EventLogStreamActor : IActor
 
     async Task OnStopping()
     {
-        _channelWriter.Complete();
+        _channelWriter.TryComplete();
         var cancelEventStoreSubscription = new CancelEventStoreSubscription
         {
             ScopeId = _scope,
@@ -174,6 +186,18 @@ public class EventLogStreamActor : IActor
     }
 
     async Task OnStarted(IContext context)
+    {
+        await RegisterSubscription(context);
+        context.ReenterAfterCancellation(_cancellationToken, () =>
+        {
+            if (!context.CancellationToken.IsCancellationRequested)
+            {
+                context.Stop(context.Self);
+            }
+        });
+    }
+
+    async Task RegisterSubscription(IContext context)
     {
         var eventStoreSubscriptionRequest = new EventStoreSubscriptionRequest
         {
@@ -187,12 +211,5 @@ public class EventLogStreamActor : IActor
             SubscriptionName = _subscriptionName
         };
         await _eventStoreClient.RegisterSubscription(eventStoreSubscriptionRequest, _cancellationToken).ConfigureAwait(false);
-        context.ReenterAfterCancellation(_cancellationToken, () =>
-        {
-            if (!context.CancellationToken.IsCancellationRequested)
-            {
-                context.Stop(context.Self);
-            }
-        });
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates;
@@ -11,11 +12,9 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
+using Dolittle.Runtime.Events.Store.MongoDB.Projections;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.MongoDB;
-using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using IAggregateRoots = Dolittle.Runtime.Events.Store.MongoDB.Aggregates.IAggregateRoots;
@@ -33,6 +32,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     readonly IEventConverter _eventConverter;
     readonly IAggregateRoots _aggregateRoots;
     readonly ILogger<CommittedEventsFetcher> _logger;
+    readonly IEventContentConverter _contentConverter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommittedEventsFetcher"/> class.
@@ -40,15 +40,19 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
+    /// <param name="contentConverter">The <see cref="IEventContentConverter" />.</param>
     /// <param name="logger"></param>
     public CommittedEventsFetcher(
         IStreams streams,
         IEventConverter eventConverter,
-        IAggregateRoots aggregateRoots, ILogger<CommittedEventsFetcher> logger)
+        IAggregateRoots aggregateRoots,
+        IEventContentConverter contentConverter,
+        ILogger<CommittedEventsFetcher> logger)
     {
         _streams = streams;
         _eventConverter = eventConverter;
         _aggregateRoots = aggregateRoots;
+        _contentConverter = contentConverter;
         _logger = logger;
     }
 
@@ -88,13 +92,18 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, int limit, CancellationToken cancellationToken)
+    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, EventLogSequenceNumber to, int limit, ISet<Guid> artifactSet, CancellationToken cancellationToken)
     {
         try
         {
             var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+            var filter = _eventFilter.Gte(e => e.EventLogSequenceNumber, from) & _eventFilter.Lt(e => e.EventLogSequenceNumber, to);
+            if (artifactSet.Count > 0)
+            {
+                filter &= _eventFilter.In(_ => _.Metadata.TypeId, artifactSet);
+            }
             var raw = await eventLog
-                .Find(_eventFilter.Gte(e => e.EventLogSequenceNumber, from))
+                .Find(filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
                 .Limit(limit)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -132,16 +141,20 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     }
 
     async IAsyncEnumerable<CommittedAggregateEvents> DoFetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot,
-        FilterDefinition<MongoDB.Events.Event> filter, CancellationToken cancellationToken)
+        FilterDefinition<MongoDB.Events.Event> filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         AggregateRootVersion version;
         try
         {
             version = await _aggregateRoots.FetchVersionFor(eventSource, aggregateRoot, cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (MongoWaitQueueFullException ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new EventStoreUnavailable("Unable to fetch version", ex);
         }
 
         if (version <= AggregateRootVersion.Initial)
@@ -150,29 +163,56 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             yield break;
         }
 
-        IAsyncEnumerable<CommittedAggregateEvents> stream;
+        IAsyncEnumerable<CommittedAggregateEvent> stream;
         try
         {
             stream = _streams.DefaultEventLog
-                .Find(filter & EventsFromAggregateFilter(eventSource, aggregateRoot, version))
+                .Find(EventsFromAggregateFilter(eventSource, aggregateRoot, version) & filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
+                .Project(evt => new AggregateEventProjection
+                {
+                    EventLogSequenceNumber = evt.EventLogSequenceNumber,
+                    Content = evt.Content,
+                    ExecutionContext = evt.ExecutionContext,
+                    Metadata = evt.Metadata,
+                    Aggregate = evt.Aggregate,
+                })
                 .ToAsyncEnumerable(cancellationToken)
-                .Select(_ => new CommittedAggregateEvents(
-                    eventSource,
-                    aggregateRoot,
-                    version,
-                    new[] { (CommittedAggregateEvent)_eventConverter.ToRuntimeStreamEvent(_).Event }));
+                .Select(evt => new CommittedAggregateEvent(
+                    new Artifact(
+                        evt.Aggregate.TypeId,
+                        evt.Aggregate.TypeGeneration),
+                    evt.Aggregate.Version,
+                    evt.EventLogSequenceNumber,
+                    evt.Metadata.Occurred,
+                    evt.Metadata.EventSource,
+                    evt.ExecutionContext.ToExecutionContext(),
+                    new Artifact(
+                        evt.Metadata.TypeId,
+                        evt.Metadata.TypeGeneration),
+                    evt.Metadata.Public,
+                    _contentConverter.ToJson(evt.Content)));
         }
-        catch (Exception ex)
+        catch (MongoWaitQueueFullException ex)
         {
             throw new EventStoreUnavailable("Mongo wait queue is full", ex);
         }
+        catch (Exception ex)
+        {
+            throw new EventStoreUnavailable("Failed to get aggregate events", ex);
+        }
 
         var hasEvents = false;
-        await foreach (var batch in stream.WithCancellation(cancellationToken))
+        await foreach (var batch in stream
+            .WithCancellation(cancellationToken))
         {
             hasEvents = true;
-            yield return batch;
+            var response = new CommittedAggregateEvents(
+                eventSource,
+                aggregateRoot,
+                version,
+                new[] { batch });
+            yield return response;
         }
 
         if (!hasEvents)
@@ -187,8 +227,8 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
     FilterDefinition<Events.Event> EventsFromAggregateFilter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion aggregateRootVersion)
         => _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
-           & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
            & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
+           & _eventFilter.EqStringOrGuid(_ => _.Metadata.EventSource, eventSource.Value)
            & _eventFilter.Lte(_ => _.Aggregate.Version, aggregateRootVersion.Value);
 
     Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scope, CancellationToken cancellationToken)
