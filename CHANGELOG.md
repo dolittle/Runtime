@@ -1,3 +1,20 @@
+# [9.0.2] - 2023-9-13 [PR: #751](https://github.com/dolittle/Runtime/pull/751)
+## Summary
+Performance focused upgrade with the following improvements:
+
+### Aggregates
+Changed aggregate indexes to only index events produces by aggregates (partial indexes). Also included version to ensure aggregate queries do not need to drop down to collection scans. 
+Also optimized aggregate queries, and ensured they do not include event horizon metadata, which is not used in the aggregate.
+
+### Event Subscriptions
+Rewritten event subscriptions to optimize throughput and memory usage
+- Optimized catchup subscriptions
+- Optimized real-time event streaming
+
+### EventHandlers
+- Ensured clean shutdown by ensuring event processing is finished before the eventstore terminates. This allows all current handlers to complete even if they need to publish new events.
+
+
 # [9.0.1] - 2023-8-15 [PR: #750](https://github.com/dolittle/Runtime/pull/750)
 ## Summary
 
