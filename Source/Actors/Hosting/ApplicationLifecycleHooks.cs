@@ -49,11 +49,44 @@ public interface IApplicationLifecycleHooks
 }
 
 /// <summary>
+/// Defines a system that knows about stream processor lifecycle hooks.
+/// This is a separate interface from <see cref="IApplicationLifecycleHooks"/> to allow for the stream processors to be shutdown before the application.
+/// </summary>
+public interface IStreamProcessorLifecycleHooks
+{
+    /// <summary>
+    /// Register a shutdown hook.
+    /// It will prevent the processor from shutting down until the hook is completed.
+    /// </summary>
+    /// <returns>The registered <see cref="IShutdownHook"/>.</returns>
+    IShutdownHook RegisterShutdownHook();
+
+    /// <summary>
+    /// Shutdown all the hooks gracefully.
+    /// </summary>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    /// <returns>A <see cref="Task"/> that is resolved when all <see cref="IShutdownHook"/> are completed.</returns>
+    Task ShutdownGracefully(CancellationToken cancellationToken);
+}
+
+/// <summary>
 /// Represents an implementation of <see cref="IApplicationLifecycleHooks"/>.
 /// </summary>
 [Singleton]
+public class ApplicationLifecycleHooks: LifecycleHooks, IApplicationLifecycleHooks
+{
+}
+
+/// <summary>
+/// Represents an implementation of <see cref="IApplicationLifecycleHooks"/>.
+/// </summary>
+[Singleton]
+public class StreamProcessorLifecycleHooks: LifecycleHooks, IStreamProcessorLifecycleHooks
+{
+}
+
 // ReSharper disable once ClassNeverInstantiated.Global
-public class ApplicationLifecycleHooks : IApplicationLifecycleHooks
+public abstract class LifecycleHooks
 {
     int _i = 0;
 

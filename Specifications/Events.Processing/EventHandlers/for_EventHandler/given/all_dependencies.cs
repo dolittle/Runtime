@@ -138,7 +138,7 @@ public class all_dependencies
             Mock.Of<IEventFetchers>(),
             EventHandlerInfo,
             tenantId,
-            new ApplicationLifecycleHooks()
+            new StreamProcessorLifecycleHooks()
         ));
 
         create_processor_props = (

@@ -49,7 +49,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly ScopedStreamProcessorProcessedEvent _onProcessed;
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
     readonly IEventFetchers _eventFetchers;
-    readonly IApplicationLifecycleHooks _lifecycleHooks;
+    readonly IStreamProcessorLifecycleHooks _lifecycleHooks;
     readonly List<IDisposable> _cleanup = new();
 
     readonly bool _partitioned;
@@ -88,7 +88,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         IEventFetchers eventFetchers,
         EventHandlerInfo eventHandlerInfo,
         TenantId tenantId,
-        IApplicationLifecycleHooks lifecycleHooks)
+        IStreamProcessorLifecycleHooks lifecycleHooks)
     {
         Identifier = streamProcessorId;
         Logger = logger;
