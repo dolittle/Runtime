@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.Events.Store;
 /// </summary>
 public interface IFetchCommittedEvents
 {
-    // TODO: Maybe move this?
     /// <summary>
     /// Fetches the next <see cref="EventLogSequenceNumber"/> to use to commit an event.
     /// </summary>

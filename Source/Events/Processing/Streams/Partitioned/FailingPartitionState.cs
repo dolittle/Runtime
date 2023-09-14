@@ -52,4 +52,21 @@ public record FailingPartitionState(ProcessingPosition Position, DateTimeOffset 
         timeToRetry = TimeSpan.Zero;
         return true;
     }
+
+    public FailingPartitionState SkipEventsBefore(EventLogSequenceNumber eventLogSequence)
+    {
+        if (Position.EventLogPosition >= eventLogSequence)
+        {
+            // Already at or after the given position
+            return this;
+        }
+
+        // Skip events before the given position
+        return this with
+        {
+            Position = Position with { EventLogPosition = eventLogSequence },
+            ProcessingAttempts = 0,
+            Reason = "Skipped older events in the partition",
+        };
+    }
 }

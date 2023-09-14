@@ -58,4 +58,10 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Error, "Failed to load processing position for {StreamProcessorId}")]
     internal static partial void FailedToLoadProcessingPosition(this ILogger logger, Exception ex, StreamProcessorId streamProcessorId);
     
+    [LoggerMessage(0, LogLevel.Information, "Deferring start of stream processor {StreamProcessorId} until {Timestamp}")]
+    internal static partial void DeferringStartOfStreamProcessor(this ILogger logger, StreamProcessorId streamProcessorId, DateTimeOffset timestamp);
+    
+    [LoggerMessage(0, LogLevel.Information, "Completed deferred start of stream processor {StreamProcessorId} after {Duration}")]
+    internal static partial void CompletedDeferredStartOfStreamProcessor(this ILogger logger, StreamProcessorId streamProcessorId, TimeSpan duration);
+    
 }

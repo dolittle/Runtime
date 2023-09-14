@@ -11,14 +11,7 @@ namespace Events.Processing.Tests.Partitioned.with_failing_state;
 public class when_failing_again : state_with_failing_partititons
 {
     const string reason = "Something went wrong";
-    readonly StreamProcessorState after_state;
-
-
-    public when_failing_again()
-    {
-        after_state = before_state.WithResult(new FailedProcessing(reason, true, retry_timeout), retry_event, now);
-    }
-
+    readonly StreamProcessorState after_state = before_state.WithResult(new FailedProcessing(reason, true, retry_timeout), retry_event, now);
 
     [Fact]
     public void ShouldNotIncrementStreamPositionOnFailedRetry()

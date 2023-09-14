@@ -164,12 +164,27 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     async Task Init(IContext context)
     {
+        // Don't start before the startFrom timestamp, if present
+        var initTimestamp = DateTimeOffset.UtcNow;
+        if (_startFrom.SpecificTimestamp != null && _startFrom.SpecificTimestamp > initTimestamp)
+        {
+            Logger.DeferringStartOfStreamProcessor(Identifier, _startFrom.SpecificTimestamp.Value);
+            var after = WaitForIt(_startFrom.SpecificTimestamp.Value);
+            context.ReenterAfter(after, _ =>
+            {
+                Logger.CompletedDeferredStartOfStreamProcessor(Identifier, DateTimeOffset.UtcNow - initTimestamp);
+                return Init(context);
+            });
+            return;
+        }
+
         var processingPosition = await LoadProcessingPosition(context);
         if (!processingPosition.Success)
         {
             Logger.FailedToLoadProcessingPosition(processingPosition.Exception, Identifier);
             throw processingPosition.Exception;
         }
+
 
         var initialState = processingPosition.Result;
         LogInitialState(initialState);
@@ -181,6 +196,22 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var events = StartSubscription(from, shutdownToken);
 
         context.ReenterAfter(Task.CompletedTask, _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
+    }
+
+    async Task WaitForIt(DateTimeOffset until)
+    {
+        while (until > DateTimeOffset.UtcNow)
+        {
+            var delay = until - DateTimeOffset.UtcNow;
+            if (delay.TotalMilliseconds > int.MaxValue)
+            {
+                await Task.Delay(int.MaxValue);
+            }
+            else
+            {
+                await Task.Delay(delay);
+            }
+        }
     }
 
     void LogInitialState(IStreamProcessorState initialState)
@@ -333,8 +364,30 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         {
             return Try<IStreamProcessorState>.Succeeded(await GetInitialProcessorState(context.CancellationToken));
         }
+        
+        var positionWithEventLog = await position.ReduceAsync(WithEventLogPosition);
+        
+        
+        if (_startFrom.SpecificTimestamp is not null)
+        {
+            // Double check that we are at or after the startFrom timestamp.
+            // If the startFrom parameter was changed from before, we might need to skip the in-between events.
+            var minimumStartPosition = await _positionFetcher.GetInitialProcessorSequence(Identifier.ScopeId, _startFrom, context.CancellationToken);
+            if (minimumStartPosition > EventLogSequenceNumber.Initial)
+            {
+                return positionWithEventLog.Select<IStreamProcessorState>(pos =>
+                {
+                    if (pos.EarliestProcessingPosition.EventLogPosition > minimumStartPosition)
+                    {
+                        // Already later than the minimum start position, no need to change anything
+                        return pos;
+                    }
+                    return pos.SkipEventsBefore(minimumStartPosition);
+                });
+            }
+        }
 
-        return await position.ReduceAsync(WithEventLogPosition);
+        return positionWithEventLog;
 
         Task<Try<IStreamProcessorState>> WithEventLogPosition(IStreamProcessorState state)
         {
@@ -347,7 +400,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     {
         var eventLogSequenceNumber = await _positionFetcher.GetInitialProcessorSequence(Identifier.ScopeId, _startFrom, cancellationToken);
         var processingPosition = new ProcessingPosition(StreamPosition.Start, eventLogSequenceNumber);
-        
+
         return _partitioned
             ? new Streams.Partitioned.StreamProcessorState(processingPosition, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty,
                 DateTimeOffset.Now)
