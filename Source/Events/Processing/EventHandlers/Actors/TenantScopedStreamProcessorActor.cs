@@ -50,12 +50,14 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     readonly ScopedStreamProcessorFailedToProcessEvent _onFailedToProcess;
     readonly IEventFetchers _eventFetchers;
     readonly IStreamProcessorLifecycleHooks _lifecycleHooks;
+    readonly IFetchStartPosition _positionFetcher;
     readonly List<IDisposable> _cleanup = new();
 
     readonly bool _partitioned;
     readonly int _concurrency;
 
     static readonly TimeSpan _runtimeShutdownTimeout = TimeSpan.FromSeconds(30);
+    readonly StartFrom _startFrom;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantScopedStreamProcessorActor"/> class.
@@ -74,6 +76,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
     /// <param name="eventFetchers"></param>
     /// <param name="onFailedToProcess"></param>
     /// <param name="lifecycleHooks"></param>
+    /// <param name="positionFetcher"></param>
     public TenantScopedStreamProcessorActor(
         StreamProcessorId streamProcessorId,
         TypeFilterWithEventSourcePartitionDefinition filterDefinition,
@@ -88,7 +91,8 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         IEventFetchers eventFetchers,
         EventHandlerInfo eventHandlerInfo,
         TenantId tenantId,
-        IStreamProcessorLifecycleHooks lifecycleHooks)
+        IStreamProcessorLifecycleHooks lifecycleHooks,
+        IFetchStartPosition positionFetcher)
     {
         Identifier = streamProcessorId;
         Logger = logger;
@@ -96,6 +100,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         _onFailedToProcess = onFailedToProcess;
         _tenantId = tenantId;
         _lifecycleHooks = lifecycleHooks;
+        _positionFetcher = positionFetcher;
         _eventFetchers = eventFetchers;
         _eventLogPositionEnricher = eventLogPositionEnricher;
         _eventSubscriber = eventSubscriber;
@@ -105,6 +110,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         _executionContext = executionContext;
         _partitioned = filterDefinition.Partitioned;
         _concurrency = eventHandlerInfo.Concurrency;
+        _startFrom = eventHandlerInfo.StartFrom;
     }
 
     public static CreateTenantScopedStreamProcessorProps CreateFactory(ICreateProps createProps)
@@ -169,11 +175,11 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         LogInitialState(initialState);
 
         var from = initialState.Position;
-        
+
         var (shutdownToken, deadlineToken) = GetCancellationTokens(context);
 
         var events = StartSubscription(from, shutdownToken);
-        
+
         context.ReenterAfter(Task.CompletedTask, _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
     }
 
@@ -325,7 +331,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         var position = await _streamProcessorStates.TryGetFor(Identifier, context.CancellationToken);
         if (position is { Success: false, Exception: StreamProcessorStateDoesNotExist })
         {
-            return Try<IStreamProcessorState>.Succeeded(GetInitialProcessorState());
+            return Try<IStreamProcessorState>.Succeeded(await GetInitialProcessorState(context.CancellationToken));
         }
 
         return await position.ReduceAsync(WithEventLogPosition);
@@ -337,10 +343,16 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         }
     }
 
-    IStreamProcessorState GetInitialProcessorState() =>
-        _partitioned
-            ? new Streams.Partitioned.StreamProcessorState(ProcessingPosition.Initial, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, DateTimeOffset.Now)
-            : new StreamProcessorState(ProcessingPosition.Initial, DateTimeOffset.UtcNow);
+    async ValueTask<IStreamProcessorState> GetInitialProcessorState(CancellationToken cancellationToken)
+    {
+        var eventLogSequenceNumber = await _positionFetcher.GetInitialProcessorSequence(Identifier.ScopeId, _startFrom, cancellationToken);
+        var processingPosition = new ProcessingPosition(StreamPosition.Start, eventLogSequenceNumber);
+        
+        return _partitioned
+            ? new Streams.Partitioned.StreamProcessorState(processingPosition, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty,
+                DateTimeOffset.Now)
+            : new StreamProcessorState(processingPosition, DateTimeOffset.UtcNow);
+    }
 
     /// <summary>
     /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="TenantScopedStreamProcessorActor"/>.
@@ -358,6 +370,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         {
             disposable.Dispose();
         }
+
         _cleanup.Clear();
     }
 }

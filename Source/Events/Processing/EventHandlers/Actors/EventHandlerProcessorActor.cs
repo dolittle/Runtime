@@ -71,6 +71,7 @@ public class EventHandlerProcessorActor : IDisposable, IActor
     /// <param name="tenants"></param>
     /// <param name="getStreamProcessorStates"></param>
     /// <param name="eventHandlerInfo"></param>
+    /// <param name="startFrom">Where to start from if the processor has no state</param>
     /// <param name="stoppingToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
     public EventHandlerProcessorActor(
         StreamProcessorId streamProcessorId,
@@ -110,8 +111,10 @@ public class EventHandlerProcessorActor : IDisposable, IActor
     }
 
     public static CreateStreamProcessorActorProps CreateFactory(ICreateProps provider)
-        => (streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext, eventHandlerInfo, cancellationTokenSource) =>
-            CreatePropsFor(provider, streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext, eventHandlerInfo,
+        => (streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext, eventHandlerInfo,
+                cancellationTokenSource) =>
+            CreatePropsFor(provider, streamProcessorId, streamDefinition, createEventProcessorFor, processedEvent, failedToProcessEvent, executionContext,
+                eventHandlerInfo,
                 cancellationTokenSource);
 
     static Props CreatePropsFor(ICreateProps provider,
@@ -124,7 +127,8 @@ public class EventHandlerProcessorActor : IDisposable, IActor
         EventHandlerInfo eventHandlerInfo,
         CancellationTokenSource cancellationTokenSource)
         => provider.PropsFor<EventHandlerProcessorActor>(
-            streamProcessorId, streamDefinition, createEventProcessorFor, executionContext, processedEvent, failedToProcessEvent, eventHandlerInfo, cancellationTokenSource);
+            streamProcessorId, streamDefinition, createEventProcessorFor, executionContext,
+            processedEvent, failedToProcessEvent, eventHandlerInfo, cancellationTokenSource);
 
     public async Task ReceiveAsync(IContext context)
     {
@@ -220,7 +224,7 @@ public class EventHandlerProcessorActor : IDisposable, IActor
             {
                 _stopEverything.Cancel();
             }
-            
+
             _streamProcessors.Remove(stoppedChild.Key);
         }
 
@@ -245,6 +249,7 @@ public class EventHandlerProcessorActor : IDisposable, IActor
         {
             await Task.Delay(100);
         }
+
         if (!context.System.Cluster().MemberList.Started.IsCompletedSuccessfully)
         {
             await context.System.Cluster().MemberList.Started;

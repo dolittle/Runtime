@@ -18,7 +18,8 @@ public class EventHandlersProtocol : IEventHandlersProtocol
 {
     /// <inheritdoc/>
     public EventHandlerRegistrationArguments ConvertConnectArguments(EventHandlerRegistrationRequest arguments)
-        => arguments.HasAlias switch
+    {
+        return arguments.HasAlias switch
         {
             true => new EventHandlerRegistrationArguments(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
@@ -27,6 +28,7 @@ public class EventHandlersProtocol : IEventHandlersProtocol
                 arguments.Partitioned,
                 arguments.ScopeId.ToGuid(),
                 arguments.Alias,
+                arguments.StartFrom.FromProtobuf(),
                 arguments.Concurrency),
             false => new EventHandlerRegistrationArguments(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
@@ -34,8 +36,10 @@ public class EventHandlersProtocol : IEventHandlersProtocol
                 arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
                 arguments.Partitioned,
                 arguments.ScopeId.ToGuid(),
+                arguments.StartFrom.FromProtobuf(),
                 arguments.Concurrency),
         };
+    }
 
     /// <inheritdoc/>
     public EventHandlerRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)

@@ -37,6 +37,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using MongoStreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 using EventHorizonConsumerProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.EventProcessor;
+using StartFrom = Dolittle.Runtime.Events.Processing.EventHandlers.StartFrom;
 using StreamEvent = Dolittle.Runtime.Events.Store.Streams.StreamEvent;
 
 namespace Integration.Tests.Events.Processing.EventHandlers.given;
@@ -217,7 +218,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         {
             var (partitioned, max_event_types_to_filter, scope, fast, implicitFilter) = _;
             var registration_arguments = new EventHandlerRegistrationArguments(
-                Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope, concurrency);
+                Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope, startFrom: StartFrom.Earliest, concurrency);
             return event_handler_factory.Create(registration_arguments, dispatcher.Object, CancellationToken.None);
         }).ToArray();
     }
