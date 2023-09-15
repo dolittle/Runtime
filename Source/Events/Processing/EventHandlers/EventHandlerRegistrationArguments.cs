@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
@@ -21,9 +22,11 @@ public record EventHandlerRegistrationArguments
     /// <param name="eventTypes">The Event types that the Event Handler handles.</param>
     /// <param name="partitioned">Whether the Event Handler is partitioned or unpartitioned.</param>
     /// <param name="scope">The Scope the Event Handler will be handling events in.</param>
+    /// <param name="startFrom">The position to start from if the event handler does not have state</param>
+    /// <param name="stopAt">(Optional) If set, the event handler does not process newer events than this</param>
     /// <param name="concurrency">How many concurrent calls the Event Handler can process simultaneously</param>
     public EventHandlerRegistrationArguments(ExecutionContext executionContext, EventProcessorId eventHandler, IEnumerable<ArtifactId> eventTypes,
-        bool partitioned, ScopeId scope, int concurrency)
+        bool partitioned, ScopeId scope, StartFrom startFrom, DateTimeOffset? stopAt, int concurrency)
     {
         ExecutionContext = executionContext;
         EventHandler = eventHandler;
@@ -32,6 +35,8 @@ public record EventHandlerRegistrationArguments
         Scope = scope;
         Alias = EventHandlerAlias.NotSet;
         HasAlias = false;
+        StartFrom = startFrom;
+        StopAt = stopAt;
         Concurrency = concurrency > 0 ? concurrency : 1;
     }
 
@@ -44,9 +49,11 @@ public record EventHandlerRegistrationArguments
     /// <param name="partitioned">Whether the Event Handler is partitioned or unpartitioned.</param>
     /// <param name="scope">The Scope the Event Handler will be handling events in.</param>
     /// <param name="alias">The alias of the Event Handler.</param>
+    /// <param name="startFrom">The position to start from if the event handler does not have state</param>
+    /// <param name="stopAt">(Optional) If set, the event handler does not process newer events than this</param>
     /// <param name="concurrency">How many concurrent calls the Event Handler can process simultaneously</param>
     public EventHandlerRegistrationArguments(ExecutionContext executionContext, EventProcessorId eventHandler, IEnumerable<ArtifactId> eventTypes,
-        bool partitioned, ScopeId scope, EventHandlerAlias alias, int concurrency = 1)
+        bool partitioned, ScopeId scope, EventHandlerAlias alias, StartFrom startFrom, DateTimeOffset? stopAt, int concurrency = 1)
     {
         ExecutionContext = executionContext;
         EventHandler = eventHandler;
@@ -55,6 +62,8 @@ public record EventHandlerRegistrationArguments
         Scope = scope;
         Alias = alias;
         Concurrency = concurrency > 0 ? concurrency : 1;
+        StartFrom = startFrom;
+        StopAt = stopAt;
         HasAlias = true;
     }
 
@@ -92,6 +101,16 @@ public record EventHandlerRegistrationArguments
     /// Gets the alias of the Event Handler if set, or <see cref="EventHandlerAlias.NotSet"/> if not passed from the Client.
     /// </summary>
     public EventHandlerAlias Alias { get; }
+
+    /// <summary>
+    /// Where to start processing events from, if the event handler does not have state
+    /// </summary>
+    public StartFrom StartFrom { get; }
+    
+    /// <summary>
+    /// If the event handler should stop processing events produced after a specific time
+    /// </summary>
+    public DateTimeOffset? StopAt { get; }
 
     /// <summary>
     /// Gets a value indicating whether or not the Client passed along an alias for the Event Handler.

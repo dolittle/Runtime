@@ -207,6 +207,39 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         };
     }
 
+    public StreamProcessorState SkipEventsBefore(EventLogSequenceNumber eventLogSequence)
+    {
+        if (eventLogSequence > Position.EventLogPosition)
+        {
+            // Later than any failing events, so we can just skip to the new position with no failing partitions
+            return new StreamProcessorState(Position with { EventLogPosition = eventLogSequence }, ImmutableDictionary<PartitionId, FailingPartitionState>.Empty, LastSuccessfullyProcessed);
+        }
+        if(eventLogSequence == Position.EventLogPosition) // Same position, just clear out failing partitions if applicable
+        {
+            if (FailingPartitions.Any())
+            {
+                return this with { FailingPartitions = ImmutableDictionary<PartitionId, FailingPartitionState>.Empty };
+            }
+            
+            // No failing partitions and the new position is the same as the current position, so we can just return the current state
+            return this;
+        }
+        
+        
+        if (!FailingPartitions.Any() || eventLogSequence <= EarliestProcessingPosition.EventLogPosition)
+        {
+            // No failing partitions before the new position, keep as is.
+            return this;
+        }
+
+        return this with
+        {
+            FailingPartitions = this.FailingPartitions.ToImmutableDictionary(
+                kv => kv.Key,
+                kv => kv.Value.SkipEventsBefore(eventLogSequence))
+        };
+    }
+
     static StreamProcessorState AddFailingPartitionFor(
         StreamProcessorState oldState,
         ProcessingPosition failedPosition,

@@ -1,52 +1,28 @@
-﻿// Copyright (c) Dolittle. All rights reserved.
+// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Streams;
 using FluentAssertions;
 
-namespace Events.Processing.Tests.NonPartitioned;
+namespace Events.Processing.Tests.Partitioned;
 
-public class StreamProcessorStateTests
+public class when_skipping_events: given.non_failing_state
 {
-    private const string Partition = "partition";
-    readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
-
-    static readonly StreamEvent Evt = new(
-        committed_events.single(EventLogSequenceNumber.Initial),
-        StreamPosition.Start,
-        StreamId.EventLog,
-        Partition,
-        true);
-
-    [Fact]
-    public void ShouldIncrementStreamPositionOnSuccessFulProcessing()
-    {
-        var before = StreamProcessorState.New;
-        var afterState = before.WithSuccessfullyProcessed(Evt, Now);
-
-        afterState.Should().BeEquivalentTo(new StreamProcessorState(Evt.NextProcessingPosition, Now));
-    }
-
     
     [Theory]
-    [InlineData(0, 0)]
     [InlineData(1, 1)]
     [InlineData(10, 10)]
     [InlineData(100, 100)]
+    [InlineData(0, 0)]
     [InlineData(-1, 0)]
     [InlineData(-10, 0)]
     public void should_skip_correct_number_of_events(long relativePosition, ulong expectedSkipped)
     {
-        var before_state = StreamProcessorState.New.WithSuccessfullyProcessed(Evt, Now);
-
         var beforePosition = (long)before_state.Position.EventLogPosition.Value;
         
         var targetPosition = beforePosition + relativePosition;
         if(targetPosition < 0) targetPosition = 0;
-        EventLogSequenceNumber targetEventLogSequenceNumber = new EventLogSequenceNumber((ulong)targetPosition);
+        var targetEventLogSequenceNumber = new EventLogSequenceNumber((ulong)targetPosition);
 
         var after = before_state.SkipEventsBefore(targetEventLogSequenceNumber);
         
@@ -58,7 +34,7 @@ public class StreamProcessorStateTests
         after.Position.StreamPosition.Should().Be(before_state.Position.StreamPosition); // No change
         after.Position.EventLogPosition.Should().Be(before_state.Position.EventLogPosition + expectedSkipped);
 
-        if (expectedSkipped == 0)
+        if (expectedSkipped == 0) // No change, should be same instance
         {
             after.Should().BeSameAs(before_state);
         }

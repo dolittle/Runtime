@@ -9,7 +9,7 @@ static class event_content_serializer
 {
     public static readonly JsonWriterSettings json_settings = new()
     {
-        OutputMode = JsonOutputMode.Strict,
+        OutputMode = JsonOutputMode.CanonicalExtendedJson,
         Indent = false,
     }; 
 }

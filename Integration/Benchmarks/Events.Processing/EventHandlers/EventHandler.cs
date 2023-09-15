@@ -21,6 +21,7 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
+using StartFrom = Dolittle.Runtime.Events.Processing.EventHandlers.StartFrom;
 
 namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 
@@ -86,7 +87,7 @@ public class EventHandler : JobBase
 
         var eventHandlers = new List<IEventHandler>();
         eventHandlers.AddRange(Enumerable.Range(0, EventHandlers).Select(_ => _eventHandlerFactory.Create(
-            new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default, Concurrency),
+            new EventHandlerRegistrationArguments(Runtime.CreateExecutionContextFor("d9fd643f-ce74-4ae5-b706-b76859fd8827"), Guid.NewGuid(), _eventTypes, Partitioned, ScopeId.Default, startFrom: StartFrom.Default, null, Concurrency),
             _dispatcher.Object,
             CancellationToken.None)));
         _eventHandlersToRun = eventHandlers;

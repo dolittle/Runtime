@@ -170,8 +170,17 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         };
     }
 
-    public StreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>
-        new StreamProcessorState(processedEvent.NextProcessingPosition, timestamp);
+    public StreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>  new(processedEvent.NextProcessingPosition, timestamp);
+
+    public StreamProcessorState SkipEventsBefore(EventLogSequenceNumber position)
+    {
+        if (position <= EarliestProcessingPosition.EventLogPosition)
+        {
+            return this; // No change
+        }
+
+        return new StreamProcessorState(Position with { EventLogPosition = position }, LastSuccessfullyProcessed);
+    }
 
     bool RetryTimeIsInThePast(DateTimeOffset retryTime)
         => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;

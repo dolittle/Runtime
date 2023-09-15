@@ -7,8 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Store;
 
@@ -17,7 +15,6 @@ namespace Dolittle.Runtime.Events.Store;
 /// </summary>
 public interface IFetchCommittedEvents
 {
-    // TODO: Maybe move this?
     /// <summary>
     /// Fetches the next <see cref="EventLogSequenceNumber"/> to use to commit an event.
     /// </summary>
@@ -26,6 +23,16 @@ public interface IFetchCommittedEvents
     /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the next <see cref="EventLogSequenceNumber"/> to use to commit an event.</returns>
     Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Fetches the next <see cref="EventLogSequenceNumber"/> after the given timestamp.
+    /// Used to allow stream processors to start from a given timestamp.
+    /// </summary>
+    /// <param name="scope"></param>
+    /// <param name="timestamp"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<EventLogSequenceNumber> FetchNextSequenceNumberAfter(ScopeId scope, DateTimeOffset timestamp, CancellationToken cancellationToken);
+    
     /// <summary>
     /// TODO: This should be made into a streaming call.
     /// Fetches EventLog <see cref="CommittedEvent"/>s from a given offset

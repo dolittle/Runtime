@@ -79,20 +79,42 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             _logger.LogError("No last event found, but event count was {EventCount}", eventCount);
             return 0ul;
         }
-        
+
         var nextSequenceNumber = lastEvent.EventLogSequenceNumber + 1;
 
-        if(nextSequenceNumber != eventCount)
+        if (nextSequenceNumber != eventCount)
         {
-            _logger.LogError("Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber, eventCount);
+            _logger.LogError("Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber,
+                eventCount);
         }
-        
-        return nextSequenceNumber;
 
+        return nextSequenceNumber;
+    }
+
+    public async Task<EventLogSequenceNumber> FetchNextSequenceNumberAfter(ScopeId scope, DateTimeOffset timestamp, CancellationToken cancellationToken)
+    {
+        var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+
+        // Search from the end of the event log
+        // Find first event that happened before the given timestamp
+        var lastEvent = await eventLog
+            .Find(_eventFilter.Lt(evt => evt.Metadata.Occurred, timestamp.UtcDateTime))
+            .Sort(Builders<MongoDB.Events.Event>.Sort.Descending(_ => _.EventLogSequenceNumber))
+            .Limit(1)
+            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        if (lastEvent is null)
+        {
+            return EventLogSequenceNumber.Initial;
+        }
+
+        // The next event will be after the timestamp cutoff
+        return lastEvent.EventLogSequenceNumber + 1;
     }
 
     /// <inheritdoc/>
-    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, EventLogSequenceNumber to, int limit, ISet<Guid> artifactSet, CancellationToken cancellationToken)
+    public async Task<CommittedEvents> FetchCommittedEvents(ScopeId scope, EventLogSequenceNumber from, EventLogSequenceNumber to, int limit,
+        ISet<Guid> artifactSet, CancellationToken cancellationToken)
     {
         try
         {
@@ -102,6 +124,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
             {
                 filter &= _eventFilter.In(_ => _.Metadata.TypeId, artifactSet);
             }
+
             var raw = await eventLog
                 .Find(filter)
                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
@@ -109,7 +132,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var events = raw.Select(evt => _eventConverter.ToRuntimeCommittedEvent(evt)).ToList();
-            
+
             return new CommittedEvents(events);
         }
         catch (MongoWaitQueueFullException ex)

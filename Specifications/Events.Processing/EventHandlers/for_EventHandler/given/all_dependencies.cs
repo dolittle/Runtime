@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 using Dolittle.Runtime.Actors.Hosting;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Platform;
@@ -48,6 +49,7 @@ public class all_dependencies
     protected static Mock<IStreamDefinitions> stream_definitions;
     protected static Mock<ReverseCallDispatcherType> reverse_call_dispatcher;
     protected static Mock<IWriteEventsToStreams> stream_writer;
+    protected static Mock<IFetchStartPosition> start_position_fetcher;
     protected static EventHandlerRegistrationArguments arguments;
     protected static Mock<IMetricsCollector> metrics_collector;
     protected static ILoggerFactory logger_factory;
@@ -68,6 +70,7 @@ public class all_dependencies
     protected static CreateStreamProcessorActorProps create_processor_props;
     protected static CreateTenantScopedStreamProcessorProps create_scoped_processor_props;
     protected static in_memory_stream_processor_states stream_processor_states;
+    protected static EventLogSequenceNumber returned_start_position = EventLogSequenceNumber.Initial;
 
     protected static ITenants tenants =
         new Tenants(Options.Create(new TenantsConfiguration(new Dictionary<TenantId, TenantConfiguration>
@@ -99,6 +102,9 @@ public class all_dependencies
             span_id,
             claims,
             culture_info);
+        
+        start_position_fetcher = new Mock<IFetchStartPosition>();
+        start_position_fetcher.SetReturnsDefault(new ValueTask<EventLogSequenceNumber>(EventLogSequenceNumber.Initial));
 
         arguments = new EventHandlerRegistrationArguments(
             execution_context,
@@ -106,7 +112,9 @@ public class all_dependencies
             Array.Empty<ArtifactId>(),
             false,
             scope,
-            "alias");
+            startFrom: StartFrom.Earliest,
+            stopAt: null,
+            alias:"alias");
 
         factory_for_stream_writer = (tenant_id) => stream_writer.Object;
 
@@ -138,7 +146,8 @@ public class all_dependencies
             Mock.Of<IEventFetchers>(),
             EventHandlerInfo,
             tenantId,
-            new StreamProcessorLifecycleHooks()
+            new StreamProcessorLifecycleHooks(),
+            start_position_fetcher.Object
         ));
 
         create_processor_props = (

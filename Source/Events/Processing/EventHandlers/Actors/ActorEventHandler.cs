@@ -105,7 +105,9 @@ public class ActorEventHandler : IEventHandler
         _arguments.Alias,
         _arguments.EventTypes,
         _arguments.Partitioned,
-        _arguments.Concurrency);
+        _arguments.Concurrency,
+        _arguments.StartFrom,
+        _arguments.StopAt);
 
     public ScopeId Scope => _arguments.Scope.Value;
 

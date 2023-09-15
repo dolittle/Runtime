@@ -20,7 +20,7 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
     protected static ActorEventHandler event_handler;
     protected static Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> filter_processor;
     protected static Mock<IEventProcessor> event_processor;
-    
+
     Establish context = () =>
     {
         arguments = new EventHandlerRegistrationArguments(
@@ -29,7 +29,9 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
             Array.Empty<ArtifactId>(),
             false,
             scope,
-            "alias");
+            startFrom: StartFrom.Earliest,
+            stopAt: null,
+            alias: "alias");
 
         filter_processor = new Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
         event_processor = new Mock<IEventProcessor>();
@@ -48,6 +50,6 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
             tenants,
             create_processor_props,
             cancellation_token
-            );
+        );
     };
 }
