@@ -1,3 +1,16 @@
+# [9.1.0] - 2023-9-15 [PR: #752](https://github.com/dolittle/Runtime/pull/752)
+## Summary
+
+This release adds support for a more fine grained control over event handlers. It adds the ability to migrate away from older eventhandlers by setting an end timestamp, or use specific handlers for a particular point in time. 
+
+You can also make it so new eventhandlers only process events "from now on", by starting from the latest events.
+
+
+### Added
+- Support for defining when event handlers should initially start from (Either from the latest events, or from the beginning)
+- Support for configuring event handlers to just process a delineated set of events by time. Both start timestamp and end timestamps are supported
+
+
 # [9.0.2] - 2023-9-13 [PR: #751](https://github.com/dolittle/Runtime/pull/751)
 ## Summary
 Performance focused upgrade with the following improvements:
