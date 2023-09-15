@@ -20,6 +20,7 @@ using Dolittle.Runtime.Events.Store.Streams.Legacy;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using Proto;
+using CommittedEvent = Dolittle.Runtime.Events.Contracts.CommittedEvent;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using StreamProcessorState = Dolittle.Runtime.Events.Processing.Streams.StreamProcessorState;
 
@@ -58,6 +59,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
     static readonly TimeSpan _runtimeShutdownTimeout = TimeSpan.FromSeconds(30);
     readonly StartFrom _startFrom;
+    readonly DateTimeOffset? _stopAt;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TenantScopedStreamProcessorActor"/> class.
@@ -111,6 +113,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         _partitioned = filterDefinition.Partitioned;
         _concurrency = eventHandlerInfo.Concurrency;
         _startFrom = eventHandlerInfo.StartFrom;
+        _stopAt = eventHandlerInfo.StopAt;
     }
 
     public static CreateTenantScopedStreamProcessorProps CreateFactory(ICreateProps createProps)
@@ -169,7 +172,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         if (_startFrom.SpecificTimestamp != null && _startFrom.SpecificTimestamp > initTimestamp)
         {
             Logger.DeferringStartOfStreamProcessor(Identifier, _startFrom.SpecificTimestamp.Value);
-            var after = WaitForIt(_startFrom.SpecificTimestamp.Value);
+            var after = WaitForIt(_startFrom.SpecificTimestamp.Value, context.CancellationToken);
             context.ReenterAfter(after, _ =>
             {
                 Logger.CompletedDeferredStartOfStreamProcessor(Identifier, DateTimeOffset.UtcNow - initTimestamp);
@@ -193,23 +196,23 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
 
         var (shutdownToken, deadlineToken) = GetCancellationTokens(context);
 
-        var events = StartSubscription(from, shutdownToken);
+        var events = _stopAt is not null ? SubscribeUntil(from, _stopAt.Value, shutdownToken) : StartSubscription(from, null, shutdownToken);
 
         context.ReenterAfter(Task.CompletedTask, _ => StartProcessing(initialState, events, context, shutdownToken, deadlineToken));
     }
 
-    async Task WaitForIt(DateTimeOffset until)
+    async Task WaitForIt(DateTimeOffset until, CancellationToken cancellationToken)
     {
         while (until > DateTimeOffset.UtcNow)
         {
             var delay = until - DateTimeOffset.UtcNow;
             if (delay.TotalMilliseconds > int.MaxValue)
             {
-                await Task.Delay(int.MaxValue);
+                await Task.Delay(int.MaxValue, cancellationToken);
             }
             else
             {
-                await Task.Delay(delay);
+                await Task.Delay(delay, cancellationToken);
             }
         }
     }
@@ -339,7 +342,14 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         }
     }
 
-    ChannelReader<StreamEvent> StartSubscription(ProcessingPosition from, CancellationToken token)
+    ChannelReader<StreamEvent> SubscribeUntil(ProcessingPosition from, DateTimeOffset to, CancellationToken token)
+    {
+        var unixTimeSeconds = to.ToUnixTimeSeconds();
+        return StartSubscription(from, evt => evt.Occurred.Seconds >= unixTimeSeconds, token);
+    }
+
+
+    ChannelReader<StreamEvent> StartSubscription(ProcessingPosition from, Predicate<CommittedEvent>? until, CancellationToken token)
     {
         return _eventSubscriber.Subscribe(
             Identifier.ScopeId,
@@ -347,6 +357,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
             from,
             _filterDefinition.Partitioned,
             $"sp:{Identifier.EventProcessorId}",
+            until,
             token);
     }
 
@@ -364,10 +375,10 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         {
             return Try<IStreamProcessorState>.Succeeded(await GetInitialProcessorState(context.CancellationToken));
         }
-        
+
         var positionWithEventLog = await position.ReduceAsync(WithEventLogPosition);
-        
-        
+
+
         if (_startFrom.SpecificTimestamp is not null)
         {
             // Double check that we are at or after the startFrom timestamp.
@@ -382,6 +393,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
                         // Already later than the minimum start position, no need to change anything
                         return pos;
                     }
+
                     return pos.SkipEventsBefore(minimumStartPosition);
                 });
             }

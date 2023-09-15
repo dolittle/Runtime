@@ -113,6 +113,7 @@ public class all_dependencies
             false,
             scope,
             startFrom: StartFrom.Earliest,
+            stopAt: null,
             alias:"alias");
 
         factory_for_stream_writer = (tenant_id) => stream_writer.Object;

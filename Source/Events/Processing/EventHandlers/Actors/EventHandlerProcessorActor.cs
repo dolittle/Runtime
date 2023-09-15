@@ -71,7 +71,6 @@ public class EventHandlerProcessorActor : IDisposable, IActor
     /// <param name="tenants"></param>
     /// <param name="getStreamProcessorStates"></param>
     /// <param name="eventHandlerInfo"></param>
-    /// <param name="startFrom">Where to start from if the processor has no state</param>
     /// <param name="stoppingToken">The cancellation token that is cancelled when the stream processor should stop processing.</param>
     public EventHandlerProcessorActor(
         StreamProcessorId streamProcessorId,

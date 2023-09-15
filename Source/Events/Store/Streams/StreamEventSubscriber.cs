@@ -22,58 +22,69 @@ public class StreamEventSubscriber : IStreamEventSubscriber
 
     public StreamEventSubscriber(IEventLogStream eventLogStream) => _eventLogStream = eventLogStream;
 
-    public ChannelReader<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken)
-    {
-        var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
-        ToStreamEvents(
-            _eventLogStream.SubscribePublic(position.EventLogPosition, cancellationToken),
-            channel.Writer,
-            position,
-            evt => evt.Public,
-            false,
-            cancellationToken);
-        return channel.Reader;
-    }
+    // public ChannelReader<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken)
+    // {
+    //     var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
+    //     ToStreamEvents(
+    //         _eventLogStream.SubscribePublic(position.EventLogPosition, cancellationToken),
+    //         channel.Writer,
+    //         position,
+    //         evt => evt.Public,
+    //         false,
+    //         cancellationToken);
+    //     return channel.Reader;
+    // }
 
-    public ChannelReader<StreamEvent> Subscribe(
-        ScopeId scopeId,
+    public ChannelReader<StreamEvent> Subscribe(ScopeId scopeId,
         IReadOnlyCollection<ArtifactId> artifactIds,
-        ProcessingPosition position,
+        ProcessingPosition from,
         bool partitioned,
         string subscriptionName,
+        Predicate<Contracts.CommittedEvent>? until,
         CancellationToken cancellationToken)
     {
         var eventTypes = artifactIds.Select(_ => _.Value.ToProtobuf()).ToHashSet();
 
         var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
+        var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
         ToStreamEvents(
-            _eventLogStream.Subscribe(scopeId, position.EventLogPosition, artifactIds, subscriptionName, cancellationToken),
+            _eventLogStream.Subscribe(scopeId, from.EventLogPosition, artifactIds, subscriptionName, linkedTokenSource.Token),
             channel.Writer,
-            position,
+            from,
             evt => eventTypes.Contains(evt.EventType.Id),
             partitioned,
-            cancellationToken);
+            until,
+            linkedTokenSource);
         return channel.Reader;
     }
 
     static void ToStreamEvents(ChannelReader<EventLogBatch> reader, ChannelWriter<StreamEvent> writer, ProcessingPosition startingPosition,
         Func<Contracts.CommittedEvent, bool> include, bool partitioned,
-        CancellationToken cancellationToken) =>
+        Predicate<Contracts.CommittedEvent>? until,
+        CancellationTokenSource linkedTokenSource) =>
         _ = Task.Run(async () =>
         {
             var current = startingPosition.StreamPosition;
-
+            using var cts = linkedTokenSource;
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                while (!linkedTokenSource.Token.IsCancellationRequested)
                 {
-                    var eventLogBatch = await reader.ReadAsync(cancellationToken);
+                    var eventLogBatch = await reader.ReadAsync(linkedTokenSource.Token);
 
                     foreach (var evt in eventLogBatch.MatchedEvents)
                     {
+                        if (until != null && !cts.IsCancellationRequested && until(evt))
+                        {
+                            cts.Cancel();
+                            return;
+                        }
+                        
                         if (include(evt))
                         {
                             var streamEvent = new StreamEvent(evt.FromProtobuf(), current, StreamId.EventLog, evt.EventSourceId, partitioned);
+
                             // ReSharper disable once MethodSupportsCancellation
                             await writer.WriteAsync(streamEvent);
                             current = current.Increment();

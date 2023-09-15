@@ -19,6 +19,7 @@ using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Rudimentary;
+using FluentAssertions;
 using Google.Protobuf.WellKnownTypes;
 using Integration.Shared;
 using Machine.Specifications;
@@ -115,7 +116,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         using var cts = new CancellationTokenSource(100);
 
         var reader = stream_event_subscriber.Subscribe(event_handler.Info.Id.Scope, event_handler.Info.EventTypes.ToList(), ProcessingPosition.Initial,
-            event_handler.Info.Partitioned, $"get_partitioned_events_in_stream:{event_handler.Info.Id.EventHandler.Value}", cts.Token);
+            event_handler.Info.Partitioned, $"get_partitioned_events_in_stream:{event_handler.Info.Id.EventHandler.Value}", null, cts.Token);
 
         var events = new List<StreamEvent>();
 
@@ -218,7 +219,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         {
             var (partitioned, max_event_types_to_filter, scope, fast, implicitFilter) = _;
             var registration_arguments = new EventHandlerRegistrationArguments(
-                Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope, startFrom: StartFrom.Earliest, concurrency);
+                Runtime.CreateExecutionContextFor(tenant), Guid.NewGuid(), event_types.Take(max_event_types_to_filter), partitioned, scope, startFrom: StartFrom.Earliest, null, concurrency);
             return event_handler_factory.Create(registration_arguments, dispatcher.Object, CancellationToken.None);
         }).ToArray();
     }
@@ -404,11 +405,11 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
         var tryGetStreamProcessorState = get_stream_processor_state_for(id);
         tryGetStreamProcessorState.Success.ShouldBeTrue();
         var state = tryGetStreamProcessorState.Result;
-        state!.Partitioned.ShouldEqual(partitioned);
+        state!.Partitioned.Should().Be(partitioned);
 
         if (partitioned)
         {
-            state.Position.StreamPosition.Value.ShouldEqual((ulong)num_events_to_handle);
+            state.Position.StreamPosition.Value.Should().Be((ulong)num_events_to_handle);
             expect_partitioned_event_processor_stream_processor_state(state, failing_partitioned_state);
         }
         else

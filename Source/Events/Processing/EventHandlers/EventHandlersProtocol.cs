@@ -29,6 +29,7 @@ public class EventHandlersProtocol : IEventHandlersProtocol
                 arguments.ScopeId.ToGuid(),
                 arguments.Alias,
                 arguments.StartFrom.FromProtobuf(),
+                arguments.StopAt?.ToDateTimeOffset(),
                 arguments.Concurrency),
             false => new EventHandlerRegistrationArguments(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
@@ -37,6 +38,7 @@ public class EventHandlersProtocol : IEventHandlersProtocol
                 arguments.Partitioned,
                 arguments.ScopeId.ToGuid(),
                 arguments.StartFrom.FromProtobuf(),
+                arguments.StopAt?.ToDateTimeOffset(),
                 arguments.Concurrency),
         };
     }

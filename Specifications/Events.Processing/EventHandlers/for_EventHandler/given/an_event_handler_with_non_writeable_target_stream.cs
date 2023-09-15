@@ -30,6 +30,7 @@ public class an_event_handler_with_non_writeable_target_stream : all_dependencie
             false,
             scope,
             startFrom: StartFrom.Earliest,
+            stopAt: null,
             alias: "alias");
 
         filter_processor = new Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
