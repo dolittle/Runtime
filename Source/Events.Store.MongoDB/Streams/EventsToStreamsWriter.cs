@@ -193,6 +193,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             MongoDuplicateKeyException => true,
             MongoWriteException writeException => writeException.Message.Contains("duplicate key error"),
             MongoBulkWriteException bulkWriteException => bulkWriteException.Message.Contains("duplicate key error"),
+            MongoCommandException commandException => commandException.Message.Contains("WriteConflict"),
             _ => false,
         };
 }
