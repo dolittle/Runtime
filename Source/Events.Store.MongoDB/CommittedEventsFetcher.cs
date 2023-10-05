@@ -205,10 +205,10 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
                     new Artifact(
                         evt.Aggregate.TypeId,
                         evt.Aggregate.TypeGeneration),
-                    evt.Aggregate.Version,
-                    evt.EventLogSequenceNumber,
-                    evt.Metadata.Occurred,
-                    evt.Metadata.EventSource,
+                    aggregateRootVersion: evt.Aggregate.Version,
+                    eventLogSequenceNumber: evt.EventLogSequenceNumber,
+                    occurred:evt.Metadata.Occurred,
+                    eventSource:evt.Metadata.EventSource,
                     evt.ExecutionContext.ToExecutionContext(),
                     new Artifact(
                         evt.Metadata.TypeId,
