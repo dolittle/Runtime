@@ -75,7 +75,7 @@ public class EventProcessor : IEventProcessor
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to commit external event");
+            _logger.LogWarning(e, "Failed to commit external event, will retry processing later");
             _metrics.IncrementTotalEventHorizonEventWritesFailed();
             throw;
         }
