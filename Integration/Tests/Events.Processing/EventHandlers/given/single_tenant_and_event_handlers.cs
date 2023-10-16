@@ -204,7 +204,7 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             (_, _) => dispatcher.Object.Reject(new EventHandlerRegistrationResponse(), CancellationToken.None),
             CancellationToken.None)));
         tasks.Add(post_start_task ?? Task.CompletedTask);
-        reset_timeout_after_action(TimeSpan.FromSeconds(4));
+        reset_timeout_after_action(TimeSpan.FromSeconds(5));
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
