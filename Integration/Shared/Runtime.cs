@@ -49,26 +49,26 @@ public static class Runtime
             .AddEnvironmentVariables()
             .Build();
 
-        var configuration = new Dictionary<string, string>();
+        var configuration = new Dictionary<string, string?>();
         var (databases, tenants) = CreateRuntimeConfiguration(configuration, numberOfTenants);
 
         var runtimeHost = Host.CreateDefaultBuilder()
             .UseDolittleServices()
             .ConfigureOpenTelemetry(cfg)
-            .ConfigureHostConfiguration(_ =>
+            .ConfigureHostConfiguration(builder =>
             {
-                _.Sources.Clear();
-                _.AddInMemoryCollection(configuration);
+                builder.Sources.Clear();
+                builder.AddInMemoryCollection(configuration);
             })
-            .ConfigureAppConfiguration(_ =>
+            .ConfigureAppConfiguration(builder =>
             {
-                _.Sources.Clear();
-                _.AddInMemoryCollection(configuration);
+                builder.Sources.Clear();
+                builder.AddInMemoryCollection(configuration);
             })
-            .ConfigureServices(_ =>
+            .ConfigureServices(coll =>
             {
-                _.AddLogging(_ => _.ClearProviders());
-                _.AddOptions<EndpointsConfiguration>().Configure(builder =>
+                coll.AddLogging(builder => builder.ClearProviders());
+                coll.AddOptions<EndpointsConfiguration>().Configure(builder =>
                 {
                     builder.Management = new EndpointConfiguration { Port = 0 };
                     // builder.Private = new EndpointConfiguration { Port = 0 };
@@ -106,7 +106,7 @@ public static class Runtime
     public static Dolittle.Runtime.Execution.ExecutionContext CreateExecutionContextFor(TenantId tenant)
         => new(_microserviceId, tenant, Version.NotSet, _environment, Guid.NewGuid(), null, Claims.Empty, CultureInfo.InvariantCulture);
 
-    static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string> configuration,
+    static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string?> configuration,
         int numberOfTenants)
     {
         configuration["dolittle:runtime:eventstore:backwardscompatibility:version"] = "V7";

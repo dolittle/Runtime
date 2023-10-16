@@ -64,19 +64,20 @@ public class EventProcessor : IEventProcessor
         return Process(@event, cancellationToken);
     }
 
-    async Task<IProcessingResult> Process(CommittedEvent @event, CancellationToken cancellationToken)
+    async Task<IProcessingResult> Process(CommittedEvent @event, CancellationToken _)
     {
         _metrics.IncrementTotalEventHorizonEventsProcessed();
         Log.ProcessEvent(_logger, @event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
         try
         {
             await _externalEventsCommitter.Commit(new CommittedEvents(new []{@event}), _consentId, Scope).ConfigureAwait(false);
+            return SuccessfulProcessing.Instance;
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to commit external event");
+            _logger.LogWarning(e, "Failed to commit external event, will retry processing later");
             _metrics.IncrementTotalEventHorizonEventWritesFailed();
+            throw;
         }
-        return SuccessfulProcessing.Instance;
     }
 }

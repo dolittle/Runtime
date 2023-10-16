@@ -13,7 +13,6 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB;
 
