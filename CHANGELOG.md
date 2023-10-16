@@ -1,3 +1,14 @@
+# [9.1.1] - 2023-10-16 [PR: #754](https://github.com/dolittle/Runtime/pull/754)
+## Summary
+
+Fixes issue where an EventHorizon event could be skipped by race condition between tenants. 
+
+### Fixed
+
+- Removed incorrectly ignored exception in EventHorizon.
+- Classify write conflict as duplicate key.
+
+
 # [9.1.0] - 2023-9-15 [PR: #752](https://github.com/dolittle/Runtime/pull/752)
 ## Summary
 
