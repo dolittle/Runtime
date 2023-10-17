@@ -68,7 +68,7 @@ jobs:
       BENCHMARK_NAME: Integration.Benchmarks.${{ matrix.benchmark }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
       - name: Run Mongo container
@@ -182,7 +182,7 @@ jobs:
     if: needs.setup.outputs.should-publish == 'true'
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
       - name: Update VersionInfo
