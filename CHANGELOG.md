@@ -1,3 +1,13 @@
+# [9.1.2] - 2023-10-18 [PR: #755](https://github.com/dolittle/Runtime/pull/755)
+## Summary
+
+Bugfix release for the Management API (CLI). 
+
+### Fixed
+- Fixed bug in eventhandlers API caused by incorrect dependency passed to service
+- Fixed missing response when invoking reprocessing of specific eventhandlers.
+
+
 # [9.1.1] - 2023-10-16 [PR: #754](https://github.com/dolittle/Runtime/pull/754)
 ## Summary
 
