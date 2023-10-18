@@ -13,7 +13,6 @@ using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Processing.Management.StreamProcessors;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Events.Store.Streams.Legacy;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services.Hosting;
@@ -46,7 +45,7 @@ public class EventHandlersService : EventHandlersBase
         IEventHandlers eventHandlers,
         IExceptionToFailureConverter exceptionToFailureConverter,
         IConvertStreamProcessorStatuses streamProcessorStatusConverter,
-        ILogger logger, IGetEventLogSequenceFromStreamPosition streamPositionToEventLogSequenceService)
+        ILogger logger)
     {
         _eventHandlers = eventHandlers;
         _exceptionToFailureConverter = exceptionToFailureConverter;
