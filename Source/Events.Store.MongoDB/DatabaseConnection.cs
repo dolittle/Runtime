@@ -38,18 +38,35 @@ public class DatabaseConnection : IDatabaseConnection
     public DatabaseConnection(IOptions<EventStoreConfiguration> configuration, IConfigureBackwardsCompatibility backwardsCompatibility)
     {
         var config = configuration.Value;
-        var settings = new MongoClientSettings
-        {
-            Servers = config.Servers.Select(MongoServerAddress.Parse),
-            GuidRepresentation = GuidRepresentation.Standard,
-            MaxConnectionPoolSize = config.MaxConnectionPoolSize,
-            ClusterConfigurator = cb => cb.AddTelemetry()
-        };
-
-        MongoClient = new MongoClient(settings.Freeze());
+        MongoClient = new MongoClient(GetMongoClientSettings(config));
         Database = MongoClient.GetDatabase(config.Database);
         
         backwardsCompatibility.ConfigureSerializers();
+    }
+
+    static MongoClientSettings GetMongoClientSettings(EventStoreConfiguration config)
+    {
+        if(!string.IsNullOrWhiteSpace(config.ConnectionString))
+        {
+            // CS style settings
+            var settings = MongoClientSettings.FromConnectionString(config.ConnectionString);
+            settings.GuidRepresentation = GuidRepresentation.Standard;
+            settings.MaxConnectionPoolSize = config.MaxConnectionPoolSize;
+            settings.ClusterConfigurator = cb => cb.AddTelemetry();
+            return settings.Freeze();
+        }
+        else
+        {
+            // Legacy settings
+            var settings = new MongoClientSettings
+            {
+                Servers = config.Servers.Select(MongoServerAddress.Parse),
+                GuidRepresentation = GuidRepresentation.Standard,
+                MaxConnectionPoolSize = config.MaxConnectionPoolSize,
+                ClusterConfigurator = cb => cb.AddTelemetry()
+            };
+            return settings.Freeze();
+        }
     }
 
     /// <inheritdoc />
