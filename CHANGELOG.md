@@ -1,3 +1,14 @@
+# [9.2.0] - 2023-10-24 [PR: #756](https://github.com/dolittle/Runtime/pull/756)
+## Summary
+Changed MongoDB configuration to support srv connection strings. This allows the runtime to use any cloud hosted MongoDB services, such as Atlas.
+This is backwards compatible with old connection format, and does not require changing config for existing deployments.
+
+In addition to this, internal dependencies have been upgraded as well.
+
+### Added
+- "connectionString" configuration for MongoDB
+
+
 # [9.1.2] - 2023-10-18 [PR: #755](https://github.com/dolittle/Runtime/pull/755)
 ## Summary
 
