@@ -18,6 +18,11 @@ public class MongoDBConfiguration
     public string? Host { get; set; }
 
     /// <summary>
+    /// Gets or sets the connection string.
+    /// </summary>
+    public string? ConnectionString { get; set; }
+    
+    /// <summary>
     /// Gets or sets the database name.
     /// </summary>
     public string? Database { get; set; }

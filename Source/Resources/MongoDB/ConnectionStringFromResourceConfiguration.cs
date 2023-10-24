@@ -28,9 +28,18 @@ public class ConnectionStringFromResourceConfiguration : IKnowTheConnectionStrin
     public MongoUrl ConnectionString { get; }
 
     static MongoUrl BuildConnectionString(MongoDBConfiguration configuration)
-        => new MongoUrlBuilder(configuration.Host)
+    {
+        if (!string.IsNullOrWhiteSpace(configuration.ConnectionString))
+        {
+            return new MongoUrlBuilder(configuration.ConnectionString)
+            {
+                DatabaseName = configuration.Database
+            }.ToMongoUrl();
+        }
+        return new MongoUrlBuilder(configuration.Host)
         {
             UseTls = configuration.UseSSL,
             DatabaseName = configuration.Database
         }.ToMongoUrl();
+    }
 }

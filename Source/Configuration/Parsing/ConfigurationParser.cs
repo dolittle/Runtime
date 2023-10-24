@@ -26,15 +26,15 @@ public class ConfigurationParser : IParseConfigurationObjects
         error = default;
         try
         {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream);
             WriteSectionToStream(configuration, writer);
             writer.Flush();
 
             stream.Seek(0, SeekOrigin.Begin);
-
-            stream.Seek(0, SeekOrigin.Begin);
-            var reader = new JsonTextReader(new StreamReader(stream));
+            
+            
+            using var reader = new JsonTextReader(new StreamReader(stream));
             var serializer = JsonSerializer.Create();
             parsed = serializer.Deserialize<TOptions>(reader);
             return true;

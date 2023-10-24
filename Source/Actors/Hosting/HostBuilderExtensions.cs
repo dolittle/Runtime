@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,7 +28,11 @@ public static class HostBuilderExtensions
     /// <returns>The builder for continuation.</returns>
     public static IHostBuilder AddActorSystem(this IHostBuilder builder)
         => builder.ConfigureServices(_ => _
-            .AddSingleton(provider => new ActorSystem(ActorSystemConfig.Setup())
+            .AddSingleton(provider => new ActorSystem(new ActorSystemConfig
+                {
+                    ConfigureProps = props => props with { StartDeadline = TimeSpan.Zero },
+                    ConfigureSystemProps = (_, props) => props with { StartDeadline = TimeSpan.Zero },
+                })
                 .WithServiceProvider(provider)
                 .WithRemote(GrpcNetRemoteConfig
                     .BindToLocalhost()

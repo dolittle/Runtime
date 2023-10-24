@@ -17,6 +17,11 @@ public class ProjectionsConfiguration
     /// Gets or sets the MongoDB servers.
     /// </summary>
     public IEnumerable<string> Servers { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the connection string.
+    /// </summary>
+    public string? ConnectionString { get; set; }
 
     /// <summary>
     /// Gets or sets the database name.
