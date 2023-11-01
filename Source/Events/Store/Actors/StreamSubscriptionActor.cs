@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Protobuf.Contracts;
@@ -61,15 +62,23 @@ public sealed class StreamSubscriptionActor : IActor
 
     public async Task ReceiveAsync(IContext context)
     {
-        await (context.Message switch
+        try
         {
-            StartEventStoreSubscription request => OnStartEventStoreSubscription(request, context),
-            CommittedEventsRequest request => OnCommittedEventsRequest(request, context),
-            EventLogCatchupResponse response => OnCatchupResponse(response, context),
-            SubscriptionEventsAck response => OnPublishAcknowledged(response, context),
-            DeadLetterResponse deadLetter => OnDeadLetterResponse(deadLetter, context),
-            _ => Task.CompletedTask
-        });
+            await (context.Message switch
+            {
+                StartEventStoreSubscription request => OnStartEventStoreSubscription(request, context),
+                CommittedEventsRequest request => OnCommittedEventsRequest(request, context),
+                EventLogCatchupResponse response => OnCatchupResponse(response, context),
+                SubscriptionEventsAck response => OnPublishAcknowledged(response, context),
+                DeadLetterResponse deadLetter => OnDeadLetterResponse(deadLetter, context),
+                _ => Task.CompletedTask
+            });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error in subscription actor");
+            TerminateNonGracefully(context, e.Message);
+        }
     }
 
     Task OnPublishAcknowledged(SubscriptionEventsAck _, IContext context)
@@ -91,11 +100,14 @@ public sealed class StreamSubscriptionActor : IActor
 
         if (_waitingEvents.Overflowed)
         {
-            // This means we got more events than we fit in the streaming buffer, and has dropped later events
-            if (_waitingEvents.Peek()!.FromOffset >= _nextPublishOffset)
+            if (_waitingEvents.Events.FromOffset >= _nextPublishOffset)
             {
                 // The buffered events are next up, publish them
                 FlushWaitingEvents(context);
+                if (_catchUpRequestsInFlight == 0 && _publishRequestsInFlight <= 2)
+                {
+                    RequestMoreCatchupEvents(context, _nextPublishOffset, _catchupTo);
+                }
             }
             else
             {
@@ -125,6 +137,7 @@ public sealed class StreamSubscriptionActor : IActor
         }
         else if (_catchupPid.Equals(deadLetter.Target))
         {
+            _logger.LogError("Catchup actor died");
             TerminateNonGracefully(context, "Catchup actor died");
         }
 
@@ -247,6 +260,7 @@ public sealed class StreamSubscriptionActor : IActor
         if (_waitingEvents.Overflowed)
         {
             // No more space in the buffer, drop events until the current set is processed
+            _catchupTo = request.ToOffset + 1;
             return Task.CompletedTask;
         }
 
@@ -276,7 +290,7 @@ public sealed class StreamSubscriptionActor : IActor
         {
             // Too far behind, catchup will be done in the background
             _catchupTo = request.ToOffset + 1;
-            _waitingEvents.Clear();
+            _waitingEvents.Reset();
             return Task.CompletedTask;
         }
 
@@ -313,6 +327,7 @@ public sealed class StreamSubscriptionActor : IActor
             SubscriptionId = _subscriptionId,
             Reason = message
         });
+        context.Stop(context.Self);
         throw new ArgumentException(message);
     }
 
@@ -343,6 +358,7 @@ public sealed class StreamSubscriptionActor : IActor
         /// If the streaming buffer is full, drop new events until the current set is processed.
         /// The actor will then go into catchup mode.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Events))]
         public bool Overflowed { get; private set; }
 
         public SubscriptionEvents? Events { get; private set; }
@@ -359,7 +375,11 @@ public sealed class StreamSubscriptionActor : IActor
             var contentSize = subscriptionEvents.CalculateSize();
             if (_bufferedSize + contentSize > MaxBufferedBytes)
             {
-                Overflowed = true;
+                if (Events != null)
+                {
+                    Overflowed = true;
+                }
+
                 return false;
             }
 
@@ -382,17 +402,15 @@ public sealed class StreamSubscriptionActor : IActor
             }
 
             var events = Events.CutoffEarlierThan(fromOffset);
-            Clear();
+            Reset();
             return events;
         }
 
-        public void Clear()
+        public void Reset()
         {
+            Overflowed = false;
             Events = null;
             _bufferedSize = 0;
-            Overflowed = false;
         }
-
-        public SubscriptionEvents? Peek() => Events;
     }
 }

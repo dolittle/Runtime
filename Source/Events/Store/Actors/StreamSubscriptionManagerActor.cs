@@ -43,14 +43,14 @@ public class StreamSubscriptionManagerActor : IActor
 
     public Task ReceiveAsync(IContext context)
     {
-        return context.Message switch
-        {
-            Started => OnStarted(context.CancellationToken),
-            EventStoreSubscriptionRequest request => OnEventStoreSubscriptionRequest(request, context),
-            CancelEventStoreSubscription request => OnCancelEventStoreSubscription(request, context),
-            Commit request => OnCommit(request, context),
-            _ => Task.CompletedTask
-        };
+            return context.Message switch
+            {
+                Started => OnStarted(context.CancellationToken),
+                EventStoreSubscriptionRequest request => OnEventStoreSubscriptionRequest(request, context),
+                CancelEventStoreSubscription request => OnCancelEventStoreSubscription(request, context),
+                Commit request => OnCommit(request, context),
+                _ => Task.CompletedTask
+            };
     }
 
     async Task OnStarted(CancellationToken cancellationToken)
