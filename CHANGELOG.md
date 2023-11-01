@@ -1,3 +1,11 @@
+# [9.2.1] - 2023-11-1 [PR: #757](https://github.com/dolittle/Runtime/pull/757)
+## Summary
+This release focuses on limiting maximum memory usage, while at the same time trying to stream committed events directly from memory. Each handler will now more intelligently flow from catchup / streaming mode and back based on event handler backpressure.
+
+### Fixed
+- Removed ability for event processors that are processing slower than events are coming in to grow in memory in an unbounded way.
+
+
 # [9.2.0] - 2023-10-24 [PR: #756](https://github.com/dolittle/Runtime/pull/756)
 ## Summary
 Changed MongoDB configuration to support srv connection strings. This allows the runtime to use any cloud hosted MongoDB services, such as Atlas.
