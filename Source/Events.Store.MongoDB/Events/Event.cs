@@ -24,8 +24,8 @@ public class Event
         ulong eventLogSequenceNumber,
         ExecutionContext executionContext,
         EventMetadata metadata,
-        AggregateMetadata aggregate,
-        EventHorizonMetadata eventHorizonMetadata,
+        AggregateMetadata? aggregate,
+        EventHorizonMetadata? eventHorizonMetadata,
         BsonDocument content)
     {
         EventLogSequenceNumber = eventLogSequenceNumber;
@@ -56,12 +56,14 @@ public class Event
     /// <summary>
     /// Gets or sets the event sourcing specific <see cref="AggregateMetadata"/>.
     /// </summary>
-    public AggregateMetadata Aggregate { get; set; }
+    [BsonIgnoreIfNull]
+    public AggregateMetadata? Aggregate { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="EventHorizonMetadata" />.
     /// </summary>
-    public EventHorizonMetadata EventHorizon { get; set; }
+    [BsonIgnoreIfNull]
+    public EventHorizonMetadata? EventHorizon { get; set; }
 
     /// <summary>
     /// Gets or sets the domain specific event data.

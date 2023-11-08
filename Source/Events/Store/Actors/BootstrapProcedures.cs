@@ -19,7 +19,7 @@ public class BootstrapProcedures : ICanPerformBoostrapProcedure
 {
     readonly ActorSystem _actorSystem;
     readonly Func<TenantId, ICreateProps> _getPropsCreator;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BootstrapProcedures"/> class.
     /// </summary>

@@ -25,12 +25,10 @@ public class ConvertCommitToEvents : IConvertCommitToEvents
         }
 
         var eventsToStore = new List<MongoDB.Events.Event>();
-        var eventHorizonMetadata = new EventHorizonMetadata();
 
         foreach (var committedEvents in eventsInCommit)
         {
             var executionContext = committedEvents.First().ExecutionContext.ToStoreRepresentation();
-            var aggregateMetadata = new AggregateMetadata();
             eventsToStore.AddRange(committedEvents.Select(_ => new Events.Event(
                 _.EventLogSequenceNumber,
                 executionContext,
@@ -40,13 +38,13 @@ public class ConvertCommitToEvents : IConvertCommitToEvents
                     _.Type.Id,
                     _.Type.Generation,
                     _.Public),
-                aggregateMetadata,
-                eventHorizonMetadata,
+                aggregate:null,
+                eventHorizonMetadata:null,
                 BsonDocument.Parse(_.Content))));
         }
         foreach (var committedEvents in aggregateEventsInCommit)
         {
-            var executionContext = committedEvents.First().ExecutionContext.ToStoreRepresentation();
+            var executionContext = committedEvents[0].ExecutionContext.ToStoreRepresentation();
             eventsToStore.AddRange(committedEvents.Select(_ => new Events.Event(
                 _.EventLogSequenceNumber,
                 executionContext,
@@ -57,7 +55,7 @@ public class ConvertCommitToEvents : IConvertCommitToEvents
                     _.Type.Generation,
                     _.Public),
                 new AggregateMetadata(true, _.AggregateRoot.Id, _.AggregateRoot.Generation, _.AggregateRootVersion),
-                eventHorizonMetadata,
+                null,
                 BsonDocument.Parse(_.Content))));
         }
         return eventsToStore;

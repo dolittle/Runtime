@@ -22,4 +22,6 @@ public interface ICanPerformBoostrapProcedure
     /// </summary>
     /// <returns>The <see cref="Task"/> representing the asynchronous action.</returns>
     Task PerformForTenant(TenantId tenant);
+    
+    int Priority => 0;
 }
