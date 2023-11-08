@@ -1,3 +1,18 @@
+# [9.2.2] - 2023-11-8 [PR: #758](https://github.com/dolittle/Runtime/pull/758)
+## Summary
+This release optimizes how events are stored in MongoDB, by only including relevant metadata for the events. This means that only events produced by aggregates will store aggregate metadata, and event horizon metadata is excluded for normal events. 
+
+In addition, this adds metrics to stream subscriptions showing how many events are streamed / buffered directly from commits, and how many are done as catch-up events via the database.
+
+### Added
+- Metric `dolittle_customer_runtime_events_store_streamed_events_total`
+- Metric `dolittle_customer_runtime_events_store_catchup_events_total`
+
+### Removed
+- For non-aggregate events: Removed `Aggregate` object from MongoDB
+- For non-EventHorizon events: Removed `EventhorizonMetadata` object from MongoDB
+
+
 # [9.2.1] - 2023-11-1 [PR: #757](https://github.com/dolittle/Runtime/pull/757)
 ## Summary
 This release focuses on limiting maximum memory usage, while at the same time trying to stream committed events directly from memory. Each handler will now more intelligently flow from catchup / streaming mode and back based on event handler backpressure.
