@@ -68,12 +68,16 @@ public class StreamEvent
     [BsonIgnoreIfNull]
     public AggregateMetadata? Aggregate { get; set; }
 
+    [BsonIgnore] public bool WasAppliedByAggregate => Aggregate is { WasAppliedByAggregate: true };
+    
     /// <summary>
     /// Gets or sets the <see cref="EventHorizonMetadata" />.
     /// </summary>
     [BsonIgnoreIfNull]
     public EventHorizonMetadata? EventHorizon { get; set; }
 
+    [BsonIgnore] public bool IsFromEventHorizon => EventHorizon is { FromEventHorizon: true };
+    
     /// <summary>
     /// Gets or sets the domain specific event data.
     /// </summary>

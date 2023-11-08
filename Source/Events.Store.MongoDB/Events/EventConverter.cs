@@ -73,9 +73,9 @@ public class EventConverter : IEventConverter
             partitioned);
 
     public runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
-        @event.Aggregate?.WasAppliedByAggregate == true
+        @event.WasAppliedByAggregate
             ? ToRuntimeCommittedAggregateEvent(@event)
-            : @event.EventHorizon?.FromEventHorizon == true
+            : @event.IsFromEventHorizon
                 ? ToRuntimeCommittedExternalEvent(@event)
                 : new runtime.CommittedEvent(
                     @event.EventLogSequenceNumber,
@@ -122,9 +122,9 @@ public class EventConverter : IEventConverter
             @event.EventHorizon.Consent);
 
     runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.StreamEvent @event) =>
-        @event.Aggregate?.WasAppliedByAggregate == true
+        @event.WasAppliedByAggregate
             ? ToRuntimeCommittedAggregateEvent(@event)
-            : @event.EventHorizon?.FromEventHorizon == true
+            : @event.IsFromEventHorizon
                 ? ToRuntimeCommittedExternalEvent(@event)
                 : new runtime.CommittedEvent(
                     @event.Metadata.EventLogSequenceNumber,
