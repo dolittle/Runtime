@@ -200,7 +200,7 @@ static class should_extensions
         stored_events.ShouldEachConformTo(_ => _.Aggregate.TypeGeneration.Equals(ArtifactGeneration.First.Value));
         stored_events.ShouldEachConformTo(_ => _.Aggregate.TypeId.Equals(aggregate_events.AggregateRoot.Value));
         stored_events.ShouldEachConformTo(_ => _.Metadata.EventSource.Equals(aggregate_events.EventSource));
-        stored_events.ShouldEachConformTo(_ => _.EventHorizon.FromEventHorizon == false);
+        stored_events.ShouldEachConformTo(_ => _.EventHorizon == null);
 
         for (var i = 0; i < stored_events.Count; i++)
         {
@@ -219,8 +219,8 @@ static class should_extensions
         {
             return;
         }
-        stored_events.ShouldEachConformTo(_ => _.Aggregate.WasAppliedByAggregate == false);
-        stored_events.ShouldEachConformTo(_ => _.EventHorizon.FromEventHorizon == false);
+        stored_events.ShouldEachConformTo(_ => _.WasAppliedByAggregate == false);
+        stored_events.ShouldEachConformTo(_ => _.IsFromEventHorizon == false);
         
         for (var i = 0; i < stored_events.Count; i++)
         {

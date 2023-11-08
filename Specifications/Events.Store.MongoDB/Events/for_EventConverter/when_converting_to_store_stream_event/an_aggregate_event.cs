@@ -31,7 +31,7 @@ public class an_aggregate_event : given.an_event_content_converter
     It should_have_the_same_aggregate_root_type_generation = () => result.Aggregate.TypeGeneration.ShouldEqual(committed_event.AggregateRoot.Generation.Value);
     It should_have_the_same_aggregate_root_type_id = () => result.Aggregate.TypeId.ShouldEqual(committed_event.AggregateRoot.Id.Value);
     It should_have_the_same_aggregate_root_version = () => result.Aggregate.Version.ShouldEqual(committed_event.AggregateRootVersion.Value);
-    It should_not_come_from_event_horizon = () => result.EventHorizon.FromEventHorizon.ShouldBeFalse();
+    It should_not_come_from_event_horizon = () => result.IsFromEventHorizon.ShouldBeFalse();
     It should_have_the_content_returned_by_the_content_converter = () => result.Content.ShouldBeTheSameAs(bson_returned_by_event_converter);
     It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToBson(committed_event.Content));
 }

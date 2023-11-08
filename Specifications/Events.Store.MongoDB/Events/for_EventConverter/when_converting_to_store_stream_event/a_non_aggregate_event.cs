@@ -27,8 +27,8 @@ public class a_non_aggregate_event : given.an_event_content_converter
     It should_represent_the_same_event = () => result.ShouldBeTheSameAs(committed_event);
     It should_have_the_correct_stream_position = () => result.StreamPosition.ShouldEqual(stream_position.Value);
     It should_have_the_correct_partition = () => result.Partition.ShouldEqual(partition.Value);
-    It should_not_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.ShouldBeFalse();
-    It should_not_come_from_event_horizon = () => result.EventHorizon.FromEventHorizon.ShouldBeFalse();
+    It should_not_be_applied_by_aggregate = () => result.WasAppliedByAggregate.ShouldBeFalse();
+    It should_not_come_from_event_horizon = () => result.IsFromEventHorizon.ShouldBeFalse();
     It should_have_the_content_returned_by_the_content_converter = () => result.Content.ShouldBeTheSameAs(bson_returned_by_event_converter);
     It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToBson(committed_event.Content));
 }

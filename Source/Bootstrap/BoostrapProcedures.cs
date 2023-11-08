@@ -28,20 +28,19 @@ public class BoostrapProcedures : IBootstrapProcedures
     }
 
     /// <inheritdoc />
-    public Task PerformAll()
+    public async Task PerformAll()
     {
         if (_performedBootstrap)
         {
             throw new BootstrapProceduresAlreadyPerformed();
         }
 
-        _performedBootstrap = true;
-        var tasks = new List<Task>();
-        foreach (var procedure in _procedures)
+        foreach (var procedure in _procedures.OrderByDescending(it => it.Priority))
         {
-            tasks.Add(procedure.Perform());
-            tasks.AddRange(_tenants.Select(procedure.PerformForTenant));
+            await procedure.Perform();
+            await Task.WhenAll(_tenants.Select(procedure.PerformForTenant));
         }
-        return Task.WhenAll(tasks);
+
+        _performedBootstrap = true;
     }
 }

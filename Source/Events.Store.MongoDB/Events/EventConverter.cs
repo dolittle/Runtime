@@ -73,9 +73,9 @@ public class EventConverter : IEventConverter
             partitioned);
 
     public runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
-        @event.Aggregate.WasAppliedByAggregate
+        @event.WasAppliedByAggregate
             ? ToRuntimeCommittedAggregateEvent(@event)
-            : @event.EventHorizon.FromEventHorizon
+            : @event.IsFromEventHorizon
                 ? ToRuntimeCommittedExternalEvent(@event)
                 : new runtime.CommittedEvent(
                     @event.EventLogSequenceNumber,
@@ -88,10 +88,11 @@ public class EventConverter : IEventConverter
                     @event.Metadata.Public,
                     _contentConverter.ToJson(@event.Content));
 
-    runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.Event @event) =>
-        new(
+    runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.Event @event)
+    {
+        return new CommittedAggregateEvent(
             new Artifact(
-                @event.Aggregate.TypeId,
+                @event.Aggregate!.TypeId,
                 @event.Aggregate.TypeGeneration),
             @event.Aggregate.Version,
             @event.EventLogSequenceNumber,
@@ -103,6 +104,7 @@ public class EventConverter : IEventConverter
                 @event.Metadata.TypeGeneration),
             @event.Metadata.Public,
             _contentConverter.ToJson(@event.Content));
+    }
 
     runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.Event @event) =>
         new(
@@ -115,14 +117,14 @@ public class EventConverter : IEventConverter
                 @event.Metadata.TypeGeneration),
             @event.Metadata.Public,
             _contentConverter.ToJson(@event.Content),
-            @event.EventHorizon.ExternalEventLogSequenceNumber,
+            @event.EventHorizon!.ExternalEventLogSequenceNumber,
             @event.EventHorizon.Received,
             @event.EventHorizon.Consent);
 
     runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.StreamEvent @event) =>
-        @event.Aggregate.WasAppliedByAggregate
+        @event.WasAppliedByAggregate
             ? ToRuntimeCommittedAggregateEvent(@event)
-            : @event.EventHorizon.FromEventHorizon
+            : @event.IsFromEventHorizon
                 ? ToRuntimeCommittedExternalEvent(@event)
                 : new runtime.CommittedEvent(
                     @event.Metadata.EventLogSequenceNumber,
@@ -137,7 +139,7 @@ public class EventConverter : IEventConverter
 
     runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.StreamEvent @event) =>
         new(
-            new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
+            new Artifact(@event.Aggregate!.TypeId, @event.Aggregate.TypeGeneration),
             @event.Aggregate.Version,
             @event.Metadata.EventLogSequenceNumber,
             @event.Metadata.Occurred,
@@ -158,7 +160,7 @@ public class EventConverter : IEventConverter
             new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
             @event.Metadata.Public,
             _contentConverter.ToJson(@event.Content),
-            @event.EventHorizon.ExternalEventLogSequenceNumber,
+            @event.EventHorizon!.ExternalEventLogSequenceNumber,
             @event.EventHorizon.Received,
             @event.EventHorizon.Consent);
 }

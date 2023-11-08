@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -24,8 +25,8 @@ public class Event
         ulong eventLogSequenceNumber,
         ExecutionContext executionContext,
         EventMetadata metadata,
-        AggregateMetadata aggregate,
-        EventHorizonMetadata eventHorizonMetadata,
+        AggregateMetadata? aggregate,
+        EventHorizonMetadata? eventHorizonMetadata,
         BsonDocument content)
     {
         EventLogSequenceNumber = eventLogSequenceNumber;
@@ -56,12 +57,21 @@ public class Event
     /// <summary>
     /// Gets or sets the event sourcing specific <see cref="AggregateMetadata"/>.
     /// </summary>
-    public AggregateMetadata Aggregate { get; set; }
+    [BsonIgnoreIfNull]
+    [MemberNotNullWhen(true, nameof(WasAppliedByAggregate))]
+    public AggregateMetadata? Aggregate { get; set; }
+
+    [BsonIgnore] public bool WasAppliedByAggregate => Aggregate is { WasAppliedByAggregate: true };
 
     /// <summary>
     /// Gets or sets the <see cref="EventHorizonMetadata" />.
     /// </summary>
-    public EventHorizonMetadata EventHorizon { get; set; }
+    [BsonIgnoreIfNull]
+    [MemberNotNullWhen(true, nameof(IsFromEventHorizon))]
+
+    public EventHorizonMetadata? EventHorizon { get; set; }
+
+    [BsonIgnore] public bool IsFromEventHorizon => EventHorizon is { FromEventHorizon: true };
 
     /// <summary>
     /// Gets or sets the domain specific event data.
