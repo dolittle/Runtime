@@ -30,6 +30,7 @@ public sealed class StreamSubscriptionActor : IActor
 
     readonly ScopeId _scope;
     readonly TenantId _tenantId;
+    readonly IMetricsCollector _metricsCollector;
     readonly ILogger<StreamSubscriptionActor> _logger;
 
     Func<Contracts.CommittedEvent, bool>? _shouldIncludeEvent;
@@ -53,10 +54,11 @@ public sealed class StreamSubscriptionActor : IActor
 
     long EventsBehind => (long)_catchupTo - (long)_nextPublishOffset - 1;
 
-    public StreamSubscriptionActor(ScopeId scope, TenantId tenantId, ILogger<StreamSubscriptionActor> logger)
+    public StreamSubscriptionActor(ScopeId scope, TenantId tenantId, IMetricsCollector metricsCollector, ILogger<StreamSubscriptionActor> logger)
     {
         _scope = scope;
         _tenantId = tenantId;
+        _metricsCollector = metricsCollector;
         _logger = logger;
     }
 
@@ -155,7 +157,8 @@ public sealed class StreamSubscriptionActor : IActor
             return Task.CompletedTask;
         }
 
-        Publish(ToSubscriptionEvent(response), context);
+
+        Publish(ToSubscriptionEvent(response), context, false);
         if (EventsBehind > 0)
         {
             RequestMoreCatchupEvents(context, _nextPublishOffset, _catchupTo);
@@ -175,7 +178,7 @@ public sealed class StreamSubscriptionActor : IActor
         var events = _waitingEvents.Pop(_nextPublishOffset);
         if (events is not null)
         {
-            Publish(events, context);
+            Publish(events, context, true);
         }
     }
 
@@ -270,7 +273,8 @@ public sealed class StreamSubscriptionActor : IActor
             if (_publishRequestsInFlight < 2)
             {
                 // This is the normal case, publish events directly.
-                Publish(subscriptionEvent, context);
+
+                Publish(subscriptionEvent, context, true);
                 return Task.CompletedTask;
             }
 
@@ -306,7 +310,7 @@ public sealed class StreamSubscriptionActor : IActor
         return Task.CompletedTask;
     }
 
-    void Publish(SubscriptionEvents subscriptionEvent, IContext context)
+    void Publish(SubscriptionEvents subscriptionEvent, IContext context, bool fromMemory)
     {
         // Should never happen..
         if (subscriptionEvent.FromOffset != _nextPublishOffset)
@@ -315,9 +319,30 @@ public sealed class StreamSubscriptionActor : IActor
             TerminateNonGracefully(context, $"Expected from offset {_nextPublishOffset} but got {subscriptionEvent.FromOffset}");
         }
 
+
         _nextPublishOffset = subscriptionEvent.ToOffset + 1;
         context.Request(_target, subscriptionEvent);
         _publishRequestsInFlight++;
+
+        RecordSubscriptionMetrics(subscriptionEvent, fromMemory);
+    }
+
+    void RecordSubscriptionMetrics(SubscriptionEvents subscriptionEvent, bool fromMemory)
+    {
+        var eventCount = subscriptionEvent.Events.Count;
+        if (eventCount < 1)
+        {
+            return;
+        }
+
+        if (fromMemory)
+        {
+            _metricsCollector.IncrementStreamedSubscriptionEvents(_subscriptionName, eventCount);
+        }
+        else
+        {
+            _metricsCollector.IncrementCatchupSubscriptionEvents(_subscriptionName, eventCount);
+        }
     }
 
     void TerminateNonGracefully(IContext context, string message)

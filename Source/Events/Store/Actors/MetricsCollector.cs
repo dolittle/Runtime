@@ -30,6 +30,8 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _totalCommittedEvents;
     readonly Counter _totalCommittedAggregateEvents;
     readonly Counter _totalAggregateConcurrencyConflicts;
+    readonly Counter _streamedSubscriptionEventsTotal;
+    readonly Counter _catchupSubscriptionEventsTotal;
 
     public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes, IAggregateRoots aggregateRoots)
     {
@@ -81,6 +83,16 @@ public class MetricsCollector : IMetricsCollector
             "dolittle_customer_runtime_events_store_aggregate_concurrency_conflicts_total",
             "EventStore total number of aggregate concurrency conflicts by aggregate root",
             new[] {"tenantId", "aggregateRootId", "aggregateRootAlias"});
+        
+        _streamedSubscriptionEventsTotal = metricFactory.CreateCounter(
+            "dolittle_customer_runtime_events_store_streamed_events_total",
+            "Total number of directly streamed events",
+            new[] { "subscriptionName" });
+
+        _catchupSubscriptionEventsTotal = metricFactory.CreateCounter(
+            "dolittle_customer_runtime_events_store_catchup_events_total",
+            "Total number of catchup-events (events that are not streamed directly, but read from DB)",
+            new[] { "subscriptionName" });
     }
 
     /// <inheritdoc />
@@ -166,4 +178,11 @@ public class MetricsCollector : IMetricsCollector
             ? string.Empty
             : aggregateRootInfo.Alias.Value;
     }
+    
+    
+    public void IncrementStreamedSubscriptionEvents(string subscriptionName, int incBy)
+        => _streamedSubscriptionEventsTotal.WithLabels(subscriptionName).Inc(incBy);
+
+    public void IncrementCatchupSubscriptionEvents(string subscriptionName, int incBy)
+        => _catchupSubscriptionEventsTotal.WithLabels(subscriptionName).Inc(incBy);
 }

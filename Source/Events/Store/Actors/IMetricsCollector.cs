@@ -51,4 +51,14 @@ public interface IMetricsCollector
     /// Increments the total number of <see cref="AggregateRootConcurrencyConflict"/> errors received when persisting commits.
     /// </summary>
     void IncrementTotalAggregateRootConcurrencyConflicts(TenantId tenant, ArtifactId aggregateRoot);
+    
+    /// <summary>
+    /// Increments the number of events streamed in-memory per subscription.
+    /// </summary>
+    void IncrementStreamedSubscriptionEvents(string subscriptionName, int incBy);
+    
+    /// <summary>
+    /// Increments the number of catch-up events (read from DB) per subscription.
+    /// </summary>
+    void IncrementCatchupSubscriptionEvents(string eventProcessorKind, int incBy);
 }
