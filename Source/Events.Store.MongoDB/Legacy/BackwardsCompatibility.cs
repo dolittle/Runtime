@@ -22,9 +22,9 @@ public class BackwardsCompatibility : IConfigureBackwardsCompatibility
     /// Initializes a new instance of the <see cref="BackwardsCompatibility"/> class.
     /// </summary>
     /// <param name="configuration">The <see cref="IOptions{TOptions}"/> for <see cref="EventStoreBackwardsCompatibilityConfiguration"/>.</param>
-    public BackwardsCompatibility(IOptions<EventStoreBackwardsCompatibilityConfiguration> configuration)
+    public BackwardsCompatibility()
     {
-        var serializer = new EventSourceAndPartitionSerializer(configuration.Value.Version);
+        var serializer = new EventSourceAndPartitionSerializer();
 
         _eventSourceAndPartitionConventions = new ConventionPack();
         _eventSourceAndPartitionConventions.AddClassMapConvention("EventSource and Partition backwards compatibility", cm =>

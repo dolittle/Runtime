@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
       <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+      <ProjectReference Include="..\Diagnostics\Diagnostics.csproj" />
     </ItemGroup>
 
 </Project>
