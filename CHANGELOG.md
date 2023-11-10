@@ -1,3 +1,19 @@
+# [9.3.0] - 2023-11-10 [PR: #759](https://github.com/dolittle/Runtime/pull/759)
+## Summary
+
+Improved structure of version migrations, and added a migration for runtime V6 EventSource IDs (which were UUIDs). This eliminates the need for the V6 compatibility mode, and this has been removed as well.
+
+This means that upgrading from older versions of the runtime should now be painless, as the runtime migrates the existing database on startup if present.
+
+### Added
+- Runtime V6 migrations
+- Migration of scoped streams (EventHorizon etc)
+- Migration metadata (to avoid running if previously migrated)
+
+### Removed
+- V6 / V7 compatibility settings.
+
+
 # [9.2.2] - 2023-11-8 [PR: #758](https://github.com/dolittle/Runtime/pull/758)
 ## Summary
 This release optimizes how events are stored in MongoDB, by only including relevant metadata for the events. This means that only events produced by aggregates will store aggregate metadata, and event horizon metadata is excluded for normal events. 
