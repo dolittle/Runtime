@@ -17,5 +17,6 @@
         <ProjectReference Include="../EventHorizon/EventHorizon.csproj" />
         <ProjectReference Include="../Events/Events.csproj" />
         <ProjectReference Include="../MongoDB/MongoDB.csproj" />
+        <ProjectReference Include="..\Diagnostics\Diagnostics.csproj" />
     </ItemGroup>
 </Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="../../tests.props" />
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Source\Events.Store.MongoDB\Events.Store.MongoDB.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Machine.Specifications.Should" Version="1.0.0" />
+    </ItemGroup>
+
+</Project>

@@ -61,18 +61,4 @@ static void VerifyConfiguration(IServiceProvider provider)
         logger.LogError(e, "It seems like the Runtime is missing its 'tenants' configuration. Without any tenants the Runtime will no function properly.");
         throw;
     }
-    try
-    {
-        var config = provider.GetRequiredService<IOptions<EventStoreBackwardsCompatibilityConfiguration>>();
-        if (config.Value.Version != EventStoreBackwardsCompatibleVersion.V6 && config.Value.Version != EventStoreBackwardsCompatibleVersion.V7)
-        {
-            throw new Exception("Event Store Backwards Compatability Version needs to be set to either 'V6' or 'V7'");
-        }
-    }
-    catch (Exception e)
-    {
-        logger.LogCritical(e, @"Cannot start Runtime because it is missing the event store backwards compatability configuration.
-Make sure that the dolittle:runtime:eventStore:backwardsCompatibility configuration is provided by setting the 'DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION' environment variable to either V6 (store PartitionId and EventSourceId as Guid) or V7 (store PartitionId and EventSourceId as string)");
-        throw;
-    }
 }

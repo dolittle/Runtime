@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -16,16 +15,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 /// </remarks>
 public class EventSourceAndPartitionSerializer : SerializerBase<string>
 {
-    readonly EventStoreBackwardsCompatibleVersion _backwardsCompatibleVersion;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventSourceAndPartitionSerializer"/> class.
     /// </summary>
     /// <param name="backwardsCompatibleVersion">The version to be backwards compatible with.</param>
-    public EventSourceAndPartitionSerializer(EventStoreBackwardsCompatibleVersion backwardsCompatibleVersion)
+    public EventSourceAndPartitionSerializer()
     {
-        ThrowIfBackwardsCompatibleVersionNotSet(backwardsCompatibleVersion);
-        _backwardsCompatibleVersion = backwardsCompatibleVersion;
     }
 
     /// <inheritdoc />
@@ -43,21 +39,6 @@ public class EventSourceAndPartitionSerializer : SerializerBase<string>
     /// <inheritdoc />
     public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, string value)
     {
-        if (_backwardsCompatibleVersion == EventStoreBackwardsCompatibleVersion.V6 && Guid.TryParse(value, out var guid))
-        {
-            context.Writer.WriteBinaryData(new BsonBinaryData(guid, GuidRepresentation.Standard));
-        }
-        else
-        {
-            context.Writer.WriteString(value);
-        }
-    }
-
-    static void ThrowIfBackwardsCompatibleVersionNotSet(EventStoreBackwardsCompatibleVersion backwardsCompatibleVersion)
-    {
-        if (backwardsCompatibleVersion == EventStoreBackwardsCompatibleVersion.NotSet)
-        {
-            throw new EventSourceBackwardsCompatibilityMustBeConfigured();
-        }
+        context.Writer.WriteString(value);
     }
 }

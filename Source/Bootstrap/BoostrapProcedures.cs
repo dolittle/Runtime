@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Bootstrap;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
+using Dolittle.Runtime.Diagnostics.OpenTelemetry;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Tenancy;
 
@@ -30,6 +31,9 @@ public class BoostrapProcedures : IBootstrapProcedures
     /// <inheritdoc />
     public async Task PerformAll()
     {
+        // ReSharper disable once ExplicitCallerInfoArgument
+        using var activity = RuntimeActivity.Source.StartActivity("PerformBootstrapProcedures");
+        
         if (_performedBootstrap)
         {
             throw new BootstrapProceduresAlreadyPerformed();

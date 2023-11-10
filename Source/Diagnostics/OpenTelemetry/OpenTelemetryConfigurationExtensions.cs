@@ -77,6 +77,7 @@ public static class OpenTelemetryConfigurationExtensions
                 .WithTracing(_ =>
                 {
                     _.SetResourceBuilder(resourceBuilder)
+                        .AddSource(RuntimeActivity.SourceName)
                         .AddHttpClientInstrumentation()
                         .AddAspNetCoreInstrumentation()
                         .AddMongoDBInstrumentation()

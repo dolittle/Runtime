@@ -38,8 +38,6 @@ public class Streams : EventStoreConnection, IStreams
 
         CreateCollectionsAndIndexesForEventLog();
         CreateCollectionsAndIndexesForStreamDefinitions();
-        RemoveAggregateDefaultDefaultMetadata();
-        RemoveEventHorizonDefaultMetadata();
     }
 
     /// <inheritdoc/>
@@ -238,29 +236,5 @@ public class Streams : EventStoreConnection, IStreams
                 Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
                     .Ascending(_ => _.StreamId)),
             cancellationToken: cancellationToken).ConfigureAwait(false);
-    }
-    
-    /// <summary>
-    /// Removes the event log default values for the EventHorizon property for events not sent via the Event Horizon.
-    /// </summary>
-    /// <param name="db"></param>
-    void RemoveEventHorizonDefaultMetadata()
-    {
-        var filter = Builders<MongoDB.Events.Event>.Filter.Eq("EventHorizon.FromEventHorizon", false);
-        var update = Builders<MongoDB.Events.Event>.Update.Unset("EventHorizon");
-
-        DefaultEventLog.UpdateMany(filter, update);
-    }
-    
-    /// <summary>
-    /// Removes the event log default values for the Aggregate property for events not applied by an Aggregate.
-    /// </summary>
-    /// <param name="db"></param>
-    void RemoveAggregateDefaultDefaultMetadata()
-    {
-        var filter = Builders<MongoDB.Events.Event>.Filter.Eq("Aggregate.WasAppliedByAggregate", false);
-        var update = Builders<MongoDB.Events.Event>.Update.Unset("Aggregate");
-
-        DefaultEventLog.UpdateMany(filter, update);
     }
 }
