@@ -10,6 +10,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Persistence;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Persistence;
@@ -24,6 +25,7 @@ public class CommitWriter : IPersistCommits
     readonly IStreamEventWatcher _streamWatcher;
     readonly IConvertCommitToEvents _commitConverter;
     readonly IUpdateAggregateVersionsAfterCommit _aggregateVersions;
+    readonly ILogger<CommitWriter> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitWriter"/> class. 
@@ -31,12 +33,13 @@ public class CommitWriter : IPersistCommits
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher"/>.</param>
     /// <param name="commitConverter">The <see cref="IConvertCommitToEvents"/>.</param>
-    public CommitWriter(IStreams streams, IStreamEventWatcher streamWatcher, IConvertCommitToEvents commitConverter, IUpdateAggregateVersionsAfterCommit aggregateVersions)
+    public CommitWriter(IStreams streams, IStreamEventWatcher streamWatcher, IConvertCommitToEvents commitConverter, IUpdateAggregateVersionsAfterCommit aggregateVersions, ILogger<CommitWriter> logger)
     {
         _streams = streams;
         _streamWatcher = streamWatcher;
         _commitConverter = commitConverter;
         _aggregateVersions = aggregateVersions;
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -57,7 +60,6 @@ public class CommitWriter : IPersistCommits
                 cancellationToken: cancellationToken).ConfigureAwait(false);
             await _aggregateVersions.UpdateAggregateVersions(session, commit, cancellationToken).ConfigureAwait(false);
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
-            //TODO: Notifying for events should be a concern handled by actors
             _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, eventsToStore.Max(_ => _.EventLogSequenceNumber));
             return Try.Succeeded;
         }
@@ -68,6 +70,7 @@ public class CommitWriter : IPersistCommits
         }
         catch (Exception ex)
         {
+            _logger.FailedWhileCommittingEvents(ex);
             await session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
             return ex;
         }
