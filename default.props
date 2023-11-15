@@ -6,6 +6,7 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <NoWarn>$(NoWarn);SYSLIB1002;SYSLIB1006;SYSLIB1007</NoWarn>
         <Nullable>enable</Nullable>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
     <PropertyGroup>
         <ContractsRootPath>$(NuGetPackageRoot)dolittle.contracts/$(ContractsVersion)/protos/</ContractsRootPath>

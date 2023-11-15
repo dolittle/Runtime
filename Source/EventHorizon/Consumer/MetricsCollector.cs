@@ -11,51 +11,32 @@ namespace Dolittle.Runtime.EventHorizon.Consumer;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Counter _totalSubscriptionRequests;
-    readonly Counter _totalRegisteredSubscriptions;
-    readonly Counter _totalSubscriptionRequestsWhereAlreadyStarted;
-    readonly Counter _totalSubscriptionsWithMissingProducerMicroserviceAddress;
-    readonly Counter _totalSubscriptionsFailedDueToException;
-    readonly Counter _totalSubscriptionsFailedDueToReceivingOrWritingEventsCompleted;
-    readonly Counter _totalSubscriptionLoops;
-    readonly Gauge _currentConnectedSubscriptions;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _totalSubscriptionRequests = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_subscription_requests_total",
-            "SubscriptionsService total number of subscription requests received from Head");
-
-        _totalRegisteredSubscriptions = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_registered_subscriptions_total",
-            "Subscriptions total number of registered subscriptions");
-
-        _currentConnectedSubscriptions = metricFactory.CreateGauge(
-            "dolittle_shared_runtime_event_horizon_consumer_connected_subscriptions_current",
-            "Subscription total number of connected subscriptions");
-        
-        _totalSubscriptionRequestsWhereAlreadyStarted = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_subscription_already_started_total",
-            "Subscriptions total number of subscription requests made where subscription was already started");
-
-        _totalSubscriptionsWithMissingProducerMicroserviceAddress = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_subscription_with_missing_producer_microservice_address_total",
-            "Subscriptions total number of subscriptions where producer microservice address configuration was missing");
-
-        _totalSubscriptionsFailedDueToException = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_subscription_failed_due_to_exception_total",
-            "Subscriptions total number of subscriptions failed due to an exception");
-
-        _totalSubscriptionsFailedDueToReceivingOrWritingEventsCompleted = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_subscription_failed_due_to_receiving_or_writing_events_completed_total",
-            "Subscriptions total number of subscriptions failed due to receiving or writing events completed");
-
-        _totalSubscriptionLoops = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_subscription_loops_total",
-            "Subscriptions total number of subscriptions loops");
-    }
+    readonly Counter _totalSubscriptionRequests = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_subscription_requests_total",
+        "SubscriptionsService total number of subscription requests received from Head");
+    readonly Counter _totalRegisteredSubscriptions = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_registered_subscriptions_total",
+        "Subscriptions total number of registered subscriptions");
+    readonly Counter _totalSubscriptionRequestsWhereAlreadyStarted = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_subscription_already_started_total",
+        "Subscriptions total number of subscription requests made where subscription was already started");
+    readonly Counter _totalSubscriptionsWithMissingProducerMicroserviceAddress = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_subscription_with_missing_producer_microservice_address_total",
+        "Subscriptions total number of subscriptions where producer microservice address configuration was missing");
+    readonly Counter _totalSubscriptionsFailedDueToException = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_subscription_failed_due_to_exception_total",
+        "Subscriptions total number of subscriptions failed due to an exception");
+    readonly Counter _totalSubscriptionsFailedDueToReceivingOrWritingEventsCompleted = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_subscription_failed_due_to_receiving_or_writing_events_completed_total",
+        "Subscriptions total number of subscriptions failed due to receiving or writing events completed");
+    readonly Counter _totalSubscriptionLoops = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_subscription_loops_total",
+        "Subscriptions total number of subscriptions loops");
+    readonly Gauge _currentConnectedSubscriptions = metricFactory.CreateGauge(
+        "dolittle_shared_runtime_event_horizon_consumer_connected_subscriptions_current",
+        "Subscription total number of connected subscriptions");
 
     /// <inheritdoc/>
     public void IncrementTotalSubscriptionsInitiatedFromHead()

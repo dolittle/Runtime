@@ -11,106 +11,65 @@ namespace Dolittle.Runtime.Projections.Store;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Counter _totalGet;
-    readonly Counter _totalFailedGet;
-    readonly Counter _totalGetAll;
-    readonly Counter _totalFailedGetAll;
-    readonly Counter _totalReplaceAttempts;
-    readonly Counter _totalCopyStoreReplacements;
-    readonly Counter _totalFailedCopyStoreReplacements;
-    readonly Counter _totalProjectionStoreReplacements;
-    readonly Counter _totalFailedProjectionStoreReplacements;
-    readonly Counter _totalRemoveAttempts;
-    readonly Counter _totalCopyStoreRemovals;
-    readonly Counter _totalFailedCopyStoreRemovals;
-    readonly Counter _totalProjectionStoreRemovals;
-    readonly Counter _totalFailedProjectionStoreRemovals;
-    readonly Counter _totalDropAttempts;
-    readonly Counter _totalCopyStoreDrops;
-    readonly Counter _totalFailedCopyStoreDrops;
-    readonly Counter _totalProjectionStoreDrops;
-    readonly Counter _totalFailedProjectionStoreDrops;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _totalGet = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_get_total",
-            "ProjectionStore total number of Get requests");
-        
-        _totalFailedGet = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_get_failed_total",
-            "ProjectionStore total number of Get requests that have failed");
-        
-        _totalGetAll = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_get_all_total",
-            "ProjectionStore total number of GetAll requests");
-        
-        _totalFailedGetAll = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_get_all_failed_total",
-            "ProjectionStore total number of GetAll requests that have failed");
-        
-        _totalReplaceAttempts = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_replace_total",
-            "ProjectionPersister total number of Replace requests");
-        
-        _totalCopyStoreReplacements = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_replace_copy_total",
-            "ProjectionPersister total number of Replace in copy stores that succeeded");
-        
-        _totalFailedCopyStoreReplacements = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_replace_copy_failed_total",
-            "ProjectionPersister total number of Replace in copy stores that failed");
-        
-        _totalProjectionStoreReplacements = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_replace_total",
-            "ProjectionStore total number of Replace requests");
-        
-        _totalFailedProjectionStoreReplacements = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_replace_failed_total",
-            "ProjectionStore total number of Replace requests that have failed");
-        
-        _totalRemoveAttempts = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_remove_total",
-            "ProjectionPersister total number of Remove requests");
-        
-        _totalCopyStoreRemovals = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_remove_copy_total",
-            "ProjectionPersister total number of Remove in copy stores that succeeded");
-        
-        _totalFailedCopyStoreRemovals = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_remove_copy_failed_total",
-            "ProjectionPersister total number of Remove in copy stores that failed");
-        
-        _totalProjectionStoreRemovals = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_remove_total",
-            "ProjectionStore total number of Remove requests");
-        
-        _totalFailedProjectionStoreRemovals = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_remove_failed_total",
-            "ProjectionStore total number of Remove requests that have failed");
-        
-        _totalDropAttempts = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_drop_total",
-            "ProjectionPersister total number of Drop requests");
-        
-        _totalCopyStoreDrops = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_drop_copy_total",
-            "ProjectionPersister total number of Drop in copy stores that succeeded");
-        
-        _totalFailedCopyStoreDrops = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_persister_drop_copy_failed_total",
-            "ProjectionPersister total number of Drop in copy stores that failed");
-        
-        _totalProjectionStoreDrops = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_drop_total",
-            "ProjectionStore total number of Drop requests");
-        
-        _totalFailedProjectionStoreDrops = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_projections_store_drop_failed_total",
-            "ProjectionStore total number of Drop requests that have failed");
-    }
+    readonly Counter _totalGet = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_get_total",
+        "ProjectionStore total number of Get requests");
+    readonly Counter _totalFailedGet = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_get_failed_total",
+        "ProjectionStore total number of Get requests that have failed");
+    readonly Counter _totalGetAll = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_get_all_total",
+        "ProjectionStore total number of GetAll requests");
+    readonly Counter _totalFailedGetAll = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_get_all_failed_total",
+        "ProjectionStore total number of GetAll requests that have failed");
+    readonly Counter _totalReplaceAttempts = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_replace_total",
+        "ProjectionPersister total number of Replace requests");
+    readonly Counter _totalCopyStoreReplacements = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_replace_copy_total",
+        "ProjectionPersister total number of Replace in copy stores that succeeded");
+    readonly Counter _totalFailedCopyStoreReplacements = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_replace_copy_failed_total",
+        "ProjectionPersister total number of Replace in copy stores that failed");
+    readonly Counter _totalProjectionStoreReplacements = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_replace_total",
+        "ProjectionStore total number of Replace requests");
+    readonly Counter _totalFailedProjectionStoreReplacements = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_replace_failed_total",
+        "ProjectionStore total number of Replace requests that have failed");
+    readonly Counter _totalRemoveAttempts = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_remove_total",
+        "ProjectionPersister total number of Remove requests");
+    readonly Counter _totalCopyStoreRemovals = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_remove_copy_total",
+        "ProjectionPersister total number of Remove in copy stores that succeeded");
+    readonly Counter _totalFailedCopyStoreRemovals = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_remove_copy_failed_total",
+        "ProjectionPersister total number of Remove in copy stores that failed");
+    readonly Counter _totalProjectionStoreRemovals = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_remove_total",
+        "ProjectionStore total number of Remove requests");
+    readonly Counter _totalFailedProjectionStoreRemovals = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_remove_failed_total",
+        "ProjectionStore total number of Remove requests that have failed");
+    readonly Counter _totalDropAttempts = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_drop_total",
+        "ProjectionPersister total number of Drop requests");
+    readonly Counter _totalCopyStoreDrops = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_drop_copy_total",
+        "ProjectionPersister total number of Drop in copy stores that succeeded");
+    readonly Counter _totalFailedCopyStoreDrops = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_persister_drop_copy_failed_total",
+        "ProjectionPersister total number of Drop in copy stores that failed");
+    readonly Counter _totalProjectionStoreDrops = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_drop_total",
+        "ProjectionStore total number of Drop requests");
+    readonly Counter _totalFailedProjectionStoreDrops = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_projections_store_drop_failed_total",
+        "ProjectionStore total number of Drop requests that have failed");
 
     /// <inheritdoc />
     public void IncrementTotalGet() 

@@ -11,36 +11,23 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Counter _totalEventHorizonEventsProcessed;
-    readonly Counter _totalEventHorizonEventWritesFailed;
-    readonly Counter _totalEventsFetched;
-    readonly Counter _totalStreamProcessorsStarted;
-    readonly Counter _totalStreamProcessorStartAttempts;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _totalEventHorizonEventsProcessed = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_events_processed_total",
-            "EventProcessor total number of event horizon events processed");
-
-        _totalEventHorizonEventWritesFailed = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_consumer_event_writes_failed_total",
-            "EventProcessor total number of event horizon event writes failed");
-
-        _totalEventsFetched = metricFactory.CreateCounter(
-            "dolittle_system_runtime_event_horizon_consumer_events_fetched_total",
-            "EventsFromEventHorizonFetcher total number of event horizon events that has been fetched from stream processors");
-
-        _totalStreamProcessorsStarted = metricFactory.CreateCounter(
-            "dolittle_system_runtime_event_horizon_consumer_stream_processors_started_total",
-            "StreamProcessor total number of stream processors started");
-
-        _totalStreamProcessorStartAttempts = metricFactory.CreateCounter(
-            "dolittle_system_runtime_event_horizon_consumer_stream_processor_start_attempts_total",
-            "StreamProcessor total number of stream processors attempted started");
-    }
+    readonly Counter _totalEventHorizonEventsProcessed = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_events_processed_total",
+        "EventProcessor total number of event horizon events processed");
+    readonly Counter _totalEventHorizonEventWritesFailed = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_consumer_event_writes_failed_total",
+        "EventProcessor total number of event horizon event writes failed");
+    readonly Counter _totalEventsFetched = metricFactory.CreateCounter(
+        "dolittle_system_runtime_event_horizon_consumer_events_fetched_total",
+        "EventsFromEventHorizonFetcher total number of event horizon events that has been fetched from stream processors");
+    readonly Counter _totalStreamProcessorsStarted = metricFactory.CreateCounter(
+        "dolittle_system_runtime_event_horizon_consumer_stream_processors_started_total",
+        "StreamProcessor total number of stream processors started");
+    readonly Counter _totalStreamProcessorStartAttempts = metricFactory.CreateCounter(
+        "dolittle_system_runtime_event_horizon_consumer_stream_processor_start_attempts_total",
+        "StreamProcessor total number of stream processors attempted started");
 
     /// <inheritdocs/>
     public void IncrementTotalEventHorizonEventsProcessed()

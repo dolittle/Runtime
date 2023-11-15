@@ -5,7 +5,7 @@
         <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
         <RootNamespace>Dolittle.Runtime.Server</RootNamespace>
         <OutputType>Exe</OutputType>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

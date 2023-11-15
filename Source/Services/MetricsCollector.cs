@@ -12,26 +12,17 @@ namespace Dolittle.Runtime.Services;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Counter _totalRequestTime;
-    readonly Counter _totalRequests;
-    readonly Counter _totalFailedRequests;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _totalRequests = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reverse_call_requests_total",
-            "ReverseCallDispatcher total requests");
-        
-        _totalFailedRequests = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reverse_call_failed_requests_total",
-            "ReverseCallDispatcher total failed requests");
-
-        _totalRequestTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reverse_call_requests_seconds_total",
-            "ReverseCallDispatcher total time spent writing request and waiting for response");
-    }
+    readonly Counter _totalRequestTime = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reverse_call_requests_seconds_total",
+        "ReverseCallDispatcher total time spent writing request and waiting for response");
+    readonly Counter _totalRequests = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reverse_call_requests_total",
+        "ReverseCallDispatcher total requests");
+    readonly Counter _totalFailedRequests = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reverse_call_failed_requests_total",
+        "ReverseCallDispatcher total failed requests");
 
     /// <inheritdoc />
     public void AddToTotalRequestTime(TimeSpan requestTime)

@@ -11,30 +11,20 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Counter _totalIncomingSubscriptions;
-    readonly Counter _totalRejectedSubscriptions;
-    readonly Counter _totalAcceptedSubscriptions;
-    readonly Counter _totalEventsWrittenToEventHorizon;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _totalIncomingSubscriptions = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_producer_incoming_subscriptions_total",
-            "ConsumerService total number of subscription received from other Runtimes");
-
-        _totalRejectedSubscriptions = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_producer_rejected_subscriptions_total",
-            "ConsumerService total number of rejected subscriptions");
-
-        _totalAcceptedSubscriptions = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_producer_accepted_subscriptions_total",
-            "ConsumerService total number of accepted subscriptions");
-        _totalEventsWrittenToEventHorizon = metricFactory.CreateCounter(
-            "dolittle_shared_runtime_event_horizon_producer_events_written_total",
-            "ConsumerService total number of events written to event horizon");
-    }
+    readonly Counter _totalIncomingSubscriptions = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_producer_incoming_subscriptions_total",
+        "ConsumerService total number of subscription received from other Runtimes");
+    readonly Counter _totalRejectedSubscriptions = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_producer_rejected_subscriptions_total",
+        "ConsumerService total number of rejected subscriptions");
+    readonly Counter _totalAcceptedSubscriptions = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_producer_accepted_subscriptions_total",
+        "ConsumerService total number of accepted subscriptions");
+    readonly Counter _totalEventsWrittenToEventHorizon = metricFactory.CreateCounter(
+        "dolittle_shared_runtime_event_horizon_producer_events_written_total",
+        "ConsumerService total number of events written to event horizon");
 
     /// <inheritdoc/>
     public void IncrementTotalIncomingSubscriptions()

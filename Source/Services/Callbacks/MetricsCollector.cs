@@ -12,51 +12,32 @@ namespace Dolittle.Runtime.Services.Callbacks;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Counter _totalCallbacksRegistered;
-    readonly Counter _totalCallbacksCalled;
-    readonly Counter _totalCallbackTime;
-    readonly Counter _totalCallbacksFailed;
-    readonly Counter _totalCallbacksUnregistered;
-    readonly Counter _totalSchedulesMissed;
-    readonly Counter _totalSchedulesMissedTime;
-    readonly Counter _totalCallbackLoopsFailed;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _totalCallbacksRegistered = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_registered_total",
-            "Callbacks total number of registered callbacks");
-
-        _totalCallbacksCalled = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_calls_total",
-            "Callbacks total number of called callbacks");
-
-        _totalCallbackTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_time_seconds_total",
-            "Callbacks total time spent calling callbacks");
-
-        _totalCallbacksFailed = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_failed_calls_total",
-            "Callbacks total number of called callbacks that failed");
-
-        _totalCallbacksUnregistered = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_unregistered_total",
-            "Callbacks total number of unregistered callbacks");
-
-        _totalSchedulesMissed = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_schedules_missed_total",
-            "Callbacks total number of missed callback schedules");
-
-        _totalSchedulesMissedTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_schedules_missed_time_seconds_total",
-            "Callbacks total time delays for missed callback schedules");
-
-        _totalCallbackLoopsFailed = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_callbacks_failed_call_loops_total",
-            "Callbacks total number of failed callback loops");
-    }
+    readonly Counter _totalCallbacksRegistered = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_registered_total",
+        "Callbacks total number of registered callbacks");
+    readonly Counter _totalCallbacksCalled = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_calls_total",
+        "Callbacks total number of called callbacks");
+    readonly Counter _totalCallbackTime = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_time_seconds_total",
+        "Callbacks total time spent calling callbacks");
+    readonly Counter _totalCallbacksFailed = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_failed_calls_total",
+        "Callbacks total number of called callbacks that failed");
+    readonly Counter _totalCallbacksUnregistered = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_unregistered_total",
+        "Callbacks total number of unregistered callbacks");
+    readonly Counter _totalSchedulesMissed = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_schedules_missed_total",
+        "Callbacks total number of missed callback schedules");
+    readonly Counter _totalSchedulesMissedTime = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_schedules_missed_time_seconds_total",
+        "Callbacks total time delays for missed callback schedules");
+    readonly Counter _totalCallbackLoopsFailed = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_callbacks_failed_call_loops_total",
+        "Callbacks total number of failed callback loops");
 
     /// <inheritdoc/>
     public void IncrementTotalCallbacksRegistered()

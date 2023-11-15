@@ -12,71 +12,44 @@ namespace Dolittle.Runtime.Services.ReverseCalls;
 /// Represents an implementation of <see cref="IMetricsCollector"/>.
 /// </summary>
 [Metrics, Singleton]
-public class MetricsCollector : IMetricsCollector
+public class MetricsCollector(IMetricFactory metricFactory) : IMetricsCollector
 {
-    readonly Gauge _currentPendingStreamWrites;
-    readonly Counter _totalStreamWrites;
-    readonly Counter _totalStreamWriteBytes;
-    readonly Counter _totalStreamWriteWaitTime;
-    readonly Counter _totalStreamWriteTime;
-    readonly Counter _totalStreamReads;
-    readonly Counter _totalStreamReadBytes;
-    readonly Counter _totalPingsSent;
-    readonly Counter _totalPongsReceived;
-    readonly Counter _totalKeepaliveResets;
-    readonly Counter _totalKeepaliveTimeouts;
-    readonly Counter _totalFirstMessageWaitTime;
-
-    public MetricsCollector(IMetricFactory metricFactory)
-    {
-        _currentPendingStreamWrites = metricFactory.CreateGauge(
-            "dolittle_system_runtime_services_reversecalls_pending_writes",
-            "ReverseCall current pending stream writes waiting");
-
-        _totalStreamWrites = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_stream_writes_total",
-            "ReverseCall total number of writes to streams");
-
-        _totalStreamWriteBytes = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_stream_write_bytes_total",
-            "ReverseCall total number of bytes written to streams");
-
-        _totalStreamWriteWaitTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_stream_write_wait_seconds_total",
-            "ReverseCall total time spent waiting to write to streams");
-
-        _totalStreamWriteTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_stream_write_seconds_total",
-            "ReverseCall total time spent writing to streams");
-
-        _totalStreamReads = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_stream_reads_total",
-            "ReverseCall total number of reads from streams");
-
-        _totalStreamReadBytes = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_stream_read_bytes_total",
-            "ReverseCall total number of bytes read from streams");
-
-        _totalPingsSent = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_pings_sent_total",
-            "ReverseCall total number of pings sent");
-
-        _totalPongsReceived = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_pongs_received_total",
-            "ReverseCall total number of pongs received");
-
-        _totalKeepaliveResets = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_keepalive_resets_total",
-            "ReverseCall total number of times ping keepalive tokens have been reset");
-
-        _totalKeepaliveTimeouts = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_keepalive_timeouts_total",
-            "ReverseCall total number of times ping keepalive tokens have timed out");
-
-        _totalFirstMessageWaitTime = metricFactory.CreateCounter(
-            "dolittle_system_runtime_services_reversecalls_first_message_wait_seconds_total",
-            "ReverseCall total time spent waiting for first message");
-    }
+    readonly Gauge _currentPendingStreamWrites = metricFactory.CreateGauge(
+        "dolittle_system_runtime_services_reversecalls_pending_writes",
+        "ReverseCall current pending stream writes waiting");
+    readonly Counter _totalStreamWrites = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_stream_writes_total",
+        "ReverseCall total number of writes to streams");
+    readonly Counter _totalStreamWriteBytes = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_stream_write_bytes_total",
+        "ReverseCall total number of bytes written to streams");
+    readonly Counter _totalStreamWriteWaitTime = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_stream_write_wait_seconds_total",
+        "ReverseCall total time spent waiting to write to streams");
+    readonly Counter _totalStreamWriteTime = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_stream_write_seconds_total",
+        "ReverseCall total time spent writing to streams");
+    readonly Counter _totalStreamReads = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_stream_reads_total",
+        "ReverseCall total number of reads from streams");
+    readonly Counter _totalStreamReadBytes = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_stream_read_bytes_total",
+        "ReverseCall total number of bytes read from streams");
+    readonly Counter _totalPingsSent = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_pings_sent_total",
+        "ReverseCall total number of pings sent");
+    readonly Counter _totalPongsReceived = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_pongs_received_total",
+        "ReverseCall total number of pongs received");
+    readonly Counter _totalKeepaliveResets = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_keepalive_resets_total",
+        "ReverseCall total number of times ping keepalive tokens have been reset");
+    readonly Counter _totalKeepaliveTimeouts = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_keepalive_timeouts_total",
+        "ReverseCall total number of times ping keepalive tokens have timed out");
+    readonly Counter _totalFirstMessageWaitTime = metricFactory.CreateCounter(
+        "dolittle_system_runtime_services_reversecalls_first_message_wait_seconds_total",
+        "ReverseCall total time spent waiting for first message");
 
     /// <inheritdoc/>
     public void IncrementPendingStreamWrites()

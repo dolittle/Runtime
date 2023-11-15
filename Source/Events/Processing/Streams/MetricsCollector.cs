@@ -23,6 +23,7 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _initialPositionSetForAllTenantsTotal;
     readonly Histogram _eventProcessingTime;
     readonly Counter _failedEventsProcessedTotal;
+    static readonly string[] _eventProcessorKindLabel = { "eventProcessorKind" };
 
 
     /// <summary>
@@ -34,48 +35,48 @@ public class MetricsCollector : IMetricsCollector
         _registrationsTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_registrations_total",
             "Total number of stream processors registration attempts per event processor kind",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
 
         _failedRegistrationsTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_failed_registrations_total",
             "Total number of failed stream processor registrations per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
 
         _initializationsTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_initializations_total",
             "Total number of stream processor initializations per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
 
         _startsTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_starts_total",
             "Total number of stream processor starts per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
 
         _failuresTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_failures_total",
             "Total number of stream processor faliures per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
 
         _positionSetTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_position_set_total",
             "Total number of times a stream processor has been reset to a specific position for one tenant per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
             
         _initialPositionSetForAllTenantsTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_initial_position_set_for_all_tenants_total",
             "Total number of times a stream processor has been reset the the beginning for all tenants per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
 
         _eventProcessingTime = metricFactory.CreateHistogram(
             "dolittle_system_runtime_streamprocessors_event_processing_time_seconds",
             "The time spent processing events per event processor kind.",
-            new[] { "eventProcessorKind" },
+            _eventProcessorKindLabel,
             new[] { 0.001, 0.01, 0.1, 1, 10 });
 
         _failedEventsProcessedTotal = metricFactory.CreateCounter(
             "dolittle_system_runtime_streamprocessors_failed_event_processings_total",
             "Total number of event processing attempts per event processor kind.",
-            new[] { "eventProcessorKind" });
+            _eventProcessorKindLabel);
     }
 
     /// <inheritdoc />
