@@ -12,7 +12,7 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -f net8.0 -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

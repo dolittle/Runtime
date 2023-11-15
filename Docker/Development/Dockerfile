@@ -1,5 +1,5 @@
 # DotNet Build
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS dotnet-build
 SHELL ["/bin/bash", "-c"]
 ARG VERSION
 ARG TARGETARCH
@@ -11,11 +11,11 @@ COPY Source /app/Source/
 COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
-RUN dotnet restore
-RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
+RUN dotnet restore -p:TargetFrameworks=net7.0
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:TargetFrameworks=net7.0 -f net7.0 -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 SHELL ["/bin/bash", "-c"]
 ARG TARGETARCH
 
@@ -33,9 +33,18 @@ RUN apt-get update \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
+# Hack to get MongoDB to install even without systemctl
+# See https://www.julienrouse.com/blog/systemctl_not_found_while_installing_mongodb_server/#spoiler-a-solution
+RUN ln -s /bin/true /usr/local/sbin/systemctl
+RUN ln -s /bin/true /usr/local/bin/systemctl
+RUN ln -s /bin/true /usr/sbin/systemctl
+RUN ln -s /bin/true /usr/bin/systemctl
+RUN ln -s /bin/true /sbin/systemctl
+RUN ln -s /bin/true /bin/systemctl
+
 # Install MongoDB
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | apt-key add - \
-    && echo "deb [ arch=$TARGETARCH ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/7.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-7.0.list \
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - \
+    && echo "deb [ arch=$TARGETARCH ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
     mongodb-org-server \
