@@ -1,5 +1,5 @@
 # DotNet Build
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS dotnet-build
 SHELL ["/bin/bash", "-c"]
 ARG VERSION
 ARG TARGETARCH
