@@ -1,3 +1,13 @@
+# [9.3.1] - 2023-11-27 [PR: #760](https://github.com/dolittle/Runtime/pull/760)
+## Summary
+Fixes and improvements to EventHorizon. 
+* Fixed incorrect subscription state mapping
+* Removed unused metadata from public streams
+
+### Fixed
+- Fixes a bug in eventhorizon state, where it incorrectly stored EventLogSequence in the position field.
+
+
 # [9.3.0] - 2023-11-10 [PR: #759](https://github.com/dolittle/Runtime/pull/759)
 ## Summary
 
