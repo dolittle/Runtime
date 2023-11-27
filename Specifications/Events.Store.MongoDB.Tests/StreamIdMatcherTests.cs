@@ -16,6 +16,14 @@ public class StreamIdMatcherTests
     }
     
     [Theory]
+    [InlineData("public-stream-2c087657-b318-40b1-ae92-a400de44e507")]
+    
+    public void VerifyMatchesPublicStream(string input)
+    {
+        StreamIdMatcher.IsPublicStream(input).Should().BeTrue();
+    }
+    
+    [Theory]
     [InlineData("x-06fd3dcf-a457-4e76-917e-5049ef49bfd3-event-log")]
     [InlineData("x-06fd3dcf-a457-4e76-917e-5049ef49bfd4-event-log")]
     
@@ -28,6 +36,7 @@ public class StreamIdMatcherTests
     [Theory]
     [InlineData("event-log")]
     [InlineData("stream-6a080414-d493-4ce1-a11b-bd60208b9d7a")]
+    [InlineData("public-stream-6a080414-d493-4ce1-a11b-bd60208b9d7a")]
     [InlineData("x-06fd3dcf-a457-4e76-917e-5049ef49bfd3-event-log")]
     [InlineData("x-16fd3dcf-a457-4e76-917e-5049ef49bfd3-stream-6a080414-d493-4ce1-a11b-bd60208b9d7b")]
     public void VerifyMatches(string input)

@@ -18,7 +18,7 @@ public class event_builder
             execution_contexts.create_store(),
             metadata.random_event_metadata,
             metadata.aggregate_metadata_from_non_aggregate_event,
-            new EventHorizonMetadata(),
+            null,
             events.some_event_content_bson_document);
 
     public event_builder(EventLogSequenceNumber event_log_sequence_number, AggregateRootVersion aggregate_version) =>
@@ -27,7 +27,7 @@ public class event_builder
             execution_contexts.create_store(),
             metadata.random_event_metadata,
             metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version),
-            new EventHorizonMetadata(),
+            null,
             events.some_event_content_bson_document);
 
     public MongoDB.Events.Event build() => _instance;

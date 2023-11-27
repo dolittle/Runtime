@@ -51,8 +51,8 @@ public static class CommittedEventExtension
     /// </summary>
     /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
     /// <returns>The converted <see cref="EventHorizonMetadata" />.</returns>
-    public static EventHorizonMetadata GetEventHorizonMetadata(this CommittedEvent committedEvent) =>
+    public static EventHorizonMetadata? GetEventHorizonMetadata(this CommittedEvent committedEvent) =>
         committedEvent is CommittedExternalEvent externalEvent ?
             externalEvent.GetEventHorizonMetadata()
-            : new EventHorizonMetadata();
+            : null;
 }

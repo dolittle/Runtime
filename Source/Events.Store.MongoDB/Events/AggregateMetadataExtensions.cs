@@ -13,8 +13,8 @@ public static class AggregateMetadataExtensions
     /// </summary>
     /// <param name="committedEvent">The <see cref="CommittedEvent" />.</param>
     /// <returns>The <see cref="AggregateMetadata"/>.</returns>
-    public static AggregateMetadata GetAggregateMetadata(this CommittedEvent committedEvent) =>
+    public static AggregateMetadata? GetAggregateMetadata(this CommittedEvent committedEvent) =>
         committedEvent is CommittedAggregateEvent aggregateEvent ?
             new AggregateMetadata(true, aggregateEvent.AggregateRoot.Id, aggregateEvent.AggregateRoot.Generation, aggregateEvent.AggregateRootVersion)
-            : new AggregateMetadata();
+            : null;
 }
