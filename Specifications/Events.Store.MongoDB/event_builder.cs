@@ -18,7 +18,7 @@ public class event_builder
             execution_contexts.create_store(),
             metadata.random_event_metadata,
             metadata.aggregate_metadata_from_non_aggregate_event,
-            new EventHorizonMetadata(),
+            null,
             events.some_event_content_bson_document);
 
     public event_builder(EventLogSequenceNumber event_log_sequence_number, AggregateRootVersion aggregate_version) =>
@@ -27,7 +27,7 @@ public class event_builder
             execution_contexts.create_store(),
             metadata.random_event_metadata,
             metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version),
-            new EventHorizonMetadata(),
+            null,
             events.some_event_content_bson_document);
 
     public MongoDB.Events.Event build() => _instance;
@@ -54,10 +54,13 @@ public class event_builder
 
     public event_builder from_event_horizon()
     {
-        _instance.EventHorizon.FromEventHorizon = true;
-        _instance.EventHorizon.Consent = Guid.Parse("df838974-100b-4a07-9e44-08e2c7d7e99a");
-        _instance.EventHorizon.ExternalEventLogSequenceNumber = 71883084;
-        _instance.EventHorizon.Received = new DateTime(2944480155, DateTimeKind.Utc);
+        _instance.EventHorizon = new EventHorizonMetadata
+        {
+            FromEventHorizon = true,
+            ExternalEventLogSequenceNumber = 71883084,
+            Received = new DateTime(2944480155, DateTimeKind.Utc),
+            Consent = Guid.Parse("df838974-100b-4a07-9e44-08e2c7d7e99a")
+        };
         return this;
     }
 }

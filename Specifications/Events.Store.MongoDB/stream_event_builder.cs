@@ -20,7 +20,7 @@ public class stream_event_builder
             execution_contexts.create_store(),
             metadata.random_stream_event_metadata,
             metadata.aggregate_metadata_from_non_aggregate_event,
-            new EventHorizonMetadata(),
+            null,
             events.some_event_content_bson_document);
 
     public stream_event_builder(StreamPosition stream_position, PartitionId partition, AggregateRootVersion aggregate_version) =>
@@ -30,7 +30,7 @@ public class stream_event_builder
             execution_contexts.create_store(),
             metadata.random_stream_event_metadata,
             metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version),
-            new EventHorizonMetadata(),
+            null,
             events.some_event_content_bson_document);
 
     public Events.StreamEvent build() => _instance;
@@ -69,10 +69,15 @@ public class stream_event_builder
 
     public stream_event_builder from_event_horizon()
     {
-        _instance.EventHorizon.FromEventHorizon = true;
-        _instance.EventHorizon.Consent = Guid.Parse("e1af7d82-b11a-4766-bcfa-f5405ac0b133");
-        _instance.EventHorizon.ExternalEventLogSequenceNumber = 205;
-        _instance.EventHorizon.Received = new DateTime(226397148, DateTimeKind.Utc);
+        _instance.EventHorizon = new EventHorizonMetadata
+        {
+            FromEventHorizon = true,
+            ExternalEventLogSequenceNumber = 205,
+            Received = new DateTime(226397148, DateTimeKind.Utc),
+            Consent = Guid.Parse("e1af7d82-b11a-4766-bcfa-f5405ac0b133")
+        };
+
+
         return this;
     }
 }

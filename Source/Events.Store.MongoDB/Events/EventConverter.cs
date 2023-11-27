@@ -30,7 +30,7 @@ public class EventConverter : IEventConverter
             committedEvent.EventLogSequenceNumber,
             committedEvent.ExecutionContext.ToStoreRepresentation(),
             committedEvent.GetEventMetadata(),
-            new AggregateMetadata(),
+            null,
             committedEvent.GetEventHorizonMetadata(),
             _contentConverter.ToBson(committedEvent.Content));
 

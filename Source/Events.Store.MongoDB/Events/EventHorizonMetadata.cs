@@ -42,22 +42,22 @@ public class EventHorizonMetadata
     /// <summary>
     /// Gets or sets a value indicating whether this event came from EventHorizon.
     /// </summary>
-    public bool FromEventHorizon { get; set; }
+    public bool FromEventHorizon { get; init; }
 
     /// <summary>
     /// Gets or sets the origin event log sequence number of the event if it came from EventHorizon.
     /// </summary>
     [BsonRepresentation(BsonType.Decimal128)]
-    public ulong ExternalEventLogSequenceNumber { get; set; }
+    public ulong ExternalEventLogSequenceNumber { get; init; }
 
     /// <summary>
     /// Gets or sets the <see cref="DateTime"/> of when the Event was received.
     /// </summary>
     [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-    public DateTime Received { get; set; }
+    public DateTime Received { get; init; }
 
     /// <summary>
     /// Gets or sets the consent id.
     /// </summary>
-    public Guid Consent { get; set; }
+    public Guid Consent { get; init; }
 }

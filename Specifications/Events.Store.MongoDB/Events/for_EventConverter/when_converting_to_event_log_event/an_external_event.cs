@@ -20,7 +20,7 @@ public class an_external_event : given.an_event_content_converter
     Because of = () => result = event_converter.ToEventLogEvent(committed_event);
 
     It should_represent_the_same_event = () => result.ShouldBeTheSameAs(committed_event);
-    It should_not_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.ShouldBeFalse();
+    private It should_not_be_applied_by_aggregate = () => result.Aggregate.ShouldBeNull();
     It should_come_from_event_horizon = () => result.IsFromEventHorizon.ShouldBeTrue();
     It should_have_the_same_consent = () => result.EventHorizon.Consent.ShouldEqual(committed_event.Consent.Value);
     It should_have_the_same_external_event_log_sequence_number = () => result.EventHorizon.ExternalEventLogSequenceNumber.ShouldEqual(committed_event.ExternalEventLogSequenceNumber.Value);

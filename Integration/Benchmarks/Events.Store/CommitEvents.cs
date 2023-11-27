@@ -100,10 +100,10 @@ public class CommitEvents : JobBase
     [Benchmark]
     [Arguments(10)]
     [Arguments(100)]
-    public async Task CommitEventsInParallel(int ParallelCommits)
+    public async Task CommitEventsInParallel(int parallelCommits)
     {
         var tasks = new List<Task>();
-        foreach (var i in Enumerable.Range(0, ParallelCommits))
+        for (var i = 0; i < parallelCommits; i++)
         {
             tasks.Add(_eventStore.Commit(_eventsToCommit, _executionContext));   
         }

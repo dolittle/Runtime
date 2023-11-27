@@ -21,7 +21,8 @@ public class SubscriptionState
     /// <param name="producerTenantId">The producer <see cref="TenantId" />.</param>
     /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
     /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
-    /// <param name="position">The position.</param>
+    /// <param name="position">The public stream position.</param>
+    /// <param name="eventLogSequence">The event log position</param>
     /// <param name="retryTime">The time to retry processing.</param>
     /// <param name="failureReason">The reason for failing.</param>
     /// <param name="processingAttempts">The number of times the event at <see cref="Position" /> has been processed.</param>
@@ -33,6 +34,7 @@ public class SubscriptionState
         Guid streamId,
         string partitionId,
         ulong position,
+        ulong eventLogSequence,
         DateTime retryTime,
         string failureReason,
         uint processingAttempts,
@@ -44,6 +46,7 @@ public class SubscriptionState
         Stream = streamId;
         Partition = partitionId;
         Position = position;
+        EventLogSequence = eventLogSequence;
         LastSuccessfullyProcessed = lastSuccessfullyProcessed;
         RetryTime = retryTime;
         FailureReason = failureReason;
@@ -76,6 +79,12 @@ public class SubscriptionState
     /// </summary>
     [BsonRepresentation(BsonType.Decimal128)]
     public ulong Position { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the EventLogSequence.
+    /// </summary>
+    [BsonRepresentation(BsonType.Decimal128)]
+    public ulong EventLogSequence { get; set; }
 
     /// <summary>
     /// Gets or sets the timestamp when the StreamProcessor has processed the stream with Kind of UTC.

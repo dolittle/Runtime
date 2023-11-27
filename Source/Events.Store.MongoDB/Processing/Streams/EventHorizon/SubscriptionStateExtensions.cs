@@ -19,7 +19,7 @@ public static class SubscriptionStateExtensions
     /// <returns>The converted <see cref="runtime.Partitioned.StreamProcessorState" />.</returns>
     public static runtime.StreamProcessorState ToRuntimeRepresentation(this SubscriptionState state) =>
         new(
-            new ProcessingPosition(state.Position, state.Position),
+            new ProcessingPosition(state.Position, state.EventLogSequence),
             state.FailureReason,
             state.RetryTime,
             state.ProcessingAttempts,
