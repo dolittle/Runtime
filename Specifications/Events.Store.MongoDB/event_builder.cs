@@ -54,10 +54,13 @@ public class event_builder
 
     public event_builder from_event_horizon()
     {
-        _instance.EventHorizon.FromEventHorizon = true;
-        _instance.EventHorizon.Consent = Guid.Parse("df838974-100b-4a07-9e44-08e2c7d7e99a");
-        _instance.EventHorizon.ExternalEventLogSequenceNumber = 71883084;
-        _instance.EventHorizon.Received = new DateTime(2944480155, DateTimeKind.Utc);
+        _instance.EventHorizon = new EventHorizonMetadata
+        {
+            FromEventHorizon = true,
+            ExternalEventLogSequenceNumber = 71883084,
+            Received = new DateTime(2944480155, DateTimeKind.Utc),
+            Consent = Guid.Parse("df838974-100b-4a07-9e44-08e2c7d7e99a")
+        };
         return this;
     }
 }

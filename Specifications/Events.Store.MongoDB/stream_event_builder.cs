@@ -69,10 +69,15 @@ public class stream_event_builder
 
     public stream_event_builder from_event_horizon()
     {
-        _instance.EventHorizon.FromEventHorizon = true;
-        _instance.EventHorizon.Consent = Guid.Parse("e1af7d82-b11a-4766-bcfa-f5405ac0b133");
-        _instance.EventHorizon.ExternalEventLogSequenceNumber = 205;
-        _instance.EventHorizon.Received = new DateTime(226397148, DateTimeKind.Utc);
+        _instance.EventHorizon = new EventHorizonMetadata
+        {
+            FromEventHorizon = true,
+            ExternalEventLogSequenceNumber = 205,
+            Received = new DateTime(226397148, DateTimeKind.Utc),
+            Consent = Guid.Parse("e1af7d82-b11a-4766-bcfa-f5405ac0b133")
+        };
+
+
         return this;
     }
 }
