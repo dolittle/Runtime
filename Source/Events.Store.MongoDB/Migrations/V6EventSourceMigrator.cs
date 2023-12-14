@@ -62,12 +62,6 @@ public static class V6EventSourceMigrator
     public static async Task ConvertUuidFieldsToStringAsync(IMongoCollection<BsonDocument> collection, params string[] uuidFieldNames)
     {
         var collectionName = collection.CollectionNamespace.CollectionName;
-        var tempCollectionName = $"{collectionName}_temp";
-        // Create a temporary collection
-        var tempCollection = collection.Database.GetCollection<BsonDocument>(tempCollectionName);
-        // Backup the original collection to the temporary collection
-
-
         // Create a projection to include only the fields that need to be converted
         var projection = Builders<BsonDocument>.Projection.Include("_id");
         foreach (var fieldName in uuidFieldNames)

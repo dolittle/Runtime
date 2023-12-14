@@ -82,13 +82,9 @@ public class V9Migrations : IDbMigration
         await V6EventSourceMigrator.MigrateEventsourceId(eventCollection);
     }
 
-    async Task MigrateEventCollections(IList<string> streams)
+    Task MigrateEventCollections(IList<string> streams)
     {
-        foreach (var collectionNames in streams)
-        {
-            _logger.LogInformation("Migrating {CollectionName}", collectionNames);
-            await MigrateEventCollection(collectionNames);
-        }
+        return Task.WhenAll(streams.AsParallel().WithDegreeOfParallelism(16).Select(MigrateEventCollection));
     }
 
     static async Task<IList<string>> GetEventCollections(IMongoDatabase db)
