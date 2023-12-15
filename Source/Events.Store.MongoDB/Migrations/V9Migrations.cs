@@ -66,7 +66,7 @@ public class V9Migrations : IDbMigration
         });
         metadata.CurrentVersion = MigrationVersion;
         metadata.UpdatedAt = DateTimeOffset.UtcNow;
-        
+
         await _metadataManager.Set(metadata);
 
         _logger.LogInformation("Completed migration of tenant {TenantId} to {Version} in {Elapsed}", _tenantId.Value, MigrationVersion,
@@ -75,16 +75,22 @@ public class V9Migrations : IDbMigration
 
     async Task MigrateEventCollection(string collectionName)
     {
+        var start = Stopwatch.GetTimestamp();
         var eventCollection = _db.GetCollection<BsonDocument>(collectionName);
 
         await RemoveEventHorizonDefaultMetadata(eventCollection);
         await RemoveAggregateDefaultDefaultMetadata(eventCollection);
-        await V6EventSourceMigrator.MigrateEventsourceId(eventCollection);
+        var eventSourceIdsMigrated = await V6EventSourceMigrator.MigrateEventsourceId(eventCollection, _logger);
+        if (eventSourceIdsMigrated > 0)
+        {
+            _logger.LogInformation("Migrated {EventSourceIdsMigrated} event source ids from V6 format in {Elapsed} for {CollectionName}", eventSourceIdsMigrated,
+                Stopwatch.GetElapsedTime(start), collectionName);
+        }
     }
 
     Task MigrateEventCollections(IList<string> streams)
     {
-        return Task.WhenAll(streams.AsParallel().WithDegreeOfParallelism(16).Select(MigrateEventCollection));
+        return Task.WhenAll(streams.AsParallel().WithDegreeOfParallelism(10).Select(MigrateEventCollection));
     }
 
     static async Task<IList<string>> GetEventCollections(IMongoDatabase db)

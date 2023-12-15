@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Diagnostics.OpenTelemetry;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -16,15 +16,17 @@ public static class V6EventSourceMigrator
 {
     static readonly string[] _migratedFields = { "Metadata.EventSource" };
 
-    public static async Task MigrateEventsourceId(IMongoCollection<BsonDocument> collection)
+    public static async Task<long> MigrateEventsourceId(IMongoCollection<BsonDocument> collection, ILogger logger)
     {
         using var activity = RuntimeActivity.Source.StartActivity();
-        
+
         var eventLogHasUuidFields = await ContainsUuidFieldsAsync(collection, _migratedFields);
         if (eventLogHasUuidFields)
         {
-            await ConvertUuidFieldsToStringAsync(collection, _migratedFields);
+            return await ConvertUuidFieldsToStringAsync(collection, logger, _migratedFields);
         }
+
+        return 0;
     }
 
     public static async Task<bool> ContainsUuidFieldsAsync(IMongoCollection<BsonDocument> collection, params string[] uuidFieldNames)
@@ -58,10 +60,11 @@ public static class V6EventSourceMigrator
     /// Creates a copy of the collection with the given UUID fields converted to strings
     /// </summary>
     /// <param name="collection">Source collection</param>
+    /// <param name="logger"></param>
     /// <param name="uuidFieldNames">Which fields to convert</param>
-    public static async Task ConvertUuidFieldsToStringAsync(IMongoCollection<BsonDocument> collection, params string[] uuidFieldNames)
+    public static async Task<long> ConvertUuidFieldsToStringAsync(IMongoCollection<BsonDocument> collection, ILogger logger, params string[] uuidFieldNames)
     {
-        var collectionName = collection.CollectionNamespace.CollectionName;
+        var total = 0L;
         // Create a projection to include only the fields that need to be converted
         var projection = Builders<BsonDocument>.Projection.Include("_id");
         foreach (var fieldName in uuidFieldNames)
@@ -79,23 +82,23 @@ public static class V6EventSourceMigrator
                 var updateDoc = new BsonDocument();
                 foreach (var fieldName in uuidFieldNames)
                 {
-                    if (!TryGetValue(doc,fieldName, out var element))
+                    if (!TryGetValue(doc, fieldName, out var element))
                     {
-                        Console.WriteLine($"Field {fieldName} not found for id {doc["_id"]}");
+                        logger.LogWarning("Field {FieldName} not found for id {Id}", fieldName, doc["_id"]?.ToString());
                     }
-                    else if (element!.IsBsonBinaryData)
+                    else if (element.IsBsonBinaryData)
                     {
-                        // Console.WriteLine($"Converting {fieldName} to string for id {doc["_id"]}");
                         var binaryData = element.AsBsonBinaryData;
                         if (binaryData.SubType is BsonBinarySubType.UuidLegacy or BsonBinarySubType.UuidStandard)
                         {
                             var guid = binaryData.ToGuid();
                             updateDoc.Add(fieldName, guid.ToString());
+                            total++;
                         }
                     }
                     else
                     {
-                        Console.WriteLine($"Field {fieldName} is not a UUID for id {doc["_id"]}");
+                        logger.LogWarning("Field {FieldName} not a UUID {Id}", fieldName, doc["_id"]?.ToString());
                     }
                 }
 
@@ -121,6 +124,8 @@ public static class V6EventSourceMigrator
         {
             await collection.BulkWriteAsync(bulkOps);
         }
+
+        return total;
     }
 
 
