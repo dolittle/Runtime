@@ -38,13 +38,19 @@ public class V9Migrations : IDbMigration
         _tenantId = tenantId;
     }
 
-    public async Task MigrateTenant()
+    public Task MigrateTenant()
+    {
+        _ = Task.Run(MigrateTenantInBackground);
+        return Task.CompletedTask;
+    }
+
+    async Task MigrateTenantInBackground()
     {
         var metadata = await _metadataManager.Get();
 
-        if (metadata?.Migrations.Any(it => it.Version.Equals(MigrationVersion)) == true) return; // Already migrated
+        if (metadata?.Migrations.Any(it => it.Version.Equals(MigrationVersion)) == true) return;
 
-        _logger.LogInformation("Migrating tenant {TenantId} to {Version}", _tenantId.Value, MigrationVersion);
+        _logger.LogInformation("Migrating tenant {TenantId} to {Version} in the background", _tenantId.Value, MigrationVersion);
 
         var before = Stopwatch.GetTimestamp();
 
@@ -66,7 +72,7 @@ public class V9Migrations : IDbMigration
         });
         metadata.CurrentVersion = MigrationVersion;
         metadata.UpdatedAt = DateTimeOffset.UtcNow;
-        
+
         await _metadataManager.Set(metadata);
 
         _logger.LogInformation("Completed migration of tenant {TenantId} to {Version} in {Elapsed}", _tenantId.Value, MigrationVersion,
@@ -75,20 +81,22 @@ public class V9Migrations : IDbMigration
 
     async Task MigrateEventCollection(string collectionName)
     {
+        var start = Stopwatch.GetTimestamp();
         var eventCollection = _db.GetCollection<BsonDocument>(collectionName);
 
         await RemoveEventHorizonDefaultMetadata(eventCollection);
         await RemoveAggregateDefaultDefaultMetadata(eventCollection);
-        await V6EventSourceMigrator.MigrateEventsourceId(eventCollection);
+        var eventSourceIdsMigrated = await V6EventSourceMigrator.MigrateEventsourceId(eventCollection, _logger);
+        if (eventSourceIdsMigrated > 0)
+        {
+            _logger.LogInformation("Migrated {EventSourceIdsMigrated} event source ids from V6 format in {Elapsed} for {CollectionName}", eventSourceIdsMigrated,
+                Stopwatch.GetElapsedTime(start), collectionName);
+        }
     }
 
-    async Task MigrateEventCollections(IList<string> streams)
+    Task MigrateEventCollections(IList<string> streams)
     {
-        foreach (var collectionNames in streams)
-        {
-            _logger.LogInformation("Migrating {CollectionName}", collectionNames);
-            await MigrateEventCollection(collectionNames);
-        }
+        return Task.WhenAll(streams.AsParallel().WithDegreeOfParallelism(4).Select(MigrateEventCollection));
     }
 
     static async Task<IList<string>> GetEventCollections(IMongoDatabase db)
