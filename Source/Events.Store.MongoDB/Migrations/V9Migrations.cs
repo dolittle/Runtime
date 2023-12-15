@@ -38,13 +38,19 @@ public class V9Migrations : IDbMigration
         _tenantId = tenantId;
     }
 
-    public async Task MigrateTenant()
+    public Task MigrateTenant()
+    {
+        _ = Task.Run(MigrateTenantInBackground);
+        return Task.CompletedTask;
+    }
+
+    async Task MigrateTenantInBackground()
     {
         var metadata = await _metadataManager.Get();
 
-        if (metadata?.Migrations.Any(it => it.Version.Equals(MigrationVersion)) == true) return; // Already migrated
+        if (metadata?.Migrations.Any(it => it.Version.Equals(MigrationVersion)) == true) return;
 
-        _logger.LogInformation("Migrating tenant {TenantId} to {Version}", _tenantId.Value, MigrationVersion);
+        _logger.LogInformation("Migrating tenant {TenantId} to {Version} in the background", _tenantId.Value, MigrationVersion);
 
         var before = Stopwatch.GetTimestamp();
 
@@ -90,7 +96,7 @@ public class V9Migrations : IDbMigration
 
     Task MigrateEventCollections(IList<string> streams)
     {
-        return Task.WhenAll(streams.AsParallel().WithDegreeOfParallelism(10).Select(MigrateEventCollection));
+        return Task.WhenAll(streams.AsParallel().WithDegreeOfParallelism(4).Select(MigrateEventCollection));
     }
 
     static async Task<IList<string>> GetEventCollections(IMongoDatabase db)
