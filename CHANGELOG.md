@@ -1,3 +1,15 @@
+# [9.3.2] - 2023-12-15 [PR: #761](https://github.com/dolittle/Runtime/pull/761)
+## Summary
+
+The runtime performs some housekeeping tasks when starting after being upgraded from an older version. Since the runtime has a compatibility layer supporting the older database formats, it is possible to process and commit events while the migration is being performed. 
+This changes the behavior from 9.3.1, where the runtime would wait for the migrations to complete before starting.
+
+### Changed
+
+- Allow migrations to be performed in the background
+- Parallelized migrations.
+
+
 # [9.3.1] - 2023-11-27 [PR: #760](https://github.com/dolittle/Runtime/pull/760)
 ## Summary
 Fixes and improvements to EventHorizon. 
