@@ -17,23 +17,10 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 [Singleton, PerTenant]
 public class StreamEventSubscriber : IStreamEventSubscriber
 {
-    const int ChannelCapacity = 100;
+    const int ChannelCapacity = 20;
     readonly IEventLogStream _eventLogStream;
 
     public StreamEventSubscriber(IEventLogStream eventLogStream) => _eventLogStream = eventLogStream;
-
-    // public ChannelReader<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken)
-    // {
-    //     var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
-    //     ToStreamEvents(
-    //         _eventLogStream.SubscribePublic(position.EventLogPosition, cancellationToken),
-    //         channel.Writer,
-    //         position,
-    //         evt => evt.Public,
-    //         false,
-    //         cancellationToken);
-    //     return channel.Reader;
-    // }
 
     public ChannelReader<StreamEvent> Subscribe(ScopeId scopeId,
         IReadOnlyCollection<ArtifactId> artifactIds,
