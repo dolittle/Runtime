@@ -1,3 +1,12 @@
+# [9.3.3] - 2024-2-7 [PR: #762](https://github.com/dolittle/Runtime/pull/762)
+## Summary
+Fixes an issue where the runtime could use large amounts of memory when reprocessing. Also tuned the pipeline to use slightly less memory overall.
+
+
+## Fixed
+- Ensured that the stream processor subscriptions do not request loading additional events unless the pipeline has < 2 un-acknowledged batches.
+
+
 # [9.3.2] - 2023-12-15 [PR: #761](https://github.com/dolittle/Runtime/pull/761)
 ## Summary
 
