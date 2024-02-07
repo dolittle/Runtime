@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 [Singleton, PerTenant]
 public class StreamEventSubscriber : IStreamEventSubscriber
 {
-    const int ChannelCapacity = 100;
+    const int ChannelCapacity = 20;
     readonly IEventLogStream _eventLogStream;
 
     public StreamEventSubscriber(IEventLogStream eventLogStream) => _eventLogStream = eventLogStream;
