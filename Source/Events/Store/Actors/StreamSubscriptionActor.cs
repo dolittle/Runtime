@@ -217,7 +217,13 @@ public sealed class StreamSubscriptionActor : IActor
     void RequestMoreCatchupEvents(IContext context, ulong fromOffset, ulong toOffset)
     {
         _isCatchingUp = true;
+        if (_publishRequestsInFlight > 1)
+        {
+            // Too many events in-flight, wait for them to finish before catching up
+            return;
+        }
         _catchUpRequestsInFlight++;
+
         context.Request(_catchupPid, new EventLogCatchupRequest(_scope, fromOffset, toOffset, _artifactSet));
     }
 
