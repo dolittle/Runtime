@@ -41,6 +41,6 @@ public class RuntimeLocator : ICanLocateRuntimes
             string.IsNullOrWhiteSpace(argument.Host) ? DefaultRuntimeHost : argument.Host,
             argument.Port == 0 ? new EndpointsConfiguration().Management.Port : argument.Port);
                 
-        return [address];
+        return new[] {address};
     }
 }
