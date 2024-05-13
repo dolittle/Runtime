@@ -7,7 +7,6 @@ using Dolittle.Runtime.CLI.Runtime.Configuration;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
 using Dolittle.Runtime.CLI.Runtime.Events.Processing;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
-using Dolittle.Runtime.CLI.Runtime.Projections;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.CLI.Runtime;
@@ -31,6 +30,5 @@ public static class ServiceCollectionExtensions
         services.AddEventHandlerServices();
         services.AddEventTypesServices();
         services.AddEventsProcessingServices();
-        services.AddProjectionServices();
     }
 }
