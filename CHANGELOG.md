@@ -1,3 +1,13 @@
+# [9.4.0] - 2024-5-13 [PR: #765](https://github.com/dolittle/Runtime/pull/765)
+## Summary
+Projections are now supported within the SDK (from V23), and runs on top of standard event handlers with no need for special support in the runtime. This replaces the need for the projections feature in the runtime.
+
+Updated dependencies for Proto.Actor, Grpc, OTEL etc.
+
+### Removed
+- Runtime Projections.
+
+
 # [9.3.3] - 2024-2-7 [PR: #762](https://github.com/dolittle/Runtime/pull/762)
 ## Summary
 Fixes an issue where the runtime could use large amounts of memory when reprocessing. Also tuned the pipeline to use slightly less memory overall.
