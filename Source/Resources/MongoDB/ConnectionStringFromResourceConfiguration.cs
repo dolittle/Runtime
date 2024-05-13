@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Resources.MongoDB;
 /// <summary>
 /// Represents an implementation of <see cref="IKnowTheConnectionString"/>.
 /// </summary>
-[Singleton, PerTenant] // TODO: Should things like this really be a singleton?
+[Singleton, PerTenant]
 public class ConnectionStringFromResourceConfiguration : IKnowTheConnectionString
 {
 

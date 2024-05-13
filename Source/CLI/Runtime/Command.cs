@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.CLI.Runtime;
 [Subcommand(typeof(Configuration.Command))]
 [Subcommand(typeof(EventHandlers.Command))]
 [Subcommand(typeof(EventTypes.Command))]
-[Subcommand(typeof(Projections.Command))]
 public class Command : CommandBase
 {
     /// <summary>

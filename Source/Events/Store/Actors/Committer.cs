@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
@@ -109,7 +110,7 @@ public class Committer : IActor
             _metrics.IncrementTotalCommitsReceived();
             if (CannotProcessCommit(out var failure))
             {
-                return RespondWithFailure(failure);
+                return RespondWithFailure(failure.ToFailure());
             }
         
             if (!_pipeline!.TryAddEventsFrom(request, out var batchedEvents, out var error))
@@ -123,7 +124,7 @@ public class Committer : IActor
                 result => !result.Success
                     ? RespondWithFailure(result.Exception.ToFailure())
                     : RespondWithEvents(batchedEvents.Item.ToProtobuf()),
-                (error, _) => RespondWithFailure(error.ToFailure()));
+                (err, _) => RespondWithFailure(err.ToFailure()));
 
             return Task.CompletedTask;
         }
@@ -151,7 +152,7 @@ public class Committer : IActor
             _metrics.IncrementTotalCommitsForAggregateReceived();
             if (CannotProcessCommit(out var failure))
             {
-                return RespondWithFailure(failure);
+                return RespondWithFailure(failure.ToFailure());
             }
 
             var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
@@ -306,7 +307,7 @@ public class Committer : IActor
         }
     }
 
-    bool CannotProcessCommit(out Dolittle.Protobuf.Contracts.Failure? failure)
+    bool CannotProcessCommit([NotNullWhen(true)] out Dolittle.Protobuf.Contracts.Failure? failure)
     {
         failure = default;
         if (_shuttingDown)
@@ -326,7 +327,7 @@ public class Committer : IActor
 
     void TrySendBatch(IContext context)
     {
-        if (_shuttingDown || !_readyToSend || !_pipeline.TryGetNextBatch(out var batchToSend))
+        if (_shuttingDown || !_readyToSend || !_pipeline!.TryGetNextBatch(out var batchToSend))
         {
             return;
         }
