@@ -133,15 +133,12 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses a single YAML configura
 
 ### Example config
 ```yaml runtime.yml
-eventStore:
-    backwardsCompatibility:
-        version: V6
 platform:
     customerID: 6d8eaf84-969c-4234-b78f-30632a608e5a
     applicationID: e0078604-ae62-378d-46fb-9e245d824c61
     microserviceID: ffb20e4f-9227-574d-31aa-d6e59b34495d
     customerName: TheCustomer
-    applicationName: THeApplication
+    applicationName: TheApplication
     microserviceName: TheMicroservice
     environment: Dev
 microservices:
@@ -152,11 +149,10 @@ tenants:
     1c707441-95b3-4214-a4d1-4199c58afa23:
         resources:
             eventStore:
-              servers:
-              - my.host
+              connectionString: mongodb://my.host:27017
               database: eventstore
             readModels:
-              host: mongodb://my.host:27017
+              connectionString: mongodb://my.host:27017
               database: readmodels
         eventHorizons:
             d47c6fb7-2339-e286-2912-2b9f163a5aa3:
@@ -173,12 +169,11 @@ tenants:
   445f8ea8-1a6f-40d7-b2fc-796dba92dc44:
     resources:
       eventStore:
-        servers:
-          - localhost
+        connectionString: mongodb://localhost:27017
         database: event_store
         maxConnectionPoolSize: 1000
       readModels:
-        host: mongodb://localhost:27017
+        connectionString: mongodb://localhost:27017
         database: readmodels
         useSSL: false
 ```
