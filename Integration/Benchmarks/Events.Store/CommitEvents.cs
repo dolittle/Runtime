@@ -19,9 +19,9 @@ namespace Integration.Benchmarks.Events.Store;
 /// </summary>
 public class CommitEvents : JobBase
 {
-    IEventStore _eventStore;
-    Dolittle.Runtime.Execution.ExecutionContext _executionContext;
-    UncommittedEvents _eventsToCommit;
+    IEventStore _eventStore = null!;
+    Dolittle.Runtime.Execution.ExecutionContext _executionContext = null!;
+    UncommittedEvents _eventsToCommit = null!;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)

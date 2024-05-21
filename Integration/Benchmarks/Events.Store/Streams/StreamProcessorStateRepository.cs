@@ -21,9 +21,9 @@ namespace Integration.Benchmarks.Events.Store.Streams;
 /// </summary>
 public class StreamProcessorStateRepository : JobBase
 {
-    Dictionary<TenantId, IStreamProcessorStates> _streamProcessorStates;
-    (StreamProcessorId, StreamProcessorState)[] _nonPartitionedStates;
-    (StreamProcessorId, PartitionedStreamProcessorState)[] _partitionedStates;
+    Dictionary<TenantId, IStreamProcessorStates> _streamProcessorStates = null!;
+    (StreamProcessorId, StreamProcessorState)[] _nonPartitionedStates = null!;
+    (StreamProcessorId, PartitionedStreamProcessorState)[] _partitionedStates = null!;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)

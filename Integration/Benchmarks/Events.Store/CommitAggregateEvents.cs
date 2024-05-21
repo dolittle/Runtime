@@ -21,9 +21,9 @@ namespace Integration.Benchmarks.Events.Store;
 /// </summary>
 public class CommitAggregateEvents : JobBase
 {
-    IEventStore _eventStore;
-    ExecutionContext _executionContext;
-    UncommittedAggregateEvents _eventsToCommit;
+    IEventStore _eventStore = null!;
+    ExecutionContext _executionContext = null!;
+    UncommittedAggregateEvents _eventsToCommit = null!;
     
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)

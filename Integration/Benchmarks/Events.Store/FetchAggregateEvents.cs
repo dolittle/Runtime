@@ -18,10 +18,10 @@ namespace Integration.Benchmarks.Events.Store;
 /// </summary>
 public class FetchAggregateEvents : JobBase
 {
-    IEventStore _eventStore;
-    Dolittle.Runtime.Execution.ExecutionContext _executionContext;
-    ArtifactId _aggregateRoot;
-    EventSourceId _eventSource;
+    IEventStore _eventStore = null!;
+    Dolittle.Runtime.Execution.ExecutionContext _executionContext = null!;
+    ArtifactId _aggregateRoot = null!;
+    EventSourceId _eventSource = null!;
     
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
