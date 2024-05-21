@@ -5,10 +5,6 @@ tenants:
         connectionString: mongodb://localhost:27017
         database: event_store
         maxConnectionPoolSize: 1000
-      projections:
-        connectionString: mongodb://localhost:27017
-        database: projections
-        maxConnectionPoolSize: 1000
       readModels:
         connectionString: mongodb://localhost:27017
         database: readmodels

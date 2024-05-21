@@ -122,16 +122,6 @@ public static class Runtime
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:eventStore:database"] = eventStoreName;
             databases.Add(eventStoreName);
 
-            var projectionsName = Guid.NewGuid().ToString();
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:projections:servers:0"] = "localhost";
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:projections:database"] = projectionsName;
-            databases.Add(projectionsName);
-
-            var embeddingsName = Guid.NewGuid().ToString();
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:embeddings:servers:0"] = "localhost";
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:embeddings:database"] = embeddingsName;
-            databases.Add(embeddingsName);
-
             var readModelsName = Guid.NewGuid().ToString();
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:readModels:host"] = "mongodb://localhost:27017";
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:readModels:database"] = readModelsName;

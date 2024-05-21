@@ -93,29 +93,7 @@ This is a dictionary mapping specifying the host:port address for reaching the P
 # Tenant-Specific Configuration
 Configurations that are specific to a single tenant. All of the configurations for a tenant is behind the configuration key tenants:\<Tenant-Guid\> 
 ## Resources
-### Embeddings [Obsolete]
-* Servers
-  * Description: The name of the host server. (Usually 'localhost')
-  * Type: Array[string]
-* Database
-  * Description: The name of the mongo database 
-  * Type: string
-* MaxConnectionPoolSize
-  * Description: The max number of concurrent MongoDB connections
-  * Type: Integer
-  * Default: 1000
 ### EventStore
-* Servers
-  * Description: The name of the host server. (Usually 'localhost')
-  * Type: Array[string]
-* Database
-  * Description: The name of the mongo database 
-  * Type: string
-* MaxConnectionPoolSize
-  * Description: The max number of concurrent MongoDB connections
-  * Type: Integer
-  * Default: 1000
-### Projections
 * Servers
   * Description: The name of the host server. (Usually 'localhost')
   * Type: Array[string]
@@ -181,21 +159,13 @@ microservices:
 tenants:
     1c707441-95b3-4214-a4d1-4199c58afa23:
         resources:
-            embeddings:
-            servers:
-            - my.host
-            database: embeddings
             eventStore:
-            servers:
-            - my.host
-            database: eventstore
+              servers:
+              - my.host
+              database: eventstore
             readModels:
-            host: mongodb://my.host:27017
-            database: readmodels
-            projections:
-            servers:
-            - dev-mongo.application-e0078604-ae62-378d-46fb-9e245d824c61.svc.cluster.local
-            database: projections
+              host: mongodb://my.host:27017
+              database: readmodels
         eventHorizons:
             d47c6fb7-2339-e286-2912-2b9f163a5aa3:
             consents:
@@ -215,25 +185,11 @@ tenants:
           - localhost
         database: event_store
         maxConnectionPoolSize: 1000
-      projections:
-        servers:
-          - localhost
-        database: projections
-        maxConnectionPoolSize: 1000
-      embeddings:
-        servers:
-          - localhost
-        database: embeddings
-        maxConnectionPoolSize: 1000
       readModels:
         host: mongodb://localhost:27017
         database: readmodels
         useSSL: false
 ```
-
-{{< alert title="Note" color="info" >}}
-In addition the  `dolittle/runtime` -development tags also sets the `EventStore Compatibility Version` to `V7`
-{{< /alert >}}
 
 ## `appsettings.json`
 All Runtime configurations in theory can also be provided through the Asp.Net `appsettings.json` configuration file by simply having a Dolittle:Runtime object in the root of the configuration:
@@ -320,20 +276,6 @@ The `database` name must be unique for all resources and tenants, reusing the sa
 {
     <tenant-id>: {
         "eventStore": {
-            "servers": [
-                <MongoDB connection URI>
-            ],
-            "database": <MongoDB database name>,
-            "maxConnectionPoolSize": 1000
-        },
-        "projections": {
-            "servers": [
-                <MongoDB connection URI>
-            ],
-            "database": <MongoDB database name>,
-            "maxConnectionPoolSize": 1000
-        },
-        "embeddings": {
             "servers": [
                 <MongoDB connection URI>
             ],
