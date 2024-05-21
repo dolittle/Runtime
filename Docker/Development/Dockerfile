@@ -20,7 +20,6 @@ SHELL ["/bin/bash", "-c"]
 ARG TARGETARCH
 
 ENV Logging__Console__FormatterName=""
-ENV DOLITTLE__RUNTIME__EVENTSTORE__BACKWARDSCOMPATIBILITY__VERSION="V7"
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./

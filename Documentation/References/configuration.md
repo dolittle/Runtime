@@ -43,14 +43,6 @@ The port where we provide metrics using Prometheus. Used for metrics scraping.
   * Type: Integer
   * Default: 9700
 
-
-## Eventstore:BackwardsCompatibility:Version
-A required configuration denoting whether the event store should use the old formatting used in V6 of the runtime or the newer format. In V6 Runtime the Partition ID and Event Source ID were forced to by GUIDs and also stored as such in the database. In V7 we changed it so that these were strings, not GUIDs, thus the database scheme is slightly different and it needs to be configured explicitly. Only Runtimes that has event store databases with data from V6 of the Runtime should use the V6 option.
-
-### Type: String
-### Values
-* V6
-* V7
 ## ReverseCalls
 Contains a feature-flag for whether or not to use reverse calls implemented with actors.
 * UseActors

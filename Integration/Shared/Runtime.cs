@@ -109,7 +109,6 @@ public static class Runtime
     static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string?> configuration,
         int numberOfTenants)
     {
-        configuration["dolittle:runtime:eventstore:backwardscompatibility:version"] = "V7";
         configuration["dolittle:runtime:platform:microserviceID"] = _microserviceId.ToString();
         configuration["dolittle:runtime:platform:environment"] = _environment.ToString();
 
