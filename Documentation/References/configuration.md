@@ -201,8 +201,54 @@ All Runtime configurations in theory can also be provided through the Asp.Net `a
         ...
     }
 }
-
 ```
 
 ## Environment variables
 All configurations to the Runtime can be configured with environment variables by prefixing the environment variables with `Dolittle__Runtime__`
+
+## Docker compose example
+
+An example of a `docker-compose.yml` file that sets up a MongoDB as a replica set and a Dolittle Runtime with a custom `runtime.yml` file.
+
+### runtime.yml
+```yaml
+tenants:
+  445f8ea8-1a6f-40d7-b2fc-796dba92dc44: # Development Tenant
+    resources:
+      eventStore:
+        connectionString: mongodb://mongo:27017 # Accessed by the Runtime, from within the compose network
+        database: event_store
+        maxConnectionPoolSize: 1000
+      readModels:
+        connectionString: mongodb://localhost:27017 # Accessed by the application, from the host machine
+        database: readmodels
+
+```
+
+### docker-compose.yml 
+```yaml
+services:
+    # MongoDB as a replica set
+    mongo:
+        image: mongo:7.0
+        command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+        healthcheck:
+            test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }" | mongosh --port 27017 --quiet
+            interval: 30s
+            timeout: 30s
+            start_period: 0s
+            start_interval: 1s
+            retries: 30
+        hostname: mongo
+        ports:
+            - 27017:27017
+
+    runtime:
+        image: dolittle/runtime:9.4.0
+        volumes:
+            # The runtime container expects the runtime.yml file to be located in the .dolittle folder, and the working directory is /app
+            - ./runtime.yml:/app/.dolittle/runtime.yml 
+        ports:
+            - 50052:50052
+            - 50053:50053
+```

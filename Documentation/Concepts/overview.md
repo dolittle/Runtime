@@ -51,17 +51,9 @@ This diagram shows a microservice with 2 tenants, each of them with their own re
 
 ![Example of multi-tenant microservice](/images/concepts/multitenant.png)
 
-## What Dolittle isn't
-Dolittle is not a traditional backend library nor an event driven message bus like [Kafka](https://kafka.apache.org/). Dolittle uses [Event Sourcing]({{< ref "event_sourcing" >}}), which means that the state of the system is built from an append-only [Event Store]({{< ref "event_store" >}}) that has all the events ever produced by the application.
-
-Dolittle does not provide a solution for [read models/cache]({{< ref "event_sourcing#projections" >}}). Different situations call for different databases depending on the sort of load and data to be stored. The event store only defines how the events are written in the system, it doesn't define how things are read or interpreted.
-
-Dolittle isn't a CQRS framework, but [it used to be](https://github.com/dolittle/Bifrost).
-
 ## Technology
 - [Runtime repository](https://github.com/dolittle/runtime)
 - [C# SDK repository](https://github.com/dolittle/dotnet.sdk)
-- [JavaScript SDK repository](https://github.com/dolittle/javascript.sdk)
 - The connection between the runtime and the SDKs is managed through [gRPC](https://grpc.io/) calls, defined in our [Contracts repository](https://github.com/dolittle/contracts)
 
 The Event Store is implemented with [MongoDB](https://www.mongodb.org/).
