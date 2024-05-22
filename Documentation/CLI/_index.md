@@ -18,9 +18,6 @@ This section helps you learn about how to use the Dolittle CLI tool. If you're n
 | `dolittle runtime eventhandlers get`    | Get details about a running Event Handler           | [Details]({{< ref "Runtime/EventHandlers/get" >}})    |
 | `dolittle runtime eventhandlers replay` | Replay events for a running Event Handler           | [Details]({{< ref "Runtime/EventHandlers/replay" >}}) |
 | `dolittle runtime eventtypes list`      | List all registered Event Types                     | [Details]({{< ref "Runtime/EventTypes/list" >}})      |
-| `dolittle runtime projections list`     | List all running Projections                        | [Details]({{< ref "Runtime/Projections/list" >}})     |
-| `dolittle runtime projections get`      | Get details about a running Projection              | [Details]({{< ref "Runtime/Projections/get" >}})      |
-| `dolittle runtime projections replay`   | Replay a running Projection                         | [Details]({{< ref "Runtime/Projections/replay" >}})   |
 
 ## How to install
 
@@ -45,5 +42,3 @@ Lastly you will need to make the file executable by running `chomd a+x /usr/loca
 The Dolittle CLI tool does currently not check for new versions by itself.
 So you will need to either download a new binary from the releases page and replace the current one, or run `dotnet tool update --global Dolittle.Runtime.CLI` to get a fresh version with new features.
 {{< /alert >}}
-
-### Subcommands
