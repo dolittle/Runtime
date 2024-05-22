@@ -49,6 +49,26 @@ Contains a feature-flag for whether or not to use reverse calls implemented with
   * Type: boolean
   * Default: True
 
+## OpenTelemetry
+Contains configuration for the OpenTelemetry tracing.
+
+* Endpoint
+    * Type: string
+    * Default: '[Not Set]'
+    * Description: OTLP reporting endpoint
+* ServiceName
+    * Type: string
+    * Default: 'dolittle-runtime'
+    * Description: The OpenTelemetry reported name of the service
+* Logging
+    * Type: boolean
+    * Default: True
+    * Description: Whether to enable logging via OpenTelemetry
+* Tracing
+    * Type: boolean
+    * Default: True
+    * Description: Whether to enable tracing via OpenTelemetry
+
 ## Platform
 Defines the platform specific information related to the running microservice.
 * CustomerName
