@@ -109,7 +109,6 @@ public static class Runtime
     static (IEnumerable<string> databases, IEnumerable<TenantId> tenants) CreateRuntimeConfiguration(Dictionary<string, string?> configuration,
         int numberOfTenants)
     {
-        configuration["dolittle:runtime:eventstore:backwardscompatibility:version"] = "V7";
         configuration["dolittle:runtime:platform:microserviceID"] = _microserviceId.ToString();
         configuration["dolittle:runtime:platform:environment"] = _environment.ToString();
 
@@ -121,16 +120,6 @@ public static class Runtime
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:eventStore:servers:0"] = "localhost";
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:eventStore:database"] = eventStoreName;
             databases.Add(eventStoreName);
-
-            var projectionsName = Guid.NewGuid().ToString();
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:projections:servers:0"] = "localhost";
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:projections:database"] = projectionsName;
-            databases.Add(projectionsName);
-
-            var embeddingsName = Guid.NewGuid().ToString();
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:embeddings:servers:0"] = "localhost";
-            configuration[$"dolittle:runtime:tenants:{tenant}:resources:embeddings:database"] = embeddingsName;
-            databases.Add(embeddingsName);
 
             var readModelsName = Guid.NewGuid().ToString();
             configuration[$"dolittle:runtime:tenants:{tenant}:resources:readModels:host"] = "mongodb://localhost:27017";

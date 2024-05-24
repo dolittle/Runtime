@@ -4,15 +4,14 @@
     <a href="https://dolittle.io">Documentation</a> |
     <a href="https://dolittle.io/docs/tutorials/getting_started/">Tutorial</a> |
     <a href="https://github.com/dolittle/DotNet.SDK">C# SDK</a> |
-    <a href="https://github.com/dolittle/JavaScript.SDK">JavaScript SDK</a>
 </h4>
 
 ---
 
 <p align="center">
     <a href="https://hub.docker.com/r/dolittle/runtime"><img src="https://img.shields.io/docker/v/dolittle/runtime?label=dolittle%2Fruntime&logo=docker&sort=semver" alt="Latest Docker image"></a>
-    <a href="https://github.com/dolittle/Runtime/actions?query=workflow%3ARuntime"><img src="https://github.com/dolittle/Runtime/workflows/.NET%20Docker%20Image%20CI/CD/badge.svg" alt="Build status"></a>
-    <a href="https://github.com/dolittle/runtime/actions?query=workflow%3ACodeQL"><img src="https://github.com/dolittle/runtime/workflows/CodeQL/badge.svg" alt="CodeQL status"></a>
+    <a href="https://github.com/dolittle/Runtime/actions?query=workflow%3ARuntime"><img src="https://github.com/dolittle/Runtime/workflows/Runtime/badge.svg" alt="Build status"></a>
+    <a href="https://github.com/dolittle/Runtime/actions?query=workflow%3ARuntime"><img src="https://github.com/dolittle/Runtime/workflows/Documentation/badge.svg" alt="Documentation build status"></a>
 </p>
 
 

@@ -28,15 +28,17 @@ namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 /// <summary>
 /// Benchmarks for Event Handler filters. How long it takes to write events to streams.
 /// </summary>
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable. IterationCleanup fixes it.
 public class Filter : JobBase
+#pragma warning restore CA1001
 {
-    IEventStore _eventStore;
-    IStreamProcessors _streamProcessors;
-    ArtifactId[] _eventTypes;
-    IEnumerable<StreamProcessor> _streamProcessorsToRun;
-    ILoggerFactory _loggerFactor;
-    CancellationTokenSource _stopStreamProcessorSource;
-    Func<TenantId, IWriteEventsToStreams> _getEventsToStreamsWriter;
+    IEventStore _eventStore = null!;
+    IStreamProcessors _streamProcessors = null!;
+    ArtifactId[] _eventTypes = null!;
+    IEnumerable<StreamProcessor> _streamProcessorsToRun = null!;
+    ILoggerFactory _loggerFactor = null!;
+    CancellationTokenSource _stopStreamProcessorSource = null!;
+    Func<TenantId, IWriteEventsToStreams> _getEventsToStreamsWriter = null!;
     
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)
@@ -81,7 +83,7 @@ public class Filter : JobBase
                     _loggerFactor.CreateLogger<TypeFilterWithEventSourcePartition>()),
                 Runtime.CreateExecutionContextFor("e3921d20-da26-422e-bf13-e959a5f505ef"),
                 _stopStreamProcessorSource.Token).Result;
-        }).ToArray();
+        }).ToArray()!;
 
         IWriteEventsToStreams GetEventWriterForTenant(TenantId tenant)
         {

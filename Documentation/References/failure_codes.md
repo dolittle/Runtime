@@ -8,7 +8,7 @@ weight: 100
 
 | Code | Failure
 |------|---------|
-| `b6fcb5dd-a32b-435b-8bf4-ed96e846d460` | Event Store Unavailable
+| `b6fcb5dd-a32b-435b-8bf4-ed96e846d460` | Event Store Unavailable
 | `d08a30b0-56ab-43dc-8fe6-490320514d2f` | Event Applied By Other Aggregate Root
 | `b2acc526-ba3a-490e-9f15-9453c6f13b46` | Event Applied To Other Event Source
 | `ad55fca7-476a-4f68-9411-1a3b087ab843` | Event Store Persistance Error

@@ -66,7 +66,7 @@ AggregateRoot {
     EventSourceId string
     Version int
     AggregateEvents AggregateEvent[] {
-        EventSourceId Guid
+        EventSourceId string
         AggregateRootId Guid
         // normal Event properties also included
         ...

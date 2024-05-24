@@ -24,9 +24,8 @@ namespace Integration.Benchmarks.Events.Store.Streams;
 /// </summary>
 public class StreamProcessorStateTest : JobBase
 {
-    Dictionary<TenantId, (IStreamProcessorStates, IStreamProcessorStateCollections)> _statesCollections;
-
-    (StreamProcessorId, StreamProcessorState)[] _states;
+    Dictionary<TenantId, (IStreamProcessorStates, IStreamProcessorStateCollections)> _statesCollections = null!;
+    (StreamProcessorId, StreamProcessorState)[] _states = null!;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)

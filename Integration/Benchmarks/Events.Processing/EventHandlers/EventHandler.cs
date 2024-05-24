@@ -31,12 +31,12 @@ namespace Integration.Benchmarks.Events.Processing.EventHandlers;
 /// </summary>
 public class EventHandler : JobBase
 {
-    IEventStore _eventStore;
-    IEventHandlers _eventHandlers;
-    IEventHandlerFactory _eventHandlerFactory;
-    IEnumerable<IEventHandler> _eventHandlersToRun;
-    ArtifactId[] _eventTypes;
-    Mock<ReverseCallDispatcher> _dispatcher;
+    IEventStore _eventStore = null!;
+    IEventHandlers _eventHandlers = null!;
+    IEventHandlerFactory _eventHandlerFactory = null!;
+    IEnumerable<IEventHandler> _eventHandlersToRun = null!;
+    ArtifactId[] _eventTypes = null!;
+    Mock<ReverseCallDispatcher> _dispatcher = null!;
 
     /// <inheritdoc />
     protected override void Setup(IServiceProvider services)

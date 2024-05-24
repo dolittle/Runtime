@@ -43,19 +43,31 @@ The port where we provide metrics using Prometheus. Used for metrics scraping.
   * Type: Integer
   * Default: 9700
 
-
-## Eventstore:BackwardsCompatibility:Version
-A required configuration denoting whether the event store should use the old formatting used in V6 of the runtime or the newer format. In V6 Runtime the Partition ID and Event Source ID were forced to by GUIDs and also stored as such in the database. In V7 we changed it so that these were strings, not GUIDs, thus the database scheme is slightly different and it needs to be configured explicitly. Only Runtimes that has event store databases with data from V6 of the Runtime should use the V6 option.
-
-### Type: String
-### Values
-* V6
-* V7
 ## ReverseCalls
 Contains a feature-flag for whether or not to use reverse calls implemented with actors.
 * UseActors
   * Type: boolean
   * Default: True
+
+## OpenTelemetry
+Contains configuration for the OpenTelemetry tracing.
+
+* Endpoint
+    * Type: string
+    * Default: '[Not Set]'
+    * Description: OTLP reporting endpoint
+* ServiceName
+    * Type: string
+    * Default: 'dolittle-runtime'
+    * Description: The OpenTelemetry reported name of the service
+* Logging
+    * Type: boolean
+    * Default: True
+    * Description: Whether to enable logging via OpenTelemetry
+* Tracing
+    * Type: boolean
+    * Default: True
+    * Description: Whether to enable tracing via OpenTelemetry
 
 ## Platform
 Defines the platform specific information related to the running microservice.
@@ -93,29 +105,7 @@ This is a dictionary mapping specifying the host:port address for reaching the P
 # Tenant-Specific Configuration
 Configurations that are specific to a single tenant. All of the configurations for a tenant is behind the configuration key tenants:\<Tenant-Guid\> 
 ## Resources
-### Embeddings [Obsolete]
-* Servers
-  * Description: The name of the host server. (Usually 'localhost')
-  * Type: Array[string]
-* Database
-  * Description: The name of the mongo database 
-  * Type: string
-* MaxConnectionPoolSize
-  * Description: The max number of concurrent MongoDB connections
-  * Type: Integer
-  * Default: 1000
 ### EventStore
-* Servers
-  * Description: The name of the host server. (Usually 'localhost')
-  * Type: Array[string]
-* Database
-  * Description: The name of the mongo database 
-  * Type: string
-* MaxConnectionPoolSize
-  * Description: The max number of concurrent MongoDB connections
-  * Type: Integer
-  * Default: 1000
-### Projections
 * Servers
   * Description: The name of the host server. (Usually 'localhost')
   * Type: Array[string]
@@ -163,15 +153,12 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses a single YAML configura
 
 ### Example config
 ```yaml runtime.yml
-eventStore:
-    backwardsCompatibility:
-        version: V6
 platform:
     customerID: 6d8eaf84-969c-4234-b78f-30632a608e5a
     applicationID: e0078604-ae62-378d-46fb-9e245d824c61
     microserviceID: ffb20e4f-9227-574d-31aa-d6e59b34495d
     customerName: TheCustomer
-    applicationName: THeApplication
+    applicationName: TheApplication
     microserviceName: TheMicroservice
     environment: Dev
 microservices:
@@ -181,21 +168,12 @@ microservices:
 tenants:
     1c707441-95b3-4214-a4d1-4199c58afa23:
         resources:
-            embeddings:
-            servers:
-            - my.host
-            database: embeddings
             eventStore:
-            servers:
-            - my.host
-            database: eventstore
+              connectionString: mongodb://my.host:27017
+              database: eventstore
             readModels:
-            host: mongodb://my.host:27017
-            database: readmodels
-            projections:
-            servers:
-            - dev-mongo.application-e0078604-ae62-378d-46fb-9e245d824c61.svc.cluster.local
-            database: projections
+              connectionString: mongodb://my.host:27017
+              database: readmodels
         eventHorizons:
             d47c6fb7-2339-e286-2912-2b9f163a5aa3:
             consents:
@@ -211,29 +189,14 @@ tenants:
   445f8ea8-1a6f-40d7-b2fc-796dba92dc44:
     resources:
       eventStore:
-        servers:
-          - localhost
+        connectionString: mongodb://localhost:27017
         database: event_store
         maxConnectionPoolSize: 1000
-      projections:
-        servers:
-          - localhost
-        database: projections
-        maxConnectionPoolSize: 1000
-      embeddings:
-        servers:
-          - localhost
-        database: embeddings
-        maxConnectionPoolSize: 1000
       readModels:
-        host: mongodb://localhost:27017
+        connectionString: mongodb://localhost:27017
         database: readmodels
         useSSL: false
 ```
-
-{{< alert title="Note" color="info" >}}
-In addition the  `dolittle/runtime` -development tags also sets the `EventStore Compatibility Version` to `V7`
-{{< /alert >}}
 
 ## `appsettings.json`
 All Runtime configurations in theory can also be provided through the Asp.Net `appsettings.json` configuration file by simply having a Dolittle:Runtime object in the root of the configuration:
@@ -258,153 +221,54 @@ All Runtime configurations in theory can also be provided through the Asp.Net `a
         ...
     }
 }
-
 ```
 
 ## Environment variables
 All configurations to the Runtime can be configured with environment variables by prefixing the environment variables with `Dolittle__Runtime__`
 
-# Legacy
+## Docker compose example
 
-The Legacy [Runtime]({{< ref "docs/concepts/overview" >}}) pre version V8 uses JSON configuration files. The files are mounted to the `.dolittle/` folder inside the Docker image.
+An example of a `docker-compose.yml` file that sets up a MongoDB as a replica set and a Dolittle Runtime with a custom `runtime.yml` file.
 
-| Configuration file            | Required |
-|-------------------------------|----------|
-| `platform.json`               | ✔️        |
-| `tenants.json`                | ✔️        |
-| `resources.json`              | ✔️        |
-| `event-horizon-consents.json` | ✔️        |
-| `microservices.json`          |          |
-| `metrics.json`                |          |
-| `endpoints.json`              |          |
+### runtime.yml
+```yaml
+tenants:
+  445f8ea8-1a6f-40d7-b2fc-796dba92dc44: # Development Tenant
+    resources:
+      eventStore:
+        connectionString: mongodb://mongo:27017 # Accessed by the Runtime, from within the compose network
+        database: event_store
+        maxConnectionPoolSize: 1000
+      readModels:
+        connectionString: mongodb://localhost:27017 # Accessed by the application, from the host machine
+        database: readmodels
 
-
-{{< alert title="Note" color="info" >}}
-These files can be used to override configuration provided by default or by `runtime.yml`. The `tenants.json` is also completely obsolete and should not be used.
-{{< /alert >}}
-{{< alert title="Note" color="warning" >}}
-The legacy file provider for `event-horizon-consents.json` is buggy. So if a Runtime needs to have event horizon consents configured then the configuration needs to be provided through the `runtime.yml` configuration (or environment variables).
-{{< /alert >}}
-
-## `platform.json`
-**Required.** Configures the Microservice environment for the Runtime.
-```json
-{
-    "applicationName": "<application-name>",
-    "applicationID": "<application-id>",
-    "microserviceName": "<microservice-name>",
-    "microserviceID": "<microservice-id>",
-    "customerName": "<customer-name>",
-    "customerID": "<customer-id>",
-    "environment": "<environment-name>"
-}
 ```
 
-## `tenants.json`
-**Required.** Defines each [Tenant]({{< ref "docs/concepts/tenants" >}}) in the Runtime.
-```json
-{
-    <tenant-id>: {}
-}
-```
+### docker-compose.yml 
+```yaml
+services:
+    # MongoDB as a replica set
+    mongo:
+        image: mongo:7.0
+        command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+        healthcheck:
+            test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }" | mongosh --port 27017 --quiet
+            interval: 30s
+            timeout: 30s
+            start_period: 0s
+            start_interval: 1s
+            retries: 30
+        hostname: mongo
+        ports:
+            - 27017:27017
 
-## `resources.json`
-**Required.** Configurations for the resources available per [Tenant]({{< ref "docs/concepts/tenants" >}}):
-- `eventStore`: MongoDB configuration for the [Event Store]({{< ref "docs/concepts/event_store" >}})
-- `projections`: MongoDB configuration for the storage of [Projections]({{< ref "docs/concepts/projections" >}})
-- `embeddings`: MongoDB configuration for the storage of [Embeddings]({{< ref "docs/concepts/embeddings" >}})
-- `readModels`: MongoDB configuration for a database that can be used for any storage and accessed through the SDKs directly. This database should only be used to store data that can be rebuilt from replaying events.
-
-The `database` name must be unique for all resources and tenants, reusing the same name will cause undefined behaviour in the Runtime and potential dataloss.
-```json
-{
-    <tenant-id>: {
-        "eventStore": {
-            "servers": [
-                <MongoDB connection URI>
-            ],
-            "database": <MongoDB database name>,
-            "maxConnectionPoolSize": 1000
-        },
-        "projections": {
-            "servers": [
-                <MongoDB connection URI>
-            ],
-            "database": <MongoDB database name>,
-            "maxConnectionPoolSize": 1000
-        },
-        "embeddings": {
-            "servers": [
-                <MongoDB connection URI>
-            ],
-            "database": <MongoDB database name>,
-            "maxConnectionPoolSize": 1000
-        },
-        "readModels": {
-            "host": <MongoDB connection string>,
-            "database": <MongoDB database name>,
-            "useSSL": false
-        }
-    }
-}
-```
-
-## `event-horizon-consents.json`
-**Required.** Defines the [Consents]({{< ref "docs/concepts/event_horizon#consent" >}}) a [Producer]({{< ref "docs/concepts/event_horizon#producer" >}}) tenant gives to [Consumers]({{< ref "docs/concepts/event_horizon#consumer" >}}) so that they can receive events over the [Event Horizon]({{< ref "docs/concepts/event_horizon" >}}).
-```json
-{
-    // The producer tenant that gives the consent
-    <tenant-id>: [
-        {
-            // the consumers microservice and tenant to give consent to
-            "microservice": <microservice-id>,
-            "tenant": <tenant-id>,
-            // the producers public stream and partition to give consent to
-            "stream": <stream-id>,
-            "partition": <partition-id>,
-            // an identifier for this consent 
-            "consent": <consent-id>
-        }
-    ]
-}
-```
-{{< alert title="Note" color="info" >}}
-If there are no subscriptions, the file should only contain an empty JSON object `{}`.
-{{< /alert >}}
-
-## `microservices.json`
-Defines where the [Producer]({{< ref "docs/concepts/event_horizon#producer" >}}) microservices are so that the [Consumer]({{< ref "docs/concepts/event_horizon#consumer" >}}) can [Subscribe]({{< ref "docs/concepts/event_horizon#subscription" >}}) to them.
-```json
-{
-    // the id of the producer microservice
-    <microservice-id>: {
-        // producer microservices Runtime host and public port
-        "host": <host>,
-        "port": <port>
-    }
-}
-```
-
-## `endpoints.json`
-Defines the private and public ports for the Runtime.
-```json
-{
-    "public": {
-        // default 50052
-        "port": <port>
-    },
-    "private": {
-        // default 50053
-        "port": <port>
-    }
-}
-```
-
-## `metrics.json`
-The port to expose the Prometheus Runtimes metrics server on.
-```json
-{
-    // default 9700
-    "Port": <port>
-}
+    runtime:
+        image: dolittle/runtime:9.4.0
+        volumes:
+            # The runtime container expects the runtime.yml file to be located in the .dolittle folder, and the working directory is /app
+            - ./runtime.yml:/app/.dolittle/runtime.yml 
+        ports:
+            - 50052:50052
+            - 50053:50053
 ```
