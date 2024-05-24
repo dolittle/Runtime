@@ -4,7 +4,6 @@
     <a href="https://dolittle.io">Documentation</a> |
     <a href="https://dolittle.io/docs/tutorials/getting_started/">Tutorial</a> |
     <a href="https://github.com/dolittle/DotNet.SDK">C# SDK</a> |
-    <a href="https://github.com/dolittle/JavaScript.SDK">JavaScript SDK</a>
 </h4>
 
 ---
