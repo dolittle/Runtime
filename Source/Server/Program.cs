@@ -8,7 +8,6 @@ using Dolittle.Runtime.Bootstrap.Hosting;
 using Dolittle.Runtime.Configuration;
 using Dolittle.Runtime.DependencyInversion.Building;
 using Dolittle.Runtime.Diagnostics.OpenTelemetry;
-using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
 using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;

@@ -37,7 +37,6 @@ using ReverseCallDispatcher = Dolittle.Runtime.Services.IReverseCallDispatcher<
     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 using UncommittedEvent = Dolittle.Runtime.Events.Store.UncommittedEvent;
 using MongoStreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
-using EventHorizonConsumerProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.EventProcessor;
 using StartFrom = Dolittle.Runtime.Events.Processing.EventHandlers.StartFrom;
 using StreamEvent = Dolittle.Runtime.Events.Store.Streams.StreamEvent;
 
