@@ -5,7 +5,7 @@
         <AssemblyName>Dolittle.Runtime.CLI</AssemblyName>
         <RootNamespace>Dolittle.Runtime.CLI</RootNamespace>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>dolittle</ToolCommandName>

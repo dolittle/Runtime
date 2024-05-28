@@ -1,5 +1,5 @@
 # DotNet Build
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS dotnet-build
 SHELL ["/bin/bash", "-c"]
 ARG VERSION
 ARG TARGETARCH
@@ -12,7 +12,7 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c "Release" -p:Version=${VERSION} -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -f net7.0 -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
