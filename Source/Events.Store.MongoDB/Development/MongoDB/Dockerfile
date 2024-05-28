@@ -1,4 +1,4 @@
-FROM mongo:7.0.2-bionic
+FROM mongo:7.0
 
 COPY replicaset-initiate.js /docker-entrypoint-initdb.d/
 
