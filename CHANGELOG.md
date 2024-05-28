@@ -1,3 +1,11 @@
+# [9.5.0] - 2024-5-28 [PR: #767](https://github.com/dolittle/Runtime/pull/767)
+## Summary
+
+Upgrades the production image of the runtime to use .NET 8, with the performance improvements this brings.
+
+The development image is still on 7, keeping the bundled MongoDB as is.
+
+
 # [9.4.0] - 2024-5-13 [PR: #765](https://github.com/dolittle/Runtime/pull/765)
 ## Summary
 Projections are now supported within the SDK (from V23), and runs on top of standard event handlers with no need for special support in the runtime. This replaces the need for the projections feature in the runtime.
