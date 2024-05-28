@@ -16,9 +16,9 @@ jobs:
         with:
           dotnet-version: "8.0.x"
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release -f net8.0
       - name: Test
-        run: dotnet test --filter Tag!=IntegrationTest --no-build --configuration Release --collect:"XPlat Code Coverage"
+        run: dotnet test --filter Tag!=IntegrationTest --no-build -f net8.0 --configuration Release --collect:"XPlat Code Coverage"
 
   build-prod-docker-image:
     name: Build Production Docker Image
