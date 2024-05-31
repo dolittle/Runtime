@@ -9,6 +9,7 @@
     <ItemGroup>
         <ProjectReference Include="../Configuration/Configuration.csproj" />
         <ProjectReference Include="../Hosting/Hosting.csproj" />
+        <ProjectReference Include="..\Diagnostics\Diagnostics.csproj" />
     </ItemGroup>
     
     <ItemGroup>

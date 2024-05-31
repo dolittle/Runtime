@@ -34,7 +34,7 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter<long> _customerFailedRegistrationsTotalOtel;
     readonly Counter<long> _systemFailedRegistrationsTotalOtel;
     readonly Counter<long> _customerEventProcessingFailuresTotalOtel;
-    readonly Histogram<TimeSpan> _customerEventProcessingTimeOtel;
+    readonly Histogram<double> _customerEventProcessingTimeOtel;
 
    /// <summary>
     /// Creates a new instance of the <see cref="MetricsCollector"/> class.
@@ -104,7 +104,7 @@ public class MetricsCollector : IMetricsCollector
             "count",
             "Total number of failed event processing attempts by an event handler");
 
-        _customerEventProcessingTimeOtel = RuntimeMetrics.Meter.CreateHistogram<TimeSpan>(
+        _customerEventProcessingTimeOtel = RuntimeMetrics.Meter.CreateHistogram<double>(
             "dolittle_customer_runtime_eventhandlers_event_processing_time_seconds",
             "count",
             "The processing time of events processed by event handlers");
@@ -146,7 +146,7 @@ public class MetricsCollector : IMetricsCollector
                 eventTypeId,
                 eventTypeAlias)
             .Observe(processingTime.TotalSeconds);
-        _customerEventProcessingTimeOtel.Record(processingTime,
+        _customerEventProcessingTimeOtel.Record(processingTime.TotalSeconds,
             new KeyValuePair<string, object?>("scope", scopeId),
             new KeyValuePair<string, object?>("eventHandlerId", handlerId),
             new KeyValuePair<string, object?>("eventHandlerAlias", handlerAlias),
