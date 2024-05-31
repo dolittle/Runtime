@@ -156,12 +156,11 @@ public class Committer : IActor
             }
 
             var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
-            if (_aggregateCommitInFlight.Contains(aggregate))
+            if (!_aggregateCommitInFlight.Add(aggregate))
             {
                 return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
             }
 
-            _aggregateCommitInFlight.Add(aggregate);
             if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
             {
                 return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
@@ -344,7 +343,7 @@ public class Committer : IActor
                     return Task.CompletedTask;
                 }
                 
-                _metrics.IncrementTotalBatchesSuccessfullyPersisted(batchToSend.Batch);
+                _metrics.IncrementTotalBatchesSuccessfullyPersisted(_tenant,batchToSend.Batch);
                 batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
                 _readyToSend = true;

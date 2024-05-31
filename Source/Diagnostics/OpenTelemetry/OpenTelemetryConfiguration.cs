@@ -17,4 +17,5 @@ public class OpenTelemetryConfiguration
     
     public bool Logging { get; set; } = true;
     public bool Tracing { get; set; } = true;
+    public bool Metrics { get; set; } = true;
 }

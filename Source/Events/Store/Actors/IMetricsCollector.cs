@@ -30,7 +30,7 @@ public interface IMetricsCollector
     /// <summary>
     /// Increments the total number of commits that has been successfully written to the event store.
     /// </summary>
-    void IncrementTotalBatchesSuccessfullyPersisted(Commit commit);
+    void IncrementTotalBatchesSuccessfullyPersisted(TenantId tenant, Commit commit);
 
     /// <summary>
     /// Increments the total number of batches that has been sent to the event store persistence layer.
