@@ -20,10 +20,10 @@ public class EventHandlerIdOrAliasParser : IValueParser
     public Type TargetType => typeof(EventHandlerIdOrAlias);
 
     /// <inheritdoc />
-    public object Parse(string argName, string value, CultureInfo culture)
+    public object Parse(string? argName, string? value, CultureInfo culture)
     {
         var scope = ScopeId.Default;
-        var segments = value.Split(":");
+        var segments = value?.Split(":") ?? Array.Empty<string>();
         ThrowIfInvalidFormat(value, segments);
         if (segments.Length > 1)
         {
@@ -35,7 +35,7 @@ public class EventHandlerIdOrAliasParser : IValueParser
             : new EventHandlerIdOrAlias(segments[0], scope);
     }
 
-    static void ThrowIfInvalidFormat(string value, string[] segments)
+    static void ThrowIfInvalidFormat(string? value, string[] segments)
     {
         switch (segments.Length)
         {

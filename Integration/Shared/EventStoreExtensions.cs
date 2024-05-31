@@ -54,7 +54,9 @@ public static class EventStoreExtensions
                 AggregateRootId = responses.First().Events.AggregateRootId,
                 EventSourceId = responses.First().Events.EventSourceId,
                 CurrentAggregateRootVersion = responses.First().Events.CurrentAggregateRootVersion,
+#pragma warning disable CS0612 // Type or member is obsolete
                 AggregateRootVersion = responses.First().Events.AggregateRootVersion
+#pragma warning restore CS0612 // Type or member is obsolete
             }
         };
 

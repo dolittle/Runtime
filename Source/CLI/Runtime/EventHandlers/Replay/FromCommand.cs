@@ -36,7 +36,7 @@ public class FromCommand : CommandBase
     StreamPosition Position { get; init; }
         
     [Option("--tenant", CommandOptionType.SingleValue, Description = "The tenant to replay events for. Defaults to the development tenant.")]
-    TenantId Tenant { get; init; }
+    TenantId? Tenant { get; init; }
 
     /// <summary>
     /// The entrypoint for the "dolittle runtime eventhandlers replay from" command.

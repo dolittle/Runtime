@@ -19,7 +19,7 @@ indent_size = 2
 # we're putting the :severity options on everything where it can be put as it's bugged on net5
 # check https://github.com/dotnet/roslyn/issues/50785#issuecomment-768606882
 # default to all on warning
-dotnet_analyzer_diagnostic.severity = warning
+# dotnet_analyzer_diagnostic.severity = warning
 file_header_template = Copyright (c) Dolittle. All rights reserved.\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #### .NET Conventions ####

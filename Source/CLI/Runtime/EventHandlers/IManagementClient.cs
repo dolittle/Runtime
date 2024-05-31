@@ -49,6 +49,6 @@ public interface IManagementClient
     /// <param name="eventHandler">The Event Handler identifier.</param>
     /// <param name="tenant">The Tenant to get Stream Processor states for, or null to get all.</param>
     /// <returns>A <see cref="Task"/> that, when resolved, returns the <see cref="Try"/> containing the <see cref="EventHandlerStatus"/>-</returns>
-    Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null);
+    Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId? tenant);
 
 }
