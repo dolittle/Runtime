@@ -27,7 +27,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB;
 [PerTenant]
 public class CommittedEventsFetcher : IFetchCommittedEvents
 {
-    readonly FilterDefinitionBuilder<Events.Event> _eventFilter = Builders<Events.Event>.Filter;
+    static readonly FilterDefinitionBuilder<Events.Event> _eventFilter = Builders<Events.Event>.Filter;
+    static readonly SortDefinition<Events.Event> _eventLogSeqSortAsc = Builders<MongoDB.Events.Event>.Sort.Ascending(it => it.EventLogSequenceNumber);
+    static readonly SortDefinition<Events.Event> _eventLogSeqSortDesc = Builders<MongoDB.Events.Event>.Sort.Descending(it => it.EventLogSequenceNumber);
+    static readonly SortDefinition<Events.Event> _aggregateVersionSortAsc = Builders<MongoDB.Events.Event>.Sort.Ascending(it => it.Aggregate!.Version);
+
     readonly IStreams _streams;
     readonly IEventConverter _eventConverter;
     readonly IAggregateRoots _aggregateRoots;
@@ -69,7 +73,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
         var lastEvent = await eventLog
             .Find(_eventFilter.Empty)
-            .Sort(Builders<MongoDB.Events.Event>.Sort.Descending(_ => _.EventLogSequenceNumber))
+            .Sort(_eventLogSeqSortDesc)
             .Limit(1)
             .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
@@ -99,7 +103,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         // Find first event that happened before the given timestamp
         var lastEvent = await eventLog
             .Find(_eventFilter.Lt(evt => evt.Metadata.Occurred, timestamp.UtcDateTime))
-            .Sort(Builders<MongoDB.Events.Event>.Sort.Descending(_ => _.EventLogSequenceNumber))
+            .Sort(_eventLogSeqSortDesc)
             .Limit(1)
             .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
@@ -127,7 +131,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
             var raw = await eventLog
                 .Find(filter)
-                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.EventLogSequenceNumber))
+                .Sort(_eventLogSeqSortAsc)
                 .Limit(limit)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
@@ -191,7 +195,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         {
             stream = _streams.DefaultEventLog
                 .Find(EventsFromAggregateFilter(eventSource, aggregateRoot, version) & filter)
-                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
+                .Sort(_aggregateVersionSortAsc)
                 .Project(evt => new AggregateEventProjection
                 {
                     EventLogSequenceNumber = evt.EventLogSequenceNumber,

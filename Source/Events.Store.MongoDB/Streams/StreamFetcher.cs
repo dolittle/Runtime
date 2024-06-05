@@ -31,7 +31,8 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     readonly IMongoCollection<TEvent> _collection;
     readonly FilterDefinitionBuilder<TEvent> _filter;
     readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
-    readonly Expression<Func<TEvent, object>> _sequenceNumberSortByExpression;
+    readonly SortDefinition<TEvent> _sequenceNumberSortByExpressionAsc;
+    readonly SortDefinition<TEvent> _sequenceNumberSortByExpressionDesc;
     readonly Func<TEvent, StreamEvent> _eventToStreamEvent;
     readonly Expression<Func<TEvent, Guid>> _eventToArtifactId;
     readonly Expression<Func<TEvent, uint>> _eventToArtifactGeneration;
@@ -64,7 +65,8 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         _collection = collection;
         _filter = filter;
         _sequenceNumberExpression = sequenceNumberExpression;
-        _sequenceNumberSortByExpression = sequenceNumberSortByExpression;
+        _sequenceNumberSortByExpressionAsc = Builders<TEvent>.Sort.Ascending(sequenceNumberSortByExpression);
+        _sequenceNumberSortByExpressionDesc = Builders<TEvent>.Sort.Descending(sequenceNumberSortByExpression);
         _eventToStreamEvent = eventToStreamEvent.Compile();
 
         _eventToArtifactId = eventToArtifactId;
@@ -106,6 +108,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         try
         {
             var results = await _collection.Find(_filter.Gte(_sequenceNumberExpression, position.Value))
+                .Sort(_sequenceNumberSortByExpressionAsc)
                 .Limit(FetchEventsBatchSize)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             var events = results.Select(_eventToStreamEvent).ToList();
@@ -143,7 +146,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
         try
         {
             var events = await _collection.Find(_filter.Empty)
-                .SortByDescending(_sequenceNumberSortByExpression)
+                .Sort(_sequenceNumberSortByExpressionDesc)
                 .FirstOrDefaultAsync(cancellationToken);
 
             return events is null
@@ -184,6 +187,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
             var results = await _collection.Find(
                     _filter.EqStringOrGuid(_partitionIdExpression, partitionId.Value)
                     & _filter.Gte(_sequenceNumberExpression, position.Value))
+                .Sort(_sequenceNumberSortByExpressionAsc)
                 .Limit(FetchEventsBatchSize)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             var events = results.Select(_eventToStreamEvent).ToList();
@@ -215,6 +219,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
             }
 
             var results = await _collection.Find(composedFilter)
+                .Sort(_sequenceNumberSortByExpressionAsc)
                 .Limit(FetchEventsBatchSize)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
             var events = results.Select(_eventToStreamEvent).ToList();
@@ -243,6 +248,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
             }
 
             var results = await _collection.Find(composedFilter)
+                .Sort(_sequenceNumberSortByExpressionAsc)
                 .Limit(2)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
@@ -272,6 +278,7 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
             var results = _collection.Find(
                     _filter.Gte(_sequenceNumberExpression, range.From.Value)
                     & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
+                .Sort(_sequenceNumberSortByExpressionAsc)
                 .ToAsyncEnumerable(cancellationToken);
             return results.Select(_eventToStreamEvent);
         }
