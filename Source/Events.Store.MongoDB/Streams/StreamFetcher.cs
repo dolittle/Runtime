@@ -31,7 +31,6 @@ public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsF
     readonly IMongoCollection<TEvent> _collection;
     readonly FilterDefinitionBuilder<TEvent> _filter;
     readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
-    // readonly Expression<Func<TEvent, object>> _sequenceNumberSortByExpression;
     readonly SortDefinition<TEvent> _sequenceNumberSortByExpressionAsc;
     readonly SortDefinition<TEvent> _sequenceNumberSortByExpressionDesc;
     readonly Func<TEvent, StreamEvent> _eventToStreamEvent;
