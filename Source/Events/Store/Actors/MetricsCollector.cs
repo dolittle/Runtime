@@ -1,15 +1,21 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Linq;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.Diagnostics.OpenTelemetry.Metrics;
 using Dolittle.Runtime.Domain.Tenancy;
+using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store.Persistence;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Metrics;
+using Dolittle.Runtime.Protobuf;
 using Prometheus;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
@@ -21,6 +27,7 @@ namespace Dolittle.Runtime.Events.Store.Actors;
 public class MetricsCollector : IMetricsCollector
 {
     readonly IEventTypes _eventTypes;
+    readonly IEventHandlers _eventHandlers;
     readonly IAggregateRoots _aggregateRoots;
 
     // Prometheus
@@ -38,6 +45,10 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter _streamedSubscriptionEventsTotal;
     readonly Counter _catchupSubscriptionEventsTotal;
 
+    readonly ConcurrentDictionary<TenantId, Func<long>> _eventLogOffsets = new();
+
+    readonly HashSet<(TenantId, StreamProcessorId)> _streamProcessorEventLogOffsets = new();
+
     // OpenTelemetry
     readonly Counter<long> _totalCommitsReceivedOtel;
     readonly Counter<long> _totalCommitsForAggregateReceivedOtel;
@@ -54,9 +65,10 @@ public class MetricsCollector : IMetricsCollector
     readonly Counter<long> _catchupSubscriptionEventsTotalOtel;
 
 
-    public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes, IAggregateRoots aggregateRoots)
+    public MetricsCollector(IMetricFactory metricFactory, IEventTypes eventTypes, IEventHandlers eventHandlers, IAggregateRoots aggregateRoots)
     {
         _eventTypes = eventTypes;
+        _eventHandlers = eventHandlers;
         _aggregateRoots = aggregateRoots;
 
         _totalCommitsReceived = metricFactory.CreateCounter(
@@ -117,6 +129,7 @@ public class MetricsCollector : IMetricsCollector
             new[] { "subscriptionName" });
 
 
+        // Otel
         _totalCommitsReceivedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_commits_received_total",
             "count",
@@ -258,7 +271,8 @@ public class MetricsCollector : IMetricsCollector
                 var aggregateRootId = committedEvent.AggregateRoot.Id.ToString();
                 var aggregateRootIdLabel = new KeyValuePair<string, object?>("aggregateRootId", aggregateRootId);
                 var aggregateRootAlias = GetAggregateRootAliasOrEmptyString(committedEvent.AggregateRoot.Id);
-                var aggregateRootAliasLabel = new KeyValuePair<string, object?>("aggregateRootAlias", aggregateRootAlias);
+                var aggregateRootAliasLabel =
+                    new KeyValuePair<string, object?>("aggregateRootAlias", aggregateRootAlias);
                 _totalCommittedAggregateEvents
                     .WithLabels(
                         tenantId,
@@ -331,12 +345,99 @@ public class MetricsCollector : IMetricsCollector
     public void IncrementStreamedSubscriptionEvents(string subscriptionName, int incBy)
     {
         _streamedSubscriptionEventsTotal.WithLabels(subscriptionName).Inc(incBy);
-        _streamedSubscriptionEventsTotalOtel.Add(incBy, new KeyValuePair<string, object?>("subscriptionName", subscriptionName));
+        _streamedSubscriptionEventsTotalOtel.Add(incBy,
+            new KeyValuePair<string, object?>("subscriptionName", subscriptionName));
     }
 
     public void IncrementCatchupSubscriptionEvents(string subscriptionName, int incBy)
     {
         _catchupSubscriptionEventsTotal.WithLabels(subscriptionName).Inc(incBy);
-        _catchupSubscriptionEventsTotalOtel.Add(incBy, new KeyValuePair<string, object?>("subscriptionName", subscriptionName));
+        _catchupSubscriptionEventsTotalOtel.Add(incBy,
+            new KeyValuePair<string, object?>("subscriptionName", subscriptionName));
+    }
+
+    public void RegisterStreamProcessorOffset(TenantId tenant, StreamProcessorId streamProcessorId, Func<ProcessingPosition> getNextProcessingPosition)
+    {
+        var key = (tenant, streamProcessorId);
+        if (_streamProcessorEventLogOffsets.Contains(key)) return;
+
+        var processorId = streamProcessorId.EventProcessorId.ToGuid().ToString();
+        var scopeId = streamProcessorId.ScopeId.ToGuid().ToString();
+        var eventHandlerInfo = _eventHandlers.All.FirstOrDefault(it => it.Id.EventHandler.Value.ToString().Equals(processorId) && it.Id.Scope.Value.ToString().Equals(scopeId));
+        var alias = eventHandlerInfo?.HasAlias == true ? eventHandlerInfo.Alias.Value : string.Empty;
+
+        
+        var labels = new[]
+        {
+            new KeyValuePair<string, object?>("tenant_id", tenant.ToString()),
+            new KeyValuePair<string, object?>("scope_id", scopeId),
+            new KeyValuePair<string, object?>("event_processor_id", processorId),
+            new KeyValuePair<string, object?>("alias", alias),
+        };
+
+        RuntimeMetrics.Meter.CreateObservableCounter(
+            $"dolittle_customer_runtime_stream_processors_offset",
+            GetEventLogPositionMeasurement,
+            "offset",
+            "The current offset of the stream processor",
+            labels);
+
+        RuntimeMetrics.Meter.CreateObservableCounter(
+            $"dolittle_customer_runtime_stream_processors_processed_total",
+            GetProcessedEventsMeasurement,
+            "count",
+            "The total number of events processed by the stream processor",
+            labels);
+
+        if(_eventLogOffsets.TryGetValue(tenant, out var getEventLogPosition))
+        {
+            RuntimeMetrics.Meter.CreateObservableCounter(
+                $"dolittle_customer_runtime_stream_processor_consumer_lag",
+                () =>
+                {
+                    var processorOffset = (long)getNextProcessingPosition().EventLogPosition.Value-1;
+                    var eventLogPosition = getEventLogPosition();
+                    var lag = eventLogPosition - processorOffset;
+                    if(lag < 0) lag = 0; // Negative lag is not possible
+                    
+                    return new Measurement<long>(lag, labels);
+                },
+                "offset",
+                "The current offset of the event log",
+                labels);
+        }
+
+        _streamProcessorEventLogOffsets.Add(key);
+        
+        // The reported value is the next event log position to be processed, so we subtract 1 to get the current position
+        Measurement<long> GetEventLogPositionMeasurement() => new((long)getNextProcessingPosition().EventLogPosition.Value-1, labels);
+        Measurement<long> GetProcessedEventsMeasurement() => new((long)getNextProcessingPosition().StreamPosition.Value, labels);
+    }
+
+    public void RegisterEventLogOffset(TenantId tenant, ScopeId scopeId, Func<EventLogSequenceNumber> getEventLogPosition)
+    {
+        var key = tenant;
+        if (!_eventLogOffsets.ContainsKey(key))
+        {
+            var getValue = () => (long)getEventLogPosition().Value;
+            
+            var labels = new[]
+            {
+                new KeyValuePair<string, object?>("tenant_id", tenant.ToString()),
+                new KeyValuePair<string, object?>("scope_id", scopeId.ToString()),
+            };
+            Measurement<long> GetMeasurement()
+            {
+                return new Measurement<long>(getValue(), labels);
+            }
+
+            RuntimeMetrics.Meter.CreateObservableCounter(
+                $"dolittle_system_runtime_events_store_offset",
+                GetMeasurement,
+                "offset",
+                "The current offset of the event log",
+                labels);
+            _eventLogOffsets.TryAdd(key, getValue);
+        }
     }
 }

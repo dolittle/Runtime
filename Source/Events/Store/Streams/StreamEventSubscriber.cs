@@ -22,7 +22,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
 
     public StreamEventSubscriber(IEventLogStream eventLogStream) => _eventLogStream = eventLogStream;
 
-    public ChannelReader<StreamEvent> Subscribe(ScopeId scopeId,
+    public ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> Subscribe(ScopeId scopeId,
         IReadOnlyCollection<ArtifactId> artifactIds,
         ProcessingPosition from,
         bool partitioned,
@@ -32,7 +32,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
     {
         var eventTypes = artifactIds.Select(_ => _.Value.ToProtobuf()).ToHashSet();
 
-        var channel = Channel.CreateBounded<StreamEvent>(ChannelCapacity);
+        var channel = Channel.CreateBounded<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)>(ChannelCapacity);
         var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         ToStreamEvents(
@@ -46,36 +46,49 @@ public class StreamEventSubscriber : IStreamEventSubscriber
         return channel.Reader;
     }
 
-    static void ToStreamEvents(ChannelReader<EventLogBatch> reader, ChannelWriter<StreamEvent> writer, ProcessingPosition startingPosition,
+    static void ToStreamEvents(ChannelReader<EventLogBatch> reader, ChannelWriter<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> writer, ProcessingPosition startingPosition,
         Func<Contracts.CommittedEvent, bool> include, bool partitioned,
         Predicate<Contracts.CommittedEvent>? until,
         CancellationTokenSource linkedTokenSource) =>
         _ = Task.Run(async () =>
         {
-            var current = startingPosition.StreamPosition;
+            var currentStreamPosition = startingPosition.StreamPosition;
+            
+            // This method owns the linkedTokenSource and will dispose it when the reader is done, even if it got it as a parameter.
             using var cts = linkedTokenSource;
             try
             {
-                while (!linkedTokenSource.Token.IsCancellationRequested)
+                while (!cts.Token.IsCancellationRequested)
                 {
                     var eventLogBatch = await reader.ReadAsync(linkedTokenSource.Token);
 
-                    foreach (var evt in eventLogBatch.MatchedEvents)
+                    var includedEvents = eventLogBatch.MatchedEvents.Where(include).ToList();
+                    if (includedEvents.Count == 0)
                     {
+                        // No events included, send the next sequence number and continue
+                        await writer.WriteAsync((null, eventLogBatch.To.Increment()), cts.Token);
+                        continue;
+                    }
+                    for (var index = 0; index < includedEvents.Count; index++)
+                    {
+                        var evt = includedEvents[index];
                         if (until != null && !cts.IsCancellationRequested && until(evt))
                         {
                             cts.Cancel();
                             return;
                         }
+                        var nextEvent = includedEvents.ElementAtOrDefault(index + 1);
                         
-                        if (include(evt))
-                        {
-                            var streamEvent = new StreamEvent(evt.FromProtobuf(), current, StreamId.EventLog, evt.EventSourceId, partitioned);
+                        // Skip any event that are not included in the artifact set.
+                        // If the next event is null, we are at the end of the batch, so we use the next sequence number from the batch.
+                        EventLogSequenceNumber nextEventLogSequenceNumber = nextEvent?.EventLogSequenceNumber ?? eventLogBatch.To.Increment();
+                        
+                        var streamEvent = new StreamEvent(evt.FromProtobuf(), currentStreamPosition, StreamId.EventLog,
+                            evt.EventSourceId, partitioned, nextEventLogSequenceNumber);
 
-                            // ReSharper disable once MethodSupportsCancellation
-                            await writer.WriteAsync(streamEvent);
-                            current = current.Increment();
-                        }
+                        // ReSharper disable once MethodSupportsCancellation
+                        await writer.WriteAsync((streamEvent, nextEventLogSequenceNumber));
+                        currentStreamPosition = currentStreamPosition.Increment();
                     }
                 }
 

@@ -1,14 +1,16 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Store.Persistence;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.Actors;
 
 /// <summary>
-/// Defines a system for collecting metrics about the projection store.
+/// Defines a system for collecting metrics about the projection store & processing offsets.
 /// </summary>
 public interface IMetricsCollector
 {
@@ -61,4 +63,7 @@ public interface IMetricsCollector
     /// Increments the number of catch-up events (read from DB) per subscription.
     /// </summary>
     void IncrementCatchupSubscriptionEvents(string eventProcessorKind, int incBy);
+    
+    void RegisterStreamProcessorOffset(TenantId tenant, StreamProcessorId streamProcessorId, Func<ProcessingPosition> getNextProcessingPosition);
+    void RegisterEventLogOffset(TenantId tenant, ScopeId scopeId, Func<EventLogSequenceNumber> eventLogPosition);
 }

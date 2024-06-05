@@ -8,6 +8,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,7 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
     }
 
 
-    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken,
+    public async Task Process(ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> messages, IStreamProcessorState state, CancellationToken cancellationToken,
         CancellationToken deadlineToken)
     {
         var currentState = AsNonPartitioned(state);
@@ -41,7 +42,17 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
         {
             try
             {
-                var evt = await messages.ReadAsync(cancellationToken);
+                var message = await messages.ReadAsync(cancellationToken);
+                
+                if (message.streamEvent == null)
+                {
+                    // No event in batch, update offset and wait for next batch
+                    currentState = currentState.WithNextEventLogSequence(message.nextSequenceNumber);
+                    await PersistNewState(currentState, deadlineToken);
+                    continue;
+                }
+
+                var evt = message.streamEvent;
 
                 (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, deadlineToken);
                 await PersistNewState(currentState, deadlineToken);

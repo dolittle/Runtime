@@ -34,7 +34,7 @@ public partial class Bucket
         }
     }
 
-    ProcessingPosition Position() => new(CurrentOffset, CurrentEventLogOffset);
+    public ProcessingPosition Position() => new(CurrentOffset, CurrentEventLogOffset);
 
     IStreamProcessorState FromProtobufPartitioned()
     {

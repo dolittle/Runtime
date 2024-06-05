@@ -11,8 +11,6 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 
 public interface IStreamEventSubscriber
 {
-    // public ChannelReader<StreamEvent> SubscribePublic(ProcessingPosition position, CancellationToken cancellationToken);
-
     /// <summary>
     /// Subscribe to a stream of events for a specific scope and a set of event types.
     /// </summary>
@@ -23,8 +21,8 @@ public interface IStreamEventSubscriber
     /// <param name="subscriptionName">Identifier for the given subscription, used for debugging only</param>
     /// <param name="until">Stops the subscription if the predicate returns true</param>
     /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    ChannelReader<StreamEvent> Subscribe(ScopeId scopeId,
+    /// <returns>(StreamEvent, (or null if no event of the correct type is in the current published batch), and the next processing position relevant for the consumer</returns>
+    ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> Subscribe(ScopeId scopeId,
         IReadOnlyCollection<ArtifactId> artifactIds,
         ProcessingPosition from,
         bool partitioned,

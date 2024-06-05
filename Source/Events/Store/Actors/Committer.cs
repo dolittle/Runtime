@@ -42,6 +42,7 @@ public class Committer : IActor
     
     bool _readyToSend = true;
     bool _shuttingDown = false;
+    ulong _lastCommittedOffset;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Committer"/> class.
@@ -95,6 +96,8 @@ public class Committer : IActor
         });
         var nextSequenceNumber = await _committedEvents.FetchNextSequenceNumber(ScopeId.Default, context.CancellationToken).ConfigureAwait(false);
         _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(nextSequenceNumber);
+        _lastCommittedOffset = nextSequenceNumber - 1;
+        _metrics.RegisterEventLogOffset(_tenant, ScopeId.Default, () => _lastCommittedOffset);
     }
 
     Task OnStreamSubscriptionManagerSet(EventLogSubscriptionManagerSpawned msg)
@@ -352,7 +355,9 @@ public class Committer : IActor
                 {
                     _shutdownHook!.MarkCompleted();
                 }
-
+                
+                Interlocked.Exchange(ref _lastCommittedOffset, batchToSend.Batch.LastSequenceNumber.Value);
+                
                 return Task.CompletedTask;
             },
             (ex, _) =>

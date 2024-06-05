@@ -105,7 +105,11 @@ public static class OpenTelemetryConfigurationExtensions
                         .AddMeter(RuntimeMetrics.SourceName)
                         .AddAspNetCoreInstrumentation()
                         .AddProtoActorInstrumentation()
-                        .AddOtlpExporter(options => { options.Endpoint = otlpEndpoint; });
+                        .AddOtlpExporter((exporterOptions, readerOptions) =>
+                        {
+                            exporterOptions.Endpoint = otlpEndpoint;
+                            readerOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 5000;
+                        });
                 }));
     }
 }
