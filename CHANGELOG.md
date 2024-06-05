@@ -1,3 +1,12 @@
+# [9.5.1] - 2024-6-5 [PR: #768](https://github.com/dolittle/Runtime/pull/768)
+## Summary
+Fixed stream ordering when using  DB's that do not use the natural sort order of _id. This has been proven to be a potential issue on MongoDB Atlas.
+
+### Fixed
+
+- Added explicit sorting on _id when querying streams
+
+
 # [9.5.0] - 2024-5-28 [PR: #767](https://github.com/dolittle/Runtime/pull/767)
 ## Summary
 
