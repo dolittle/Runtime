@@ -53,6 +53,8 @@ public static class Runtime
         var configuration = new Dictionary<string, string?>();
         var (databases, tenants) = CreateRuntimeConfiguration(configuration, numberOfTenants);
 
+        var (manPort, freePort, pubPort) = Portable.FindFreePorts();
+        
         var runtimeHost = Host.CreateDefaultBuilder()
             .UseDolittleServices()
             .ConfigureOpenTelemetry(cfg)
@@ -71,9 +73,9 @@ public static class Runtime
                 coll.AddLogging(builder => builder.ClearProviders());
                 coll.AddOptions<EndpointsConfiguration>().Configure(builder =>
                 {
-                    builder.Management = new EndpointConfiguration { Port = 0 };
-                    builder.Private = new EndpointConfiguration { Port = 0 };
-                    builder.Public = new EndpointConfiguration { Port = 0 };
+                    builder.Management = new EndpointConfiguration { Port = manPort };
+                    builder.Private = new EndpointConfiguration { Port = freePort };
+                    builder.Public = new EndpointConfiguration { Port = pubPort };
                 });
                 coll.AddOptions<MetricsServerConfiguration>().Configure(builder =>
                 {
