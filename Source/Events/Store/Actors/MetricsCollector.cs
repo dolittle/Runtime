@@ -369,9 +369,9 @@ public class MetricsCollector : IMetricsCollector
         
         var labels = new[]
         {
-            new KeyValuePair<string, object?>("tenant_id", tenant.ToString()),
-            new KeyValuePair<string, object?>("scope_id", scopeId),
-            new KeyValuePair<string, object?>("event_processor_id", processorId),
+            new KeyValuePair<string, object?>("tenantId", tenant.ToString()),
+            new KeyValuePair<string, object?>("scopeId", scopeId),
+            new KeyValuePair<string, object?>("eventProcessorId", processorId),
             new KeyValuePair<string, object?>("alias", alias),
         };
 
@@ -423,8 +423,8 @@ public class MetricsCollector : IMetricsCollector
             
             var labels = new[]
             {
-                new KeyValuePair<string, object?>("tenant_id", tenant.ToString()),
-                new KeyValuePair<string, object?>("scope_id", scopeId.ToString()),
+                new KeyValuePair<string, object?>("tenantId", tenant.ToString()),
+                new KeyValuePair<string, object?>("scopeId", scopeId.ToString()),
             };
             Measurement<long> GetMeasurement()
             {
