@@ -139,7 +139,7 @@ public class MetricsCollector : IMetricsCollector
         // OpenTelemetry
         _totalStartedConnectionsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_clients_reversecalls_connections_started_total",
-            "count",
+            "connections",
             "ReverseCall total number of connections that have been started");
 
         _pendingWritesOtel = RuntimeMetrics.Meter.CreateUpDownCounter<long>(
@@ -209,22 +209,22 @@ public class MetricsCollector : IMetricsCollector
 
         _totalPingTimeoutsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_clients_reversecalls_keepalive_timeouts_total",
-            "count",
+            "errors",
             "ReverseCall total number of times ping keepalive has timed out");
 
         _totalFailedRequestHandlersOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_clients_reversecalls_requests_failed_handlers_total",
-            "count",
+            "errors",
             "ReverseCall total number of failed request handlers");
 
         _totalFailedRequestCallbacksOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_clients_reversecalls_requests_failed_callbacks_total",
-            "count",
+            "errors",
             "ReverseCall total number of failed request callbacks");
 
         _totalFailedResponseWritesOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_clients_reversecalls_failed_response_writes_total",
-            "count",
+            "errors",
             "ReverseCall total number of failed response writes");
 
         _totalRequestHandlingTimeOtel = RuntimeMetrics.Meter.CreateCounter<double>(

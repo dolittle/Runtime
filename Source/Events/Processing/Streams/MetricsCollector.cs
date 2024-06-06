@@ -92,12 +92,12 @@ public class MetricsCollector : IMetricsCollector
       // New OpenTelemetry metrics initialization
         _registrationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_streamprocessors_registrations_total",
-            "count",
+            "registrations",
             "Total number of stream processors registration attempts per event processor kind");
 
         _failedRegistrationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_streamprocessors_failed_registrations_total",
-            "count",
+            "errors",
             "Total number of failed stream processor registrations per event processor kind.");
 
         _initializationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
@@ -112,7 +112,7 @@ public class MetricsCollector : IMetricsCollector
 
         _failuresTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_streamprocessors_failures_total",
-            "count",
+            "errors",
             "Total number of stream processor faliures per event processor kind.");
 
         _positionSetTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
@@ -132,7 +132,7 @@ public class MetricsCollector : IMetricsCollector
 
         _failedEventsProcessedTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_streamprocessors_failed_event_processings_total",
-            "count",
+            "errors",
             "Total number of event processing attempts per event processor kind.");
     }
 

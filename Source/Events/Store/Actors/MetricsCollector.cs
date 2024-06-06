@@ -129,71 +129,71 @@ public class MetricsCollector : IMetricsCollector
             new[] { "subscriptionName" });
 
 
-        // Otel
+        // OpenTelemetry
         _totalCommitsReceivedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_commits_received_total",
-            "count",
+            "commits",
             "EventStore total number of non-aggregate commits received");
 
         _totalCommitsForAggregateReceivedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_commits_for_aggregate_received_total",
-            "count",
+            "commits",
             "EventStore total number of commits for aggregate received");
 
         _totalAggregateRootVersionCacheInconsistenciesOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_aggregate_root_version_cache_inconsistencies_total",
-            "count",
+            "errors",
             "EventStore total number of aggregate root version cache inconsistencies occurred");
 
         _totalBatchesSuccessfullyPersistedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_batches_successfully_persisted_total",
-            "count",
+            "batches",
             "EventStore total number of batches that has been successfully persisted");
 
         _totalBatchedEventsSuccessfullyPersistedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_batched_events_successfully_persisted_total",
-            "count",
+            "events",
             "EventStore total number of batched events that has been successfully persisted");
 
         _totalBatchesSentOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_batches_sent_total",
-            "count",
+            "batches",
             "EventStore total number of batches that has been sent to the event store");
 
         _totalAggregateRootVersionCacheInconsistenciesResolvedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_aggregate_root_version_cache_inconsistencies_resolved_total",
-            "count",
+            "errors",
             "EventStore total number of aggregate root version cache inconsistencies that has been resolved");
 
         _totalBatchesFailedPersistingOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_events_store_batches_failed_persisting_total",
-            "count",
+            "errors",
             "EventStore total number of batches that failed to be persisted");
 
         _totalCommittedEventsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_events_store_committed_events_total",
-            "count",
+            "events",
             "EventStore total number of committed events by type");
 
 
         _totalCommittedAggregateEventsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_events_store_committed_aggregate_events_total",
-            "count",
+            "events",
             "EventStore total number of committed events by type");
 
         _totalAggregateConcurrencyConflictsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_events_store_aggregate_concurrency_conflicts_total",
-            "count",
+            "errors",
             "EventStore total number of aggregate concurrency conflicts by aggregate root");
 
         _streamedSubscriptionEventsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_events_store_streamed_events_total",
-            "count",
+            "events",
             "Total number of directly streamed events");
 
         _catchupSubscriptionEventsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_events_store_catchup_events_total",
-            "count",
+            "events",
             "Total number of catchup-events (events that are not streamed directly, but read from DB)");
     }
 

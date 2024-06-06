@@ -40,17 +40,17 @@ public class MetricsCollector : IMetricsCollector
 
         _totalRequestsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_reverse_call_requests_total",
-            "count",
+            "requests",
             "ReverseCallDispatcher total requests");
 
         _totalFailedRequestsOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_reverse_call_failed_requests_total",
-            "count",
+            "errors",
             "ReverseCallDispatcher total failed requests");
 
         _totalRequestTimeOtel = RuntimeMetrics.Meter.CreateCounter<double>(
             "dolittle_system_runtime_services_reverse_call_requests_seconds_total",
-            "count",
+            "seconds",
             "ReverseCallDispatcher total time spent writing request and waiting for response");
     }
 

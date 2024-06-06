@@ -73,7 +73,7 @@ public class MetricsCollector : IMetricsCollector
                 new[] { "scope", "eventHandlerId", "eventHandlerAlias", "tenantId", "eventTypeId", "eventTypeAlias" },
             new[] { 0.001, 0.01, 0.1, 1, 10 });
     
-        // OpenTelemetry metrics initialization
+        // OpenTelemetry
         _customerRegistrationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_eventhandlers_registrations_total",
             "count",
@@ -86,27 +86,27 @@ public class MetricsCollector : IMetricsCollector
 
         _systemRegistrationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_eventhandlers_registrations_total",
-            "count",
+            "registrations",
             "Total number of event handler registrations");
 
         _customerFailedRegistrationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_eventhandlers_failed_registrations_total",
-            "count",
+            "errors",
             "Total number of failed event handler registrations");
 
         _systemFailedRegistrationsTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_eventhandlers_failed_registrations_total",
-            "count",
+            "errors",
             "Total number of failed event handler registrations");
 
         _customerEventProcessingFailuresTotalOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_customer_runtime_eventhandlers_event_processing_failures_total",
-            "count",
+            "errors",
             "Total number of failed event processing attempts by an event handler");
 
         _customerEventProcessingTimeOtel = RuntimeMetrics.Meter.CreateHistogram<double>(
             "dolittle_customer_runtime_eventhandlers_event_processing_time_seconds",
-            "count",
+            "seconds",
             "The processing time of events processed by event handlers");
     }
 

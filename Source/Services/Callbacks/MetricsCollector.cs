@@ -70,7 +70,7 @@ public class MetricsCollector : IMetricsCollector
             "Callbacks total number of failed callback loops");
         
         
-                // OpenTelemetry metrics
+        // OpenTelemetry
         _totalCallbacksRegisteredOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_callbacks_registered_total",
             "count",
@@ -88,7 +88,7 @@ public class MetricsCollector : IMetricsCollector
 
         _totalCallbacksFailedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_callbacks_failed_calls_total",
-            "count",
+            "errors",
             "Callbacks total number of called callbacks that failed");
 
         _totalCallbacksUnregisteredOtel = RuntimeMetrics.Meter.CreateCounter<long>(
@@ -98,7 +98,7 @@ public class MetricsCollector : IMetricsCollector
 
         _totalSchedulesMissedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_callbacks_schedules_missed_total",
-            "count",
+            "errors",
             "Callbacks total number of missed callback schedules");
 
         _totalSchedulesMissedTimeOtel = RuntimeMetrics.Meter.CreateCounter<double>(
@@ -108,7 +108,7 @@ public class MetricsCollector : IMetricsCollector
 
         _totalCallbackLoopsFailedOtel = RuntimeMetrics.Meter.CreateCounter<long>(
             "dolittle_system_runtime_services_callbacks_failed_call_loops_total",
-            "count",
+            "errors",
             "Callbacks total number of failed callback loops");
     }
 
