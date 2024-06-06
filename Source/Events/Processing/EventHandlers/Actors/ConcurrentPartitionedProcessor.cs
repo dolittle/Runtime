@@ -154,7 +154,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         _handledTypes = handledEventTypes.Select(_ => _.Value).ToImmutableHashSet();
     }
 
-    public async Task Process(ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> messages, IStreamProcessorState state, CancellationToken cancellationToken,
+    public async Task Process(ChannelReader<StreamSubscriptionMessage> messages, IStreamProcessorState state, CancellationToken cancellationToken,
         CancellationToken deadlineToken)
     {
         var currentState = new State(AsPartitioned(state), new ActiveRequests(_concurrency));
@@ -220,15 +220,13 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
         }
     }
 
-    async Task<State> ProcessNextEvent(ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> messages, State currentState, CancellationToken stoppingToken,
+    async Task<State> ProcessNextEvent(ChannelReader<StreamSubscriptionMessage> messages, State currentState, CancellationToken stoppingToken,
         CancellationToken deadlineToken)
     {
-        var (evt, nextProcessingPosition) = await messages.ReadAsync(stoppingToken);
-        
-        if (evt is not null)
+        var message = await messages.ReadAsync(stoppingToken);
+        if (message.IsEvent)
         {
-            // Event is present, try to process it
-
+            var evt = message.StreamEvent;
             if (currentState.ProcessorState.FailingPartitions.TryGetValue(evt.Partition, out _))
             {
                 await currentState.ActiveRequests.AddSkipped(Task.FromResult(AsSkippedEvent(evt)));
@@ -238,10 +236,11 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
             var newTask = ProcessEventAndReturnStateUpdateCallback(evt, deadlineToken);
             await currentState.ActiveRequests.Add(evt.Partition, newTask).ConfigureAwait(false);
         }
+
         else
         {
             // Eventlog has unhandled events, skip them
-            currentState = currentState.WithNextProcessingPosition(nextProcessingPosition);
+            currentState = currentState.WithNextProcessingPosition(message.NextEventLogSequenceNumber);
             await PersistNewState(currentState.ProcessorState, deadlineToken);
         }
         
@@ -305,7 +304,7 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
     /// <returns></returns>
     /// <exception cref="OperationCanceledException"></exception>
     internal static async ValueTask<(NextAction, PartitionId?)> WaitForNextAction(
-        ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> messages,
+        ChannelReader<StreamSubscriptionMessage> messages,
         State state,
         CancellationToken cancellationToken)
     {
@@ -376,9 +375,9 @@ public class ConcurrentPartitionedProcessor : ProcessorBase<StreamProcessorState
             return (NextAction.ReceiveResult, default);
         }
 
-        if (messages.TryPeek(out var message) && message.streamEvent is not null && state.ActiveRequests.IsProcessing(message.streamEvent.Partition))
+        if (messages.TryPeek(out var message) && message.IsEvent && state.ActiveRequests.IsProcessing(message.StreamEvent.Partition))
         {
-            return (NextAction.ReceiveResult, message.streamEvent.Partition);
+            return (NextAction.ReceiveResult, message.StreamEvent.Partition);
         }
 
         return (NextAction.ProcessNextEvent, default);

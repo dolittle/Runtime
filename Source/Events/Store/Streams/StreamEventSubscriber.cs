@@ -22,7 +22,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
 
     public StreamEventSubscriber(IEventLogStream eventLogStream) => _eventLogStream = eventLogStream;
 
-    public ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> Subscribe(ScopeId scopeId,
+    public ChannelReader<StreamSubscriptionMessage> Subscribe(ScopeId scopeId,
         IReadOnlyCollection<ArtifactId> artifactIds,
         ProcessingPosition from,
         bool partitioned,
@@ -32,7 +32,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
     {
         var eventTypes = artifactIds.Select(_ => _.Value.ToProtobuf()).ToHashSet();
 
-        var channel = Channel.CreateBounded<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)>(ChannelCapacity);
+        var channel = Channel.CreateBounded<StreamSubscriptionMessage>(ChannelCapacity);
         var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         ToStreamEvents(
@@ -46,7 +46,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
         return channel.Reader;
     }
 
-    static void ToStreamEvents(ChannelReader<EventLogBatch> reader, ChannelWriter<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> writer, ProcessingPosition startingPosition,
+    static void ToStreamEvents(ChannelReader<EventLogBatch> reader, ChannelWriter<StreamSubscriptionMessage> writer, ProcessingPosition startingPosition,
         Func<Contracts.CommittedEvent, bool> include, bool partitioned,
         Predicate<Contracts.CommittedEvent>? until,
         CancellationTokenSource linkedTokenSource) =>
@@ -66,7 +66,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
                     if (includedEvents.Count == 0)
                     {
                         // No events included, send the next sequence number and continue
-                        await writer.WriteAsync((null, eventLogBatch.To.Increment()), cts.Token);
+                        await writer.WriteAsync(new StreamSubscriptionMessage(eventLogBatch.To.Increment()),cts.Token);
                         continue;
                     }
                     for (var index = 0; index < includedEvents.Count; index++)
@@ -87,7 +87,7 @@ public class StreamEventSubscriber : IStreamEventSubscriber
                             evt.EventSourceId, partitioned, nextEventLogSequenceNumber);
 
                         // ReSharper disable once MethodSupportsCancellation
-                        await writer.WriteAsync((streamEvent, nextEventLogSequenceNumber));
+                        await writer.WriteAsync(new StreamSubscriptionMessage(streamEvent));
                         currentStreamPosition = currentStreamPosition.Increment();
                     }
                 }

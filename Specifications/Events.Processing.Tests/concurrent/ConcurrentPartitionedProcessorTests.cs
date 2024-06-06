@@ -168,23 +168,23 @@ public class ConcurrentPartitionedProcessorTests
         }.ToImmutableDictionary(), DateTimeOffset.UtcNow);
     }
 
-    private static Channel<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> ChannelWithEvent()
+    private static Channel<StreamSubscriptionMessage> ChannelWithEvent()
     {
-        var events = Channel.CreateBounded<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)>(100);
-        events.Writer.WriteAsync((FirstStreamEvent, FirstStreamEvent.NextSequenceInStream)).GetAwaiter().GetResult();
+        var events = Channel.CreateBounded<StreamSubscriptionMessage>(100);
+        events.Writer.WriteAsync(new StreamSubscriptionMessage(FirstStreamEvent)).GetAwaiter().GetResult();
         return events;
     }
 
-    private static Channel<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> ChannelWithEventAvailableAfter(TimeSpan timeSpan)
+    private static Channel<StreamSubscriptionMessage> ChannelWithEventAvailableAfter(TimeSpan timeSpan)
     {
-        var events = Channel.CreateBounded<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)>(100);
+        var events = Channel.CreateBounded<StreamSubscriptionMessage>(100);
         Task.Run(async () =>
         {
             await Task.Delay(timeSpan);
-            events.Writer.WriteAsync((FirstStreamEvent, FirstStreamEvent.NextSequenceInStream)).GetAwaiter().GetResult();
+            events.Writer.WriteAsync(new StreamSubscriptionMessage(FirstStreamEvent)).GetAwaiter().GetResult();
         });
         return events;
     }
 
-    private static Channel<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> ChannelWithoutEvents() => Channel.CreateBounded<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)>(100);
+    private static Channel<StreamSubscriptionMessage> ChannelWithoutEvents() => Channel.CreateBounded<StreamSubscriptionMessage>(100);
 }

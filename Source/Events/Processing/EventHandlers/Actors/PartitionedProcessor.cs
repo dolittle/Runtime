@@ -13,7 +13,6 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
@@ -75,7 +74,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
     }
 
     public async Task Process(
-        ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> messages,
+        ChannelReader<StreamSubscriptionMessage> messages,
         IStreamProcessorState state, CancellationToken cancellationToken, CancellationToken deadlineToken)
     {
         var currentState = new State(AsPartitioned(state));
@@ -138,7 +137,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
     /// <returns></returns>
     /// <exception cref="OperationCanceledException"></exception>
     async ValueTask<(NextAction, PartitionId?)> WaitForNextAction(
-        ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> messages, State state,
+        ChannelReader<StreamSubscriptionMessage> messages, State state,
         CancellationToken cancellationToken)
     {
         if (!state.TryGetTimeToRetry(out var timeToRetry, out var partitionId))
@@ -169,8 +168,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
             {
                 if (_catchingUp && messages.TryPeek(out var message))
                 {
-                    var evt = message.streamEvent;
-                    if (evt is not null && evt.Event.EventLogSequenceNumber < state.ProcessorState.Position.EventLogPosition)
+                    if (message.IsEvent && message.StreamEvent.Event.EventLogSequenceNumber < state.ProcessorState.Position.EventLogPosition)
                     {
                         return NextAction.ProcessCatchUpEvent;
                     }
@@ -187,11 +185,12 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
         }
     }
 
-    async Task<State> HandleNewEvent((StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber) message,
+    async Task<State> HandleNewEvent(StreamSubscriptionMessage subscriptionMessage,
         State state, CancellationToken deadlineToken)
     {
-        if (message.streamEvent is { } evt)
+        if (subscriptionMessage.IsEvent)
         {
+            var evt = subscriptionMessage.StreamEvent;
             if (state.ProcessorState.FailingPartitions.TryGetValue(evt.Partition, out _))
             {
                 return state with
@@ -211,7 +210,7 @@ public class PartitionedProcessor : ProcessorBase<StreamProcessorState>
             // Unhandled events, skip forward
             state = state with
             {
-                ProcessorState = state.ProcessorState.WithNextEventLogSequence(message.nextSequenceNumber)
+                ProcessorState = state.ProcessorState.WithNextEventLogSequence(subscriptionMessage.NextEventLogSequenceNumber)
             };
         }
 

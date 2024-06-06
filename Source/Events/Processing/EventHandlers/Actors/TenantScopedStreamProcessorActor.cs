@@ -265,7 +265,7 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         return (shutdownTokenSource.Token, deadlineTokenSource.Token);
     }
 
-    async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> events, IContext context, CancellationToken stoppingToken,
+    async Task StartProcessing(IStreamProcessorState streamProcessorState, ChannelReader<StreamSubscriptionMessage> events, IContext context, CancellationToken stoppingToken,
         CancellationToken deadlineToken)
     {
         try
@@ -342,14 +342,14 @@ public sealed class TenantScopedStreamProcessorActor : IActor, IDisposable
         }
     }
 
-    ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> SubscribeUntil(ProcessingPosition from, DateTimeOffset to, CancellationToken token)
+    ChannelReader<StreamSubscriptionMessage> SubscribeUntil(ProcessingPosition from, DateTimeOffset to, CancellationToken token)
     {
         var unixTimeSeconds = to.ToUnixTimeSeconds();
         return StartSubscription(from, evt => evt.Occurred.Seconds >= unixTimeSeconds, token);
     }
 
 
-    ChannelReader<(StreamEvent? streamEvent, EventLogSequenceNumber nextSequenceNumber)> StartSubscription(ProcessingPosition from, Predicate<CommittedEvent>? until, CancellationToken token)
+    ChannelReader<StreamSubscriptionMessage> StartSubscription(ProcessingPosition from, Predicate<CommittedEvent>? until, CancellationToken token)
     {
         return _eventSubscriber.Subscribe(
             Identifier.ScopeId,
