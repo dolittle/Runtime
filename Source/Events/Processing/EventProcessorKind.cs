@@ -6,7 +6,7 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.Events.Processing;
 
 /// <summary>
-/// Represents the kind of an <see cref="IEventProcessor"/>.
+/// Represents the kind of <see cref="IEventProcessor"/>.
 /// </summary>
 public record EventProcessorKind(string Value) : ConceptAs<string>(Value)
 {
