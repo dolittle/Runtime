@@ -1,3 +1,26 @@
+# [9.6.0] - 2024-6-13 [PR: #769](https://github.com/dolittle/Runtime/pull/769)
+## Summary
+
+This release adds OpenTelemetry metrics to the runtime.  It also changes the behavior of stream processors to be able to provide consumer lag metrics for all event handlers. 
+
+### Stream processors
+Previously if the event handler did not consume an event, it would also not update its current offset in the event log at all. Only processed events would cause an update. This release changes that, so all events are taken into consideration when storing how far each handler is in the stream. This allows the runtime to also provide consumer lag metrics that reflects this offset against the latest committed event.
+
+### OpenTelemetry
+OpenTelemetry metrics will be enabled by default if there is defined an OpenTelemetry endpoint to publish to.
+It can be disabled with `Dolittle__Runtime__OpenTelemetry__Tracing=false`
+
+### Added
+- OpenTelemetry metrics support
+- New metrics:
+   -  `dolittle_customer_runtime_stream_processor_consumer_lag`
+   -  `dolittle_customer_runtime_stream_processors_offset`
+   -  `dolittle_customer_runtime_stream_processors_processed_total`
+
+### Changed
+-  Stream processor state behavior - now considers unhandled events as well as processed events.
+
+
 # [9.5.1] - 2024-6-5 [PR: #768](https://github.com/dolittle/Runtime/pull/768)
 ## Summary
 Fixed stream ordering when using  DB's that do not use the natural sort order of _id. This has been proven to be a potential issue on MongoDB Atlas.
