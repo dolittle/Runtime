@@ -39,6 +39,7 @@ public interface IStreamProcessorState
     public IStreamProcessorState WithFailure(IProcessingResult failedProcessing, StreamEvent processedEvent, DateTimeOffset retryAt, DateTimeOffset timestamp);
     public IStreamProcessorState WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp);
     public IStreamProcessorState SkipEventsBefore(EventLogSequenceNumber eventLogSequence);
+    public IStreamProcessorState WithNextEventLogSequence(EventLogSequenceNumber nextEventLogSequenceNumber);
 }
 
 /// <summary>
@@ -54,7 +55,7 @@ public interface IStreamProcessorState<T> : IStreamProcessorState where T : IStr
 
     IStreamProcessorState IStreamProcessorState.WithSuccessfullyProcessed(StreamEvent processedEvent, DateTimeOffset timestamp) =>
         WithSuccessfullyProcessed(processedEvent, timestamp);
-
+    
     IStreamProcessorState IStreamProcessorState.SkipEventsBefore(EventLogSequenceNumber eventLogSequence) => SkipEventsBefore(eventLogSequence);
     
     public new T WithResult(IProcessingResult result, StreamEvent processedEvent, DateTimeOffset timestamp);
@@ -68,4 +69,13 @@ public interface IStreamProcessorState<T> : IStreamProcessorState where T : IStr
     /// <param name="position"></param>
     /// <returns></returns>
     new T SkipEventsBefore(EventLogSequenceNumber position);
+    
+    /// <summary>
+    /// Update the next event log position to start from.
+    /// Will not clear partitions.
+    /// </summary>
+    /// <param name="nextEventLogSequenceNumber"></param>
+    /// <returns></returns>
+    new T WithNextEventLogSequence(EventLogSequenceNumber nextEventLogSequenceNumber);
+
 }

@@ -14,6 +14,7 @@ using Dolittle.Runtime.Diagnostics.OpenTelemetry;
 using Dolittle.Runtime.Domain.Platform;
 using Dolittle.Runtime.Domain.Tenancy;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Metrics.Configuration;
 using Dolittle.Runtime.Metrics.Hosting;
 using Dolittle.Runtime.Server.Web;
 using Dolittle.Runtime.Services;
@@ -52,6 +53,8 @@ public static class Runtime
         var configuration = new Dictionary<string, string?>();
         var (databases, tenants) = CreateRuntimeConfiguration(configuration, numberOfTenants);
 
+        var (manPort, freePort, pubPort) = Portable.FindFreePorts();
+        
         var runtimeHost = Host.CreateDefaultBuilder()
             .UseDolittleServices()
             .ConfigureOpenTelemetry(cfg)
@@ -70,9 +73,13 @@ public static class Runtime
                 coll.AddLogging(builder => builder.ClearProviders());
                 coll.AddOptions<EndpointsConfiguration>().Configure(builder =>
                 {
-                    builder.Management = new EndpointConfiguration { Port = 0 };
-                    // builder.Private = new EndpointConfiguration { Port = 0 };
-                    builder.Public = new EndpointConfiguration { Port = 0 };
+                    builder.Management = new EndpointConfiguration { Port = manPort };
+                    builder.Private = new EndpointConfiguration { Port = freePort };
+                    builder.Public = new EndpointConfiguration { Port = pubPort };
+                });
+                coll.AddOptions<MetricsServerConfiguration>().Configure(builder =>
+                {
+                    builder.Port = 0;
                 });
             })
             .AddActorSystem()

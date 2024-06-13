@@ -93,7 +93,7 @@ public class ManagementClient : IManagementClient
     }
 
     /// <inheritdoc />
-    public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
+    public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId? tenant = null)
     {
         var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
         var request = new GetOneRequest

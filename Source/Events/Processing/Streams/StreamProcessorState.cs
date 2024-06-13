@@ -182,6 +182,13 @@ public record StreamProcessorState(ProcessingPosition Position, string FailureRe
         return new StreamProcessorState(Position with { EventLogPosition = position }, LastSuccessfullyProcessed);
     }
 
+    IStreamProcessorState IStreamProcessorState.WithNextEventLogSequence(EventLogSequenceNumber nextEventLogSequenceNumber) => WithNextEventLogSequence(nextEventLogSequenceNumber);
+
+    public StreamProcessorState WithNextEventLogSequence(EventLogSequenceNumber nextEventLogSequenceNumber) => this with
+    {
+        Position = Position with { EventLogPosition = nextEventLogSequenceNumber }
+    };
+
     bool RetryTimeIsInThePast(DateTimeOffset retryTime)
         => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
 

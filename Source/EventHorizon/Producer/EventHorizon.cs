@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.EventHorizon.Producer;
 
 /// <summary>
-/// Represents an an event horizon in the system.
+/// Represents an event horizon in the system.
 /// </summary>
 public class EventHorizon : IDisposable
 {
@@ -101,7 +101,7 @@ public class EventHorizon : IDisposable
                 Id.ConsumerTenant,
                 Id.ProducerTenant,
                 Id.Partition,
-                Id.PublicStream);;
+                Id.PublicStream);
             tasks.OnAllTasksCompleted += () => Log.EventHorizonStopped(
                 _logger,
                 Id.ConsumerMicroservice,

@@ -240,6 +240,21 @@ public record StreamProcessorState(ProcessingPosition Position, ImmutableDiction
         };
     }
 
+    IStreamProcessorState IStreamProcessorState.WithNextEventLogSequence(EventLogSequenceNumber nextEventLogSequenceNumber) => WithNextEventLogSequence(nextEventLogSequenceNumber);
+
+    public StreamProcessorState WithNextEventLogSequence(EventLogSequenceNumber nextEventLogSequenceNumber)
+    {
+        if(nextEventLogSequenceNumber < Position.EventLogPosition)
+        {
+            throw new ArgumentException("Cannot set the next event log sequence number to a lower value than the current event log sequence number", nameof(nextEventLogSequenceNumber));
+        }
+        
+        return this with
+        {
+            Position = Position with { EventLogPosition = nextEventLogSequenceNumber }
+        };
+    }
+
     static StreamProcessorState AddFailingPartitionFor(
         StreamProcessorState oldState,
         ProcessingPosition failedPosition,

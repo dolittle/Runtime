@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.CLI;
 /// </summary>
 [Command("dolittle", Description = "The Dolittle CLI tool")]
 [Subcommand(typeof(Runtime.Command))]
-class Program
+sealed class Program
 {
     static int Main(string[] args)
     {

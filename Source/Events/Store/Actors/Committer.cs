@@ -42,6 +42,7 @@ public class Committer : IActor
     
     bool _readyToSend = true;
     bool _shuttingDown = false;
+    ulong _lastCommittedOffset;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Committer"/> class.
@@ -95,6 +96,8 @@ public class Committer : IActor
         });
         var nextSequenceNumber = await _committedEvents.FetchNextSequenceNumber(ScopeId.Default, context.CancellationToken).ConfigureAwait(false);
         _pipeline = CommitPipeline.NewFromEventLogSequenceNumber(nextSequenceNumber);
+        _lastCommittedOffset = nextSequenceNumber - 1;
+        _metrics.RegisterEventLogOffset(_tenant, ScopeId.Default, () => _lastCommittedOffset);
     }
 
     Task OnStreamSubscriptionManagerSet(EventLogSubscriptionManagerSpawned msg)
@@ -156,12 +159,11 @@ public class Committer : IActor
             }
 
             var aggregate = new Aggregate(request.Events.AggregateRootId.ToGuid(), request.Events.EventSourceId);
-            if (_aggregateCommitInFlight.Contains(aggregate))
+            if (!_aggregateCommitInFlight.Add(aggregate))
             {
                 return RespondWithFailure(new EventsForAggregateAlreadyAddedToCommit(aggregate).ToFailure());
             }
 
-            _aggregateCommitInFlight.Add(aggregate);
             if (_aggregateRootVersionCache.TryGetValue(aggregate, out var aggregateRootVersion))
             {
                 return CommitForAggregate(context, request, aggregate, aggregateRootVersion, respond);
@@ -344,7 +346,7 @@ public class Committer : IActor
                     return Task.CompletedTask;
                 }
                 
-                _metrics.IncrementTotalBatchesSuccessfullyPersisted(batchToSend.Batch);
+                _metrics.IncrementTotalBatchesSuccessfullyPersisted(_tenant,batchToSend.Batch);
                 batchToSend.Complete();
                 context.Send(_streamSubscriptionManagerPid!, batchToSend.Batch);
                 _readyToSend = true;
@@ -353,7 +355,9 @@ public class Committer : IActor
                 {
                     _shutdownHook!.MarkCompleted();
                 }
-
+                
+                Interlocked.Exchange(ref _lastCommittedOffset, batchToSend.Batch.LastSequenceNumber.Value);
+                
                 return Task.CompletedTask;
             },
             (ex, _) =>

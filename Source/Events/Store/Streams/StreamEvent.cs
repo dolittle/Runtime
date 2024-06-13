@@ -6,9 +6,13 @@ namespace Dolittle.Runtime.Events.Store.Streams;
 /// <summary>
 /// Represents a <see cref="CommittedEvent" /> that is a part of a stream.
 /// </summary>
-public record StreamEvent(CommittedEvent Event, StreamPosition Position, StreamId Stream, PartitionId Partition, bool Partitioned)
+public record StreamEvent(CommittedEvent Event, StreamPosition Position, StreamId Stream, PartitionId Partition, bool Partitioned, EventLogSequenceNumber NextSequenceInStream)
 {
-    public ProcessingPosition NextProcessingPosition => new(Position.Increment(), Event.EventLogSequenceNumber.Increment());
-    public ProcessingPosition CurrentProcessingPosition => new(Position, Event.EventLogSequenceNumber);
+    public StreamEvent(CommittedEvent @event, StreamPosition position, StreamId stream, PartitionId partition, bool partitioned)
+        : this(@event, position, stream, partition, partitioned, @event.EventLogSequenceNumber.Increment())
+    {
+    }
     
+    public ProcessingPosition NextProcessingPosition => new(Position.Increment(), NextSequenceInStream);
+    public ProcessingPosition CurrentProcessingPosition { get; } = new(Position, Event.EventLogSequenceNumber);
 }

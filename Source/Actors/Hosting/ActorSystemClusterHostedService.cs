@@ -40,10 +40,11 @@ public class ActorSystemClusterHostedService : IHostedService
     }
 
     /// <inheritdoc />
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         Log.SetLoggerFactory(_loggerFactory);
-        return _actorSystem.Cluster().StartMemberAsync();
+        await _actorSystem.Cluster().StartMemberAsync();
+        _logger.LogInformation("Actor system started");
     }
 
     /// <inheritdoc />

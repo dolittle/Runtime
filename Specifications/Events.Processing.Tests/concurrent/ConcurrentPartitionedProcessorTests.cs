@@ -168,23 +168,23 @@ public class ConcurrentPartitionedProcessorTests
         }.ToImmutableDictionary(), DateTimeOffset.UtcNow);
     }
 
-    private static Channel<StreamEvent> ChannelWithEvent()
+    private static Channel<StreamSubscriptionMessage> ChannelWithEvent()
     {
-        var events = Channel.CreateBounded<StreamEvent>(100);
-        events.Writer.WriteAsync(FirstStreamEvent).GetAwaiter().GetResult();
+        var events = Channel.CreateBounded<StreamSubscriptionMessage>(100);
+        events.Writer.WriteAsync(new StreamSubscriptionMessage(FirstStreamEvent)).GetAwaiter().GetResult();
         return events;
     }
 
-    private static Channel<StreamEvent> ChannelWithEventAvailableAfter(TimeSpan timeSpan)
+    private static Channel<StreamSubscriptionMessage> ChannelWithEventAvailableAfter(TimeSpan timeSpan)
     {
-        var events = Channel.CreateBounded<StreamEvent>(100);
+        var events = Channel.CreateBounded<StreamSubscriptionMessage>(100);
         Task.Run(async () =>
         {
             await Task.Delay(timeSpan);
-            events.Writer.WriteAsync(FirstStreamEvent).GetAwaiter().GetResult();
+            events.Writer.WriteAsync(new StreamSubscriptionMessage(FirstStreamEvent)).GetAwaiter().GetResult();
         });
         return events;
     }
 
-    private static Channel<StreamEvent> ChannelWithoutEvents() => Channel.CreateBounded<StreamEvent>(100);
+    private static Channel<StreamSubscriptionMessage> ChannelWithoutEvents() => Channel.CreateBounded<StreamSubscriptionMessage>(100);
 }

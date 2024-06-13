@@ -29,6 +29,13 @@ public class VersionParser : IValueParser
     public Type TargetType => typeof(Version);
 
     /// <inheritdoc/>
-    public object Parse(string argName, string value, CultureInfo culture)
-        => _converter.FromString(value);
+    public object Parse(string? argName, string? value, CultureInfo culture)
+    {
+        if (value == null)
+        {
+            throw new InvalidVersionString("");
+        }
+
+        return _converter.FromString(value);
+    }
 }

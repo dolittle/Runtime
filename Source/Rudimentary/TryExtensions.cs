@@ -54,14 +54,14 @@ public static class TryExtensions
             {
                 try
                 {
-                    return Try<TNextResult>.Succeeded(callback(_.Result));
+                    return Try<TNextResult>.Succeeded(callback(_.Result!));
                 }
                 catch (Exception exception)
                 {
                     return Try<TNextResult>.Failed(exception);
                 }
             },
-            _ => Try<TNextResult>.Failed(_.Exception));
+            _ => Try<TNextResult>.Failed(_.Exception!));
 
     /// <summary>
     /// Adds a callback to a <see cref="Try{TResult}"/> that will be called if the operation is successful.

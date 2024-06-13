@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
@@ -54,7 +55,7 @@ public class PipelineReadyBatchAggregator<TBatch, TBatchBuilder> : IPipelineRead
     }
 
     /// <inheritdoc />
-    public bool TryGetNextBatch(out ReadyBatch<TBatch> readyBatch)
+    public bool TryGetNextBatch([NotNullWhen(true)] out ReadyBatch<TBatch>? readyBatch)
     {
         if (_preparedBatches.Reader.TryRead(out readyBatch))
         {

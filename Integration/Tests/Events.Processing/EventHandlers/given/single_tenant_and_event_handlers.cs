@@ -124,7 +124,10 @@ class single_tenant_and_event_handlers : Processing.given.a_clean_event_store
             while (!cts.IsCancellationRequested)
             {
                 var evt = Task.Run(async () => await reader.ReadAsync(CancellationToken.None), cts.Token).GetAwaiter().GetResult();
-                events.Add(evt);
+                if (evt.IsEvent)
+                {
+                    events.Add(evt.StreamEvent);
+                }
             }
         }
         catch (Exception)

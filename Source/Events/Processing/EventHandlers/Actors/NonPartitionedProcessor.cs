@@ -33,7 +33,7 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
     }
 
 
-    public async Task Process(ChannelReader<StreamEvent> messages, IStreamProcessorState state, CancellationToken cancellationToken,
+    public async Task Process(ChannelReader<StreamSubscriptionMessage> messages, IStreamProcessorState state, CancellationToken cancellationToken,
         CancellationToken deadlineToken)
     {
         var currentState = AsNonPartitioned(state);
@@ -41,7 +41,18 @@ public class NonPartitionedProcessor : ProcessorBase<StreamProcessorState>
         {
             try
             {
-                var evt = await messages.ReadAsync(cancellationToken);
+                var message = await messages.ReadAsync(cancellationToken);
+                
+                if (!message.IsEvent)
+                {
+                    var nextSequenceNumber = message.NextEventLogSequenceNumber;
+                    // No event in batch, update offset and wait for next batch
+                    currentState = currentState.WithNextEventLogSequence(nextSequenceNumber);
+                    await PersistNewState(currentState, deadlineToken);
+                    continue;
+                }
+
+                var evt = message.StreamEvent;
 
                 (currentState, var processingResult) = await ProcessEventAndHandleResult(evt, currentState, deadlineToken);
                 await PersistNewState(currentState, deadlineToken);
