@@ -1,3 +1,14 @@
+# [9.6.1] - 2024-6-13 [PR: #770](https://github.com/dolittle/Runtime/pull/770)
+## Summary
+
+This fixes the build scripts for the Dolittle CLI and switches the performance benchmarks to be only built for dotnet 8.
+
+### Fixed
+
+- CLI builds
+- Benchmark runner
+
+
 # [9.6.0] - 2024-6-13 [PR: #769](https://github.com/dolittle/Runtime/pull/769)
 ## Summary
 
