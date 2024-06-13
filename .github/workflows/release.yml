@@ -255,18 +255,6 @@ jobs:
           asset_path: ./Source/CLI/bin/Release/net8.0/win-arm64/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-arm64.exe
           asset_content_type: application/octet-stream
-      - name: Publish for Windows arm
-        working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm
-      - name: Upload Windows arm
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net8.0/win-arm/publish/Dolittle.Runtime.CLI.exe
-          asset_name: dolittle-win-arm.exe
-          asset_content_type: application/octet-stream
       - name: Publish for Linux x64
         working-directory: ./Source/CLI
         run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-x64
