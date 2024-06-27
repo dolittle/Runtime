@@ -81,6 +81,10 @@ public static class Runtime
                 {
                     builder.Port = 0;
                 });
+                coll.AddOptions<WebServerConfiguration>().Configure(builder =>
+                {
+                    builder.Port = 0;
+                });
             })
             .AddActorSystem()
             .AddMetrics()

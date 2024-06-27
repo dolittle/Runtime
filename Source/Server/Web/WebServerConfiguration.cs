@@ -14,10 +14,10 @@ public record WebServerConfiguration
     /// <summary>
     /// Gets a value indicating whether or not the endpoint should be enabled.
     /// </summary>
-    public bool Enabled { get; init; } = true; // TODO: It would be cool if this made it so that the scoped server host didn't start
+    public bool Enabled { get; set; } = true; // TODO: It would be cool if this made it so that the scoped server host didn't start
 
     /// <summary>
     /// Gets the port to serve the endpoint on.
     /// </summary>
-    public int Port { get; init; } = 8001;
+    public int Port { get; set; } = 8001;
 }
