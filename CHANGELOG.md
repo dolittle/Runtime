@@ -1,3 +1,11 @@
+# [9.6.2] - 2024-6-27 [PR: #771](https://github.com/dolittle/Runtime/pull/771)
+## Summary
+Hardened the handling of already written stream events. Will now log and skip in filter processors. Previously it was able to get stuck while processing a filter that was in an inconsistent state.
+
+### Fixed
+- Improved error handling for filter processors, allowing the runtime to self-correct when the stream and processor state does not match
+
+
 # [9.6.1] - 2024-6-13 [PR: #770](https://github.com/dolittle/Runtime/pull/770)
 ## Summary
 
