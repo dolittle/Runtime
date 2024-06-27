@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Linq.Expressions;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -10,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
 /// <summary>
 /// Represents an event stored in a stream in the MongoDB event store.
 /// </summary>
-public class StreamEvent
+public class StreamEvent: IEvent<StreamEvent>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="StreamEvent"/> class.
@@ -46,6 +48,10 @@ public class StreamEvent
     [BsonId]
     [BsonRepresentation(BsonType.Decimal128)]
     public ulong StreamPosition { get; set; }
+
+    public static Expression<Func<StreamEvent, object>> StreamPositionExpression { get; } = e => e.StreamPosition;
+
+    [BsonIgnore] public ulong EventLogSequenceNumber => Metadata.EventLogSequenceNumber;
 
     /// <summary>
     /// Gets or sets the partition id.

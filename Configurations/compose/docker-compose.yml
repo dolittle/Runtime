@@ -15,7 +15,7 @@ services:
       - 27017:27017
       
   runtime:
-    image: dolittle/runtime:9.4.0
+    image: dolittle/runtime:9.5.1
     volumes:
       - ./runtime.yml:/app/.dolittle/runtime.yml
       - ./appsettings.json:/app/appsettings.json

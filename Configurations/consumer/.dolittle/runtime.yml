@@ -2,7 +2,7 @@ opentelemetry:
   serviceName: "Consumer-Runtime"
 endpoints: 
   private:
-    port: 5055
+    port: 50055
   public:
     port: 5054
   management:
@@ -32,16 +32,6 @@ tenants:
         servers:
         - localhost
         database: "consumer_event_store"
-      projections:
-        servers:
-        - localhost
-        database: "consumer_projections"
-        maxConnectionPoolSize: 1000
-      embeddings:
-        servers:
-        - localhost
-        database: "consumer_embeddings"
-        maxConnectionPoolSize: 1000
       readModels:
         host: "mongodb://localhost:27017"
         database: "consumer_readmodels"

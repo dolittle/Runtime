@@ -1,7 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -10,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
 /// <summary>
 /// Represents an event stored in the MongoDB event store.
 /// </summary>
-public class Event
+public class Event: IEvent<Event>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Event"/> class.
@@ -43,6 +45,11 @@ public class Event
     [BsonId]
     [BsonRepresentation(BsonType.Decimal128)]
     public ulong EventLogSequenceNumber { get; set; }
+
+    // Do not serialize
+    [BsonIgnore] public ulong StreamPosition => EventLogSequenceNumber;
+    
+    public static Expression<Func<Event, object>> StreamPositionExpression { get; } = e => e.EventLogSequenceNumber;
 
     /// <summary>
     /// Gets or sets the execution context.
