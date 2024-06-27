@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
@@ -26,7 +27,7 @@ public interface IWriteEventsToStreamCollection
     Task<StreamPosition> Write<TEvent>(
         IMongoCollection<TEvent> stream,
         Func<StreamPosition, TEvent> createStoreEvent,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken) where TEvent : IEvent<TEvent>;
     
     /// <summary>
     /// Writes multiple <typeparamref name="TEvent">Event</typeparamref> to <see cref="IMongoCollection{TDocument}" /> Stream collection.
@@ -39,5 +40,5 @@ public interface IWriteEventsToStreamCollection
     Task<StreamPosition> Write<TEvent>(
         IMongoCollection<TEvent> stream,
         Func<StreamPosition, IReadOnlyList<TEvent>> createStoreEvents,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken) where TEvent : IEvent<TEvent>;
 }

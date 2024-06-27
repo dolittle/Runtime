@@ -95,8 +95,15 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
         _logger.FilteredEventIsIncluded(Identifier, Scope, @event.Type.Id, partitionId, Definition.TargetStream);
         try
         {
-            await _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken).ConfigureAwait(false);
+            await _eventsToStreamsWriter
+                .Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken)
+                .ConfigureAwait(false);
             return result;
+        }
+        catch (EventLogSequenceAlreadyWritten ex)
+        {
+            _logger.LogWarning("Event {Event} was already written to stream {Stream}", ex.EventLogSequenceNumber, Definition.TargetStream);
+            return result; // No need to retry, already written
         }
         catch (Exception ex)
         {

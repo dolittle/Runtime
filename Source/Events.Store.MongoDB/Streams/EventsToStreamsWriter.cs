@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
@@ -61,21 +63,23 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     }
 
     /// <inheritdoc/>
-    public Task<StreamPosition> Write<TEvent>(IMongoCollection<TEvent> stream, Func<StreamPosition, TEvent> createStoreEvent, CancellationToken cancellationToken)
+    public Task<StreamPosition> Write<TEvent>(IMongoCollection<TEvent> stream, Func<StreamPosition, TEvent> createStoreEvent, CancellationToken cancellationToken) where TEvent : IEvent<TEvent>
         => WriteOnlyNewEvents(stream, position => new List<TEvent>{createStoreEvent(position)}, cancellationToken);
 
     /// <inheritdoc />
-    public Task<StreamPosition> Write<TEvent>(IMongoCollection<TEvent> stream, Func<StreamPosition, IReadOnlyList<TEvent>> createStoreEvents, CancellationToken cancellationToken)
+    public Task<StreamPosition> Write<TEvent>(IMongoCollection<TEvent> stream, Func<StreamPosition, IReadOnlyList<TEvent>> createStoreEvents, CancellationToken cancellationToken) where TEvent : IEvent<TEvent>
         => WriteOnlyNewEvents(stream, createStoreEvents, cancellationToken);
 
-    async Task<StreamPosition> WriteOnlyNewEvents<TEvent>(IMongoCollection<TEvent> stream, Func<StreamPosition, IReadOnlyList<TEvent>> createEventsToWrite, CancellationToken cancellationToken)
+    async Task<StreamPosition> WriteOnlyNewEvents<TEvent>(IMongoCollection<TEvent> stream, Func<StreamPosition, IReadOnlyList<TEvent>> createEventsToWrite, CancellationToken cancellationToken) where TEvent : IEvent<TEvent>
     {
-        Task WriteToCollection(IReadOnlyList<TEvent> events, IClientSessionHandle transaction, CancellationToken cancellationToken) => events.Count switch
+        Task WriteToCollection(IReadOnlyList<TEvent> events, IClientSessionHandle transaction, CancellationToken ct) => events.Count switch
         {
             0 => Task.CompletedTask,
-            1 => stream.InsertOneAsync(transaction, events[0], cancellationToken: cancellationToken),
-            _ => stream.InsertManyAsync(transaction, events, cancellationToken: cancellationToken)
+            1 => stream.InsertOneAsync(transaction, events[0], cancellationToken: ct),
+            _ => stream.InsertManyAsync(transaction, events, cancellationToken: ct)
         };
+
+        IReadOnlyList<TEvent> eventsToWrite = ImmutableList<TEvent>.Empty;
 
         try
         {
@@ -88,7 +92,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
                     session,
                     Builders<TEvent>.Filter.Empty,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
-                var eventsToWrite = createEventsToWrite(streamPosition).ToList();
+                eventsToWrite = createEventsToWrite(streamPosition);
                 await WriteToCollection(eventsToWrite, session, cancellationToken).ConfigureAwait(false);
                 await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
                 return streamPosition + (ulong) (eventsToWrite.Count - 1);
@@ -109,21 +113,15 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             try
             {
                 session.StartTransaction();
-                //TODO: Have a look at this.
-                var streamPosition = (ulong) await stream.CountDocumentsAsync(
-                    session,
-                    Builders<TEvent>.Filter.Empty,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                var eventsToWrite = createEventsToWrite(streamPosition).ToList();
-                var streamEventsToWrite = eventsToWrite.Cast<Events.StreamEvent>().ToList();
-                var storedEvents = await GetStoredEventStreamHeadOfStreamToWrite((IMongoCollection<Events.StreamEvent>) stream, streamEventsToWrite, session, cancellationToken).ConfigureAwait(false);
-        
-                if (!CheckIfStoredEventsIsPrefixOfEventsToWrite(streamEventsToWrite, storedEvents))
+                var lastEvent = await stream.Find(session, Builders<TEvent>.Filter.Empty).SortByDescending(TEvent.StreamPositionExpression).FirstAsync(cancellationToken);
+                if(lastEvent.EventLogSequenceNumber >= eventsToWrite[0].EventLogSequenceNumber)
                 {
-                    throw;
+                    throw new EventLogSequenceAlreadyWritten(eventsToWrite[0].EventLogSequenceNumber);
                 }
-        
-                eventsToWrite = eventsToWrite.Skip(storedEvents.Count).ToList();
+                
+                
+                var streamPosition = lastEvent.StreamPosition + 1;
+                eventsToWrite = createEventsToWrite(streamPosition);
                 await WriteToCollection(eventsToWrite, session, cancellationToken).ConfigureAwait(false);
         
                 await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
