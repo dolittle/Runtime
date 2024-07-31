@@ -88,7 +88,7 @@ public static class OpenTelemetryConfigurationExtensions
                         .AddSource(RuntimeActivity.SourceName)
                         .AddHttpClientInstrumentation()
                         .AddAspNetCoreInstrumentation()
-                        .AddMongoDBInstrumentation()
+                        .AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
                         .AddGrpcClientInstrumentation()
                         .AddProtoActorInstrumentation()
                         .AddOtlpExporter(options => { options.Endpoint = otlpEndpoint; });
