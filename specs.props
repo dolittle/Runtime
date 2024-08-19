@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)" />
-        <PackageReference Include="Machine.Specifications" Version="1.0.0" />
+        <PackageReference Include="Machine.Specifications" Version="1.1.2" />
         <PackageReference Include="Machine.Specifications.Should" Version="1.0.0" />
         <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
         <PackageReference Include="moq" Version="$(MoqVersion)" />
