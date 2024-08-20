@@ -52,12 +52,12 @@ static void VerifyConfiguration(IServiceProvider provider)
         var config = provider.GetRequiredService<IOptions<TenantsConfiguration>>();
         if (!config.Value.Any())
         {
-            logger.LogWarning("No tenants are configured in the Runtime. Without any tenants the Runtime will not function properly.");
+            logger.LogWarning("No tenants are configured in the Runtime. Without any tenants the Runtime will not function properly");
         }
     }
     catch (Exception e)
     {
-        logger.LogError(e, "It seems like the Runtime is missing its 'tenants' configuration. Without any tenants the Runtime will no function properly.");
+        logger.LogError(e, "It seems like the Runtime is missing its 'tenants' configuration. Without any tenants the Runtime will no function properly");
         throw;
     }
 }

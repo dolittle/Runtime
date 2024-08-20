@@ -8,6 +8,6 @@
 
     <ItemGroup>
         <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
-        <PackageReference Include="MongoDB.Driver.Core.Extensions.OpenTelemetry" Version="$(MongoDBOpenTelemetryVersion)" />
+        <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="$(MongoDBDiagnosticSourcesVersion)" />
     </ItemGroup>
 </Project>

@@ -13,7 +13,6 @@
     <ItemGroup>
         <PackageReference Include="Autofac" Version="$(AutofacVersion)" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
-        <PackageReference Include="BaselineTypeDiscovery" Version="$(BaselineTypeDiscoveryVersion)" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
