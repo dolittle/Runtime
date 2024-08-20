@@ -1,3 +1,10 @@
+# [9.6.3] - 2024-8-20 [PR: #772](https://github.com/dolittle/Runtime/pull/772)
+## Summary
+This is a pure maintenance release, upgrading the runtime internal dependencies to their latest stable version.
+
+No breaking changes or interface additions had been added.
+
+
 # [9.6.2] - 2024-6-27 [PR: #771](https://github.com/dolittle/Runtime/pull/771)
 ## Summary
 Hardened the handling of already written stream events. Will now log and skip in filter processors. Previously it was able to get stuck while processing a filter that was in an inconsistent state.
