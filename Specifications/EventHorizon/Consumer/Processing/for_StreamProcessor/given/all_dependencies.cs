@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using System.Threading;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.Streams;
-using Nito.AsyncEx;
+using System.Threading.Channels;
 using Microsoft.Extensions.Logging.Abstractions;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -20,7 +20,7 @@ public class all_dependencies
     protected static CancellationToken cancellation_token;
     protected static Mock<IEventProcessor> event_processor;
     protected static EventsFromEventHorizonFetcher event_fetcher;
-    protected static AsyncProducerConsumerQueue<StreamEvent> event_queue;
+    protected static Channel<StreamEvent> event_queue;
     protected static Mock<IStreamProcessorStates> stream_processor_states;
     protected static StreamProcessor stream_processor;
     protected static ExecutionContext execution_context;
@@ -38,7 +38,7 @@ public class all_dependencies
         );
         cancellation_token = CancellationToken.None;
         event_processor = new Mock<IEventProcessor>();
-        event_queue = new AsyncProducerConsumerQueue<StreamEvent>();
+        event_queue = Channel.CreateBounded<StreamEvent>(1000);
         event_fetcher = new EventsFromEventHorizonFetcher(event_queue, Mock.Of<IMetricsCollector>());
         stream_processor_states = new Mock<IStreamProcessorStates>();
         stream_processor = new StreamProcessor(

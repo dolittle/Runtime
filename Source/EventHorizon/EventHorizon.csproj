@@ -8,7 +8,6 @@
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Contracts"/>
-        <PackageReference Include="Nito.AsyncEx"/>
     </ItemGroup>
 
     <ItemGroup>

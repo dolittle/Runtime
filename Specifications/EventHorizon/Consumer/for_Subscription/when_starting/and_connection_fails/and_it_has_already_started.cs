@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 using Microservices;
-using Nito.AsyncEx;
+using System.Threading.Channels;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.and_connection_fails;
 
@@ -49,7 +49,7 @@ public class and_it_has_already_started : given.all_dependencies
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
     It should_not_start_receiving_events = () => event_horizon_connection.Verify(_ => _.StartReceivingEventsInto(
-        Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
+        Moq.It.IsAny<Channel<StreamEvent>>(),
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
     It should_not_be_connected = () => subscription.State.ShouldNotEqual(SubscriptionState.Connected);

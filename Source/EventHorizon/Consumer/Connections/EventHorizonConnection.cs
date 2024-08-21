@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.EventHorizon.UnBreaking;
@@ -11,7 +12,6 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients;
 using Microsoft.Extensions.Logging;
-using Nito.AsyncEx;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
@@ -92,7 +92,7 @@ public class EventHorizonConnection : IEventHorizonConnection
 
     /// <inheritdoc/>
     public Task StartReceivingEventsInto(
-        AsyncProducerConsumerQueue<StreamEvent> connectionToStreamProcessorQueue,
+        Channel<StreamEvent> connectionToStreamProcessorQueue,
         CancellationToken cancellationToken)
     {
         return _reverseCallClient.Handle(
@@ -105,7 +105,7 @@ public class EventHorizonConnection : IEventHorizonConnection
     }
 
     async Task<ConsumerResponse> HandleEventFromEventHorizon(
-        AsyncProducerConsumerQueue<StreamEvent> connectionToStreamProcessorQueue,
+        Channel<StreamEvent> connectionToStreamProcessorQueue,
         EventHorizonEvent @event,
         CancellationToken cancellationToken)
     {
@@ -120,7 +120,7 @@ public class EventHorizonConnection : IEventHorizonConnection
                 PartitionId.None,
                 false);
 
-            await connectionToStreamProcessorQueue.EnqueueAsync(streamEvent, cancellationToken).ConfigureAwait(false);
+            await connectionToStreamProcessorQueue.Writer.WriteAsync(streamEvent, cancellationToken).ConfigureAwait(false);
             return CreateSuccessfulResponse();
         }
         catch (Exception exception)
