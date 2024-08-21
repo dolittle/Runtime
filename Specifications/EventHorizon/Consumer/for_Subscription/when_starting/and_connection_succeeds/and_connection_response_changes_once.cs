@@ -8,7 +8,7 @@ using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
-using Nito.AsyncEx;
+using System.Threading.Channels;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.and_connection_succeeds;
 
@@ -80,7 +80,7 @@ public class and_connection_response_changes_once : given.all_dependencies
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
 
     It should_start_receiving_events_twice = () => event_horizon_connection.Verify(_ => _.StartReceivingEventsInto(
-        Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
+        Moq.It.IsAny<Channel<StreamEvent>>(),
         Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
 
     It should_be_connected = () => subscription.State.ShouldEqual(SubscriptionState.Connected);

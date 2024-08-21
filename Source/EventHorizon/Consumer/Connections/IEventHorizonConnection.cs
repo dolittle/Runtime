@@ -3,9 +3,9 @@
 
 using System;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
-using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
 
@@ -22,7 +22,7 @@ public interface IEventHorizonConnection : IDisposable
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the connection attempt.</param>
     /// <returns>
     /// A task that, when resolved returns the <see cref="SubscriptionResponse"/> from the connection to the producer Runtime.
-    /// If <see cref="SubscriptionResponse.Success"/> is true, the connection is started and <see cref="StartRecevingEventsInto(AsyncProducerConsumerQueue{StreamEvent}, CancellationToken)"/> should be called.
+    /// If <see cref="SubscriptionResponse.Success"/> is true, the connection is started and <see cref="StartRecevingEventsInto(Channel{StreamEvent}, CancellationToken)"/> should be called.
     /// Else, the connection failed and should it should not be used.
     /// </returns>
     Task<SubscriptionResponse> Connect(
@@ -37,6 +37,6 @@ public interface IEventHorizonConnection : IDisposable
     /// <param name="cancellationToken">A cancellation token that can be used to close the connection.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task StartReceivingEventsInto(
-        AsyncProducerConsumerQueue<StreamEvent> connectionToStreamProcessorQueue,
+        Channel<StreamEvent> connectionToStreamProcessorQueue,
         CancellationToken cancellationToken);
 }

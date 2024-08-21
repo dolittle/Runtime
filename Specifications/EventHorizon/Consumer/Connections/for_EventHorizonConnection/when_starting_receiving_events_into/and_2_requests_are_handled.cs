@@ -28,6 +28,6 @@ public class and_2_requests_are_handled : given.all_dependencies
     };
 
     It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
-    It should_not_have_put_anything_in_event_queue = () => event_queue.OutputAvailable().ShouldBeTrue();
-    It should_have_2_events_in_queue = () => event_queue.GetConsumingEnumerable().Count().ShouldEqual(2);
+    It should_not_have_put_anything_in_event_queue = () => event_queue.Reader.TryPeek(out _).ShouldBeTrue();
+    It should_have_2_events_in_queue = () => event_queue.Reader.ReadAllAsync().ToListAsync().GetAwaiter().GetResult().Count.ShouldEqual(2);
 }

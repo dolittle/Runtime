@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 
@@ -17,15 +17,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
 /// </summary>
 public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamEventWatcher
 {
-    readonly AsyncProducerConsumerQueue<StreamEvent> _events;
+    readonly Channel<StreamEvent> _events;
     readonly IMetricsCollector _metrics;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventsFromEventHorizonFetcher"/> class.
     /// </summary>
-    /// <param name="events">The <see cref="AsyncProducerConsumerQueue{TResponse}" />.</param>
+    /// <param name="events">The <see cref="Channel{TResponse}" />.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
-    public EventsFromEventHorizonFetcher(AsyncProducerConsumerQueue<StreamEvent> events, IMetricsCollector metrics)
+    public EventsFromEventHorizonFetcher(Channel<StreamEvent> events, IMetricsCollector metrics)
     {
         _events = events;
         _metrics = metrics;
@@ -37,7 +37,7 @@ public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamE
         try
         {
             //TODO: This can be improved by taking as many as possible instead of just the first
-            var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            var @event = await _events.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
             _metrics.IncrementTotalEventsFetched();
             return new[] { @event };
         }

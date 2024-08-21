@@ -19,7 +19,6 @@
         <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
         <NetEscapadesYaml>2.2.0</NetEscapadesYaml>
         <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
-        <NitoAsyncVersion>5.1.2</NitoAsyncVersion>
         <PollyVersion>8.4.1</PollyVersion>
         <PrometheusVersion>8.2.1</PrometheusVersion>
         <PrometheusNetDotNetRuntimeVersion>4.4.0</PrometheusNetDotNetRuntimeVersion>

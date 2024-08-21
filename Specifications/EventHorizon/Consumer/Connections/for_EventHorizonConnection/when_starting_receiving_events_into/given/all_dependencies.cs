@@ -7,8 +7,8 @@ using System;
 
 using Machine.Specifications;
 using System.Threading;
+using System.Threading.Channels;
 using Dolittle.Runtime.Events.Store.Streams;
-using Nito.AsyncEx;
 using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using System.Threading.Tasks;
@@ -22,13 +22,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
 
 public class all_dependencies : for_EventHorizonConnection.given.all_dependencies
 {
-    protected static AsyncProducerConsumerQueue<StreamEvent> event_queue;
+    protected static Channel<StreamEvent> event_queue;
     protected static CancellationTokenSource cts;
 
     Establish context = () =>
     {
         cts = new CancellationTokenSource();
-        event_queue = new AsyncProducerConsumerQueue<StreamEvent>();
+        event_queue = Channel.CreateBounded<StreamEvent>(1000);
     };
 
     protected static void SetupReverseCallClient(params ConsumerRequest[] requests)
@@ -45,7 +45,7 @@ public class all_dependencies : for_EventHorizonConnection.given.all_dependencie
                     await Task.Delay(10).ConfigureAwait(false);
                     i++;
                 }
-                event_queue.CompleteAdding();
+                event_queue.Writer.Complete();
             }));
     protected static ConsumerRequest CreateRequest()
     {

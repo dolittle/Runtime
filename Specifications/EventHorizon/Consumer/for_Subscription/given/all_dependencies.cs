@@ -12,7 +12,7 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Microservices;
-using Nito.AsyncEx;
+using System.Threading.Channels;
 using Polly;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
@@ -132,8 +132,8 @@ public class all_dependencies
                 }
             }));
         event_horizon_connection
-            .Setup(_ => _.StartReceivingEventsInto(Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(), Moq.It.IsAny<CancellationToken>()))
-            .Returns<AsyncProducerConsumerQueue<StreamEvent>, CancellationToken>((_, cancellationToken) => Task.Run(async () =>
+            .Setup(_ => _.StartReceivingEventsInto(Moq.It.IsAny<Channel<StreamEvent>>(), Moq.It.IsAny<CancellationToken>()))
+            .Returns<Channel<StreamEvent>, CancellationToken>((_, cancellationToken) => Task.Run(async () =>
             {
                 while (!event_horizon_connection_cts.Token.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                 {
