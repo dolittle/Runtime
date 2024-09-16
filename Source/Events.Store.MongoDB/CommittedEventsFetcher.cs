@@ -88,7 +88,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
         if (nextSequenceNumber != eventCount)
         {
-            _logger.LogError("Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber,
+            _logger.LogInformation("Sparse event log: Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber,
                 eventCount);
         }
 
