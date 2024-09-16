@@ -58,7 +58,7 @@ public class CommitWriter : IPersistCommits
             await _aggregateVersions.UpdateAggregateVersions(session, commit, cancellationToken).ConfigureAwait(false);
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
             //TODO: Notifying for events should be a concern handled by actors
-            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, eventsToStore.Max(_ => _.EventLogSequenceNumber));
+            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, commit.LastSequenceNumber.Value);
             return Try.Succeeded;
         }
         catch (MongoWaitQueueFullException ex)

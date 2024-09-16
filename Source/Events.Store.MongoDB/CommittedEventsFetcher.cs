@@ -69,7 +69,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (eventCount == 0) return 0ul; // No events means no need to double check
+        if (eventCount == 0) return 0ul; // No events means no need to double-check
 
         var lastEvent = await eventLog
             .Find(_eventFilter.Empty)
