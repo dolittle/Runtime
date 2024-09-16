@@ -13,15 +13,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
-        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Remote" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Dolittle.Contracts"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+        <PackageReference Include="Swashbuckle.AspNetCore"/>
+        <PackageReference Include="Proto.Actor"/>
+        <PackageReference Include="Proto.Remote"/>
+        <PackageReference Include="Proto.Cluster"/>
+        <PackageReference Include="Proto.Cluster.CodeGen"/>
     </ItemGroup>
 
     <ItemGroup>

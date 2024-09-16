@@ -11,7 +11,7 @@
     <ProjectReference Include="../../Source/Services/Services.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Dolittle.Contracts"/>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="for_ReverseCallDispatcherActor" />

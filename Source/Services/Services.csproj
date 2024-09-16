@@ -16,13 +16,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
-        <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
-        <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
-        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="$(GrpcVersion)" />
-        <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="$(GrpcVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Dolittle.Contracts"/>
+        <PackageReference Include="Google.Protobuf"/>
+        <PackageReference Include="Grpc.AspNetCore"/>
+        <PackageReference Include="Grpc.AspNetCore.Web"/>
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
+        <PackageReference Include="Grpc.AspNetCore.HealthChecks"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Proto.Actor"/>
     </ItemGroup>
 </Project>

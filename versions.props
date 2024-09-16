@@ -1,34 +1,5 @@
 <Project>
     <PropertyGroup>
-        <AutofacVersion>8.0.0</AutofacVersion>
-        <AutofacExtensionsVersion>9.0.0</AutofacExtensionsVersion>
-        <ConsoleTablesVersion>2.6.1</ConsoleTablesVersion>
         <ContractsVersion>7.8.0</ContractsVersion>
-        <CoverletVersion>6.0.2</CoverletVersion>
-        <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
-        <GrpcVersion>2.65.0</GrpcVersion>
-        <GrpcTestingVersion>2.46.6</GrpcTestingVersion>
-        <GrpcToolsVersion>2.65.0</GrpcToolsVersion>
-        <MachineSpecificationsRunnerVersion>2.10.2</MachineSpecificationsRunnerVersion>
-        <MachineSpecificationsVersion>1.1.2</MachineSpecificationsVersion>
-        <MicrosoftDotNetTestVersion>17.10.0</MicrosoftDotNetTestVersion>
-        <MicrosoftExtensionsVersion>8.0.0</MicrosoftExtensionsVersion>
-        <MongoDBDriverVersion>2.28.0</MongoDBDriverVersion>
-        <MongoDBDiagnosticSourcesVersion>1.5.0</MongoDBDiagnosticSourcesVersion>
-        <MoqVersion>4.18.*</MoqVersion>
-        <FluentAssertionsVersion>6.12.0</FluentAssertionsVersion>
-        <NetEscapadesYaml>2.2.0</NetEscapadesYaml>
-        <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
-        <NitoAsyncVersion>5.1.2</NitoAsyncVersion>
-        <PollyVersion>8.4.1</PollyVersion>
-        <PrometheusVersion>8.2.1</PrometheusVersion>
-        <PrometheusNetDotNetRuntimeVersion>4.4.0</PrometheusNetDotNetRuntimeVersion>
-        <ProtoActorVersion>1.6.0</ProtoActorVersion>
-        <ProtobufVersion>3.27.3</ProtobufVersion>
-        <SwashbuckleVersion>6.7.1</SwashbuckleVersion>
-        <SystemLinqAsyncVersion>6.0.1</SystemLinqAsyncVersion>
-        <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
-        <XUnitVersion>2.9.0</XUnitVersion>
-        <XUnitRunnerVersion>2.8.2</XUnitRunnerVersion>
     </PropertyGroup>
 </Project>

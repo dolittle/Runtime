@@ -6,6 +6,7 @@ ARG TARGETARCH
 
 COPY default.props /app/
 COPY versions.props /app/
+COPY Directory.Packages.props /app/
 COPY Runtime.sln /app/
 COPY Source /app/Source/
 COPY Specifications /app/Specifications/

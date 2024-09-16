@@ -13,8 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
-        <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" />
+        <PackageReference Include="Dolittle.Contracts"/>
+        <PackageReference Include="Google.Protobuf"/>
+        <PackageReference Include="Grpc.Net.Client"/>
     </ItemGroup>
 </Project>

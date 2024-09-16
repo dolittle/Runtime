@@ -7,7 +7,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Machine.Specifications.Should" Version="1.0.0" />
+      <PackageReference Include="Machine.Specifications.Should"/>
     </ItemGroup>
 
 </Project>
