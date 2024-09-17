@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
 [Singleton, PerTenant]
 public class Streams : EventStoreConnection, IStreams
 {
-    const string EventLogCollectionName = "event-log";
+    public const string EventLogCollectionName = "event-log";
     const string StreamDefinitionCollectionName = "stream-definitions";
 
     readonly ILogger _logger;
@@ -43,7 +43,7 @@ public class Streams : EventStoreConnection, IStreams
 
     /// <inheritdoc/>
     public IMongoCollection<MongoDB.Events.Event> DefaultEventLog { get; }
-    public IMongoCollection<MongoDB.Events.EventLogMetadata> EventLogMetadata { get; }
+    public IMongoCollection<MongoDB.Events.StreamMetadata> EventLogMetadata { get; }
 
     /// <inheritdoc/>
     public Task<IMongoCollection<MongoDB.Events.StreamEvent>> Get(ScopeId scopeId, StreamId streamId, CancellationToken token)

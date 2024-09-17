@@ -28,7 +28,7 @@ public interface IWriteEventsToStreamCollection
         IMongoCollection<TEvent> stream,
         Func<StreamPosition, TEvent> createStoreEvent,
         CancellationToken cancellationToken) where TEvent : IEvent<TEvent>;
-    
+
     /// <summary>
     /// Writes multiple <typeparamref name="TEvent">Event</typeparamref> to <see cref="IMongoCollection{TDocument}" /> Stream collection.
     /// </summary>

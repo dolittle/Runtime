@@ -10,12 +10,14 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Store.MongoDB.Persistence;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using StreamEvent = Dolittle.Runtime.Events.Store.MongoDB.Events.StreamEvent;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
+
 
 /// <summary>
 /// Represents an implementation of <see cref="IWriteEventsToStreams" /> and <see cref="IWriteEventsToStreamCollection" />..
@@ -26,18 +28,21 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     readonly IStreams _streams;
     readonly IEventConverter _eventConverter;
     readonly ILogger _logger;
+    readonly IOffsetStore _offsetStore;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EventsToStreamsWriter"/> class.
     /// </summary>
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
+    /// <param name="offsetStore">The <see cref="IOffsetStore" /> for storing next written offsets.</param>
     /// <param name="logger">An <see cref="ILogger"/>.</param>
-    public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, ILogger logger)
+    public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IOffsetStore offsetStore, ILogger logger)
     {
         _streams = streams;
         _eventConverter = eventConverter;
         _logger = logger;
+        _offsetStore = offsetStore;
     }
 
     /// <inheritdoc/>
@@ -47,6 +52,7 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
     /// <inheritdoc />
     public async Task Write(IEnumerable<(CommittedEvent, PartitionId)> events, ScopeId scope, StreamId stream, CancellationToken cancellationToken)
     {
+        
         var lastWrittenStreamPosition = await Write(
             await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
             streamPosition =>
@@ -80,6 +86,8 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         };
 
         IReadOnlyList<TEvent> eventsToWrite = ImmutableList<TEvent>.Empty;
+        var streamName = stream.CollectionNamespace.CollectionName;
+
 
         try
         {
@@ -87,15 +95,29 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
             try
             {
                 session.StartTransaction();
-                // TODO: Have a look at this.
-                var streamPosition = (ulong) await stream.CountDocumentsAsync(
-                    session,
-                    Builders<TEvent>.Filter.Empty,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                var storedNextOffset = await _offsetStore.GetNextOffset(streamName, session, cancellationToken).ConfigureAwait(false);
+                var streamPosition = storedNextOffset;
+                if (storedNextOffset < 1)
+                {
+                    // No offset stored, either empty collection or legacy data
+                    streamPosition = (ulong) await stream.CountDocumentsAsync(
+                        session,
+                        Builders<TEvent>.Filter.Empty,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                    
+                }
+                
+                
                 eventsToWrite = createEventsToWrite(streamPosition);
                 await WriteToCollection(eventsToWrite, session, cancellationToken).ConfigureAwait(false);
+                
                 await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
-                return streamPosition + (ulong) (eventsToWrite.Count - 1);
+                var writtenOffset = streamPosition + (ulong) (eventsToWrite.Count - 1);
+                var nextOffset = writtenOffset + 1;
+                await _offsetStore.UpdateOffset(streamName, session, nextOffset, cancellationToken).ConfigureAwait(false);
+                
+                return writtenOffset;
             }
             catch
             {
@@ -125,7 +147,10 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
                 await WriteToCollection(eventsToWrite, session, cancellationToken).ConfigureAwait(false);
         
                 await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
-                return streamPosition + (ulong) (eventsToWrite.Count - 1);
+                var writtenOffset = streamPosition + (ulong) (eventsToWrite.Count - 1);
+                var nextOffset = writtenOffset + 1;
+                await _offsetStore.UpdateOffset(streamName, session, nextOffset, cancellationToken).ConfigureAwait(false);
+                return writtenOffset;
             }
             catch
             {
@@ -135,8 +160,6 @@ public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEvent
         }
     }
 
-    
-    
     static Task<List<Events.StreamEvent>> GetStoredEventStreamHeadOfStreamToWrite(IMongoCollection<Events.StreamEvent> stream, IReadOnlyList<Events.StreamEvent> eventsToWrite, IClientSessionHandle transaction, CancellationToken cancellationToken)
         => stream
             .Find(

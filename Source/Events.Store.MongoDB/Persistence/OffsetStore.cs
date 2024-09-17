@@ -6,25 +6,23 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Store.Persistence;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Persistence;
 
 [Singleton, PerTenant]
-public class EventLogOffsetStore: EventStoreConnection, IEventLogOffsetStore
+public class OffsetStore : EventStoreConnection, IOffsetStore
 {
-    static readonly FilterDefinitionBuilder<EventLogMetadata> _filterBuilder = new();
-    static readonly FilterDefinition<EventLogMetadata> _defaultScopeFilter = _filterBuilder.Eq(metadata => metadata.Scope, ScopeId.Default.Value);
-    
-    
+    static readonly FilterDefinitionBuilder<StreamMetadata> _filterBuilder = new();
+
+
     const string EventLogMetadataCollectionName = "event-log-metadata";
 
-    public IMongoCollection<EventLogMetadata> Collection { get; }
+    IMongoCollection<StreamMetadata> Collection { get; }
 
-    public EventLogOffsetStore(IDatabaseConnection connection):base(connection)
+    public OffsetStore(IDatabaseConnection connection) : base(connection)
     {
-        Collection = Database.GetCollection<EventLogMetadata>(EventLogMetadataCollectionName);
+        Collection = Database.GetCollection<StreamMetadata>(EventLogMetadataCollectionName);
 
         CreateCollectionIfNotExists();
     }
@@ -38,22 +36,22 @@ public class EventLogOffsetStore: EventStoreConnection, IEventLogOffsetStore
         }
     }
 
-    public Task UpdateOffset(IClientSessionHandle session, ScopeId scopeId, ulong nextEventOffset,
+    public Task UpdateOffset(string stream, IClientSessionHandle session, ulong nextEventOffset,
         CancellationToken cancellationToken)
     {
-        var metadata = new EventLogMetadata
+        var metadata = new StreamMetadata
         {
-            Scope = scopeId.Value,
+            StreamName = stream,
             NextEventOffset = nextEventOffset,
         };
-        
-        var updateDefinition = new UpdateDefinitionBuilder<EventLogMetadata>()
-            .SetOnInsert(it => it.Scope, metadata.Scope)
+
+        var updateDefinition = new UpdateDefinitionBuilder<StreamMetadata>()
+            .SetOnInsert(it => it.StreamName, stream)
             .Set(it => it.NextEventOffset, metadata.NextEventOffset);
 
         return Collection.UpdateOneAsync(
-            session:session,
-            filter: GetFilter(scopeId),
+            session: session,
+            filter: GetFilter(stream),
             updateDefinition,
             options: new UpdateOptions
             {
@@ -61,11 +59,16 @@ public class EventLogOffsetStore: EventStoreConnection, IEventLogOffsetStore
             }, cancellationToken);
     }
 
-    public Task<ulong> GetNextOffset(ScopeId scopeId, CancellationToken cancellationToken)
-        => Collection
-            .Find(GetFilter(scopeId))
+    public Task<ulong> GetNextOffset(string stream, IClientSessionHandle? session, CancellationToken cancellationToken)
+    {
+        var find = session is not null
+            ? Collection.Find(session, GetFilter(stream))
+            : Collection.Find(GetFilter(stream));
+        return find
             .Project(metadata => metadata.NextEventOffset)
             .FirstOrDefaultAsync(cancellationToken);
+    }
 
-    static FilterDefinition<EventLogMetadata> GetFilter(ScopeId scopeId) => scopeId.IsDefaultScope ? _defaultScopeFilter : _filterBuilder.Eq(metadata => metadata.Scope, scopeId.Value);
+    static FilterDefinition<StreamMetadata> GetFilter(string streamName) =>
+        _filterBuilder.Eq(metadata => metadata.StreamName, streamName);
 }

@@ -38,7 +38,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     readonly IAggregateRoots _aggregateRoots;
     readonly ILogger<CommittedEventsFetcher> _logger;
     readonly IEventContentConverter _contentConverter;
-    readonly IEventLogOffsetStore _eventLogOffsetStore;
+    readonly IOffsetStore _offsetStore;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommittedEventsFetcher"/> class.
@@ -47,14 +47,14 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
     /// <param name="contentConverter">The <see cref="IEventContentConverter" />.</param>
-    /// <param name="eventLogOffsetStore">The <see cref="IEventLogOffsetStore" />.</param>
+    /// <param name="offsetStore">The <see cref="IOffsetStore" />.</param>
     /// <param name="logger"></param>
     public CommittedEventsFetcher(
         IStreams streams,
         IEventConverter eventConverter,
         IAggregateRoots aggregateRoots,
         IEventContentConverter contentConverter,
-        IEventLogOffsetStore eventLogOffsetStore,
+        IOffsetStore offsetStore,
         ILogger<CommittedEventsFetcher> logger)
     {
         _streams = streams;
@@ -62,15 +62,15 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         _aggregateRoots = aggregateRoots;
         _contentConverter = contentConverter;
         _logger = logger;
-        _eventLogOffsetStore = eventLogOffsetStore;
+        _offsetStore = offsetStore;
     }
 
     /// <inheritdoc />
     public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken)
     {
-        var storedEventOffset = await _eventLogOffsetStore.GetNextOffset(scope, cancellationToken);
         
         var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+        var storedEventOffset = await _offsetStore.GetNextOffset(eventLog.CollectionNamespace.CollectionName, null, cancellationToken);
         var eventCount = (ulong)await eventLog.CountDocumentsAsync(
                 _eventFilter.Empty,
                 cancellationToken: cancellationToken)
@@ -95,7 +95,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
 
         if (nextSequenceNumber != eventCount)
         {
-            _logger.LogInformation("Sparse event log: Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber,
+            _logger.LogInformation("Sparse event log: Next event sequence number was {NextSequenceNumber}, but event count was {EventCount}", nextSequenceNumber,
                 eventCount);
         }
 

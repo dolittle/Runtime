@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.MongoDB.Persistence;
 using FluentAssertions;
 using Xunit;
@@ -13,7 +12,7 @@ public class EventStoreOffsetTests(MongoDatabaseFixture fixture): IClassFixture<
     [Fact]
     public async Task WhenNoOffsetExists()
     {
-        var nextOffset = await Sut.GetNextOffset(new ScopeId(Guid.NewGuid()), CancellationToken.None);
+        var nextOffset = await Sut.GetNextOffset(Guid.NewGuid().ToString(), null, CancellationToken.None);
 
         nextOffset.Should().Be(0);
     }
@@ -22,9 +21,9 @@ public class EventStoreOffsetTests(MongoDatabaseFixture fixture): IClassFixture<
     public async Task WhenStoringDefaultScopeOffset()
     {
         ulong nextOffset = 9;
-        await StoreOffset(ScopeId.Default, nextOffset);
+        await StoreOffset("event-log", nextOffset);
         
-        var nextOffsetRetrieved = await Sut.GetNextOffset(ScopeId.Default, CancellationToken.None);
+        var nextOffsetRetrieved = await Sut.GetNextOffset("event-log", null, CancellationToken.None);
 
         nextOffsetRetrieved.Should().Be(nextOffset);
     }
@@ -32,12 +31,12 @@ public class EventStoreOffsetTests(MongoDatabaseFixture fixture): IClassFixture<
     [Fact]
     public async Task WhenUpdatingOffset()
     {
-        var scope = new ScopeId(Guid.NewGuid());
+        var stream = Guid.NewGuid().ToString();
         ulong nextOffset = 99;
-        await StoreOffset(scope, nextOffset);
-        await StoreOffset(scope, ++nextOffset);
+        await StoreOffset(stream, nextOffset);
+        await StoreOffset(stream, ++nextOffset);
 
-        var nextOffsetRetrieved = await Sut.GetNextOffset(scope, CancellationToken.None);
+        var nextOffsetRetrieved = await Sut.GetNextOffset(stream, null, CancellationToken.None);
 
         nextOffsetRetrieved.Should().Be(nextOffset);
     }
@@ -45,31 +44,31 @@ public class EventStoreOffsetTests(MongoDatabaseFixture fixture): IClassFixture<
     [Fact]
     public async Task WhenRollingBackOffset()
     {
-        var scope = new ScopeId(Guid.NewGuid());
+        var stream = Guid.NewGuid().ToString("N");
         ulong nextOffset = 999;
-        await StoreOffset(scope, nextOffset);
-        await StoreOffsetButRollBack(scope, nextOffset + 1);
+        await StoreOffset(stream, nextOffset);
+        await StoreOffsetButRollBack(stream, nextOffset + 1);
 
-        var nextOffsetRetrieved = await Sut.GetNextOffset(scope, CancellationToken.None);
+        var nextOffsetRetrieved = await Sut.GetNextOffset(stream, null, CancellationToken.None);
 
         nextOffsetRetrieved.Should().Be(nextOffset);
     }
 
-    private async Task StoreOffset(ScopeId scope, ulong nextOffset)
+    private async Task StoreOffset(string stream, ulong nextOffset)
     {
         using var session = await fixture.Connection.MongoClient.StartSessionAsync();
         session.StartTransaction();
-        await Sut.UpdateOffset(session, scope, nextOffset, CancellationToken.None);
+        await Sut.UpdateOffset(stream, session, nextOffset, CancellationToken.None);
         await session.CommitTransactionAsync();
     }
     
-    private async Task StoreOffsetButRollBack(ScopeId scope, ulong nextOffset)
+    private async Task StoreOffsetButRollBack(string stream, ulong nextOffset)
     {
         using var session = await fixture.Connection.MongoClient.StartSessionAsync();
         session.StartTransaction();
-        await Sut.UpdateOffset(session, scope, nextOffset, CancellationToken.None);
+        await Sut.UpdateOffset(stream, session, nextOffset, CancellationToken.None);
         await session.AbortTransactionAsync();
     }
 
-    private EventLogOffsetStore Sut { get; } =  new(fixture.Connection);
+    private OffsetStore Sut { get; } =  new(fixture.Connection);
 }

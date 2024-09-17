@@ -24,7 +24,7 @@ public class CommitWriter : IPersistCommits
     readonly IStreamEventWatcher _streamWatcher;
     readonly IConvertCommitToEvents _commitConverter;
     readonly IUpdateAggregateVersionsAfterCommit _aggregateVersions;
-    readonly IEventLogOffsetStore _eventLogOffsetStore;
+    readonly IOffsetStore _offsetStore;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitWriter"/> class. 
@@ -33,20 +33,20 @@ public class CommitWriter : IPersistCommits
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher"/>.</param>
     /// <param name="commitConverter">The <see cref="IConvertCommitToEvents"/>.</param>
     /// <param name="aggregateVersions">The <see cref="IUpdateAggregateVersionsAfterCommit"/>.</param>
-    /// <param name="eventLogOffsetStore">The <see cref="IEventLogOffsetStore"/>.</param>
+    /// <param name="offsetStore">The <see cref="IOffsetStore"/>.</param>
     public CommitWriter(
         IStreams streams,
         IStreamEventWatcher streamWatcher,
         IConvertCommitToEvents commitConverter,
         IUpdateAggregateVersionsAfterCommit aggregateVersions,
-        IEventLogOffsetStore eventLogOffsetStore
+        IOffsetStore offsetStore
     )
     {
         _streams = streams;
         _streamWatcher = streamWatcher;
         _commitConverter = commitConverter;
         _aggregateVersions = aggregateVersions;
-        _eventLogOffsetStore = eventLogOffsetStore;
+        _offsetStore = offsetStore;
     }
 
     /// <inheritdoc />
@@ -68,8 +68,8 @@ public class CommitWriter : IPersistCommits
                 eventsToStore,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            var nextOffset = commit.LastSequenceNumber + 1;
-            await _eventLogOffsetStore.UpdateOffset(session, ScopeId.Default, nextOffset, cancellationToken)
+            var nextSequenceNumber = commit.LastSequenceNumber + 1;
+            await _offsetStore.UpdateOffset(Streams.Streams.EventLogCollectionName, session, nextSequenceNumber, cancellationToken)
                 .ConfigureAwait(false);
             await _aggregateVersions.UpdateAggregateVersions(session, commit, cancellationToken).ConfigureAwait(false);
 
