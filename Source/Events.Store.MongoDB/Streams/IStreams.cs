@@ -18,6 +18,8 @@ public interface IStreams : IEventStoreConnection
     /// </summary>
     IMongoCollection<MongoDB.Events.Event> DefaultEventLog { get; }
 
+    IMongoCollection<MongoDB.Events.EventLogMetadata> EventLogMetadata { get; }
+
     /// <summary>
     /// Gets a non-public and non-event-log Stream.
     /// </summary>

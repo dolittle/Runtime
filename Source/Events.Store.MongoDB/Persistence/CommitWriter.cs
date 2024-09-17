@@ -24,6 +24,7 @@ public class CommitWriter : IPersistCommits
     readonly IStreamEventWatcher _streamWatcher;
     readonly IConvertCommitToEvents _commitConverter;
     readonly IUpdateAggregateVersionsAfterCommit _aggregateVersions;
+    readonly IEventLogOffsetStore _eventLogOffsetStore;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommitWriter"/> class. 
@@ -31,12 +32,21 @@ public class CommitWriter : IPersistCommits
     /// <param name="streams">The <see cref="IStreams"/>.</param>
     /// <param name="streamWatcher">The <see cref="IStreamEventWatcher"/>.</param>
     /// <param name="commitConverter">The <see cref="IConvertCommitToEvents"/>.</param>
-    public CommitWriter(IStreams streams, IStreamEventWatcher streamWatcher, IConvertCommitToEvents commitConverter, IUpdateAggregateVersionsAfterCommit aggregateVersions)
+    /// <param name="aggregateVersions">The <see cref="IUpdateAggregateVersionsAfterCommit"/>.</param>
+    /// <param name="eventLogOffsetStore">The <see cref="IEventLogOffsetStore"/>.</param>
+    public CommitWriter(
+        IStreams streams,
+        IStreamEventWatcher streamWatcher,
+        IConvertCommitToEvents commitConverter,
+        IUpdateAggregateVersionsAfterCommit aggregateVersions,
+        IEventLogOffsetStore eventLogOffsetStore
+    )
     {
         _streams = streams;
         _streamWatcher = streamWatcher;
         _commitConverter = commitConverter;
         _aggregateVersions = aggregateVersions;
+        _eventLogOffsetStore = eventLogOffsetStore;
     }
 
     /// <inheritdoc />
@@ -47,7 +57,9 @@ public class CommitWriter : IPersistCommits
         {
             return new NoEventsToCommit();
         }
-        using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        using var session =
+            await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         try
         {
             session.StartTransaction();
@@ -55,7 +67,12 @@ public class CommitWriter : IPersistCommits
                 session,
                 eventsToStore,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            var nextOffset = commit.LastSequenceNumber + 1;
+            await _eventLogOffsetStore.UpdateOffset(session, ScopeId.Default, nextOffset, cancellationToken)
+                .ConfigureAwait(false);
             await _aggregateVersions.UpdateAggregateVersions(session, commit, cancellationToken).ConfigureAwait(false);
+
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
             //TODO: Notifying for events should be a concern handled by actors
             _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, commit.LastSequenceNumber.Value);
@@ -71,6 +88,5 @@ public class CommitWriter : IPersistCommits
             await session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
             return ex;
         }
-        
     }
 }

@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Machine.Specifications.Should"/>
+      <PackageReference Include="Testcontainers.MongoDb" />
     </ItemGroup>
 
 </Project>
