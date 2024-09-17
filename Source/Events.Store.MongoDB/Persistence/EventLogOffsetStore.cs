@@ -25,6 +25,17 @@ public class EventLogOffsetStore: EventStoreConnection, IEventLogOffsetStore
     public EventLogOffsetStore(IDatabaseConnection connection):base(connection)
     {
         Collection = Database.GetCollection<EventLogMetadata>(EventLogMetadataCollectionName);
+
+        CreateCollectionIfNotExists();
+    }
+
+    void CreateCollectionIfNotExists()
+    {
+        var collectionNames = Database.ListCollectionNames().ToList();
+        if (!collectionNames.Contains(EventLogMetadataCollectionName))
+        {
+            Database.CreateCollection(EventLogMetadataCollectionName);
+        }
     }
 
     public Task UpdateOffset(IClientSessionHandle session, ScopeId scopeId, ulong nextEventOffset,
