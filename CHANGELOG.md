@@ -1,3 +1,22 @@
+# [9.6.4] - 2024-9-18 [PR: #774](https://github.com/dolittle/Runtime/pull/774)
+## Summary
+### External behavior
+This release adds support for sparse event logs, which allows users to delete events that are no longer needed. Previously the runtime would not tolerate any events being removed. Now it will just info log the fact and process as normally
+
+### Internal
+The runtime has been refactored to use central package management, which reduces friction when upgrading dependency versions. It also removes a legacy dependency and replaces it with channels. In addition it will now enforce limits to work in progress by EventHorizon.
+
+
+### Added
+
+- Central package management
+- Support for sparse event logs
+
+### Removed
+
+- Internal dependency on Nito.AsyncEx, rewritten to use channels
+
+
 # [9.6.3] - 2024-8-20 [PR: #772](https://github.com/dolittle/Runtime/pull/772)
 ## Summary
 This is a pure maintenance release, upgrading the runtime internal dependencies to their latest stable version.
