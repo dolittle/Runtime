@@ -12,6 +12,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion.Scoping;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Legacy;
+using Dolittle.Runtime.Events.Store.MongoDB.Persistence;
 using Dolittle.Runtime.Events.Store.MongoDB.Projections;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.MongoDB;
@@ -37,6 +38,7 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     readonly IAggregateRoots _aggregateRoots;
     readonly ILogger<CommittedEventsFetcher> _logger;
     readonly IEventContentConverter _contentConverter;
+    readonly IOffsetStore _offsetStore;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommittedEventsFetcher"/> class.
@@ -45,12 +47,14 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
     /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
     /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
     /// <param name="contentConverter">The <see cref="IEventContentConverter" />.</param>
+    /// <param name="offsetStore">The <see cref="IOffsetStore" />.</param>
     /// <param name="logger"></param>
     public CommittedEventsFetcher(
         IStreams streams,
         IEventConverter eventConverter,
         IAggregateRoots aggregateRoots,
         IEventContentConverter contentConverter,
+        IOffsetStore offsetStore,
         ILogger<CommittedEventsFetcher> logger)
     {
         _streams = streams;
@@ -58,18 +62,21 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         _aggregateRoots = aggregateRoots;
         _contentConverter = contentConverter;
         _logger = logger;
+        _offsetStore = offsetStore;
     }
 
     /// <inheritdoc />
     public async Task<EventLogSequenceNumber> FetchNextSequenceNumber(ScopeId scope, CancellationToken cancellationToken)
     {
+        
         var eventLog = await GetEventLog(scope, cancellationToken).ConfigureAwait(false);
+        var storedEventOffset = await _offsetStore.GetNextOffset(eventLog.CollectionNamespace.CollectionName, null, cancellationToken);
         var eventCount = (ulong)await eventLog.CountDocumentsAsync(
                 _eventFilter.Empty,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (eventCount == 0) return 0ul; // No events means no need to double check
+        if (storedEventOffset == 0 && eventCount == 0) return 0ul; // No events means no need to double-check
 
         var lastEvent = await eventLog
             .Find(_eventFilter.Empty)
@@ -80,15 +87,15 @@ public class CommittedEventsFetcher : IFetchCommittedEvents
         if (lastEvent is null)
         {
             // Should not be possible
-            _logger.LogError("No last event found, but event count was {EventCount}", eventCount);
-            return 0ul;
+            _logger.LogError("No last event found");
+            return storedEventOffset;
         }
-
-        var nextSequenceNumber = lastEvent.EventLogSequenceNumber + 1;
+        
+        var nextSequenceNumber = Math.Max(lastEvent.EventLogSequenceNumber + 1, storedEventOffset);
 
         if (nextSequenceNumber != eventCount)
         {
-            _logger.LogError("Last event sequence number was {LastEventSequenceNumber}, but event count was {EventCount}", lastEvent.EventLogSequenceNumber,
+            _logger.LogInformation("Sparse event log: Next event sequence number was {NextSequenceNumber}, but event count was {EventCount}", nextSequenceNumber,
                 eventCount);
         }
 

@@ -7,8 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Nito.AsyncEx" Version="$(NitoAsyncVersion)" />
+        <PackageReference Include="Dolittle.Contracts"/>
     </ItemGroup>
 
     <ItemGroup>

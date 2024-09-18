@@ -10,6 +10,6 @@
     <ProjectReference Include="../../Source/Services.Clients/Services.Clients.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Dolittle.Contracts"/>
   </ItemGroup>
 </Project>

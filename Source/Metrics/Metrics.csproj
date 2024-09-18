@@ -13,10 +13,10 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="prometheus-net" Version="$(PrometheusVersion)" />
-        <PackageReference Include="prometheus-net.AspNetCore" Version="$(PrometheusVersion)" />
-        <PackageReference Include="prometheus-net.DotNetRuntime" Version="$(PrometheusNetDotNetRuntimeVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="prometheus-net"/>
+        <PackageReference Include="prometheus-net.AspNetCore"/>
+        <PackageReference Include="prometheus-net.DotNetRuntime"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" />
     </ItemGroup>
     
     <ItemGroup>

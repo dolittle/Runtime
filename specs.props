@@ -1,22 +1,23 @@
 <Project>
+    
     <Import Project="versions.props"/>
     
     <PropertyGroup>
-        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <IsTestProject>true</IsTestProject>
         <NoWarn>IDE1006;IDE0044;IDE0051;IDE0052;CA2211;CS0612;CS0169;CS8981;RCS1169;RCS1018;RCS1213</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)" />
-        <PackageReference Include="Machine.Specifications" Version="1.1.2" />
-        <PackageReference Include="Machine.Specifications.Should" Version="1.0.0" />
-        <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-        <PackageReference Include="moq" Version="$(MoqVersion)" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftDotNetTestVersion)" />
-        <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="$(MachineSpecificationsRunnerVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Grpc.Core.Testing" Version="$(GrpcTestingVersion)" />
+        <PackageReference Include="coverlet.collector"/>
+        <PackageReference Include="Machine.Specifications"/>
+        <PackageReference Include="Machine.Specifications.Should"/>
+        <PackageReference Include="FluentAssertions"/>
+        <PackageReference Include="moq"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="Machine.Specifications.Runner.VisualStudio"/>
+        <PackageReference Include="Microsoft.Extensions.Logging"/>
+        <PackageReference Include="Grpc.Core.Testing"/>
     </ItemGroup>
     <PropertyGroup>
         <ContractsRootPath>$(NuGetPackageRoot)dolittle.contracts/$(ContractsVersion)/protos/</ContractsRootPath>

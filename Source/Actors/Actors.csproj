@@ -6,16 +6,15 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="Grpc.Tools" Version="$(GrpcToolsVersion)">
+        <PackageReference Include="Grpc.Tools">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Proto.Actor" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Remote" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.OpenTelemetry" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Cluster" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Cluster.CodeGen" Version="$(ProtoActorVersion)" />
-        <PackageReference Include="Proto.Cluster.TestProvider" Version="$(ProtoActorVersion)" />
+        <PackageReference Include="Proto.Actor"/>
+        <PackageReference Include="Proto.Remote"/>
+        <PackageReference Include="Proto.OpenTelemetry"/>
+        <PackageReference Include="Proto.Cluster"/>
+        <PackageReference Include="Proto.Cluster.CodeGen"/>
     </ItemGroup>
     
     <ItemGroup>

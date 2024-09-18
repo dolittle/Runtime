@@ -22,5 +22,11 @@ public class and_cancellation_is_requested : given.all_dependencies
     };
 
     It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
-    It should_not_have_put_anything_in_event_queue = () => event_queue.OutputAvailable().ShouldBeFalse();
+    It should_not_have_put_anything_in_event_queue = () =>
+    {
+        var wasRead = event_queue.Reader.TryPeek(out var evt);
+        evt.ShouldBeNull();
+        wasRead.ShouldBeFalse();
+        
+    };
 }

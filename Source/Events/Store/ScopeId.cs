@@ -27,4 +27,6 @@ public record ScopeId(Guid Value) : ConceptAs<Guid>(Value)
     /// </summary>
     /// <param name="scopeId">ScopeId as <see cref="string"/>.</param>
     public static implicit operator ScopeId(string scopeId) => new(Guid.Parse(scopeId));
+    
+    public bool IsDefaultScope => Value.Equals(Guid.Empty);
 }

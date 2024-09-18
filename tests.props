@@ -16,12 +16,12 @@
         <PackageReference Include="Moq" Version="$(MoqVersion)"/>
         <PackageReference Include="xunit" Version="$(XUnitVersion)"/>
         <PackageReference Include="Grpc.Core.Testing" Version="$(GrpcTestingVersion)"/>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.Logging"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitRunnerVersion)">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)">
+        <PackageReference Include="coverlet.collector">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>

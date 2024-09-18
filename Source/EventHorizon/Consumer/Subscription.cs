@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
@@ -12,7 +13,6 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Microservices;
 using Microsoft.Extensions.Logging;
-using Nito.AsyncEx;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer;
@@ -46,7 +46,7 @@ public class Subscription : ISubscription
     /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
     /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
     /// <param name="metrics">The system for collecting metrics.</param>
-    /// <param name="processingMetrics">Thh <see cref="Processing.IMetricsCollector"/>.</param>
+    /// <param name="processingMetrics">The <see cref="Processing.IMetricsCollector"/>.</param>
     /// <param name="logger">The system for logging messages.</param>
     public Subscription(
         SubscriptionId identifier,
@@ -182,14 +182,12 @@ public class Subscription : ISubscription
         {
             _logger.SubscriptionIsReceivingAndWriting(Identifier, consent);
             using var processingCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var connectionToStreamProcessorQueue = new AsyncProducerConsumerQueue<StreamEvent>();
+            var connectionToStreamProcessorQueue = Channel.CreateBounded<StreamEvent>(1000);
             var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, _executionContext, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue, _processingMetrics));
             var tasks = new TaskGroup(
-                writeEventsStreamProcessor.StartAndWait(
-                    processingCancellationToken.Token),
-                connection.StartReceivingEventsInto(
-                    connectionToStreamProcessorQueue,
-                    processingCancellationToken.Token));
+                writeEventsStreamProcessor.StartAndWait(processingCancellationToken.Token),
+                connection.StartReceivingEventsInto(connectionToStreamProcessorQueue, processingCancellationToken.Token)
+            );
 
             State = SubscriptionState.Connected;
             await tasks.WaitForAllCancellingOnFirst(processingCancellationToken).ConfigureAwait(false);
