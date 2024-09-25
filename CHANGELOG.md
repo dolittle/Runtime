@@ -1,3 +1,12 @@
+# [9.6.5] - 2024-9-25 [PR: #775](https://github.com/dolittle/Runtime/pull/775)
+## Summary
+
+This release adds offset metadata initialization on startup, and does not wait until streams are being written. This supports the sparse streams use case, allowing the runtime to work correctly with events removed from the log.
+
+### Added
+- Stream offset metadata init
+
+
 # [9.6.4] - 2024-9-18 [PR: #774](https://github.com/dolittle/Runtime/pull/774)
 ## Summary
 ### External behavior
