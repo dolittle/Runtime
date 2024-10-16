@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Actors;
@@ -137,7 +138,8 @@ public class EventStore : EventStoreBase
             Array.Empty<CommittedAggregateEvents>(),
             committedEvents,
             request.Event.EventLogSequenceNumber,
-            request.Event.EventLogSequenceNumber));
+            request.Event.EventLogSequenceNumber,
+            ImmutableList<Redactions.Redaction>.Empty)); // TODO: Consider redaction via external event
 
         return Task.FromResult(new CommitExternalEventsResponse());
     }

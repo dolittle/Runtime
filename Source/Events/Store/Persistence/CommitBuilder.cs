@@ -19,6 +19,7 @@ public class CommitBuilder : ICanBuildABatch<Commit>
 {
     readonly List<CommittedEvents> _committedEvents = new();
     readonly List<CommittedAggregateEvents> _committedAggregateEvents = new();
+    readonly List<Redactions.Redaction> _redactions = new();
     readonly HashSet<Aggregate> _aggregates = new();
     EventLogSequenceNumber _nextSequenceNumber;
     readonly List<CommittedEvent> _orderedEvents = new();
@@ -76,6 +77,9 @@ public class CommitBuilder : ICanBuildABatch<Commit>
             _orderedEvents.AddRange(committedEvents);
             _nextSequenceNumber = nextSequenceNumber;
             eventsToBeCommitted = committedEvents;
+            
+            AddRedactions(committedEvents);
+            
             return true;
         }
         catch (Exception ex)
@@ -127,6 +131,9 @@ public class CommitBuilder : ICanBuildABatch<Commit>
             _orderedEvents.AddRange(committedEvents);
             _nextSequenceNumber = nextSequenceNumber;
             eventsToBeCommitted = committedEvents;
+            
+            AddRedactions(committedEvents);
+            
             return true;
         }
         catch (Exception ex)
@@ -135,20 +142,20 @@ public class CommitBuilder : ICanBuildABatch<Commit>
             return false;
         }
     }
-    
+
     /// <inheritdoc />
-    public Commit Build() => new (_committedEvents, _committedAggregateEvents, _orderedEvents, _initialSequenceNumber, _nextSequenceNumber - 1);
+    public Commit Build() => new (_committedEvents, _committedAggregateEvents, _orderedEvents, _initialSequenceNumber, _nextSequenceNumber - 1, _redactions);
 
     bool TryAddCommittedAggregateEvents(CommittedAggregateEvents events, out Exception error)
     {
         error = default;
         var aggregate = new Aggregate(events.AggregateRoot, events.EventSource);
-        if (_aggregates.Contains(aggregate))
+        if (!_aggregates.Add(aggregate))
         {
             error = new EventsForAggregateAlreadyAddedToCommit(aggregate);
             return false;
         }
-        _aggregates.Add(aggregate);
+
         _committedAggregateEvents.Add(events);
         return true;
 
@@ -163,5 +170,20 @@ public class CommitBuilder : ICanBuildABatch<Commit>
         //
         // //TODO: Update the aggregate root version range
         // _committedAggregateEvents.Add(committedEvents);
+    }
+
+    /// <summary>
+    /// If the events contain valid redactions, add them to the redactions list.
+    /// </summary>
+    /// <param name="committedEvents"></param>
+    void AddRedactions(IEnumerable<CommittedEvent> committedEvents)
+    {
+        foreach (var evt in committedEvents)
+        {
+            if (Redactions.Redaction.TryGet(evt, out var redaction))
+            {
+                _redactions.Add(redaction);
+            }
+        }
     }
 }
