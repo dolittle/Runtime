@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.DependencyInversion.Lifecycle;
 using Dolittle.Runtime.DependencyInversion.Scoping;
-using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
