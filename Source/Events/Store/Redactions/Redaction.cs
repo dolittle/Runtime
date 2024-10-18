@@ -20,12 +20,14 @@ public class Redaction
     public EventSourceId EventSourceId { get; }
     public Event Details { get; }
     public EventLogSequenceNumber EventLogSequenceNumber { get; }
+    public Guid TypeId { get; }
 
-    public Redaction(EventSourceId eventSourceId, Event @event, EventLogSequenceNumber eventLogSequenceNumber)
+    public Redaction(EventSourceId eventSourceId, Event @event, EventLogSequenceNumber eventLogSequenceNumber, Guid typeId)
     {
         EventSourceId = eventSourceId;
         Details = @event;
         EventLogSequenceNumber = eventLogSequenceNumber;
+        TypeId = typeId;
     }
 
     public class Event
@@ -41,6 +43,12 @@ public class Redaction
 
         public required string RedactedBy { get; init; }
         public required string Reason { get; init; }
+
+        public bool IsValid => !string.IsNullOrWhiteSpace(EventId)
+                               && !string.IsNullOrWhiteSpace(EventAlias)
+                               && RedactedProperties.Count > 0
+                               && !string.IsNullOrWhiteSpace(RedactedBy)
+                               && !string.IsNullOrWhiteSpace(Reason);
     }
 
     public static bool TryGet(CommittedEvent evt, [NotNullWhen(true)] out Redaction? redaction)
@@ -54,12 +62,17 @@ public class Redaction
         try
         {
             var payload = JsonSerializer.Deserialize<Event>(evt.Content);
-            if (payload == null)
+            if (payload is not { IsValid: true })
             {
                 return false;
             }
 
-            redaction = new Redaction(evt.EventSource, payload, evt.EventLogSequenceNumber);
+            if (!Guid.TryParse(payload.EventId, out var typeId))
+            {
+                return false;
+            }
+
+            redaction = new Redaction(evt.EventSource, payload, evt.EventLogSequenceNumber, typeId);
             return true;
         }
         catch // Bad payload, ignore

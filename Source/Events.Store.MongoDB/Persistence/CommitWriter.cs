@@ -57,6 +57,7 @@ public class CommitWriter : IPersistCommits
         {
             return new NoEventsToCommit();
         }
+        var evt = eventsToStore.First();
 
         using var session =
             await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -68,6 +69,13 @@ public class CommitWriter : IPersistCommits
                 eventsToStore,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
+            // Perform any redactions
+            if (commit.Redactions.Count > 0)
+            {
+                await RedactionUtil.RedactEvents(session, _streams.DefaultEventLog, commit.Redactions, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            
             var nextSequenceNumber = commit.LastSequenceNumber + 1;
             await _offsetStore.UpdateOffset(Streams.Streams.EventLogCollectionName, session, nextSequenceNumber, cancellationToken)
                 .ConfigureAwait(false);
