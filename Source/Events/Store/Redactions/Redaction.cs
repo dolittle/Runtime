@@ -14,15 +14,15 @@ namespace Dolittle.Runtime.Events.Store.Redactions;
 /// </summary>
 public class Redaction
 {
-    public const string MagicRedactionId = "de1e7e17-bad5-da7a-fad4-fbc6ec3c0ea5";
-    public static readonly Guid MagicRedactionGuid = Guid.Parse(MagicRedactionId);
+    public const string RedactedPrefix = "de1e7e17-bad5-da7a";
 
     public EventSourceId EventSourceId { get; }
     public Event Details { get; }
     public EventLogSequenceNumber EventLogSequenceNumber { get; }
     public Guid TypeId { get; }
 
-    public Redaction(EventSourceId eventSourceId, Event @event, EventLogSequenceNumber eventLogSequenceNumber, Guid typeId)
+    public Redaction(EventSourceId eventSourceId, Event @event, EventLogSequenceNumber eventLogSequenceNumber,
+        Guid typeId)
     {
         EventSourceId = eventSourceId;
         Details = @event;
@@ -54,7 +54,7 @@ public class Redaction
     public static bool TryGet(CommittedEvent evt, [NotNullWhen(true)] out Redaction? redaction)
     {
         redaction = default;
-        if (evt.Type.Id.Value != MagicRedactionGuid)
+        if (!IsRedactionId(evt.Type.Id))
         {
             return false;
         }
@@ -67,12 +67,20 @@ public class Redaction
                 return false;
             }
 
-            if (!Guid.TryParse(payload.EventId, out var typeId))
+            if (!Guid.TryParse(payload.EventId, out var redactedTypeId))
             {
                 return false;
             }
 
-            redaction = new Redaction(evt.EventSource, payload, evt.EventLogSequenceNumber, typeId);
+            if (IsRedactionId(redactedTypeId))
+            {
+                // Cannot redact a redaction. This is to prevent removing logs of what has been redacted
+                // As redactions themselves should not contain PII, this should not be a problem
+                return false;
+            }
+
+
+            redaction = new Redaction(evt.EventSource, payload, evt.EventLogSequenceNumber, redactedTypeId);
             return true;
         }
         catch // Bad payload, ignore
@@ -80,4 +88,7 @@ public class Redaction
             return false;
         }
     }
+
+    static bool IsRedactionId(Guid id) =>
+        id.ToString().StartsWith(RedactedPrefix, StringComparison.InvariantCultureIgnoreCase);
 }
