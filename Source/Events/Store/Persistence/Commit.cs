@@ -16,4 +16,6 @@ public record Commit(
     IReadOnlyCollection<CommittedAggregateEvents> AggregateEvents,
     IReadOnlyCollection<CommittedEvent> AllEvents,
     EventLogSequenceNumber FirstSequenceNumber,
-    EventLogSequenceNumber LastSequenceNumber);
+    EventLogSequenceNumber LastSequenceNumber,
+    IReadOnlyCollection<Redactions.Redaction> Redactions
+    );
