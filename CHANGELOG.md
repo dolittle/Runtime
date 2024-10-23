@@ -1,3 +1,42 @@
+# [9.7.0] - 2024-10-23 [PR: #776](https://github.com/dolittle/Runtime/pull/776)
+## Summary
+Runtime support for [GDPR redactions](https://github.com/dolittle/DotNET.SDK/releases/tag/v23.5.0). This adds support for redacting personal data from previously committed events.
+
+Redactions are scoped to a single artifact-type (EventTypeId) and an EventSourceId. 
+
+It will recognize events with the correct GUID prefix `"de1e7e17-bad5-da7a"` that match the event payload and is valid.
+
+```csharp
+    public class Event
+    {
+        public required string EventId { get; init; }
+        public required string EventAlias { get; init; }
+
+        /// <summary>
+        /// The properties that will be redacted, and the replacement values.
+        /// Can be null, in which case the properties will be redacted with a default value
+        /// </summary>
+        public required Dictionary<string, object?> RedactedProperties { get; init; }
+
+        public required string RedactedBy { get; init; }
+        public required string Reason { get; init; }
+
+        public bool IsValid => !string.IsNullOrWhiteSpace(EventId)
+                               && !string.IsNullOrWhiteSpace(EventAlias)
+                               && RedactedProperties.Count > 0
+                               && !string.IsNullOrWhiteSpace(RedactedBy)
+                               && !string.IsNullOrWhiteSpace(Reason);
+    }
+```
+
+Any valid redactions will then be performed in the same transaction as it writes the new events. Replays of these events will then return the updated version of the event, with the redactions performed.
+
+
+### Added
+
+- GDPR redaction support
+
+
 # [9.6.5] - 2024-9-25 [PR: #775](https://github.com/dolittle/Runtime/pull/775)
 ## Summary
 
