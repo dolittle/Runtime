@@ -26,8 +26,7 @@ ENV Logging__Console__FormatterName=""
 
 ENV \
     MONGODB_VERSION=7.0 \
-    MONGODB_PORT=27017 \
-    ASPNETCORE_URLS=http://+:8080
+    MONGODB_PORT=27017
 
 # Install MongoDB and tini
 RUN apt-get update \
