@@ -16,5 +16,6 @@
         <PackageReference Include="Dolittle.Contracts"/>
         <PackageReference Include="Google.Protobuf"/>
         <PackageReference Include="Grpc.Net.Client"/>
+        <PackageReference Include="System.Private.Uri"/>
     </ItemGroup>
 </Project>

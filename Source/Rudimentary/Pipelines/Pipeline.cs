@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dolittle.Runtime.Rudimentary.Pipelines;
 
@@ -63,7 +64,7 @@ public class Pipeline<TBatchItem, TBatch, TBatchBuilder> : IPipeline<TBatchItem,
     public int BatchSize { get; }
 
     /// <inheritdoc />
-    public bool TryAdd(TBatchItem item, out BatchedItem<TBatchItem> batchedItem, out Exception error)
+    public bool TryAdd(TBatchItem item, [NotNullWhen(true)] out BatchedItem<TBatchItem>? batchedItem, [NotNullWhen(false)] out Exception? error)
     {
         batchedItem = default;
         error = default;

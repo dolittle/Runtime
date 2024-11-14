@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,7 +32,7 @@ public static class HostBuilderExtensions
                     services.AddSwaggerGen(options =>
                     {
                         // TODO: Fix JSON serializer so that Web APIs don't need copies of types
-                        options.SchemaGeneratorOptions.SchemaIdSelector = _ => _.FullName;
+                        options.SchemaGeneratorOptions.SchemaIdSelector = (Type type) => type.FullName;
                     });
                 });
                 webHost.Configure(app =>

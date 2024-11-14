@@ -21,7 +21,7 @@ public record ConceptAs<TValue>(TValue Value)
     /// Implicitly convert from <see cref="ConceptAs{TValue}"/> to type of the <see cref="ConceptAs{TValue}"/>.
     /// </summary>
     /// <param name="value">The converted value.</param>
-    public static implicit operator TValue(ConceptAs<TValue> value) => value == null ? default : value.Value;
+    public static implicit operator TValue(ConceptAs<TValue> value) => value is null ? default : value.Value;
 
     /// <inheritdoc/>
     public sealed override string ToString() => Value?.ToString() ?? "NULL";

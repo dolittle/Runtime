@@ -29,7 +29,7 @@ public class GeneratedTenantFactoryRegistrationSource : IRegistrationSource
     {
         if (!IsDelegateWithTenantIdAsFirstParameter(service, out var delegateType, out var parameters, out var resolvedType))
         {
-            return Enumerable.Empty<IComponentRegistration>();
+            return [];
         }
 
         var tenantDelegateArguments = parameters.Skip(1).Select(_ => _.ParameterType).Append(resolvedType).ToArray();

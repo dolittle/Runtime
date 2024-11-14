@@ -148,6 +148,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "development", "development", "{AC1D9095-A820-4B4B-BD98-A88E08790C16}"
 	ProjectSection(SolutionItems) = preProject
 		Docker\Development\Dockerfile = Docker\Development\Dockerfile
+		Docker\Development\docker-entrypoint.sh = Docker\Development\docker-entrypoint.sh
+		Docker\Development\mongod.conf = Docker\Development\mongod.conf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Store.MongoDB", "Integration\Tests\Events.Store.MongoDB\Events.Store.MongoDB.csproj", "{02CE4263-12B0-4DDC-AB20-452D2257D4D5}"

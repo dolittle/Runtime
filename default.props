@@ -2,7 +2,7 @@
     <Import Project="versions.props"/>
     
     <PropertyGroup>
-        <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+        <TargetFramework>net9.0</TargetFramework>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <NoWarn>$(NoWarn);SYSLIB1002;SYSLIB1006;SYSLIB1007</NoWarn>
         <Nullable>enable</Nullable>
