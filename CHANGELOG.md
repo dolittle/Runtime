@@ -1,3 +1,14 @@
+# [9.8.0] - 2024-11-14 [PR: #777](https://github.com/dolittle/Runtime/pull/777)
+## Summary
+This upgraded the Dolittle Runtime to .NET 9, with major improvements to memory usage and the performance increases provided by the new .NET release. Internal dependencies have also been updated.
+
+For the dev image, the lifecycle management has been improved, and have also been updated to the latest version. Unfortunately, there is not currently available a MongoDB package for the arm64 version, so that is not available.
+
+
+### Removed
+- Dev builds for arm64. Since Mongodb did not provide an ARM compatible package, we only provide an adm64 dev image (where MongoDB is included on-image). ARM users will need to have MongoDB externally, for example via docker compose.
+
+
 # [9.7.0] - 2024-10-23 [PR: #776](https://github.com/dolittle/Runtime/pull/776)
 ## Summary
 Runtime support for [GDPR redactions](https://github.com/dolittle/DotNET.SDK/releases/tag/v23.5.0). This adds support for redacting personal data from previously committed events.
