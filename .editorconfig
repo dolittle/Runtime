@@ -163,3 +163,5 @@ csharp_style_prefer_range_operator = false:none
 dotnet_diagnostic.IDE0055.severity = none
 # prefere brace indentation when creating objects etc
 csharp_indent_braces = false
+
+resharper_remove_redundant_braces_highlighting = none

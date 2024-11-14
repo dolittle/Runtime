@@ -20,5 +20,6 @@
         <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" />
         <PackageReference Include="NetEscapades.Configuration.Yaml"/>
         <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="System.Text.Json"/>
     </ItemGroup>
 </Project>

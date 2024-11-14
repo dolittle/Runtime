@@ -29,9 +29,7 @@ public static class HostBuilderExtensions
             services.AddSingleton(provider =>
             {
                 foreach (var collector in provider.GetRequiredService<IEnumerable<MetricCollector>>())
-                {
                     provider.GetRequiredService(collector.CollectorType);
-                }
 
                 return registry;
             });

@@ -1,5 +1,5 @@
 # DotNet Build
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS dotnet-build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS dotnet-build
 SHELL ["/bin/bash", "-c"]
 ARG VERSION
 ARG TARGETARCH
@@ -13,62 +13,56 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c "Release" -p:Version=${VERSION} -f net7.0 -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
+RUN dotnet publish -c "Release" -p:Version=${VERSION} -f net9.0 -p:RuntimeIdentifier="linux-${TARGETARCH/amd64/x64}" -o out
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 SHELL ["/bin/bash", "-c"]
 ARG TARGETARCH
 
 ENV Logging__Console__FormatterName=""
 
-WORKDIR /app
-COPY --from=dotnet-build /app/Source/Server/out ./
-COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
 
-# Install MongoDB dependencies
+
+ENV \
+    MONGODB_VERSION=7.0 \
+    MONGODB_PORT=27017
+
+# Install MongoDB and tini
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    wget \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
-
-# Hack to get MongoDB to install even without systemctl
-# See https://www.julienrouse.com/blog/systemctl_not_found_while_installing_mongodb_server/#spoiler-a-solution
-RUN ln -s /bin/true /usr/local/sbin/systemctl
-RUN ln -s /bin/true /usr/local/bin/systemctl
-RUN ln -s /bin/true /usr/sbin/systemctl
-RUN ln -s /bin/true /usr/bin/systemctl
-RUN ln -s /bin/true /sbin/systemctl
-RUN ln -s /bin/true /bin/systemctl
-
-# Install MongoDB
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - \
-    && echo "deb [ arch=$TARGETARCH ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list \
+        ca-certificates \
+        curl \
+        gnupg \
+        tini \
+    # Add MongoDB repository
+    && curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc | gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor \
+    && echo "deb [signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/${MONGODB_VERSION} main" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-    mongodb-org-server \
-    mongodb-org-shell \
+        mongodb-org \
     && rm -rf /var/lib/apt/lists/*
 
-# Setup MongoDB as single-node replicaset
+
+# Create directories for MongoDB
 RUN mkdir -p /data/db /data/configdb \
-    && chown -R mongodb:mongodb /data/db /data/configdb \
-    && mongod --logpath /var/log/mongodb/initdb.log --replSet "rs0" --bind_ip 0.0.0.0 --fork \
-    && mongo --eval 'rs.initiate({_id: "rs0", members: [{ _id: 0, host: "localhost:27017"}]})' \
-    && mongo admin --eval 'db.shutdownServer()'
+    && chown -R mongodb:mongodb /data/db /data/configdb
 
-VOLUME /data/db /data/configdb
+# Copy MongoDB configuration
+COPY Docker/Development/mongod.conf /etc/mongod.conf
+RUN chown mongodb:mongodb /etc/mongod.conf
 
-# Add Tini to get a real init process
-ADD "https://github.com/krallin/tini/releases/download/v0.19.0/tini-$TARGETARCH" /usr/bin/tini
-RUN chmod +x /usr/bin/tini
+
 
 # Create entrypoint that runs both MongoDB and Runtime
 COPY Docker/Development/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
+WORKDIR /app
+COPY --from=dotnet-build /app/Source/Server/out ./
+COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
+
 # Expose the ports
 EXPOSE 9700 50052 50053 51052 27017
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["tini", "-v", "--", "docker-entrypoint.sh"]

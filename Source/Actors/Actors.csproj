@@ -15,6 +15,7 @@
         <PackageReference Include="Proto.OpenTelemetry"/>
         <PackageReference Include="Proto.Cluster"/>
         <PackageReference Include="Proto.Cluster.CodeGen"/>
+        <PackageReference Include="System.Text.Json"/>
     </ItemGroup>
     
     <ItemGroup>

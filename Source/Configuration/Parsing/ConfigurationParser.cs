@@ -37,7 +37,10 @@ public class ConfigurationParser : IParseConfigurationObjects
             using var reader = new JsonTextReader(new StreamReader(stream));
             var serializer = JsonSerializer.Create();
             parsed = serializer.Deserialize<TOptions>(reader);
-            return true;
+            if (parsed is not null) return true;
+            
+            error = new Exception("Failed to parse configuration");
+            return false;
         }
         catch (Exception ex)
         {

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dolittle.Runtime.Rudimentary.Pipelines;
 
@@ -24,5 +25,5 @@ public interface IPipeline<TBatchItem, TBatch> : ICanGetNextReadyBatch<TBatch>
     /// <param name="batchedItem">The batched item.</param>
     /// <param name="error">The error.</param>
     /// <returns>True if successfully added to pipeline, false if not.</returns>
-    bool TryAdd(TBatchItem item, out BatchedItem<TBatchItem> batchedItem, out Exception error);
+    bool TryAdd(TBatchItem item, [NotNullWhen(true)] out BatchedItem<TBatchItem>? batchedItem, [NotNullWhen(false)] out Exception? error);
 }

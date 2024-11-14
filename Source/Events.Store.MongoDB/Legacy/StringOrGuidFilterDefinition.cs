@@ -33,6 +33,8 @@ public class StringOrGuidFilterDefinition<TDocument> : FilterDefinition<TDocumen
         _value = value;
     }
 
+    public override BsonDocument Render(RenderArgs<TDocument> args) => Render(args.DocumentSerializer, args.SerializerRegistry);
+
     /// <inheritdoc />
     public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry)
     {

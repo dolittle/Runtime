@@ -2,7 +2,7 @@
     <Import Project="versions.props"/>
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <IsTestProject>true</IsTestProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -25,6 +25,9 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="System.Net.Http"/>
+        <PackageReference Include="System.Text.Json"/>
+        <PackageReference Include="System.Text.RegularExpressions"/>
     </ItemGroup>
 
     <PropertyGroup>
