@@ -38,29 +38,23 @@ public class OffsetStore : EventStoreConnection, IOffsetStore
         {
             Database.CreateCollection(EventLogMetadataCollectionName);
         }
-        else // Already created. Check if it's initialized
-        {
-            var existingDocuments = Collection.CountDocuments(FilterDefinition<StreamMetadata>.Empty);
-            if (existingDocuments > 0)
-            {
-                return; // Already initialized
-            }
-        }
 
         SetInitialOffsetsForStreams(collectionNames);
     }
 
     void SetInitialOffsetsForStreams(List<string> collectionNames)
     {
-        // Not initialized, create and populate with stream metadata
         using var session = Database.Client.StartSession();
         try
         {
             session.StartTransaction();
             var streamCollections = collectionNames.Where(StreamIdMatcher.IsStreamOrEventLog).ToList();
+            var currentOffsets = Collection.Find(_ => true).ToList();
             foreach (var stream in streamCollections)
             {
-                InitStream(session, stream);
+                var storedOffset = currentOffsets.FirstOrDefault(metadata => metadata.StreamName == stream)
+                    ?.NextEventOffset;
+                InitStream(session, stream, storedOffset);
             }
             session.CommitTransaction();
         }
@@ -71,19 +65,27 @@ public class OffsetStore : EventStoreConnection, IOffsetStore
         }
     }
 
-    void InitStream(IClientSessionHandle session, string stream)
+    void InitStream(IClientSessionHandle session, string stream, ulong? storedOffset)
     {
         var currentOffset = GetCurrentOffsetForStream(session, stream);
         if (currentOffset is null)
         {
             return;
         }
-
         var nextOffset = currentOffset.Value + 1;
-        Collection.InsertOne(session, new StreamMetadata
+        if(storedOffset >= nextOffset)
+        {
+            // Initialized, no need to update
+            return;
+        }
+
+        Collection.ReplaceOne(session, GetFilter(stream), new StreamMetadata
         {
             StreamName = stream,
             NextEventOffset = nextOffset,
+        }, new ReplaceOptions
+        {
+            IsUpsert = true,
         });
     }
 
