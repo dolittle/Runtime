@@ -1,3 +1,13 @@
+# [9.8.1] - 2024-11-25 [PR: #778](https://github.com/dolittle/Runtime/pull/778)
+## Summary
+Added checks on startup for stream offset metadata, with corrections if offsets are lower than expected. 
+
+Updated internal gRPC libraries
+
+### Added
+- Checks on already initialized stream offsets
+
+
 # [9.8.0] - 2024-11-14 [PR: #777](https://github.com/dolittle/Runtime/pull/777)
 ## Summary
 This upgraded the Dolittle Runtime to .NET 9, with major improvements to memory usage and the performance increases provided by the new .NET release. Internal dependencies have also been updated.
