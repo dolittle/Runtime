@@ -4,7 +4,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <PropertyGroup>
-    <ContractsVersion>7.8.0</ContractsVersion>
+    <ContractsVersion>7.8.1</ContractsVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
@@ -12,14 +12,14 @@
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="ConsoleTables" Version="2.6.2" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" />
     <PackageVersion Include="Docker.DotNet" Version="3.125.15" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageVersion Include="Grpc.AspNetCore.Web" Version="2.67.0" />
     <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.67.0" />
     <PackageVersion Include="Grpc.AspNetCore.HealthChecks" Version="2.67.0" />
     <PackageVersion Include="Grpc.Core.Testing" Version="2.46.6" />
-    <PackageVersion Include="Grpc.Tools" Version="2.67.0">
+    <PackageVersion Include="Grpc.Tools" Version="2.68.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
@@ -45,7 +45,7 @@
     <PackageVersion Include="MongoDB.Driver" Version="2.30.0" />
     <PackageVersion Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.5.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.2" />
+    <PackageVersion Include="FluentAssertions" Version="7.0.0" />
     <PackageVersion Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Nito.AsyncEx" Version="5.1.2" />
@@ -59,8 +59,8 @@
     <PackageVersion Include="Proto.OpenTelemetry" Version="1.7.1-alpha.0.1" />
     <PackageVersion Include="Proto.Cluster" Version="1.7.1-alpha.0.1" />
     <PackageVersion Include="Proto.Cluster.CodeGen" Version="1.7.1-alpha.0.1" />
-    <PackageVersion Include="Google.Protobuf" Version="3.28.3" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.29.2" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
@@ -70,11 +70,11 @@
     <PackageVersion Include="OpenTelemetry.Api" Version="1.10.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
-    <PackageVersion Include="Testcontainers.MongoDb" Version="4.0.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.10.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.10.0" />
+    <PackageVersion Include="Testcontainers.MongoDb" Version="4.1.0" />
     <PackageVersion Include="xunit" Version="2.9.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
   </ItemGroup>
 </Project>
