@@ -1,3 +1,13 @@
+# [9.9.0] - 2025-1-6 [PR: #779](https://github.com/dolittle/Runtime/pull/779)
+## Summary
+
+In addition to updating the runtime dependencies, this adds stream position metadata to events being processed by event handlers. This allows services to better reason about the number of processed events for a given handler.
+
+
+### Added
+- `Dolittle.Runtime.Events.Processing.Contracts.StreamEvent`: Added StreamPosition metadata
+
+
 # [9.8.1] - 2024-11-25 [PR: #778](https://github.com/dolittle/Runtime/pull/778)
 ## Summary
 Added checks on startup for stream offset metadata, with corrections if offsets are lower than expected. 
