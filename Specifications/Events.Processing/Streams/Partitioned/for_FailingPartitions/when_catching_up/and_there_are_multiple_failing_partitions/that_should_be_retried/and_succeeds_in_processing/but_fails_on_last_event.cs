@@ -42,7 +42,7 @@ public class but_fails_on_last_event : given.all_dependencies
     It should_have_new_failing_partition_reason = () => failing_partition(first_failing_partition_id).Reason.ShouldEqual(new_failure_reason);
     It should_not_retry_failing_partition = () => failing_partition(first_failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
 
-    It should_have_retried_processeing_three_times = () => event_processor.Verify(
+    It should_have_retried_processing_three_times = () => event_processor.Verify(
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),

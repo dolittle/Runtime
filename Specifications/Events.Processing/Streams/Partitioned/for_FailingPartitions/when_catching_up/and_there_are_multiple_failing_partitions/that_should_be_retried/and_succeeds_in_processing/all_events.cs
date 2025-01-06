@@ -55,7 +55,7 @@ public class all_events : given.all_dependencies
             Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(1));
 
-    It should_have_retried_processeing_three_times = () => event_processor.Verify(
+    It should_have_retried_processing_three_times = () => event_processor.Verify(
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
