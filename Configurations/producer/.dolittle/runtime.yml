@@ -2,7 +2,7 @@ opentelemetry:
   serviceName: "Producer-Runtime"
 endpoints:
   private:
-    port: 50053
+    port: 5053
   public:
     port: 5052
   management:

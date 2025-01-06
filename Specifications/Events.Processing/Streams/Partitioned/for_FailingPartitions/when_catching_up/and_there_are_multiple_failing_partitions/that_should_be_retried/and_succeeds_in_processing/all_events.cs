@@ -20,6 +20,7 @@ public class all_events : given.all_dependencies
             .Setup(_ => _.Process(
                 Moq.It.IsAny<CommittedEvent>(),
                 Moq.It.IsAny<PartitionId>(),
+                Moq.It.IsAny<StreamPosition>(),
                 Moq.It.IsAny<string>(),
                 Moq.It.IsAny<uint>(),
                 Moq.It.IsAny<ExecutionContext>(),
@@ -38,6 +39,7 @@ public class all_events : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             first_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -47,15 +49,17 @@ public class all_events : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             second_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(1));
 
-    It should_have_retried_processeing_three_times = () => event_processor.Verify(
+    It should_have_retried_processing_three_times = () => event_processor.Verify(
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -65,6 +69,7 @@ public class all_events : given.all_dependencies
         _ => _.Process(
             eventStream[0].Event,
             first_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -74,6 +79,7 @@ public class all_events : given.all_dependencies
         _ => _.Process(
             eventStream[1].Event,
             second_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -83,6 +89,7 @@ public class all_events : given.all_dependencies
         _ => _.Process(
             eventStream[2].Event,
             first_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),

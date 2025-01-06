@@ -22,11 +22,12 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
             .Setup(_ => _.Process(
                 Moq.It.IsAny<CommittedEvent>(),
                 Moq.It.IsAny<PartitionId>(),
+                Moq.It.IsAny<StreamPosition>(),
                 Moq.It.IsAny<string>(),
                 Moq.It.IsAny<uint>(),
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
-            .Returns<CommittedEvent, PartitionId, string, uint, ExecutionContext, CancellationToken>((@event, partition, reason, _, retryCount, _) => Task.FromResult<IProcessingResult>(num_processed++ >= 2 ? new FailedProcessing(new_failing_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
+            .Returns<CommittedEvent, PartitionId, StreamPosition, string, uint, ExecutionContext, CancellationToken>((@event, partition, position, reason, _, retryCount, _) => Task.FromResult<IProcessingResult>(num_processed++ >= 2 ? new FailedProcessing(new_failing_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
 
     Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
@@ -41,6 +42,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -50,6 +52,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
         _ => _.Process(
             eventStream[(int)failing_partition(failing_partition_id).Position.StreamPosition.Value].Event,
             failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),

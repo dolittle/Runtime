@@ -21,7 +21,7 @@ public class and_fails_processing : given.all_dependencies
         stream_processor_state_repository.Persist(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
         
         event_processor
-            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(),
+            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(),
                 Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(new_failing_reason)));
     };
@@ -43,6 +43,7 @@ public class and_fails_processing : given.all_dependencies
         _ => _.Process(
             eventStream[0].Event,
             first_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -52,6 +53,7 @@ public class and_fails_processing : given.all_dependencies
         _ => _.Process(
             eventStream[1].Event,
             second_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),

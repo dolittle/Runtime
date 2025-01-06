@@ -39,21 +39,23 @@ public interface IEventProcessor
     /// </summary>
     /// <param name="event">The <see cref="CommittedEvent" />.</param>
     /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+    /// <param name="position">The number of processed events in the stream.</param>
     /// <param name="executionContext">The execution context to process the event in.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns><see cref="IProcessingResult" />.</returns>
-    Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken);
+    Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
     /// </summary>
     /// <param name="event">The <see cref="CommittedEvent" />.</param>
     /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+    /// <param name="position">The number of processed events in the stream.</param>
     /// <param name="failureReason">The reason the processor was failing.</param>
     /// <param name="retryCount">The retry count.</param>
     /// <param name="executionContext">The execution context to process the event in.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
     /// <returns><see cref="IProcessingResult" />.</returns>
-    Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext,
+    Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, string failureReason, uint retryCount, ExecutionContext executionContext,
         CancellationToken cancellationToken);
 }

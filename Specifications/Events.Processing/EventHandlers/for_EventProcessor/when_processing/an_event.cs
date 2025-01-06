@@ -39,7 +39,7 @@ public class an_event : given.all_dependencies
         partition = "some partition";
     };
 
-    Because of = () => event_processor.Process(@event, partition, execution_context, default).GetAwaiter().GetResult();
+    Because of = () => event_processor.Process(@event, partition, StreamPosition.Start, execution_context, default).GetAwaiter().GetResult();
 
     It should_call_the_dispatcher_once = () => dispatcher.Verify(_ => _.Call(Moq.It.IsAny<Contracts.HandleEventRequest>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
 }

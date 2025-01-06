@@ -55,10 +55,10 @@ public class EventProcessor : IEventProcessor
     public EventProcessorId Identifier { get; }
 
     /// <inheritdoc/>
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken) => Process(@event, cancellationToken);
+    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, ExecutionContext executionContext, CancellationToken cancellationToken) => Process(@event, cancellationToken);
 
     /// <inheritdoc/>
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         Log.RetryProcessEvent(_logger, _subscriptionId);
         return Process(@event, cancellationToken);
@@ -70,7 +70,7 @@ public class EventProcessor : IEventProcessor
         Log.ProcessEvent(_logger, @event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
         try
         {
-            await _externalEventsCommitter.Commit(new CommittedEvents(new []{@event}), _consentId, Scope).ConfigureAwait(false);
+            await _externalEventsCommitter.Commit(new CommittedEvents([@event]), _consentId, Scope).ConfigureAwait(false);
             return SuccessfulProcessing.Instance;
         }
         catch (Exception e)
