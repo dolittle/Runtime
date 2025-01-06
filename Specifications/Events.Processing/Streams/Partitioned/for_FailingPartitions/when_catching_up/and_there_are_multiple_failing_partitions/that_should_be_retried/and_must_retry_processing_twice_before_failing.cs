@@ -24,11 +24,12 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
             .Setup(_ => _.Process(
                 Moq.It.IsAny<CommittedEvent>(),
                 Moq.It.IsAny<PartitionId>(),
+                Moq.It.IsAny<StreamPosition>(),
                 Moq.It.IsAny<string>(),
                 Moq.It.IsAny<uint>(),
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
-            .Returns<CommittedEvent, PartitionId, string, uint, ExecutionContext, CancellationToken>((@event, partition, reason, retryCount, _, _) =>
+            .Returns<CommittedEvent, PartitionId, StreamPosition, string, uint, ExecutionContext, CancellationToken>((@event, partition, position, reason, retryCount, _, _) =>
                 Task.FromResult<IProcessingResult>(retryCount >= 1 ? new FailedProcessing(last_failure_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
         stream_processor_state_repository.Persist(stream_processor_id,stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
     };
@@ -48,6 +49,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
         _ => _.Process(
             eventStream[0].Event,
             first_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),
@@ -57,6 +59,7 @@ public class and_must_retry_processing_twice_before_failing : given.all_dependen
         _ => _.Process(
             eventStream[1].Event,
             second_failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),

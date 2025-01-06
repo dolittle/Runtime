@@ -123,6 +123,7 @@ public class FailingPartitions : IFailingPartitions
                     failingPartitionState,
                     streamEvent.Event,
                     partition,
+                    streamEvent.Position,
                     _createExecutionContextForEvent(streamEvent),
                     cancellationToken).ConfigureAwait(false);
 
@@ -230,9 +231,9 @@ public class FailingPartitions : IFailingPartitions
         return (newState, newFailingPartitionState);
     }
 
-    Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition,
+    Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition, StreamPosition position,
         ExecutionContext executionContext, CancellationToken cancellationToken) =>
-        _eventProcessor.Process(@event, partition, failingPartitionState.Reason,
+        _eventProcessor.Process(@event, partition, position, failingPartitionState.Reason,
             failingPartitionState.ProcessingAttempts == 0 ? 0 : failingPartitionState.ProcessingAttempts - 1, executionContext, cancellationToken);
 
     Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState, CancellationToken cancellationToken) =>

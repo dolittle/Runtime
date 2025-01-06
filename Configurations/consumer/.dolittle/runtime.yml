@@ -2,7 +2,7 @@ opentelemetry:
   serviceName: "Consumer-Runtime"
 endpoints: 
   private:
-    port: 50055
+    port: 5055
   public:
     port: 5054
   management:

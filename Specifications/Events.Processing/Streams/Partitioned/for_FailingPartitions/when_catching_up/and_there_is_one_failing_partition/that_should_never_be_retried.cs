@@ -43,6 +43,7 @@ public class that_should_never_be_retried : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
@@ -50,6 +51,7 @@ public class that_should_never_be_retried : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),

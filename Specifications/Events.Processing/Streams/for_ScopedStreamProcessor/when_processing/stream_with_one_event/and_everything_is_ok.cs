@@ -20,14 +20,14 @@ public class and_everything_is_ok : given.all_dependencies
     {
         var event_with_partition = new StreamEvent(first_event, StreamPosition.Start, Guid.NewGuid(), partition_id, false);
         event_processor
-            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
+            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IProcessingResult>(SuccessfulProcessing.Instance));
         setup_event_stream(event_with_partition);
     };
     
     Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(500)).GetAwaiter().GetResult();
 
-    It should_process_first_event = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
+    It should_process_first_event = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
     It should_have_current_position_equal_one = () => current_stream_processor_state.Position.StreamPosition.ShouldEqual(new StreamPosition(1));
     It should_not_be_failing = () => current_stream_processor_state.IsFailing.ShouldBeFalse();
     It should_try_fetching_next_event = () => events_fetcher.Verify(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);

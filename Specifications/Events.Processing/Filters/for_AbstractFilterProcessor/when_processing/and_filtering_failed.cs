@@ -33,7 +33,7 @@ public class and_filtering_failed : given.all_dependencies
             .Returns(Task.FromResult(failed_result));
     };
 
-    Because of = () => result = filter_processor.Object.Process(committed_event, partition, committed_event.ExecutionContext, CancellationToken.None).GetAwaiter().GetResult();
+    Because of = () => result = filter_processor.Object.Process(committed_event, partition, StreamPosition.Start, committed_event.ExecutionContext, CancellationToken.None).GetAwaiter().GetResult();
     It should_not_write_stream = () => events_to_streams_writer.Verify(_ => _.Write(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()), Times.Never);
     It should_return_the_failed_result = () => result.ShouldEqual(failed_result);
 }

@@ -227,7 +227,7 @@ public abstract class AbstractScopedStreamProcessor
     protected async Task<(IStreamProcessorState, IProcessingResult)> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
-        var processingResult = await _processor.Process(@event.Event, @event.Partition, executionContext, cancellationToken).ConfigureAwait(false);
+        var processingResult = await _processor.Process(@event.Event, @event.Partition, @event.Position, executionContext, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
         return (await HandleProcessingResult(processingResult, @event, stopwatch.Elapsed, currentState).ConfigureAwait(false), processingResult);
     }
@@ -275,7 +275,7 @@ public abstract class AbstractScopedStreamProcessor
     protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts, IStreamProcessorState currentState, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
-        var processingResult = await _processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, executionContext, cancellationToken).ConfigureAwait(false);
+        var processingResult = await _processor.Process(@event.Event, @event.Partition, @event.Position, failureReason, processingAttempts - 1, executionContext, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
         return await HandleProcessingResult(processingResult, @event, stopwatch.Elapsed, currentState).ConfigureAwait(false);
     }

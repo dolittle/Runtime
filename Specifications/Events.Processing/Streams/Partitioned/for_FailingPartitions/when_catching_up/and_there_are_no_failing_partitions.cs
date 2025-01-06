@@ -27,6 +27,6 @@ public class and_there_are_no_failing_partitions : given.all_dependencies
 
     It should_not_process_any_events = () =>
         event_processor.Verify(
-            _ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()),
+            _ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<CancellationToken>()),
             Moq.Times.Never);
 }

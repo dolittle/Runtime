@@ -22,6 +22,7 @@ public class and_fails_processing : given.all_dependencies
             .Setup(_ => _.Process(
                 Moq.It.IsAny<CommittedEvent>(),
                 Moq.It.IsAny<PartitionId>(),
+                Moq.It.IsAny<StreamPosition>(),
                 Moq.It.IsAny<string>(),
                 Moq.It.IsAny<uint>(),
                 Moq.It.IsAny<ExecutionContext>(),
@@ -44,6 +45,7 @@ public class and_fails_processing : given.all_dependencies
         _ => _.Process(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<ExecutionContext>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
@@ -51,6 +53,7 @@ public class and_fails_processing : given.all_dependencies
         _ => _.Process(
             eventStream[(int)(result as StreamProcessorState).FailingPartitions[failing_partition_id].Position.StreamPosition.Value].Event,
             failing_partition_id,
+            Moq.It.IsAny<StreamPosition>(),
             Moq.It.IsAny<string>(),
             Moq.It.IsAny<uint>(),
             Moq.It.IsAny<ExecutionContext>(),

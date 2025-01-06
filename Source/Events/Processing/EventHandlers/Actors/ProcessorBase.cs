@@ -113,7 +113,7 @@ public abstract class ProcessorBase<T> where T : IStreamProcessorState<T>
     {
         var before = Stopwatch.GetTimestamp();
 
-        var processingResult = await _processor.Process(evt.Event, evt.Partition, GetExecutionContextForEvent(evt), cancellationToken).ConfigureAwait(false);
+        var processingResult = await _processor.Process(evt.Event, evt.Partition, evt.Position, GetExecutionContextForEvent(evt), cancellationToken).ConfigureAwait(false);
         var elapsed = Stopwatch.GetElapsedTime(before);
         return (processingResult, elapsed);
     }
@@ -137,7 +137,7 @@ public abstract class ProcessorBase<T> where T : IStreamProcessorState<T>
     {
         var before = Stopwatch.GetTimestamp();
         var processingResult = await _processor.Process(
-            evt.Event, evt.Partition, failureReason, processingAttempts - 1, GetExecutionContextForEvent(evt), cancellationToken).ConfigureAwait(false);
+            evt.Event, evt.Partition, evt.Position, failureReason, processingAttempts - 1, GetExecutionContextForEvent(evt), cancellationToken).ConfigureAwait(false);
         var elapsed = Stopwatch.GetElapsedTime(before);
         return (processingResult, elapsed);
     }

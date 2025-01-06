@@ -54,24 +54,24 @@ public class EventProcessor : IEventProcessor
     public CancellationToken? DeadlineToken => _dispatcher.DeadlineToken;
 
     /// <inheritdoc />
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
 
         var request = new HandleEventRequest
         {
-            Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf() },
+            Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf(), StreamPosition = position.Value },
         };
         return Process(request, executionContext, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
         var request = new HandleEventRequest
         {
-            Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf() },
+            Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf(), StreamPosition = position.Value },
             RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
         };
         return Process(request, executionContext, cancellationToken);

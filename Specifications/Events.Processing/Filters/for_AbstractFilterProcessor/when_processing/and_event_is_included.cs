@@ -30,7 +30,7 @@ public class and_event_is_included : given.all_dependencies
             .Returns(Task.FromResult<IFilterResult>(new SuccessfulFiltering(true, partition)));
     };
 
-    Because of = () => result = filter_processor.Object.Process(committed_event, partition, committed_event.ExecutionContext, CancellationToken.None).GetAwaiter().GetResult();
+    Because of = () => result = filter_processor.Object.Process(committed_event, partition, StreamPosition.Start, committed_event.ExecutionContext, CancellationToken.None).GetAwaiter().GetResult();
     It should_write_it_to_target_stream = () => events_to_streams_writer.Verify(_ => _.Write(committed_event, scope_id, filter_processor.Object.Definition.TargetStream, partition, Moq.It.IsAny<CancellationToken>()), Times.Once);
     It should_returned_successful_processing_result = () => result.Succeeded.ShouldBeTrue();
 }

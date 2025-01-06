@@ -60,7 +60,7 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken);
 
     /// <inheritdoc />
-    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.FilteringEvent(Identifier, Scope, @event.Type.Id, partitionId);
         var result = await Filter(@event, partitionId, Identifier, executionContext, cancellationToken).ConfigureAwait(false);
@@ -69,7 +69,7 @@ public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TD
     }
 
     /// <inheritdoc/>
-    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
+    public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, StreamPosition position, string failureReason, uint retryCount, ExecutionContext executionContext, CancellationToken cancellationToken)
     {
         _logger.FilteringEventAgain(Identifier, Scope, @event.Type.Id, partitionId, retryCount, failureReason);
         var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, executionContext, cancellationToken).ConfigureAwait(false);
