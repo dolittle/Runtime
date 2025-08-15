@@ -22,28 +22,41 @@ ARG TARGETARCH
 
 ENV Logging__Console__FormatterName=""
 
-
-
 ENV \
     MONGODB_VERSION=7.0 \
     MONGODB_PORT=27017
 
-# Install MongoDB and tini
+# Install essential packages and handle architecture-specific MongoDB installation
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         gnupg \
         tini \
-    # Add MongoDB repository
-    && curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc | gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor \
-    && echo "deb [signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/${MONGODB_VERSION} main" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list \
+    # Add MongoDB repository for ARM64
+    && if [ "$TARGETARCH" = "arm64" ]; then \
+        # Add both MongoDB Server and MongoDB Shell repositories
+        curl -fsSL https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor \
+        && curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc | gpg -o /usr/share/keyrings/mongodb-mongosh.gpg --dearmor \
+        && echo "deb [signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg arch=arm64] http://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/${MONGODB_VERSION} multiverse" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list \
+        && echo "deb [signed-by=/usr/share/keyrings/mongodb-mongosh.gpg arch=arm64] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-mongosh/1.x multiverse" | tee /etc/apt/sources.list.d/mongodb-mongosh.list; \
+    else \
+        curl -fsSL https://pgp.mongodb.com/server-${MONGODB_VERSION}.asc | gpg -o /usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg --dearmor \
+        && echo "deb [signed-by=/usr/share/keyrings/mongodb-server-${MONGODB_VERSION}.gpg] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/${MONGODB_VERSION} main" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list; \
+    fi \
+    # Install MongoDB
     && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        mongodb-org \
+    && if [ "$TARGETARCH" = "arm64" ]; then \
+        apt-get install -y --no-install-recommends \
+            mongodb-org-server \
+            mongodb-mongosh \
+            mongodb-org-mongos \
+            mongodb-org-database-tools-extra; \
+    else \
+        apt-get install -y --no-install-recommends \
+            mongodb-org \
+    fi \
     && rm -rf /var/lib/apt/lists/*
-
-
 # Create directories for MongoDB
 RUN mkdir -p /data/db /data/configdb \
     && chown -R mongodb:mongodb /data/db /data/configdb
@@ -51,8 +64,6 @@ RUN mkdir -p /data/db /data/configdb \
 # Copy MongoDB configuration
 COPY Docker/Development/mongod.conf /etc/mongod.conf
 RUN chown mongodb:mongodb /etc/mongod.conf
-
-
 
 # Create entrypoint that runs both MongoDB and Runtime
 COPY Docker/Development/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh

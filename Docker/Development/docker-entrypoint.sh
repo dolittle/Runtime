@@ -1,8 +1,7 @@
 #!/bin/bash
+set -e
 
 echo "Starting MongoDB"
-
-
 
 # Start MongoDB as mongodb user in the background
 su -s /bin/bash mongodb -c "mongod --config /etc/mongod.conf --replSet rs0" &
@@ -34,15 +33,18 @@ cleanup() {
 # Trap SIGTERM and call cleanup
 trap cleanup SIGTERM SIGINT
 
-
 # Wait for MongoDB to start
-until mongosh --eval "print(\"waited for connection\")"
+echo "Waiting for MongoDB to start..."
+until mongosh --quiet --eval "print('waited for connection')" 
 do
     sleep 2
+    echo "Still waiting for MongoDB..."
 done
 
+echo "MongoDB connection established. Initializing replica set..."
+
 # Initialize replica set
-mongosh --eval '
+mongosh --quiet --eval '
 rsconf = {
     _id: "rs0",
     members: [
@@ -57,13 +59,14 @@ rs.initiate(rsconf);
 '
 
 # Wait for replica set to be fully initialized
-until mongosh --eval "rs.isMaster().ismaster"
+echo "Waiting for replica set to be initialized..."
+until mongosh --quiet --eval "rs.isMaster().ismaster"
 do
     sleep 2
+    echo "Still waiting for replica set..."
 done
 
 echo "MongoDB replica set initialized and ready. Starting Runtime"
-
 
 dotnet Dolittle.Runtime.Server.dll &
 DOTNET_PID=$!
